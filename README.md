@@ -1,54 +1,96 @@
-# gita & gitpp
+<div align="center">
 
-> Versioning **logic**, not text. Tools for agentic version control.
+# gita.
 
-This repo ships two Python packages:
+*— every agent needs a direction.*
 
-| Package | What it does |
-| --- | --- |
-| **`gita`** | A git-native sidecar. Wraps a real git repo, gives you semantic diffs, per-symbol history (`symbol-log`), a cross-file callers index, and an MCP server so coding agents can ask *"what did this commit actually change?"* without re-deriving it from raw text. |
-| **`gitpp`** | The original research prototype: a from-scratch CST-aware VCS (no git underneath) that merges concurrent agent edits structurally. The thesis-prover for [`inspiration.md`](./inspiration.md). |
+A little experiment: `git`, but the things it tells an agent are *structural*
+instead of textual. Same content-addressed store underneath — just trades
+unified-diff hunks for ops on named symbols. Three commands, that's the whole
+show.
 
-If you just want something usable on a real repo today → use **`gita`**.
-If you want to see structural merge proven on hand-crafted scenarios → use **`gitpp`**.
+</div>
 
 ---
 
-## Install
+## install
 
-```powershell
+```sh
 git clone https://github.com/DevPranjal/gita
 cd gita
-python -m venv .venv
-.venv\Scripts\Activate.ps1
+python -m venv .venv && .venv/bin/activate     # or .venv\Scripts\Activate.ps1
 pip install -e .
 ```
 
-Now both `gita` and `gitpp` are on your PATH.
+Then, inside any git repo:
+
+```sh
+gita init        # one-time, optional — sets up .git/gita/
+```
 
 ---
 
-## `gita` — git-native semantic layer
+## 01 · diff
 
-Run it inside any git repo:
+### show me what changed, not which bytes moved.
 
-```powershell
-gita init                  # create .git/gita/ store (optional; commands work without it)
-gita status                # porcelain + manifest summary of unstaged changes
-gita diff                  # HEAD vs working tree, structural
-gita diff HEAD~3 HEAD      # any two refs
-gita diff --staged --json  # machine-readable for agents
-gita commit -m "msg"       # like git commit, plus writes a manifest
-gita explain <ref>         # what *actually* changed in that commit
-gita symbol-log fetch_user # every commit that touched this symbol, across renames
-gita callers fetch_user    # every call site, multi-file, with line numbers
-gita reindex               # back-fill manifests for older commits
+Same edit, two readings. The left is what an agent stares at today; the right
+is what it actually wants.
+
+```diff
+# git diff — users.py
+- def get_user(uid):
++ def fetch_user(uid):
+      row = db.lookup('users', uid)
+      if row is None:
+          return None
+-     return User.from_row(row)
++     user = User.from_row(row)
++     return user
 ```
 
-### What's in a manifest
+```text
+# gita diff — users.py
+  modified  users.py
+    rename     get_user → fetch_user  (2 ref(s))
+    signature  fetch_user: def get_user(uid)  →  def fetch_user(uid)
+    body       fetch_user: +1/-0
+```
 
-Each commit's manifest is a JSON document of structural operations, not a text
-diff:
+Rename detection runs on name-neutralised bodies (similarity ≥ 0.6, greedy
+best-first, same-kind only), so **rename + body edit in one commit** still
+comes back as a single rename, not as `add` + `remove`.
+
+```sh
+gita diff                  # HEAD vs working tree
+gita diff HEAD~3 HEAD      # any two refs
+gita diff --staged --json  # machine-readable, for agents
+```
+
+---
+
+## 02 · explain
+
+### commits remember what they meant.
+
+Each commit's manifest is written next to the tree, as a small JSON blob.
+`gita explain` just reads it back — no re-deriving, no re-parsing, no LLM
+guessing from a diff.
+
+```text
+$ gita explain HEAD
+commit a9b54e1  Pranjal Gulati <pranjal@…>  Tue May 26 12:04
+    rename get_user, add caching
+
+  modified  src/users.py
+    rename     get_user → fetch_user  (2 ref(s))
+    add        function fetch_user_cached
+    body       fetch_user: +1/-0
+
+  summary: 2 logic / 1 signature / 0 cosmetic
+```
+
+What the manifest actually looks like on disk:
 
 ```json
 {
@@ -67,22 +109,53 @@ diff:
 }
 ```
 
-Rename detection uses similarity over name-neutralised bodies (threshold 0.6,
-greedy best-first, same-kind only). That means **rename + body edit in the
-same commit** still reports as a rename, not as `add` + `remove`.
+Everything lives under `.git/gita/` — nothing escapes the repo. Uninstalling
+gita is `rm -rf .git/gita`.
 
-### MCP server for coding agents
+---
 
-```powershell
-gita mcp   # stdio JSON-RPC 2.0, protocol version 2024-11-05
+## 03 · ask
+
+### walk the symbol, not the lines.
+
+History is queryable by *thing*. Who renamed this function? Who calls it now?
+Answers come from stored manifests plus one CST pass.
+
+```text
+$ gita symbol-log fetch_user
+a9b54e1  rename get_user, add caching
+    [src/users.py] rename get_user → fetch_user
+710c2f3  faster lookup
+    [src/users.py] modify body of get_user: +3/-1
+d04a811  initial users module
+    [src/users.py] add function get_user
+```
+
+```text
+$ gita callers fetch_user
+3 call site(s) of 'fetch_user':
+  src/app/handlers.py:48   in UserHandler.get
+  src/app/handlers.py:71   in UserHandler.put
+  src/jobs/refresh.py:14   in run
+```
+
+The callers index is cached at `.git/gita/callers/<tree_sha>.json`, so it
+survives branch switches when the tree is unchanged.
+
+---
+
+## mcp
+
+A stdio MCP server is built in, so an agent can ask gita the same questions
+you do:
+
+```sh
+gita mcp   # JSON-RPC 2.0 over stdio, protocol 2024-11-05
 ```
 
 Tools exposed: `gita_diff`, `gita_status`, `gita_explain`, `gita_symbol_log`,
-`gita_callers`. All take a `root` argument (or fall back to `$GITA_ROOT` /
-cwd).
-
-Register it once in your editor (example for clients that read an
-`mcpServers` map):
+`gita_callers`. Each accepts a `root` argument (or falls back to
+`$GITA_ROOT`, or cwd).
 
 ```json
 {
@@ -96,40 +169,38 @@ Register it once in your editor (example for clients that read an
 }
 ```
 
-### Storage model
-
-- Manifests: `.git/gita/manifests/<commit_sha>.json` (one per commit, local
-  to the clone — not pushed by default).
-- Callers index: `.git/gita/callers/<tree_sha>.json` (keyed by tree sha so it
-  survives branch switches with identical trees).
-- Nothing escapes `.git/`. Uninstalling gita = `rm -rf .git/gita`.
-
 ---
 
-## `gitpp` — structural merge research prototype
+## tests
 
-`gitpp` stores Python code as a content-addressed tree of **CST nodes**
-(Concrete Syntax Tree, via [LibCST]) instead of file blobs, and merges
-concurrent edits by reasoning over the tree rather than character lines.
-
-The thesis we are trying to prove:
-
-> Two agents can make changes that traditional Git reports as conflicts, and
-> `gitpp` merges them automatically and correctly because it understands the
-> structure of the code.
-
-See [`SPEC.md`](./SPEC.md) for the merge policy table and
-[`tests/scenarios/`](./tests/scenarios/) for the canonical conflict cases.
-
----
-
-## Tests
-
-```powershell
-.venv\Scripts\python.exe -m pytest -q
+```sh
+.venv/bin/python -m pytest -q
 ```
 
 72 passing, 2 xfailed (the two `gitpp` scenarios that are intentionally
-unfinished and tracked in [`SPEC.md`](./SPEC.md)).
+unfinished — see [`SPEC.md`](./SPEC.md)).
 
-[LibCST]: https://libcst.readthedocs.io/
+---
+
+## also in this repo · gitpp
+
+`gitpp` is the older sibling: a from-scratch CST-aware VCS — no git
+underneath — that merges concurrent agent edits *structurally*. It exists to
+prove a single claim:
+
+> Two agents can make changes that traditional git reports as conflicts, and
+> `gitpp` merges them automatically and correctly because it understands the
+> structure of the code.
+
+Canonical conflict cases live in [`tests/scenarios/`](./tests/scenarios/);
+the merge policy table is in [`SPEC.md`](./SPEC.md); the larger vision —
+the one this whole repo is a finger pointing at — is in
+[`inspiration.md`](./inspiration.md).
+
+---
+
+<div align="center">
+
+*made for fun · libcst + a content-addressed json store · v0.1*
+
+</div>
