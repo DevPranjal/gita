@@ -177,30 +177,12 @@ Tools exposed: `gita_diff`, `gita_status`, `gita_explain`, `gita_symbol_log`,
 .venv/bin/python -m pytest -q
 ```
 
-72 passing, 2 xfailed (the two `gitpp` scenarios that are intentionally
-unfinished — see [`SPEC.md`](./SPEC.md)).
+54 passing. Covers the git wrappers, similarity-based rename detection
+(rename + body edit in one commit still pairs as a rename), manifest
+storage, symbol-log across renames, the multi-file callers index and its
+tree-sha cache, every CLI subcommand, and the MCP request/response surface.
 
 ---
 
-## also in this repo · gitpp
-
-`gitpp` is the older sibling: a from-scratch CST-aware VCS — no git
-underneath — that merges concurrent agent edits *structurally*. It exists to
-prove a single claim:
-
-> Two agents can make changes that traditional git reports as conflicts, and
-> `gitpp` merges them automatically and correctly because it understands the
-> structure of the code.
-
-Canonical conflict cases live in [`tests/scenarios/`](./tests/scenarios/);
-the merge policy table is in [`SPEC.md`](./SPEC.md); the larger vision —
-the one this whole repo is a finger pointing at — is in
-[`inspiration.md`](./inspiration.md).
-
----
-
-<div align="center">
-
-*made for fun · libcst + a content-addressed json store · v0.1*
-
-</div>
+The larger vision — the one this whole repo is a finger pointing at — is
+in [`inspiration.md`](./inspiration.md).

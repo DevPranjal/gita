@@ -17,7 +17,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from gitpp.manifest import build_manifest
+from gita._manifest import build_manifest
 
 from . import git as gx
 from .symdiff import diff_sources

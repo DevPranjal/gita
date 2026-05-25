@@ -1,7 +1,7 @@
 [project]
-name = "gitpp"
-version = "0.1.0-dev"
-description = "Agentic version control prototype: versioning logic, not text."
+name = "gita"
+version = "0.1.0"
+description = "Git-native semantic layer: structural diffs, symbol history, callers index, MCP server."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -16,7 +16,6 @@ dev = [
 ]
 
 [project.scripts]
-gitpp = "gitpp.cli:main"
 gita = "gita.cli:main"
 
 [build-system]
@@ -24,7 +23,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/gitpp", "src/gita"]
+packages = ["src/gita"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,7 +1,7 @@
 """Per-file structural diff with similarity-based rename detection.
 
 This module replaces the strict ``body_hash == body_hash`` rename pairing
-from :mod:`gitpp.manifest` with a similarity score. Two unmatched symbols
+from :mod:`gita._manifest` with a similarity score. Two unmatched symbols
 (one removed, one added) are paired as a rename when:
 
 * they have the same kind (function / class),
@@ -13,7 +13,7 @@ and weaker ones fall back to add/remove. This handles the common case of
 "rename + small body edit in the same commit" that the v0 pairing missed.
 
 Everything else (signature/body/import op extraction, summary) comes from
-:mod:`gitpp.manifest` unchanged.
+:mod:`gita._manifest` unchanged.
 """
 
 from __future__ import annotations
@@ -21,9 +21,9 @@ from __future__ import annotations
 import difflib
 from typing import Any
 
-# Reuse the heavy lifting from gitpp.manifest. We only override the
+# Reuse the heavy lifting from gita._manifest. We only override the
 # function-level routing so we can swap in similarity-based pairing.
-from gitpp.manifest import (
+from gita._manifest import (
     _Symbol,           # type: ignore[attr-defined]
     _ModuleView,       # type: ignore[attr-defined]
     _parse_view,       # type: ignore[attr-defined]

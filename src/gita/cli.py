@@ -12,7 +12,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from gitpp.manifest import render_manifest
+from gita._manifest import render_manifest
 
 from . import callers as callers_mod
 from . import git as gx
