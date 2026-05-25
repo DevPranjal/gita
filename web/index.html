@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>gita</title>
+  <style>
+    :root {
+      --bg: #f7f6f2;
+      --paper: #fffdf8;
+      --ink: #1c1b1a;
+      --muted: #8a857c;
+      --line: #e6e2d6;
+      --accent: #b34a1c;
+      --accent-soft: #f3d9c5;
+      --term-bg: #faf8f3;
+      --term-ink: #1c1b1a;
+      --term-prompt: #b34a1c;
+      --term-comment: #8a857c;
+      --term-str: #2f6b3a;
+      --term-key: #4b3a8c;
+      --mono: "JetBrains Mono", "Cascadia Code", ui-monospace, Consolas, monospace;
+      --serif: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+      --sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+      font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+
+    .wrap { max-width: 880px; margin: 0 auto; padding: 64px 28px 80px; }
+
+    .hero { margin-bottom: 56px; }
+    .name {
+      font-family: var(--serif); font-size: 96px; line-height: 1; font-weight: 400;
+      letter-spacing: -0.04em; margin: 0;
+    }
+    .name .dot { color: var(--accent); }
+    .sanskrit {
+      font-family: var(--serif); font-style: italic; color: var(--muted);
+      font-size: 19px; margin: 14px 0 0; line-height: 1.5;
+    }
+    .blurb {
+      font-family: var(--sans); color: var(--ink); font-size: 17px; line-height: 1.6;
+      margin: 22px 0 0; max-width: 620px;
+    }
+    .blurb code {
+      font-family: var(--mono); font-size: 14px; background: var(--accent-soft);
+      padding: 1px 6px; border-radius: 4px; color: #5a2509;
+    }
+
+    .term {
+      background: var(--term-bg); border: 1px solid var(--line); border-radius: 8px;
+      margin: 22px 0 0; overflow: hidden;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+    }
+    .term-bar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 12px; border-bottom: 1px solid var(--line);
+      background: #f0ede4;
+    }
+    .term-bar .dot {
+      width: 11px; height: 11px; border-radius: 50%; background: #d9d4c6;
+      border: 1px solid #c5bfae;
+    }
+    .term-bar .title {
+      margin-left: 10px; color: var(--muted); font-family: var(--mono); font-size: 12px;
+    }
+    .term-body {
+      padding: 16px 18px 18px;
+      font-family: var(--mono); font-size: 13.5px; line-height: 1.6;
+      color: var(--term-ink); white-space: pre-wrap; word-break: break-word;
+    }
+    .term-body .prompt { color: var(--term-prompt); }
+    .term-body .out { color: #3a3a36; }
+    .term-body .dim { color: var(--term-comment); font-style: italic; }
+    .term-body .ok  { color: var(--term-str); }
+    .term-body .kw  { color: var(--term-key); }
+    .term-body .acc { color: var(--accent); }
+    .cursor {
+      display: inline-block; width: 8px; height: 1em; background: var(--ink);
+      vertical-align: -2px; margin-left: 2px; animation: blink 1s steps(1) infinite;
+    }
+    @keyframes blink { 50% { background: transparent; } }
+
+    .pillar { margin-top: 52px; }
+    .pillar h2 {
+      font-family: var(--serif); font-size: 26px; font-weight: 500;
+      letter-spacing: -0.01em; margin: 0;
+    }
+    .pillar .n {
+      font-family: var(--mono); color: var(--muted); font-size: 12px;
+      letter-spacing: 0.18em; text-transform: uppercase; margin: 0 0 6px;
+    }
+    .pillar p.note {
+      font-family: var(--sans); color: var(--muted); font-size: 15px;
+      margin: 8px 0 0; max-width: 620px; line-height: 1.55;
+    }
+    .pillar p.note code {
+      font-family: var(--mono); font-size: 13px; color: var(--ink);
+      background: #efebde; padding: 0 5px; border-radius: 3px;
+    }
+
+    .picker {
+      margin-top: 26px; font-family: var(--mono); font-size: 13px; color: var(--muted);
+      display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+    }
+    .picker .lbl { color: var(--muted); }
+    .picker button {
+      background: transparent; border: 1px dashed var(--line); color: var(--ink);
+      padding: 4px 10px; border-radius: 4px; cursor: pointer;
+      font-family: var(--mono); font-size: 12.5px;
+    }
+    .picker button.active { border-style: solid; border-color: var(--accent); color: var(--accent); }
+    .picker button:hover:not(.active) { background: #f0ede4; }
+
+    footer {
+      margin-top: 72px; padding-top: 24px; border-top: 1px dashed var(--line);
+      font-family: var(--mono); font-size: 12px; color: var(--muted);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .wrap { padding: 40px 18px; }
+      .name { font-size: 64px; }
+      .term-body { font-size: 12.5px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <section class="hero">
+      <h1 class="name">gita<span class="dot">.</span></h1>
+      <p class="sanskrit">— every agent needs a direction.</p>
+      <p class="blurb">
+        A little experiment: <code>git</code>, but the things it tells an agent
+        are <em>structural</em> instead of textual. Same content-addressed store
+        underneath &mdash; just trades unified-diff hunks for ops on named
+        symbols. Three commands, that's the whole show.
+      </p>
+
+      <div class="picker">
+        <span class="lbl"># scenario:</span>
+        <span id="picker"></span>
+      </div>
+    </section>
+
+    <section class="pillar">
+      <p class="n">01 · diff</p>
+      <h2>show me what changed, not which bytes moved.</h2>
+      <p class="note">
+        Same edit, two readings. The left is what an agent stares at today; the
+        right is what it actually wants.
+      </p>
+
+      <div class="term">
+        <div class="term-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="title">git diff — users.py</span>
+        </div>
+        <div class="term-body" id="t-git"></div>
+      </div>
+
+      <div class="term">
+        <div class="term-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="title">gita diff — users.py</span>
+        </div>
+        <div class="term-body" id="t-gita"></div>
+      </div>
+    </section>
+
+    <section class="pillar">
+      <p class="n">02 · explain</p>
+      <h2>commits remember what they meant.</h2>
+      <p class="note">
+        Each commit stores its manifest as a content-addressed blob next to the
+        tree. <code>gita explain</code> just reads it back &mdash; no
+        re-deriving, no re-parsing, no LLM guessing from a diff.
+      </p>
+
+      <div class="term">
+        <div class="term-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="title">gita</span>
+        </div>
+        <div class="term-body" id="t-explain"></div>
+      </div>
+    </section>
+
+    <section class="pillar">
+      <p class="n">03 · ask</p>
+      <h2>walk the symbol, not the lines.</h2>
+      <p class="note">
+        History is queryable by <em>thing</em>. Who renamed this function? Who
+        calls it now? Answers come from stored manifests plus one CST pass.
+      </p>
+
+      <div class="term">
+        <div class="term-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="title">gita</span>
+        </div>
+        <div class="term-body" id="t-ask"></div>
+      </div>
+    </section>
+
+    <footer>
+      <span>made for fun · libcst + a content-addressed json store</span>
+      <span>v0.1</span>
+    </footer>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const SCENARIOS = ["rename-vs-edit", "parallel-methods", "import-reorder-add"];
+
+    function esc(s) {
+      return String(s)
+        .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    }
+    function colorDiff(text) {
+      return text.split('\n').map(l => {
+        const e = esc(l);
+        if (l.startsWith('+')) return `<span style="color:#2f6b3a">${e}</span>`;
+        if (l.startsWith('-')) return `<span style="color:#a23a2a">${e}</span>`;
+        if (l.startsWith('@@')) return `<span class="kw">${e}</span>`;
+        return `<span class="out">${e}</span>`;
+      }).join('\n');
+    }
+    function line(prompt, cmd) {
+      return `<span class="prompt">${prompt}</span> <span class="out">${esc(cmd)}</span>\n`;
+    }
+
+    function buildPicker() {
+      const p = $('picker');
+      p.innerHTML = '';
+      for (const name of SCENARIOS) {
+        const b = document.createElement('button');
+        b.textContent = name;
+        b.onclick = () => load(name);
+        p.appendChild(b);
+      }
+    }
+
+    async function load(name) {
+      for (const b of document.querySelectorAll('#picker button')) {
+        b.classList.toggle('active', b.textContent === name);
+      }
+      const data = await fetch('/api/pillars?name=' + encodeURIComponent(name))
+        .then(r => r.json());
+      render(data);
+    }
+
+    function render(data) {
+      const sym = data.symbol || 'symbol';
+
+      $('t-git').innerHTML =
+        line('$', 'git diff base.py users.py') +
+        colorDiff(data.pillar1.git_diff || '(no textual diff)') +
+        `\n<span class="dim"># ${data.pillar1.git_diff_lines} lines for the agent to read.</span>`;
+
+      $('t-gita').innerHTML =
+        line('$', 'gita diff') +
+        `<span class="out">${esc(data.pillar1.manifest_rendered)}</span>` +
+        `<span class="dim"># ${data.pillar1.op_count} op. the agent already knows.</span>`;
+
+      const shortChange = (data.pillar2.commit_sha || '').slice(0, 10);
+      const shortInit   = (data.pillar2.initial_sha || '').slice(0, 10);
+      $('t-explain').innerHTML =
+        line('$', 'gita log') +
+        `<span class="acc">${shortChange}</span> <span class="out">${esc(data.pillar2.commit_message)}</span>\n` +
+        `<span class="acc">${shortInit}</span> <span class="out">initial users module</span>\n\n` +
+        line('$', 'gita explain HEAD') +
+        `<span class="out">${esc(data.pillar2.explain_rendered)}</span>` +
+        `<span class="dim"># stored at commit time. no rederivation.</span>`;
+
+      let askHtml = '';
+      askHtml += line('$', `gita symbol-log ${sym}`);
+      if (!data.pillar3.symbol_log.length) {
+        askHtml += `<span class="dim">  (no commits touch this symbol)</span>\n`;
+      }
+      for (const entry of data.pillar3.symbol_log) {
+        const short = entry.sha.slice(0, 10);
+        askHtml += `<span class="acc">${short}</span> <span class="out">${esc(entry.message)}</span>\n`;
+        for (const op of entry.ops) {
+          askHtml += `           <span class="dim">${esc(opLine(op))}</span>\n`;
+        }
+      }
+      askHtml += `\n`;
+      askHtml += line('$', `gita callers ${sym}`);
+      if (!data.pillar3.callers.length) {
+        askHtml += `<span class="dim">  (no callers)</span>\n`;
+      }
+      for (const c of data.pillar3.callers) {
+        askHtml += `<span class="kw">${esc(c.file)}</span><span class="out">:</span><span class="ok">${esc(c.caller)}</span>\n`;
+      }
+      askHtml += `<span class="cursor"></span>`;
+      $('t-ask').innerHTML = askHtml;
+    }
+
+    function opLine(op) {
+      switch (op.op) {
+        case 'rename_symbol':    return `rename ${op.from} → ${op.to}  (${op.references} ref(s))`;
+        case 'add_symbol':       return `add ${op.kind || ''} ${op.name}`.trim();
+        case 'remove_symbol':    return `remove ${op.name}`;
+        case 'modify_body':      return `body ${op.name}: +${op.lines_added||0}/-${op.lines_removed||0}`;
+        case 'modify_signature': return `signature ${op.name}`;
+        default: return `${op.op} ${op.name || ''}`.trim();
+      }
+    }
+
+    buildPicker();
+    load('rename-vs-edit');
+  </script>
+</body>
+</html>

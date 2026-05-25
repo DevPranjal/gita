@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# gitpp's own object store, if we ever dogfood
+.gitpp/
+
+# Smoke-test scratch dir produced by scripts/smoke.ps1
+.demo/
+
+# Playwright MCP scratch
+.playwright-mcp/
