@@ -7,8 +7,10 @@ git surface as :class:`GitError`. We never shell out with ``shell=True``.
 from __future__ import annotations
 
 import subprocess
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Iterator
 
 
 class GitError(RuntimeError):
@@ -287,3 +289,43 @@ def commit(root: Path, message: str, *, allow_empty: bool = False) -> str:
 
 def is_git_dir(path: Path) -> bool:
     return (path / ".git").exists()
+
+
+# ---------------------------------------------------------------------------
+# merge helpers
+# ---------------------------------------------------------------------------
+
+
+def is_merge_commit(root: Path, sha: str) -> bool:
+    """True iff the commit has more than one parent."""
+    return len(commit_meta(root, sha).parents) > 1
+
+
+def merge_parents(root: Path, sha: str) -> list[str]:
+    """Parents of ``sha`` (length > 1 iff merge commit)."""
+    return list(commit_meta(root, sha).parents)
+
+
+# ---------------------------------------------------------------------------
+# checkout / restore (used by bisect to walk history safely)
+# ---------------------------------------------------------------------------
+
+
+@contextmanager
+def checkout_then_restore(root: Path, sha: str) -> Iterator[None]:
+    """Detach-checkout ``sha`` for the duration of the block, then restore.
+
+    Captures the original branch (or detached sha) at entry and restores it
+    on exit — even if the body raises. Caller is responsible for ensuring the
+    working tree is clean before entering (otherwise git refuses the
+    checkout).
+    """
+    branch = current_branch(root)
+    original = branch if branch is not None else head_sha(root)
+    if original is None:
+        raise GitError(1, ["git", "rev-parse", "HEAD"], "no HEAD to restore")
+    _run(root, ["checkout", "--detach", "--quiet", sha])
+    try:
+        yield
+    finally:
+        _run(root, ["checkout", "--quiet", original], check=False)

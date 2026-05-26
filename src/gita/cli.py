@@ -23,6 +23,7 @@ from . import notes as notes_mod
 from . import proofs as proofs_mod
 from . import store
 from . import who as who_mod
+from . import bisect as bisect_mod
 from .diff import build_for_commit, build_for_refs, build_for_working_tree
 
 
@@ -488,6 +489,66 @@ def _cmd_mcp(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_bisect_proven(args: argparse.Namespace) -> int:
+    root = _discover_root()
+    cmd = list(args.cmd or [])
+    if cmd and cmd[0] == "--":
+        cmd = cmd[1:]
+    cmd_arg = cmd if cmd else None
+    try:
+        result = bisect_mod.run(
+            root, args.name, cmd=cmd_arg, symbol=args.symbol, ref=args.ref,
+        )
+    except bisect_mod.NoBaseline:
+        sys.stderr.write(
+            f"gita: no baseline for {args.name!r}; "
+            f"try 'gita prove {args.name} -- <cmd>' on a known-good commit\n"
+        )
+        return 3
+    except proofs_mod.DirtyTree as exc:
+        sys.stderr.write(f"gita: {exc}\n")
+        return 4
+    if args.json:
+        sys.stdout.write(
+            json.dumps(result.to_dict(), indent=2, sort_keys=True, ensure_ascii=False)
+            + "\n"
+        )
+        return 0 if result.suspect is None else 1
+    out = sys.stdout
+    from_short = (result.from_sha or "")[:12]
+    to_short = result.to_sha[:12]
+    out.write(f"range:   {from_short}..{to_short}\n")
+    if result.reason == "head_is_proven":
+        out.write("HEAD is already the last proven commit; nothing to bisect.\n")
+        return 0
+    if result.reason == "head_passes":
+        out.write("HEAD passes; no failing commit found in range.\n")
+        return 0
+    if result.reason == "gaps":
+        out.write(f"unable to narrow: {len(result.missing)} commit(s) lack proofs:\n")
+        for sha in result.missing:
+            out.write(f"  {sha[:12]}\n")
+        out.write("hint: rerun with '-- <cmd>' to fill the gaps automatically\n")
+        return 1
+    # first_failure
+    out.write(f"suspect: {result.suspect}\n")
+    if result.via_merge:
+        out.write(f"  via merge {result.via_merge[:12]}\n")
+    if result.ops:
+        out.write("ops:\n")
+        for op in result.ops:
+            out.write(f"  [{op.get('path','?')}] {_render_history_op(op)}\n")
+    if result.callers_of_changed_symbols:
+        out.write("callers of touched symbols:\n")
+        for c in result.callers_of_changed_symbols:
+            out.write(
+                f"  {c.get('symbol','?')}: {c.get('file','?')}:{c.get('line','?')} "
+                f" in {c.get('caller','?')}\n"
+            )
+    out.write(f"hint: 'gita explain {result.suspect[:12]}' for the full manifest\n")
+    return 1
+
+
 # ---------------------------------------------------------------------------
 # entrypoint
 # ---------------------------------------------------------------------------
@@ -607,6 +668,26 @@ def main(argv: list[str] | None = None) -> int:
     )
     p_ctx.add_argument("--json", action="store_true")
     p_ctx.set_defaults(func=_cmd_context)
+
+    p_bisect = sub.add_parser(
+        "bisect-proven",
+        help="Narrow a regression in a check to its first failing commit.",
+    )
+    p_bisect.add_argument("name", help="Check name, e.g. 'pytest'.")
+    p_bisect.add_argument(
+        "--symbol", default=None,
+        help="Filter reported ops to those touching SYMBOL.",
+    )
+    p_bisect.add_argument(
+        "--ref", default="HEAD",
+        help="Endpoint of the bisect range (default HEAD).",
+    )
+    p_bisect.add_argument("--json", action="store_true")
+    p_bisect.add_argument(
+        "cmd", nargs=argparse.REMAINDER,
+        help="Optional command after '--' to fill missing proofs.",
+    )
+    p_bisect.set_defaults(func=_cmd_bisect_proven)
 
     p_mcp = sub.add_parser("mcp", help="Run as an MCP server over stdio.")
     p_mcp.set_defaults(func=_cmd_mcp)

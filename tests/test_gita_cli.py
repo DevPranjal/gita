@@ -545,3 +545,66 @@ def test_cli_context_symbol_not_found(
     commit_file(git_repo, "m.py", "x = 1\n", "init")
     rc = _run_cli(monkeypatch, git_repo, "context", "ghost")
     assert rc != 0
+
+# ---------------------------------------------------------------------------
+# phase 2: bisect-proven CLI
+# ---------------------------------------------------------------------------
+
+
+def _write_pytest_proof(root: Path, sha: str, ok: bool) -> None:
+    from gita import proofs as proofs_mod
+    p = proofs_mod.proof_path(root, sha)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(
+        json.dumps({
+            "commit": sha,
+            "checks": {
+                "pytest": {
+                    "ok": ok, "exit_code": 0 if ok else 1, "duration_ms": 1,
+                    "ran_at": "2026-01-01T00:00:00Z", "cmd": ["fake"],
+                    "stdout_head": "", "stdout_tail": "", "truncated": False,
+                }
+            },
+        }),
+        encoding="utf-8",
+    )
+
+
+def test_cli_bisect_proven_text_output(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    a = commit_file(git_repo, "s.py", "def foo():\n    return 1\n", "init")
+    _write_pytest_proof(git_repo, a, ok=True)
+    b = commit_file(git_repo, "s.py", "def foo():\n    return 99\n", "break")
+    _write_pytest_proof(git_repo, b, ok=False)
+    rc = _run_cli(monkeypatch, git_repo, "bisect-proven", "pytest")
+    out = capsys.readouterr().out
+    assert "range:" in out
+    assert "suspect:" in out
+    assert b in out
+    assert rc != 0
+
+
+def test_cli_bisect_proven_json_output(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    a = commit_file(git_repo, "s.py", "def foo():\n    return 1\n", "init")
+    _write_pytest_proof(git_repo, a, ok=True)
+    b = commit_file(git_repo, "s.py", "def foo():\n    return 99\n", "break")
+    _write_pytest_proof(git_repo, b, ok=False)
+    _run_cli(monkeypatch, git_repo, "bisect-proven", "--json", "pytest")
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["suspect"] == b
+    assert payload["from_sha"] == a
+    assert payload["reason"] == "first_failure"
+    assert payload["checks_used"] == ["pytest"]
+
+
+def test_cli_bisect_proven_exits_nonzero_on_no_baseline(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    commit_file(git_repo, "s.py", "x = 1\n", "init")
+    rc = _run_cli(monkeypatch, git_repo, "bisect-proven", "pytest")
+    err = capsys.readouterr().err
+    assert rc == 3
+    assert "no baseline" in err.lower()
