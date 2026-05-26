@@ -6,7 +6,7 @@
 writing most code anymore — agents are. And agents don't want lines. They
 want answers.
 
-`gita` is `git` rebuilt around the questions an agent actually asks.
+**`gita` is `git` rebuilt around the questions an agent actually asks.**
 
 ---
 

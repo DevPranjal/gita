@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>gita — git for agents</title>
+  <style>
+    :root {
+      --bg: #f7f6f2;
+      --paper: #fffdf8;
+      --ink: #1c1b1a;
+      --muted: #8a857c;
+      --line: #e6e2d6;
+      --accent: #b34a1c;
+      --accent-soft: #f3d9c5;
+      --term-bg: #faf8f3;
+      --term-ink: #1c1b1a;
+      --term-prompt: #b34a1c;
+      --term-comment: #8a857c;
+      --term-str: #2f6b3a;
+      --term-key: #4b3a8c;
+      --term-del: #a23a2a;
+      --mono: "JetBrains Mono", "Cascadia Code", ui-monospace, Consolas, monospace;
+      --serif: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+      --sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+      font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+
+    .wrap { max-width: 920px; margin: 0 auto; padding: 64px 28px 80px; }
+
+    /* hero */
+    .hero { margin-bottom: 56px; }
+    .name {
+      font-family: var(--serif); font-size: 96px; line-height: 1; font-weight: 400;
+      letter-spacing: -0.04em; margin: 0;
+    }
+    .name .dot { color: var(--accent); }
+    .sanskrit {
+      font-family: var(--serif); font-style: italic; color: var(--muted);
+      font-size: 19px; margin: 14px 0 0; line-height: 1.5;
+    }
+    .blurb {
+      font-family: var(--sans); color: var(--ink); font-size: 17px; line-height: 1.65;
+      margin: 22px 0 0; max-width: 640px;
+    }
+    .blurb code, .note code, p code {
+      font-family: var(--mono); font-size: 13.5px; background: var(--accent-soft);
+      padding: 1px 6px; border-radius: 4px; color: #5a2509;
+    }
+
+    /* section header */
+    .section-h {
+      font-family: var(--mono); color: var(--muted); font-size: 12px;
+      letter-spacing: 0.18em; text-transform: uppercase; margin: 60px 0 14px;
+    }
+
+    /* question card */
+    .q {
+      margin-top: 36px; padding-top: 28px; border-top: 1px dashed var(--line);
+    }
+    .q:first-of-type { border-top: none; padding-top: 0; }
+    .q .num {
+      font-family: var(--mono); color: var(--muted); font-size: 12px;
+      letter-spacing: 0.18em; text-transform: uppercase; margin: 0 0 6px;
+    }
+    .q h2 {
+      font-family: var(--serif); font-size: 24px; font-weight: 500;
+      letter-spacing: -0.01em; margin: 0;
+    }
+    .q .note {
+      font-family: var(--sans); color: var(--muted); font-size: 15px;
+      margin: 8px 0 0; max-width: 640px; line-height: 1.55;
+    }
+
+    /* terminal cards */
+    .pair {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px;
+    }
+    .pair.single { grid-template-columns: 1fr; }
+    .term {
+      background: var(--term-bg); border: 1px solid var(--line); border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+    }
+    .term-bar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 12px; border-bottom: 1px solid var(--line);
+      background: #f0ede4;
+    }
+    .term-bar .d {
+      width: 11px; height: 11px; border-radius: 50%; background: #d9d4c6;
+      border: 1px solid #c5bfae;
+    }
+    .term-bar .title {
+      margin-left: 10px; color: var(--muted); font-family: var(--mono); font-size: 12px;
+    }
+    .term-bar .tag {
+      margin-left: auto; font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 3px;
+    }
+    .tag.git  { background: #efe9d8; color: var(--muted); }
+    .tag.gita { background: var(--accent-soft); color: #5a2509; }
+    .term-body {
+      padding: 14px 16px 16px;
+      font-family: var(--mono); font-size: 13px; line-height: 1.6;
+      color: var(--term-ink); white-space: pre-wrap; word-break: break-word;
+    }
+    .prompt { color: var(--term-prompt); }
+    .out { color: #3a3a36; }
+    .dim { color: var(--term-comment); font-style: italic; }
+    .ok  { color: var(--term-str); }
+    .bad { color: var(--term-del); }
+    .kw  { color: var(--term-key); }
+    .acc { color: var(--accent); }
+    .add { color: var(--term-str); }
+    .del { color: var(--term-del); }
+
+    /* wins */
+    .wins {
+      margin-top: 56px; padding: 22px 24px; border: 1px solid var(--line);
+      border-radius: 8px; background: var(--paper);
+    }
+    .wins h3 {
+      font-family: var(--serif); font-weight: 500; font-size: 19px; margin: 0 0 10px;
+    }
+    .wins ul { margin: 0; padding-left: 18px; color: var(--ink); font-size: 15px; line-height: 1.7; }
+    .wins ul code {
+      font-family: var(--mono); font-size: 13px; color: var(--ink);
+      background: #efebde; padding: 0 5px; border-radius: 3px;
+    }
+
+    /* install */
+    .install { margin-top: 56px; }
+    .install pre {
+      background: var(--term-bg); border: 1px solid var(--line); border-radius: 8px;
+      padding: 14px 16px; font-family: var(--mono); font-size: 13px;
+      line-height: 1.6; color: var(--ink); overflow-x: auto;
+    }
+
+    footer {
+      margin-top: 72px; padding-top: 24px; border-top: 1px dashed var(--line);
+      font-family: var(--mono); font-size: 12px; color: var(--muted);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 10px;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 720px) {
+      .wrap { padding: 40px 18px; }
+      .name { font-size: 64px; }
+      .term-body { font-size: 12.5px; }
+      .pair { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <section class="hero">
+      <h1 class="name">gita<span class="dot">.</span></h1>
+      <p class="sanskrit">— every agent needs a direction.</p>
+      <p class="blurb">
+        <code>git</code> was built for humans reading lines of text. But humans
+        aren't the ones writing most code anymore — agents are. And agents
+        don't want lines. They want answers.
+      </p>
+      <p class="blurb">
+        <code>gita</code> is <code>git</code> rebuilt around the questions an
+        agent actually asks.
+      </p>
+    </section>
+
+    <p class="section-h">six questions · two answers each</p>
+
+    <!-- Q1 -->
+    <section class="q">
+      <p class="num">01</p>
+      <h2>"what changed in this commit?"</h2>
+      <p class="note">A rename plus a body edit is what trips every diff tool on earth.</p>
+      <div class="pair">
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">git diff</span><span class="tag git">git</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">git diff src/users.py</span>
+<span class="del">- def get_user(uid):</span>
+<span class="add">+ def fetch_user(uid):</span>
+      row = db.lookup('users', uid)
+      if row is None:
+          return None
+<span class="del">-     return User.from_row(row)</span>
+<span class="add">+     user = User.from_row(row)</span>
+<span class="add">+     return user</span>
+<span class="dim"># 8 lines. agent has to guess: was this a rename, or a delete + add?</span></div>
+        </div>
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">gita diff</span><span class="tag gita">gita</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">gita diff</span>
+<span class="kw">modified</span>  src/users.py
+  <span class="acc">rename</span>     get_user → fetch_user  (2 ref(s))
+  <span class="acc">signature</span>  fetch_user: def get_user(uid) → def fetch_user(uid)
+  <span class="acc">body</span>       fetch_user: +1/-0
+<span class="dim"># 4 lines. the rename is named. no guessing.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Q2 -->
+    <section class="q">
+      <p class="num">02</p>
+      <h2>"show me this function."</h2>
+      <p class="note">The thing agents do twenty times an hour.</p>
+      <div class="pair">
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">grep + sed</span><span class="tag git">git</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">grep -rn 'def fetch_user' src/</span>
+<span class="kw">src/users.py</span>:<span class="ok">40</span>:def fetch_user(uid):
+<span class="prompt">$</span> <span class="out">sed -n '40,55p' src/users.py</span>
+def fetch_user(uid):
+    row = db.lookup('users', uid)
+    ...
+<span class="dim"># two commands. and you still have to guess where the function ends.</span></div>
+        </div>
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">gita get</span><span class="tag gita">gita</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">gita get fetch_user</span>
+<span class="kw">src/users.py</span>:<span class="ok">40-52</span>  function fetch_user
+
+def fetch_user(uid):
+    row = db.lookup('users', uid)
+    if row is None:
+        return None
+    return User.from_row(row)
+<span class="dim"># one call. exact bounds. methods work too: gita get UserHandler.put</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Q3 -->
+    <section class="q">
+      <p class="num">03</p>
+      <h2>"show it the way it was 5 commits ago."</h2>
+      <p class="note">Walks renames automatically — the symbol's old name is in the manifest chain.</p>
+      <div class="pair">
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">checkout dance</span><span class="tag git">git</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">git stash</span>
+<span class="prompt">$</span> <span class="out">git checkout HEAD~5</span>
+<span class="prompt">$</span> <span class="out">grep -rn fetch_user src/</span>
+<span class="dim"># (nothing — it was called get_user back then)</span>
+<span class="prompt">$</span> <span class="out">grep -rn get_user src/</span>
+<span class="prompt">$</span> <span class="out">sed -n ...</span>
+<span class="prompt">$</span> <span class="out">git checkout main && git stash pop</span>
+<span class="dim"># five commands. mutates your working tree. brittle.</span></div>
+        </div>
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">gita get @rev</span><span class="tag gita">gita</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">gita get fetch_user@HEAD~5</span>
+<span class="kw">src/users.py</span>:<span class="ok">38-49</span>  function get_user
+<span class="dim"># resolved as: get_user (renamed → fetch_user)</span>
+
+def get_user(uid):
+    row = db.lookup('users', uid)
+    ...
+<span class="dim"># one call. working tree untouched. rename followed.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Q4 -->
+    <section class="q">
+      <p class="num">04</p>
+      <h2>"who calls this function?"</h2>
+      <div class="pair">
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">grep</span><span class="tag git">git</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">grep -rn '\bfetch_user(' src/</span>
+<span class="kw">src/api.py</span>:<span class="ok">12</span>:    u = fetch_user(uid)
+<span class="kw">src/api.py</span>:<span class="ok">88</span>:    if fetch_user(other):
+<span class="kw">src/jobs.py</span>:<span class="ok">5</span>:from .users import fetch_user
+<span class="dim"># the import is a false positive. the caller name? you'd have to read the file.</span></div>
+        </div>
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">gita callers</span><span class="tag gita">gita</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">gita callers fetch_user</span>
+<span class="out">2 call site(s) of 'fetch_user':</span>
+  <span class="kw">src/api.py</span>:<span class="ok">12</span>   in <span class="acc">handle_get</span>
+  <span class="kw">src/api.py</span>:<span class="ok">88</span>   in <span class="acc">UserHandler.put</span>
+<span class="dim"># real call sites only. caller named. ready to plug into a prompt.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Q5 -->
+    <section class="q">
+      <p class="num">05</p>
+      <h2>"when was the last commit where tests passed?"</h2>
+      <p class="note">An agent that commits ten times an hour needs a real answer to this — not the commit message.</p>
+      <div class="pair">
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">commit messages</span><span class="tag git">git</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">git log --oneline -5</span>
+<span class="acc">a91f2c</span> fix the thing
+<span class="acc">88e1d0</span> wip
+<span class="acc">3b22ff</span> tests passing 🤞
+<span class="acc">7c0411</span> refactor
+<span class="acc">1d990a</span> initial
+<span class="dim"># commit messages lie. agents lie. nothing recorded the actual result.</span></div>
+        </div>
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">gita prove + last-proven</span><span class="tag gita">gita</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">gita prove pytest -- python -m pytest -q</span>
+<span class="ok">✓</span> pytest  (exit 0, 1832 ms)
+
+<span class="prompt">$</span> <span class="out">gita last-proven pytest</span>
+<span class="acc">3b22ff</span>
+<span class="dim"># refuses to run on a dirty tree. the proof can't lie about which commit it covers.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Q6 -->
+    <section class="q">
+      <p class="num">06</p>
+      <h2>"every commit that touched this function."</h2>
+      <p class="note">History filtered to one symbol — and annotated with whether each commit was green.</p>
+      <div class="pair">
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">git log -S</span><span class="tag git">git</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">git log -S fetch_user --oneline</span>
+<span class="acc">a91f2c</span> fix the thing
+<span class="acc">88e1d0</span> wip
+<span class="acc">3b22ff</span> tests passing
+<span class="dim"># finds commits where the *string* changed count. misses renames. no shape.</span></div>
+        </div>
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">gita symbol-log</span><span class="tag gita">gita</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">gita symbol-log fetch_user</span>
+<span class="ok">✓</span> <span class="acc">a91f2c</span> fix the thing
+       body fetch_user: +2/-1
+<span class="bad">✗</span> <span class="acc">88e1d0</span> wip
+       signature fetch_user
+<span class="ok">✓</span> <span class="acc">3b22ff</span> tests passing
+       rename get_user → fetch_user (2 ref(s))
+<span class="dim"># follows renames. ✓/✗/· says which commits passed which check.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- wins -->
+    <div class="wins">
+      <h3>what changes, for an agent</h3>
+      <ul>
+        <li>fewer tokens — structural answers instead of paragraphs of diff</li>
+        <li>no hallucinated renames — the rename is named at commit time, once</li>
+        <li>no <code>grep + sed</code> as a substitute for "give me this function"</li>
+        <li>real ground truth for "did this commit pass?" — not commit messages</li>
+      </ul>
+    </div>
+
+    <!-- mcp -->
+    <p class="section-h">the same surface, for agents directly</p>
+    <p class="blurb" style="margin-top:0">
+      A built-in MCP server exposes every command above as a tool.
+    </p>
+    <div class="install">
+<pre><span class="prompt">$</span> gita mcp
+
+<span class="dim"># in your agent's mcp config:</span>
+{
+  "mcpServers": {
+    "gita": {
+      "command": "gita",
+      "args": ["mcp"],
+      "env": { "GITA_ROOT": "${workspaceFolder}" }
+    }
+  }
+}</pre>
+      <p class="note" style="margin-top:14px">
+        Eight tools: <code>gita_diff</code> · <code>gita_status</code> ·
+        <code>gita_explain</code> · <code>gita_symbol_log</code> ·
+        <code>gita_callers</code> · <code>gita_get</code> ·
+        <code>gita_prove</code> · <code>gita_last_proven</code>.
+      </p>
+    </div>
+
+    <!-- install -->
+    <p class="section-h">install + try</p>
+    <div class="install">
+<pre><span class="prompt">$</span> git clone https://github.com/DevPranjal/gita && cd gita
+<span class="prompt">$</span> python -m venv .venv && .venv\Scripts\Activate.ps1
+<span class="prompt">$</span> pip install -e .
+
+<span class="dim"># then in any repo:</span>
+<span class="prompt">$</span> gita init
+<span class="prompt">$</span> gita diff
+<span class="prompt">$</span> gita get &lt;a function name in your codebase&gt;
+<span class="prompt">$</span> gita prove tests -- &lt;your test command&gt;</pre>
+    </div>
+
+    <footer>
+      <span>v0.2 · 116 tests passing · libcst + a tiny json sidecar</span>
+      <span><a href="https://github.com/DevPranjal/gita">github</a></span>
+    </footer>
+  </div>
+</body>
+</html>
