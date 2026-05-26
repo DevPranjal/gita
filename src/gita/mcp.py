@@ -29,6 +29,7 @@ import traceback
 from pathlib import Path
 from typing import Any, Callable
 
+from . import bisect as bisect_mod
 from . import callers as callers_mod
 from . import git as gx
 from . import history as history_mod
@@ -40,7 +41,7 @@ from .diff import build_for_refs, build_for_working_tree
 
 PROTOCOL_VERSION = "2024-11-05"
 SERVER_NAME = "gita"
-SERVER_VERSION = "0.2.0"
+SERVER_VERSION = "0.3.0"
 
 
 # ---------------------------------------------------------------------------
@@ -165,6 +166,17 @@ def _tool_last_proven(args: dict[str, Any]) -> dict[str, Any]:
     return {"sha": sha, "name": name, "symbol": symbol, "ref": ref}
 
 
+def _tool_bisect_proven(args: dict[str, Any]) -> dict[str, Any]:
+    root = _resolve_root(args)
+    name = args["name"]
+    symbol = args.get("symbol")
+    ref = args.get("ref") or "HEAD"
+    cmd = args.get("cmd")
+    cmd_list = list(cmd) if cmd else None
+    result = bisect_mod.run(root, name, cmd=cmd_list, symbol=symbol, ref=ref)
+    return result.to_dict()
+
+
 TOOLS: dict[str, tuple[Callable[[dict[str, Any]], Any], dict[str, Any]]] = {
     "gita_diff": (
         _tool_diff,
@@ -263,6 +275,24 @@ TOOLS: dict[str, tuple[Callable[[dict[str, Any]], Any], dict[str, Any]]] = {
             },
         },
     ),
+    "gita_bisect_proven": (
+        _tool_bisect_proven,
+        {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+                "root": {"type": "string"},
+                "name": {"type": "string", "description": "Check name, e.g. 'pytest'."},
+                "symbol": {"type": ["string", "null"], "description": "Filter reported ops to those touching SYMBOL."},
+                "ref": {"type": ["string", "null"], "description": "Endpoint of the bisect range (default HEAD)."},
+                "cmd": {
+                    "type": ["array", "null"],
+                    "items": {"type": "string"},
+                    "description": "Optional command to run for commits with no recorded proof.",
+                },
+            },
+        },
+    ),
 }
 
 
@@ -275,6 +305,7 @@ TOOL_DESCRIPTIONS = {
     "gita_get": "Source of a named symbol at a rev. One-hop backward rename walk when missing at rev.",
     "gita_prove": "Run a command and record the result as a proof on HEAD. Refuses dirty trees.",
     "gita_last_proven": "Newest commit reachable from ref whose recorded checks satisfy the filter.",
+    "gita_bisect_proven": "Narrow a regression in a named check to its first failing commit between last_proven and ref.",
 }
 
 

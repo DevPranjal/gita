@@ -20,6 +20,8 @@ want answers.
 | *"who calls this function?"*                | `grep -rn` and hope                          | `gita callers fetch_user`                                      |
 | *"when was the last commit where tests passed?"* | read commit messages, guess               | `gita last-proven pytest`                                      |
 | *"every commit that touched this function"* | `git log -S` and squint                      | `gita symbol-log fetch_user`                                   |
+| *"which commit broke the tests?"*           | `git bisect run` from scratch                | `gita bisect-proven pytest`                                    |
+| *"re-run my checks after every commit"*     | hand-rolled hook                             | `gita hooks install` + `gita auto enable pytest -- ...`        |
 
 ---
 
@@ -104,6 +106,32 @@ commit it covers.
 > ("last commit where tests passed and the symbol I touched still exists")
 > instead of vibes.
 
+### 5 · bisect by a real criterion + auto-prove every commit
+
+With proofs in place, finding the first failing commit stops being a ritual:
+
+```sh
+gita bisect-proven pytest                        # walks cached proofs
+gita bisect-proven pytest -- python -m pytest -q # fills gaps automatically
+```
+
+`gita` walks from the last green commit forward, reuses any cached proofs,
+and only runs the check on commits it hasn't seen. Merge commits recurse
+one hop into the merged-in branch so the suspect is the real culprit, not
+the merge node. Output is the offending sha plus the structural ops that
+landed in it and the callers of every symbol it touched.
+
+And because nobody wants to remember to `gita prove` by hand:
+
+```sh
+gita hooks install                                 # one-time
+gita auto enable pytest -- python -m pytest -q
+```
+
+A post-commit hook now re-runs every enabled check against each new HEAD
+and records the proof. The hook never fails a commit — a crashing check
+just shows up later as a `✗` glyph.
+
 ---
 
 ## the same surface, for agents directly
@@ -127,7 +155,8 @@ gita mcp
 ```
 
 Eight tools: `gita_diff` · `gita_status` · `gita_explain` · `gita_symbol_log`
-· `gita_callers` · `gita_get` · `gita_prove` · `gita_last_proven`.
+· `gita_callers` · `gita_get` · `gita_prove` · `gita_last_proven`
+· `gita_bisect_proven` (nine, as of v0.3).
 
 ---
 
@@ -148,6 +177,6 @@ gita get <a function name in your codebase>        # try it
 gita prove tests -- <your test command>            # record a proof
 ```
 
-v0.2 · 116 tests passing · zero runtime deps beyond `libcst`.
+v0.3 · 193 tests passing · zero runtime deps beyond `libcst`.
 
 The longer vision lives in [`inspiration.md`](./inspiration.md).

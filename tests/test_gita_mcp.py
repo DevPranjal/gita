@@ -25,6 +25,7 @@ def test_tools_list_exposes_all_tools() -> None:
     assert names == {
         "gita_diff", "gita_status", "gita_explain", "gita_symbol_log",
         "gita_callers", "gita_get", "gita_prove", "gita_last_proven",
+        "gita_bisect_proven",
     }
     for tool in resp["result"]["tools"]:
         assert tool["description"]
@@ -255,6 +256,64 @@ def test_mcp_gita_diff_supports_symbol_arg(git_repo: Path) -> None:
     assert "bar" not in names
 
 
-def test_mcp_server_version_is_0_2_0() -> None:
+def test_mcp_server_version_is_0_3_0() -> None:
     resp = mcp.handle_request({"jsonrpc": "2.0", "id": 26, "method": "initialize"})
-    assert resp["result"]["serverInfo"]["version"] == "0.2.0"
+    assert resp["result"]["serverInfo"]["version"] == "0.3.0"
+
+
+def test_mcp_gita_bisect_proven_returns_suspect(git_repo: Path) -> None:
+    """End-to-end: cached good proof on A, failing proof on B → suspect is B."""
+    import sys as _sys
+    from gita import proofs as proofs_mod
+
+    a = commit_file(git_repo, "s.py", "def foo():\n    return 1\n", "init")
+    # Record passing proof against A directly so we have a baseline.
+    proofs_mod.proofs_dir(git_repo).mkdir(parents=True, exist_ok=True)
+    (proofs_mod.proof_path(git_repo, a)).write_text(
+        json.dumps({
+            "commit": a,
+            "checks": {"pytest": {"ok": True, "exit_code": 0, "duration_ms": 1,
+                                  "ran_at": "2026-01-01T00:00:00Z",
+                                  "cmd": [_sys.executable, "-c", "pass"],
+                                  "stdout_head": "", "stdout_tail": "", "truncated": False}},
+        }),
+        encoding="utf-8",
+    )
+    b = commit_file(git_repo, "s.py", "def foo():\n    return 99\n", "break")
+    (proofs_mod.proof_path(git_repo, b)).write_text(
+        json.dumps({
+            "commit": b,
+            "checks": {"pytest": {"ok": False, "exit_code": 1, "duration_ms": 1,
+                                  "ran_at": "2026-01-01T00:00:01Z",
+                                  "cmd": [_sys.executable, "-c", "pass"],
+                                  "stdout_head": "", "stdout_tail": "", "truncated": False}},
+        }),
+        encoding="utf-8",
+    )
+
+    resp = mcp.handle_request({
+        "jsonrpc": "2.0", "id": 27, "method": "tools/call",
+        "params": {
+            "name": "gita_bisect_proven",
+            "arguments": {"root": str(git_repo), "name": "pytest"},
+        },
+    })
+    assert resp["result"]["isError"] is False
+    payload = json.loads(resp["result"]["content"][0]["text"])
+    assert payload["suspect"] == b
+    assert payload["from_sha"] == a
+    assert payload["reason"] == "first_failure"
+    assert payload["checks_used"] == ["pytest"]
+
+
+def test_mcp_gita_bisect_proven_no_baseline_returns_error(git_repo: Path) -> None:
+    commit_file(git_repo, "s.py", "x = 1\n", "init")
+    resp = mcp.handle_request({
+        "jsonrpc": "2.0", "id": 28, "method": "tools/call",
+        "params": {
+            "name": "gita_bisect_proven",
+            "arguments": {"root": str(git_repo), "name": "pytest"},
+        },
+    })
+    assert "error" in resp
+    assert resp["error"]["code"] == -32000
