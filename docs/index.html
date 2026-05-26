@@ -61,9 +61,26 @@
       margin-top: 36px; padding-top: 28px; border-top: 1px dashed var(--line);
     }
     .q:first-of-type { border-top: none; padding-top: 0; }
+    .q > summary {
+      list-style: none; cursor: pointer; display: block;
+      position: relative; padding-right: 36px;
+    }
+    .q > summary::-webkit-details-marker { display: none; }
+    .q > summary::after {
+      content: "+"; position: absolute; right: 4px; top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--mono); font-size: 22px; color: var(--muted);
+      line-height: 1; transition: transform 0.15s ease, color 0.15s ease;
+    }
+    .q[open] > summary::after {
+      content: "−"; color: var(--accent);
+    }
+    .q > summary:hover h2 { color: var(--accent); }
+    .q > summary h2 { transition: color 0.15s ease; }
     .q .num {
       font-family: var(--mono); color: var(--muted); font-size: 12px;
-      letter-spacing: 0.18em; text-transform: uppercase; margin: 0 0 6px;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      margin: 0 0 6px; display: block;
     }
     .q h2 {
       font-family: var(--serif); font-size: 24px; font-weight: 500;
@@ -71,7 +88,7 @@
     }
     .q .note {
       font-family: var(--sans); color: var(--muted); font-size: 15px;
-      margin: 8px 0 0; max-width: 640px; line-height: 1.55;
+      margin: 14px 0 0; max-width: 640px; line-height: 1.55;
     }
 
     /* terminal cards */
@@ -174,12 +191,15 @@
       </p>
     </section>
 
-    <p class="section-h">six questions · two answers each</p>
+    <p class="section-h">eight questions · two answers each</p>
+    <p class="blurb" style="margin-top:-6px; font-size:14px; color:var(--muted)">click a question to see how <code>git</code> answers it — and how <code>gita</code> does.</p>
 
     <!-- Q1 -->
-    <section class="q">
-      <p class="num">01</p>
-      <h2>"what changed in this commit?"</h2>
+    <details class="q">
+      <summary>
+        <span class="num">01</span>
+        <h2>"what changed in this commit?"</h2>
+      </summary>
       <p class="note">A real PR touches several things at once. <code>git diff</code> tells you which bytes moved. <code>gita diff</code> tells you which <em>things</em> moved — as a short list of named operations on named symbols.</p>
       <div class="pair">
         <div class="term">
@@ -233,12 +253,14 @@
         </div>
       </div>
       <p class="note" style="margin-top:14px">Op vocabulary is small and closed: <code>add</code> / <code>remove</code> / <code>rename</code> / <code>signature</code> / <code>body</code> / <code>import +</code> / <code>import -</code> / <code>imports reordered</code> / <code>format</code>. Non-Python files keep their unified diff, just labelled.</p>
-    </section>
+    </details>
 
     <!-- Q2 -->
-    <section class="q">
-      <p class="num">02</p>
-      <h2>"show me this function."</h2>
+    <details class="q">
+      <summary>
+        <span class="num">02</span>
+        <h2>"show me this function."</h2>
+      </summary>
       <p class="note">The thing agents do twenty times an hour.</p>
       <div class="pair">
         <div class="term">
@@ -270,12 +292,14 @@ def fetch_user(uid):
 <span class="dim"># one call. exact bounds. methods work too: gita get UserHandler.put</span></div>
         </div>
       </div>
-    </section>
+    </details>
 
     <!-- Q3 -->
-    <section class="q">
-      <p class="num">03</p>
-      <h2>"show it the way it was 5 commits ago."</h2>
+    <details class="q">
+      <summary>
+        <span class="num">03</span>
+        <h2>"show it the way it was 5 commits ago."</h2>
+      </summary>
       <p class="note">Walks renames automatically — the symbol's old name is in the manifest chain.</p>
       <div class="pair">
         <div class="term">
@@ -307,12 +331,14 @@ def get_user(uid):
 <span class="dim"># one call. working tree untouched. rename followed.</span></div>
         </div>
       </div>
-    </section>
+    </details>
 
     <!-- Q4 -->
-    <section class="q">
-      <p class="num">04</p>
-      <h2>"who calls this function?"</h2>
+    <details class="q">
+      <summary>
+        <span class="num">04</span>
+        <h2>"who calls this function?"</h2>
+      </summary>
       <div class="pair">
         <div class="term">
           <div class="term-bar">
@@ -337,12 +363,14 @@ def get_user(uid):
 <span class="dim"># real call sites only. caller named. ready to plug into a prompt.</span></div>
         </div>
       </div>
-    </section>
+    </details>
 
     <!-- Q5 -->
-    <section class="q">
-      <p class="num">05</p>
-      <h2>"when was the last commit where tests passed?"</h2>
+    <details class="q">
+      <summary>
+        <span class="num">05</span>
+        <h2>"when was the last commit where tests passed?"</h2>
+      </summary>
       <p class="note">An agent that commits ten times an hour needs a real answer to this — not the commit message.</p>
       <div class="pair">
         <div class="term">
@@ -371,12 +399,14 @@ def get_user(uid):
 <span class="dim"># refuses to run on a dirty tree. the proof can't lie about which commit it covers.</span></div>
         </div>
       </div>
-    </section>
+    </details>
 
     <!-- Q6 -->
-    <section class="q">
-      <p class="num">06</p>
-      <h2>"every commit that touched this function."</h2>
+    <details class="q">
+      <summary>
+        <span class="num">06</span>
+        <h2>"every commit that touched this function."</h2>
+      </summary>
       <p class="note">History filtered to one symbol — and annotated with whether each commit was green.</p>
       <div class="pair">
         <div class="term">
@@ -405,7 +435,87 @@ def get_user(uid):
 <span class="dim"># follows renames. ✓/✗/· says which commits passed which check.</span></div>
         </div>
       </div>
-    </section>
+    </details>
+
+    <!-- Q7 -->
+    <details class="q">
+      <summary>
+        <span class="num">07</span>
+        <h2>"which commit broke the tests?"</h2>
+      </summary>
+      <p class="note">Bisect by a real criterion. Reuses cached proofs; only runs the check on commits it hasn't seen. Merges recurse one hop into the merged-in branch so the suspect is the real culprit, not the merge node.</p>
+      <div class="pair">
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">git bisect run</span><span class="tag git">git</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">git bisect start HEAD HEAD~20</span>
+<span class="prompt">$</span> <span class="out">git bisect run python -m pytest -q</span>
+<span class="dim"># re-runs your full test suite at every step from scratch.
+# no memory of which commits you already proved green.</span></div>
+        </div>
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">gita bisect-proven</span><span class="tag gita">gita</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">gita bisect-proven pytest -- python -m pytest -q</span>
+<span class="ok">baseline</span>   <span class="acc">3b22ff</span>  (last green)
+<span class="dim">walking 7 commits, running 2 (5 cached)</span>
+<span class="bad">suspect</span>    <span class="acc">88e1d0</span>  wip
+  signature  fetch_user
+  body       handle_get: +4/-1
+  callers of fetch_user:
+    src/api.py:12  in handle_get
+    src/jobs.py:5  in run_batch
+<span class="dim"># suspect sha + the structural ops + every caller of every touched symbol.</span></div>
+        </div>
+      </div>
+    </details>
+
+    <!-- Q8 -->
+    <details class="q">
+      <summary>
+        <span class="num">08</span>
+        <h2>"re-run my checks after every commit."</h2>
+      </summary>
+      <p class="note">No hand-rolled hooks. <code>gita</code> installs a post-commit hook once, then anything you've <code>enable</code>d gets re-proven on every new HEAD. The hook never fails the commit — a crashing check just shows up later as a <code>✗</code> glyph.</p>
+      <div class="pair">
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">hand-rolled hook</span><span class="tag git">git</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">cat &gt; .git/hooks/post-commit &lt;&lt;'EOF'</span>
+#!/usr/bin/env bash
+python -m pytest -q &gt; /tmp/last.log 2&gt;&amp;1 || true
+echo "$(git rev-parse HEAD) $?" &gt;&gt; .git/passing.log
+EOF
+<span class="prompt">$</span> <span class="out">chmod +x .git/hooks/post-commit</span>
+<span class="dim"># now go invent your own way to query that log later.</span></div>
+        </div>
+        <div class="term">
+          <div class="term-bar">
+            <span class="d"></span><span class="d"></span><span class="d"></span>
+            <span class="title">gita hooks + auto</span><span class="tag gita">gita</span>
+          </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">gita hooks install</span>
+<span class="ok">✓</span> installed post-commit hook
+
+<span class="prompt">$</span> <span class="out">gita auto enable pytest -- python -m pytest -q</span>
+<span class="ok">✓</span> enabled: pytest
+
+<span class="dim"># commit normally from now on. every HEAD gets proved.</span>
+<span class="prompt">$</span> <span class="out">git commit -m "tweak"</span>
+<span class="dim">[post-commit] gita auto: pytest ✓</span>
+
+<span class="prompt">$</span> <span class="out">gita last-proven pytest</span>
+<span class="acc">a91f2c</span>
+<span class="dim"># queryable, structured, no log-parsing.</span></div>
+        </div>
+      </div>
+    </details>
 
     <!-- wins -->
     <div class="wins">
@@ -414,7 +524,7 @@ def get_user(uid):
         <li>a 3-line summary instead of a 60-line diff — fewer tokens, faster triage</li>
         <li>changes named by intent (<code>add</code>, <code>body</code>, <code>signature</code>, <code>import +</code>) — not re-derived from <code>+</code>/<code>-</code> hunks</li>
         <li>no <code>grep + sed</code> as a substitute for "give me this function"</li>
-        <li>real ground truth for "did this commit pass?" — not commit messages</li>
+        <li>real ground truth for "did this commit pass?" — proven, not narrated</li>
       </ul>
     </div>
 
@@ -437,10 +547,11 @@ def get_user(uid):
   }
 }</pre>
       <p class="note" style="margin-top:14px">
-        Eight tools: <code>gita_diff</code> · <code>gita_status</code> ·
+        Nine tools: <code>gita_diff</code> · <code>gita_status</code> ·
         <code>gita_explain</code> · <code>gita_symbol_log</code> ·
         <code>gita_callers</code> · <code>gita_get</code> ·
-        <code>gita_prove</code> · <code>gita_last_proven</code>.
+        <code>gita_prove</code> · <code>gita_last_proven</code> ·
+        <code>gita_bisect_proven</code>.
       </p>
     </div>
 
@@ -459,7 +570,7 @@ def get_user(uid):
     </div>
 
     <footer>
-      <span>v0.2 · 116 tests passing · libcst + a tiny json sidecar</span>
+      <span>v0.3 · 193 tests passing · libcst + a tiny json sidecar</span>
       <span><a href="https://github.com/DevPranjal/gita">github</a></span>
     </footer>
   </div>
