@@ -263,6 +263,112 @@ def glyph(proof: dict[str, Any] | None) -> str:
     return GLYPH_FAIL
 
 
+# ---------------------------------------------------------------------------
+# auto-prove config — drives the post-commit hook (gita.hooks)
+# ---------------------------------------------------------------------------
+
+
+def auto_config_path(root: Path) -> Path:
+    return root / ".git" / "gita" / "auto.json"
+
+
+def read_auto_config(root: Path) -> dict[str, Any]:
+    """Load the auto-prove config. Returns an empty shell if missing/invalid."""
+    p = auto_config_path(root)
+    if not p.exists():
+        return {"checks": {}}
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {"checks": {}}
+    if not isinstance(data, dict) or not isinstance(data.get("checks"), dict):
+        return {"checks": {}}
+    return data
+
+
+def write_auto_config(root: Path, cfg: dict[str, Any]) -> Path:
+    p = auto_config_path(root)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(
+        json.dumps(cfg, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    return p
+
+
+def set_auto(
+    root: Path,
+    name: str,
+    *,
+    cmd: list[str],
+    enabled: bool = True,
+) -> None:
+    """Enable (or re-enable) a check for auto-prove with the given command."""
+    cfg = read_auto_config(root)
+    cfg.setdefault("checks", {})[name] = {
+        "cmd": list(cmd),
+        "enabled": bool(enabled),
+    }
+    write_auto_config(root, cfg)
+
+
+def disable_auto(root: Path, name: str) -> None:
+    """Mark a configured check disabled. No-op if the check isn't configured."""
+    cfg = read_auto_config(root)
+    entry = cfg.get("checks", {}).get(name)
+    if entry is None:
+        return
+    entry["enabled"] = False
+    write_auto_config(root, cfg)
+
+
+def list_auto(root: Path) -> dict[str, dict[str, Any]]:
+    """Public view of configured checks (sorted by name for stable output)."""
+    cfg = read_auto_config(root)
+    return dict(sorted(cfg.get("checks", {}).items()))
+
+
+def auto_prove_for_head(root: Path) -> list[ProofResult]:
+    """Run every enabled auto-prove check against the current HEAD.
+
+    Designed to be invoked from the post-commit hook, so it must never raise
+    on conditions that would block a commit: a dirty tree (rare just after a
+    commit, but possible if files were written between commit and hook),
+    missing config, or a check command that exits non-zero. The hook is a
+    convenience layer; bugs in checks should never break ``git commit``.
+    """
+    if not gx.is_git_dir(root):
+        return []
+    cfg = read_auto_config(root)
+    checks = cfg.get("checks") or {}
+    if not checks:
+        return []
+    # If anything is dirty we can't honestly attach a proof to HEAD; bail.
+    try:
+        if gx.status(root):
+            return []
+    except gx.GitError:
+        return []
+
+    results: list[ProofResult] = []
+    for name in sorted(checks):
+        entry = checks[name]
+        if not entry.get("enabled"):
+            continue
+        cmd = entry.get("cmd")
+        if not cmd:
+            continue
+        try:
+            results.append(record(root, name, cmd=list(cmd)))
+        except DirtyTree:
+            # Concurrent edit landed between status() and record(); skip.
+            continue
+        except Exception:
+            # Never let a misbehaving check break the hook.
+            continue
+    return results
+
+
 __all__ = [
     "DirtyTree",
     "NoProofs",
@@ -276,4 +382,11 @@ __all__ = [
     "GLYPH_OK",
     "GLYPH_FAIL",
     "GLYPH_UNKNOWN",
+    "auto_config_path",
+    "read_auto_config",
+    "write_auto_config",
+    "set_auto",
+    "disable_auto",
+    "list_auto",
+    "auto_prove_for_head",
 ]

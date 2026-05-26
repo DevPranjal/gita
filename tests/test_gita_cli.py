@@ -608,3 +608,91 @@ def test_cli_bisect_proven_exits_nonzero_on_no_baseline(
     err = capsys.readouterr().err
     assert rc == 3
     assert "no baseline" in err.lower()
+
+
+# ---------------------------------------------------------------------------
+# phase 3: hooks + auto-prove
+# ---------------------------------------------------------------------------
+
+
+def test_cli_hooks_install_and_status(git_repo: Path, monkeypatch, capsys) -> None:
+    rc = _run_cli(monkeypatch, git_repo, "hooks", "install")
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "post-commit" in out
+    assert (git_repo / ".git" / "hooks" / "post-commit").exists()
+
+    rc = _run_cli(monkeypatch, git_repo, "hooks", "status")
+    assert rc == 0
+    assert "installed" in capsys.readouterr().out
+
+
+def test_cli_hooks_uninstall(git_repo: Path, monkeypatch, capsys) -> None:
+    _run_cli(monkeypatch, git_repo, "hooks", "install")
+    capsys.readouterr()
+    rc = _run_cli(monkeypatch, git_repo, "hooks", "uninstall")
+    assert rc == 0
+
+    rc = _run_cli(monkeypatch, git_repo, "hooks", "status")
+    assert "not installed" in capsys.readouterr().out
+
+
+def test_cli_auto_enable_and_list_json(git_repo: Path, monkeypatch, capsys) -> None:
+    import sys as _sys
+    rc = _run_cli(
+        monkeypatch, git_repo, "auto", "enable", "pytest", "--", _sys.executable, "-c", "pass"
+    )
+    assert rc == 0
+    capsys.readouterr()
+
+    rc = _run_cli(monkeypatch, git_repo, "auto", "list", "--json")
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert "pytest" in payload["checks"]
+    assert payload["checks"]["pytest"]["enabled"] is True
+    assert payload["checks"]["pytest"]["cmd"][0] == _sys.executable
+
+
+def test_cli_auto_enable_requires_cmd(git_repo: Path, monkeypatch, capsys) -> None:
+    rc = _run_cli(monkeypatch, git_repo, "auto", "enable", "pytest")
+    assert rc == 2
+    assert "auto enable requires" in capsys.readouterr().err
+
+
+def test_cli_auto_disable(git_repo: Path, monkeypatch, capsys) -> None:
+    import sys as _sys
+    _run_cli(monkeypatch, git_repo, "auto", "enable", "x", "--", _sys.executable, "-c", "pass")
+    capsys.readouterr()
+    rc = _run_cli(monkeypatch, git_repo, "auto", "disable", "x")
+    assert rc == 0
+    capsys.readouterr()
+    _run_cli(monkeypatch, git_repo, "auto", "list", "--json")
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["checks"]["x"]["enabled"] is False
+
+
+def test_cli_auto_run_records_proof(git_repo: Path, monkeypatch, capsys) -> None:
+    import sys as _sys
+    from gita import proofs as proofs_mod
+
+    sha = commit_file(git_repo, "a.py", "x = 1\n", "init")
+    _run_cli(
+        monkeypatch, git_repo, "auto", "enable", "always", "--", _sys.executable, "-c", "pass"
+    )
+    capsys.readouterr()
+    rc = _run_cli(monkeypatch, git_repo, "auto", "run")
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "always" in out
+    stored = proofs_mod.read(git_repo, sha)
+    assert stored["checks"]["always"]["ok"] is True
+
+
+def test_cli_auto_prove_hook_internal_swallows_errors(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    # Even with no config and no commits the hidden hook command must exit 0.
+    rc = _run_cli(monkeypatch, git_repo, "_auto-prove-hook")
+    assert rc == 0
+
+

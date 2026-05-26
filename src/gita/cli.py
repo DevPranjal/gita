@@ -24,6 +24,7 @@ from . import proofs as proofs_mod
 from . import store
 from . import who as who_mod
 from . import bisect as bisect_mod
+from . import hooks as hooks_mod
 from .diff import build_for_commit, build_for_refs, build_for_working_tree
 
 
@@ -550,6 +551,94 @@ def _cmd_bisect_proven(args: argparse.Namespace) -> int:
 
 
 # ---------------------------------------------------------------------------
+# hooks / auto-prove
+# ---------------------------------------------------------------------------
+
+
+def _cmd_hooks_install(args: argparse.Namespace) -> int:
+    root = _discover_root()
+    path = hooks_mod.install(root)
+    sys.stdout.write(f"installed post-commit hook: {path}\n")
+    return 0
+
+
+def _cmd_hooks_uninstall(args: argparse.Namespace) -> int:
+    root = _discover_root()
+    hooks_mod.uninstall(root)
+    sys.stdout.write("uninstalled gita post-commit hook\n")
+    return 0
+
+
+def _cmd_hooks_status(args: argparse.Namespace) -> int:
+    root = _discover_root()
+    state = "installed" if hooks_mod.is_installed(root) else "not installed"
+    sys.stdout.write(f"post-commit: {state}\n")
+    return 0
+
+
+def _cmd_auto_enable(args: argparse.Namespace) -> int:
+    root = _discover_root()
+    cmd = list(args.cmd or [])
+    if cmd and cmd[0] == "--":
+        cmd = cmd[1:]
+    if not cmd:
+        sys.stderr.write("gita: auto enable requires '-- <cmd>'\n")
+        return 2
+    proofs_mod.set_auto(root, args.name, cmd=cmd)
+    sys.stdout.write(f"enabled auto-prove for {args.name!r}\n")
+    return 0
+
+
+def _cmd_auto_disable(args: argparse.Namespace) -> int:
+    root = _discover_root()
+    proofs_mod.disable_auto(root, args.name)
+    sys.stdout.write(f"disabled auto-prove for {args.name!r}\n")
+    return 0
+
+
+def _cmd_auto_list(args: argparse.Namespace) -> int:
+    root = _discover_root()
+    checks = proofs_mod.list_auto(root)
+    if args.json:
+        sys.stdout.write(
+            json.dumps({"checks": checks}, indent=2, sort_keys=True, ensure_ascii=False)
+            + "\n"
+        )
+        return 0
+    if not checks:
+        sys.stdout.write("(no auto-prove checks configured)\n")
+        return 0
+    for name, entry in checks.items():
+        state = "on " if entry.get("enabled") else "off"
+        cmd = " ".join(entry.get("cmd") or [])
+        sys.stdout.write(f"  [{state}] {name}: {cmd}\n")
+    return 0
+
+
+def _cmd_auto_run(args: argparse.Namespace) -> int:
+    root = _discover_root()
+    results = proofs_mod.auto_prove_for_head(root)
+    for r in results:
+        glyph = proofs_mod.GLYPH_OK if r.ok else proofs_mod.GLYPH_FAIL
+        sys.stdout.write(f"  {glyph} {r.name} (exit={r.exit_code}, {r.duration_ms}ms)\n")
+    return 0
+
+
+# Hidden — invoked by the post-commit hook. Always exits 0 so the hook can't
+# break the commit; user-visible failures show up in 'gita auto list'.
+def _cmd_auto_prove_hook(args: argparse.Namespace) -> int:
+    try:
+        root = gx.discover_root(Path.cwd())
+    except FileNotFoundError:
+        return 0
+    try:
+        proofs_mod.auto_prove_for_head(root)
+    except Exception:
+        pass
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # entrypoint
 # ---------------------------------------------------------------------------
 
@@ -688,6 +777,38 @@ def main(argv: list[str] | None = None) -> int:
         help="Optional command after '--' to fill missing proofs.",
     )
     p_bisect.set_defaults(func=_cmd_bisect_proven)
+
+    p_hooks = sub.add_parser("hooks", help="Manage the gita post-commit hook.")
+    hooks_sub = p_hooks.add_subparsers(dest="hooks_cmd", required=True)
+    hi = hooks_sub.add_parser("install", help="Install the auto-prove post-commit hook.")
+    hi.set_defaults(func=_cmd_hooks_install)
+    hu = hooks_sub.add_parser("uninstall", help="Remove the gita post-commit hook block.")
+    hu.set_defaults(func=_cmd_hooks_uninstall)
+    hs = hooks_sub.add_parser("status", help="Show whether the hook is installed.")
+    hs.set_defaults(func=_cmd_hooks_status)
+
+    p_auto = sub.add_parser(
+        "auto", help="Configure checks the post-commit hook re-runs on every HEAD."
+    )
+    auto_sub = p_auto.add_subparsers(dest="auto_cmd", required=True)
+    a_en = auto_sub.add_parser("enable", help="Enable a check: 'gita auto enable NAME -- cmd ...'")
+    a_en.add_argument("name")
+    a_en.add_argument("cmd", nargs=argparse.REMAINDER)
+    a_en.set_defaults(func=_cmd_auto_enable)
+    a_dis = auto_sub.add_parser("disable", help="Disable a configured check.")
+    a_dis.add_argument("name")
+    a_dis.set_defaults(func=_cmd_auto_disable)
+    a_ls = auto_sub.add_parser("list", help="List configured auto-prove checks.")
+    a_ls.add_argument("--json", action="store_true")
+    a_ls.set_defaults(func=_cmd_auto_list)
+    a_run = auto_sub.add_parser("run", help="Run all enabled checks against HEAD now.")
+    a_run.set_defaults(func=_cmd_auto_run)
+
+    p_hook_internal = sub.add_parser(
+        "_auto-prove-hook",
+        help=argparse.SUPPRESS,
+    )
+    p_hook_internal.set_defaults(func=_cmd_auto_prove_hook)
 
     p_mcp = sub.add_parser("mcp", help="Run as an MCP server over stdio.")
     p_mcp.set_defaults(func=_cmd_mcp)
