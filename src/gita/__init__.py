@@ -15,4 +15,4 @@ exposes it through a small set of read commands an agent can call:
                          all of the above as tools
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

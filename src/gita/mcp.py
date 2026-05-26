@@ -32,12 +32,15 @@ from typing import Any, Callable
 from . import callers as callers_mod
 from . import git as gx
 from . import history as history_mod
+from . import lookup as lookup_mod
+from . import proofs as proofs_mod
+from .cli import _filter_manifest
 from .diff import build_for_refs, build_for_working_tree
 
 
 PROTOCOL_VERSION = "2024-11-05"
 SERVER_NAME = "gita"
-SERVER_VERSION = "0.1.0"
+SERVER_VERSION = "0.2.0"
 
 
 # ---------------------------------------------------------------------------
@@ -55,13 +58,18 @@ def _tool_diff(args: dict[str, Any]) -> dict[str, Any]:
     staged = bool(args.get("staged"))
     from_ref = args.get("from_ref")
     to_ref = args.get("to_ref")
+    symbol = args.get("symbol")
     if staged:
-        return build_for_working_tree(root, staged=True)
-    if from_ref is None and to_ref is None:
-        return build_for_working_tree(root, staged=False)
-    if to_ref is None:
-        return build_for_refs(root, from_ref, "HEAD")
-    return build_for_refs(root, from_ref, to_ref)
+        manifest = build_for_working_tree(root, staged=True)
+    elif from_ref is None and to_ref is None:
+        manifest = build_for_working_tree(root, staged=False)
+    elif to_ref is None:
+        manifest = build_for_refs(root, from_ref, "HEAD")
+    else:
+        manifest = build_for_refs(root, from_ref, to_ref)
+    if symbol:
+        manifest = _filter_manifest(manifest, only=None, exclude=None, symbol=symbol)
+    return manifest
 
 
 def _tool_status(args: dict[str, Any]) -> dict[str, Any]:
@@ -116,6 +124,47 @@ def _tool_callers(args: dict[str, Any]) -> dict[str, Any]:
     return {"name": name, "ref": ref, "callers": hits}
 
 
+def _tool_get(args: dict[str, Any]) -> dict[str, Any]:
+    root = _resolve_root(args)
+    name = args["name"]
+    rev = args.get("rev") or "HEAD"
+    sym = lookup_mod.get(root, name, rev=rev)
+    return {
+        "name": sym.name,
+        "kind": sym.kind,
+        "path": sym.path,
+        "line_start": sym.line_start,
+        "line_end": sym.line_end,
+        "signature": sym.signature,
+        "body": sym.body,
+        "rev": sym.rev,
+        "requested_as": sym.requested_as,
+        "parent": sym.parent,
+    }
+
+
+def _tool_prove(args: dict[str, Any]) -> dict[str, Any]:
+    root = _resolve_root(args)
+    name = args["name"]
+    cmd = list(args["cmd"])
+    result = proofs_mod.record(root, name, cmd=cmd)
+    return {
+        "name": result.name,
+        "ok": result.ok,
+        "exit_code": result.exit_code,
+        "duration_ms": result.duration_ms,
+    }
+
+
+def _tool_last_proven(args: dict[str, Any]) -> dict[str, Any]:
+    root = _resolve_root(args)
+    name = args.get("name")
+    symbol = args.get("symbol")
+    ref = args.get("ref") or "HEAD"
+    sha = proofs_mod.last_proven(root, name, symbol=symbol, ref=ref)
+    return {"sha": sha, "name": name, "symbol": symbol, "ref": ref}
+
+
 TOOLS: dict[str, tuple[Callable[[dict[str, Any]], Any], dict[str, Any]]] = {
     "gita_diff": (
         _tool_diff,
@@ -126,6 +175,7 @@ TOOLS: dict[str, tuple[Callable[[dict[str, Any]], Any], dict[str, Any]]] = {
                 "from_ref": {"type": ["string", "null"], "description": "Base ref (commit/branch)."},
                 "to_ref": {"type": ["string", "null"], "description": "Target ref (default: working tree)."},
                 "staged": {"type": "boolean", "description": "If true, diff HEAD vs index."},
+                "symbol": {"type": ["string", "null"], "description": "Keep only ops mentioning NAME."},
             },
         },
     ),
@@ -173,6 +223,46 @@ TOOLS: dict[str, tuple[Callable[[dict[str, Any]], Any], dict[str, Any]]] = {
             },
         },
     ),
+    "gita_get": (
+        _tool_get,
+        {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+                "root": {"type": "string"},
+                "name": {"type": "string", "description": "Symbol name."},
+                "rev": {"type": ["string", "null"], "description": "Default HEAD; uses one-hop rename walk on miss."},
+            },
+        },
+    ),
+    "gita_prove": (
+        _tool_prove,
+        {
+            "type": "object",
+            "required": ["name", "cmd"],
+            "properties": {
+                "root": {"type": "string"},
+                "name": {"type": "string", "description": "Check name, e.g. 'pytest'."},
+                "cmd": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Command to run; recorded against HEAD.",
+                },
+            },
+        },
+    ),
+    "gita_last_proven": (
+        _tool_last_proven,
+        {
+            "type": "object",
+            "properties": {
+                "root": {"type": "string"},
+                "name": {"type": ["string", "null"], "description": "Optional check name; default = all recorded checks must pass."},
+                "symbol": {"type": ["string", "null"], "description": "Additionally require symbol to exist at the commit."},
+                "ref": {"type": ["string", "null"], "description": "Default HEAD."},
+            },
+        },
+    ),
 }
 
 
@@ -182,6 +272,9 @@ TOOL_DESCRIPTIONS = {
     "gita_explain": "Manifest stored with a single commit. Compact summary of what the commit did.",
     "gita_symbol_log": "Every commit whose manifest touches a named symbol (rename-aware).",
     "gita_callers": "Call sites of a symbol across the whole tree at a given ref (default HEAD).",
+    "gita_get": "Source of a named symbol at a rev. One-hop backward rename walk when missing at rev.",
+    "gita_prove": "Run a command and record the result as a proof on HEAD. Refuses dirty trees.",
+    "gita_last_proven": "Newest commit reachable from ref whose recorded checks satisfy the filter.",
 }
 
 
@@ -243,6 +336,27 @@ def handle_request(req: dict[str, Any]) -> dict[str, Any] | None:
             if is_notification:
                 return None
             return _make_response(req_id, error={"code": -32601, "message": f"unknown method: {method}"})
+    except lookup_mod.Ambiguous as exc:
+        if is_notification:
+            return None
+        return _make_response(
+            req_id,
+            error={
+                "code": -32602,
+                "message": f"ambiguous symbol: {exc.name!r}",
+                "data": {"candidates": list(exc.candidates)},
+            },
+        )
+    except proofs_mod.NoProofs as exc:
+        if is_notification:
+            return None
+        return _make_response(
+            req_id,
+            error={
+                "code": -32000,
+                "message": f"no proofs recorded; try 'gita prove <check> -- <cmd>' ({exc})",
+            },
+        )
     except Exception as exc:
         if is_notification:
             return None

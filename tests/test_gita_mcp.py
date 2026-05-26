@@ -23,7 +23,8 @@ def test_tools_list_exposes_all_tools() -> None:
     resp = mcp.handle_request({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
     names = {t["name"] for t in resp["result"]["tools"]}
     assert names == {
-        "gita_diff", "gita_status", "gita_explain", "gita_symbol_log", "gita_callers"
+        "gita_diff", "gita_status", "gita_explain", "gita_symbol_log",
+        "gita_callers", "gita_get", "gita_prove", "gita_last_proven",
     }
     for tool in resp["result"]["tools"]:
         assert tool["description"]
@@ -140,3 +141,120 @@ def test_tool_call_error_propagated(git_repo: Path) -> None:
 def test_ping_returns_empty_result() -> None:
     resp = mcp.handle_request({"jsonrpc": "2.0", "id": 11, "method": "ping"})
     assert resp["result"] == {}
+
+
+# ---------------------------------------------------------------------------
+# phase 4 — get / prove / last-proven + diff symbol filter
+# ---------------------------------------------------------------------------
+
+
+def test_mcp_gita_get_returns_symbol(git_repo: Path) -> None:
+    commit_file(git_repo, "u.py", "def foo():\n    return 1\n", "init")
+    resp = mcp.handle_request({
+        "jsonrpc": "2.0", "id": 20, "method": "tools/call",
+        "params": {
+            "name": "gita_get",
+            "arguments": {"root": str(git_repo), "name": "foo"},
+        },
+    })
+    assert resp["result"]["isError"] is False
+    payload = json.loads(resp["result"]["content"][0]["text"])
+    assert payload["name"] == "foo"
+    assert payload["kind"] == "function"
+    assert "def foo" in payload["body"]
+
+
+def test_mcp_gita_get_ambiguous_returns_jsonrpc_error(git_repo: Path) -> None:
+    commit_file(
+        git_repo,
+        "u.py",
+        "def foo():\n    return 1\n\nclass C:\n    def foo(self):\n        return 2\n",
+        "init",
+    )
+    resp = mcp.handle_request({
+        "jsonrpc": "2.0", "id": 21, "method": "tools/call",
+        "params": {
+            "name": "gita_get",
+            "arguments": {"root": str(git_repo), "name": "foo"},
+        },
+    })
+    assert "error" in resp
+    assert resp["error"]["code"] == -32602
+    assert resp["error"]["data"]["candidates"]
+
+
+def test_mcp_gita_get_not_found_returns_jsonrpc_error(git_repo: Path) -> None:
+    commit_file(git_repo, "u.py", "x = 1\n", "init")
+    resp = mcp.handle_request({
+        "jsonrpc": "2.0", "id": 22, "method": "tools/call",
+        "params": {
+            "name": "gita_get",
+            "arguments": {"root": str(git_repo), "name": "nope"},
+        },
+    })
+    assert "error" in resp
+    assert resp["error"]["code"] == -32000
+
+
+def test_mcp_gita_prove_records_and_returns_result(git_repo: Path) -> None:
+    import sys as _sys
+    sha = commit_file(git_repo, "u.py", "x = 1\n", "init")
+    resp = mcp.handle_request({
+        "jsonrpc": "2.0", "id": 23, "method": "tools/call",
+        "params": {
+            "name": "gita_prove",
+            "arguments": {
+                "root": str(git_repo),
+                "name": "pytest",
+                "cmd": [_sys.executable, "-c", "pass"],
+            },
+        },
+    })
+    assert resp["result"]["isError"] is False
+    payload = json.loads(resp["result"]["content"][0]["text"])
+    assert payload["ok"] is True
+    assert payload["name"] == "pytest"
+    assert (git_repo / ".git" / "gita" / "proofs" / f"{sha}.json").exists()
+
+
+def test_mcp_gita_last_proven_no_proofs_returns_error(git_repo: Path) -> None:
+    commit_file(git_repo, "u.py", "x = 1\n", "init")
+    resp = mcp.handle_request({
+        "jsonrpc": "2.0", "id": 24, "method": "tools/call",
+        "params": {
+            "name": "gita_last_proven",
+            "arguments": {"root": str(git_repo)},
+        },
+    })
+    assert "error" in resp
+    assert resp["error"]["code"] == -32000
+    assert "prove" in resp["error"]["message"].lower()
+
+
+def test_mcp_gita_diff_supports_symbol_arg(git_repo: Path) -> None:
+    s1 = commit_file(
+        git_repo, "m.py", "def foo():\n    return 1\n\ndef bar():\n    return 2\n", "init"
+    )
+    s2 = commit_file(
+        git_repo, "m.py", "def foo():\n    return 9\n\ndef bar():\n    return 8\n", "edit both"
+    )
+    resp = mcp.handle_request({
+        "jsonrpc": "2.0", "id": 25, "method": "tools/call",
+        "params": {
+            "name": "gita_diff",
+            "arguments": {
+                "root": str(git_repo), "from_ref": s1, "to_ref": s2,
+                "symbol": "foo",
+            },
+        },
+    })
+    payload = json.loads(resp["result"]["content"][0]["text"])
+    ops = [op for fe in payload["files"] for op in fe.get("ops", [])]
+    names = {op.get("name") for op in ops}
+    assert "foo" in names
+    assert "bar" not in names
+
+
+def test_mcp_server_version_is_0_2_0() -> None:
+    resp = mcp.handle_request({"jsonrpc": "2.0", "id": 26, "method": "initialize"})
+    assert resp["result"]["serverInfo"]["version"] == "0.2.0"
