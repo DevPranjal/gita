@@ -33,8 +33,14 @@ _OP_CATEGORIES = {
 }
 
 
-def _filter_manifest(manifest: dict, *, only: list[str] | None, exclude: list[str] | None) -> dict:
-    if not only and not exclude:
+def _filter_manifest(
+    manifest: dict,
+    *,
+    only: list[str] | None,
+    exclude: list[str] | None,
+    symbol: str | None = None,
+) -> dict:
+    if not only and not exclude and not symbol:
         return manifest
     allowed = set().union(*(_OP_CATEGORIES[c] for c in (only or _OP_CATEGORIES)))
     if exclude:
@@ -42,10 +48,26 @@ def _filter_manifest(manifest: dict, *, only: list[str] | None, exclude: list[st
             allowed -= _OP_CATEGORIES[c]
     new_files = []
     for fe in manifest["files"]:
-        kept = [op for op in fe["ops"] if op["op"] in allowed]
-        if kept or fe["status"] != "modified":
-            new_files.append({**fe, "ops": kept})
+        if symbol is not None and fe.get("parseable") is False:
+            # Symbol filter is python-symbol scoped; drop textual entries.
+            continue
+        kept = [
+            op for op in fe.get("ops", [])
+            if op["op"] in allowed and (symbol is None or _op_mentions(op, symbol))
+        ]
+        if symbol is not None:
+            if not kept:
+                continue
+        elif not kept and fe["status"] == "modified":
+            continue
+        new_files.append({**fe, "ops": kept})
     return {**manifest, "files": new_files}
+
+
+def _op_mentions(op: dict, symbol: str) -> bool:
+    if op["op"] == "rename_symbol":
+        return op.get("from") == symbol or op.get("to") == symbol
+    return op.get("name") == symbol
 
 
 def _discover_root() -> Path:
@@ -89,7 +111,9 @@ def _cmd_diff(args: argparse.Namespace) -> int:
         manifest = build_for_refs(root, args.from_ref, "HEAD")
     else:
         manifest = build_for_refs(root, args.from_ref, args.to_ref)
-    manifest = _filter_manifest(manifest, only=args.only, exclude=args.exclude)
+    manifest = _filter_manifest(
+        manifest, only=args.only, exclude=args.exclude, symbol=args.symbol
+    )
     _emit(manifest, as_json=args.json)
     return 0
 
@@ -251,6 +275,7 @@ def main(argv: list[str] | None = None) -> int:
     p_diff.add_argument("--staged", action="store_true", help="HEAD vs index.")
     p_diff.add_argument("--only", action="append", choices=list(_OP_CATEGORIES))
     p_diff.add_argument("--exclude", action="append", choices=list(_OP_CATEGORIES))
+    p_diff.add_argument("--symbol", default=None, help="Keep only ops mentioning NAME.")
     p_diff.add_argument("--json", action="store_true")
     p_diff.set_defaults(func=_cmd_diff)
 

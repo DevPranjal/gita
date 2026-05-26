@@ -136,3 +136,34 @@ def test_diff_outside_repo_errors(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     with pytest.raises(SystemExit):
         main(["diff"])
+
+
+def test_cli_diff_symbol_flag(git_repo: Path, monkeypatch, capsys) -> None:
+    s1 = commit_file(
+        git_repo,
+        "m.py",
+        "def fetch_user():\n    return 1\n\ndef other():\n    return 2\n",
+        "init",
+    )
+    s2 = commit_file(
+        git_repo,
+        "m.py",
+        "def fetch_user():\n    return 11\n\ndef other():\n    return 22\n",
+        "edit both",
+    )
+    rc = _run_cli(monkeypatch, git_repo, "diff", s1, s2, "--symbol", "fetch_user", "--json")
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    names = {op.get("name") for fe in payload["files"] for op in fe["ops"]}
+    assert names == {"fetch_user"}
+
+
+def test_cli_diff_nonpy_rendered_as_textual(git_repo: Path, monkeypatch, capsys) -> None:
+    s1 = commit_file(git_repo, "config.yaml", "port: 80\n", "init")
+    s2 = commit_file(git_repo, "config.yaml", "port: 8080\n", "edit")
+    rc = _run_cli(monkeypatch, git_repo, "diff", s1, s2)
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "config.yaml" in out
+    assert "non-python" in out
+

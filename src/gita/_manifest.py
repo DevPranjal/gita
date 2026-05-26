@@ -11,14 +11,20 @@ patch on lines, so an agent can:
 Schema (versioned via the ``schema`` field on the root)::
 
     {
-      "kind": "manifest", "schema": 1,
+      "kind": "manifest", "schema": 2,
       "from": "<commit_sha or null>",   # null = empty tree / first commit
       "to":   "<commit_sha or null>",   # null = working tree
       "files": [
         {
           "path": "<repo-relative path>",
           "status": "added" | "modified" | "deleted",
-          "ops": [<Op>, ...]
+          "ops": [<Op>, ...]                   # parseable .py files
+        },
+        {
+          "path": "config.yaml",
+          "status": "modified",
+          "parseable": false,                  # non-Python file (v0.2)
+          "textual_diff": "<unified diff>"
         },
         ...
       ],
@@ -365,12 +371,19 @@ def build_manifest(
     from_sha: str | None,
     to_sha: str | None,
 ) -> dict[str, Any]:
-    """Assemble a manifest from per-file entries + compute the summary."""
-    file_list = [f for f in files if f["ops"] or f["status"] != "unchanged"]
+    """Assemble a manifest from per-file entries + compute the summary.
+
+    Tolerates both parseable entries (have an ``ops`` list) and
+    ``parseable: false`` entries (have a ``textual_diff`` instead).
+    """
+    file_list = [
+        f for f in files
+        if f.get("ops") or f.get("status") != "unchanged" or f.get("parseable") is False
+    ]
     counts = {"logic": 0, "signature": 0, "cosmetic": 0}
     symbols_touched: set[str] = set()
     for fe in file_list:
-        for op in fe["ops"]:
+        for op in fe.get("ops", []):
             cat = _CATEGORY.get(op["op"], "other")
             if cat in counts:
                 counts[cat] += 1
@@ -381,7 +394,7 @@ def build_manifest(
                 symbols_touched.add(op["to"])
     return {
         "kind": "manifest",
-        "schema": 1,
+        "schema": 2,
         "from": from_sha,
         "to": to_sha,
         "files": file_list,
@@ -399,8 +412,15 @@ def build_manifest(
 # ---------------------------------------------------------------------------
 
 
+_NONPY_DIFF_HEAD_LINES = 20
+
+
 def render_manifest(manifest: dict[str, Any]) -> str:
-    """Compact human (and agent) readable form. ~200 tokens for typical PRs."""
+    """Compact human (and agent) readable form. ~200 tokens for typical PRs.
+
+    Non-Python files (``parseable: false``) are rendered with a short head
+    of their textual diff (~20 lines); the JSON form keeps the full diff.
+    """
     lines: list[str] = []
     s = manifest["summary"]
     lines.append(
@@ -408,8 +428,19 @@ def render_manifest(manifest: dict[str, Any]) -> str:
         f"{s['cosmetic_ops']} cosmetic op(s), {len(s['symbols_touched'])} symbol(s)"
     )
     for fe in manifest["files"]:
+        if fe.get("parseable") is False:
+            lines.append(f"  {fe['status']:<9} {fe['path']}  (non-python, textual diff)")
+            diff_lines = fe.get("textual_diff", "").splitlines()
+            head = diff_lines[:_NONPY_DIFF_HEAD_LINES]
+            for dl in head:
+                lines.append("    " + dl)
+            if len(diff_lines) > _NONPY_DIFF_HEAD_LINES:
+                lines.append(
+                    f"    \u2026 ({len(diff_lines) - _NONPY_DIFF_HEAD_LINES} more diff line(s))"
+                )
+            continue
         lines.append(f"  {fe['status']:<9} {fe['path']}")
-        for op in fe["ops"]:
+        for op in fe.get("ops", []):
             lines.append("    " + _render_op(op))
     return "\n".join(lines) + "\n"
 
