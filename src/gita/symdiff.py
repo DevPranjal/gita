@@ -21,18 +21,21 @@ from __future__ import annotations
 import difflib
 from typing import Any
 
-# Reuse the heavy lifting from gita._manifest. We only override the
-# function-level routing so we can swap in similarity-based pairing.
-from gita._manifest import (
-    _Symbol,           # type: ignore[attr-defined]
-    _ModuleView,       # type: ignore[attr-defined]
-    _parse_view,       # type: ignore[attr-defined]
-    _strip_name,       # type: ignore[attr-defined]
-    _render,           # type: ignore[attr-defined]
-    _diff_imports,     # type: ignore[attr-defined]
-    _diff_symbol_pair, # type: ignore[attr-defined]
-    _count_name_uses,  # type: ignore[attr-defined]
+# Parsing primitives come from gita.parse (the one home for symbol parsing).
+# The diff/op machinery still lives in gita._manifest — we only override the
+# function-level routing to swap in similarity-based rename pairing.
+from gita.parse import (
+    Symbol as _Symbol,
+    ModuleView as _ModuleView,
+    parse_module,
+    _strip_name,
+    _render,
     symbol_id,
+)
+from gita._manifest import (
+    _diff_imports,
+    _diff_symbol_pair,
+    _count_name_uses,
 )
 
 
@@ -72,10 +75,7 @@ def diff_sources(
 
 
 def _safe_view(source: str) -> _ModuleView | None:
-    try:
-        return _parse_view(source)
-    except Exception:
-        return None
+    return parse_module(source)
 
 
 def _ops_added(view: _ModuleView) -> list[dict[str, Any]]:

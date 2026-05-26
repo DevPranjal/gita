@@ -52,144 +52,34 @@ Categories used in the summary:
 
 from __future__ import annotations
 
-import hashlib
 from dataclasses import dataclass, field
 from typing import Any, Iterable
 
-import libcst as cst
-
-
-# ---------------------------------------------------------------------------
-# stable-ish symbol IDs
-# ---------------------------------------------------------------------------
-
-
-def symbol_id(kind: str, name: str) -> str:
-    """Deterministic ID for a top-level symbol.
-
-    v0.1 keys on (kind, name) only — good enough to be a useful handle in
-    the manifest. A real GumTree-style matcher that survives rename is a
-    v0.2 concern; for now the *diff* phase detects renames explicitly and
-    emits a `rename_symbol` op that carries both names.
-    """
-    return hashlib.sha256(f"{kind}:{name}".encode("utf-8")).hexdigest()[:16]
-
-
-# ---------------------------------------------------------------------------
-# parsed view of a module (just the bits we need for diffing)
-# ---------------------------------------------------------------------------
-
-
-@dataclass(frozen=True)
-class _Symbol:
-    kind: str           # "function" | "class"
-    name: str
-    signature: str      # rendered "def name(args) -> ret" line, sans body
-    body_hash: str      # hash of body text with own name stripped
-    body_lines: int
-    node: cst.CSTNode   # original node for downstream inspection
-
-
-@dataclass(frozen=True)
-class _Imports:
-    # We model imports as (module, sorted-tuple-of-names) so reorder is a no-op
-    # and add/remove fall out of set difference.
-    items: tuple[tuple[str, tuple[str, ...]], ...]
-    # Source order, to detect pure reorders.
-    order: tuple[tuple[str, tuple[str, ...]], ...]
-
-
-@dataclass(frozen=True)
-class _ModuleView:
-    symbols: dict[str, _Symbol]  # keyed by name
-    imports: _Imports
-    raw_code: str
-
-
-def _render(node: cst.CSTNode) -> str:
-    return cst.Module(body=[]).code_for_node(node)
-
-
-def _strip_name(text: str, name: str) -> str:
-    # Replace just the def/class name token to neutralize it for body-hash.
-    # Crude but adequate — only used to pair rename candidates.
-    return text.replace(f" {name}(", " __SYM__(").replace(f" {name}:", " __SYM__:")
-
-
-def _hash(s: str) -> str:
-    return hashlib.sha256(s.encode("utf-8")).hexdigest()[:16]
-
-
-def _body_text(node: cst.CSTNode) -> str:
-    # We render the whole def then strip leading whitespace and the def line.
-    rendered = _render(node)
-    return rendered
+# Parsing primitives live in gita.parse so symdiff and lookup can share them.
+# Kept under the original names here so the diff/op functions below read the
+# same way they always have.
+from .parse import (
+    Symbol as _Symbol,
+    Imports as _Imports,
+    ModuleView as _ModuleView,
+    parse_module as _parse_module,
+    symbol_id,
+    _render,
+    _strip_name,
+)
 
 
 def _parse_view(source: str) -> _ModuleView:
-    module = cst.parse_module(source)
-    symbols: dict[str, _Symbol] = {}
-    import_items: list[tuple[str, tuple[str, ...]]] = []
+    """v0 raise-on-error wrapper around :func:`gita.parse.parse_module`.
 
-    for stmt in module.body:
-        if isinstance(stmt, cst.FunctionDef):
-            name = stmt.name.value
-            sig = _render_signature(stmt)
-            body_text = _strip_name(_render(stmt.body), name)
-            symbols[name] = _Symbol(
-                kind="function",
-                name=name,
-                signature=sig,
-                body_hash=_hash(body_text),
-                body_lines=body_text.count("\n"),
-                node=stmt,
-            )
-        elif isinstance(stmt, cst.ClassDef):
-            name = stmt.name.value
-            sig = f"class {name}"
-            body_text = _strip_name(_render(stmt.body), name)
-            symbols[name] = _Symbol(
-                kind="class",
-                name=name,
-                signature=sig,
-                body_hash=_hash(body_text),
-                body_lines=body_text.count("\n"),
-                node=stmt,
-            )
-        elif isinstance(stmt, cst.SimpleStatementLine):
-            for small in stmt.body:
-                if isinstance(small, cst.Import):
-                    for alias in small.names:
-                        mod = _dotted(alias.name)
-                        import_items.append((mod, ()))
-                elif isinstance(small, cst.ImportFrom):
-                    mod = _dotted(small.module) if small.module else ""
-                    if isinstance(small.names, cst.ImportStar):
-                        names: tuple[str, ...] = ("*",)
-                    else:
-                        names = tuple(sorted(a.name.value for a in small.names))
-                    import_items.append((mod, names))
-
-    imports = _Imports(
-        items=tuple(sorted(import_items)),
-        order=tuple(import_items),
-    )
-    return _ModuleView(symbols=symbols, imports=imports, raw_code=source)
-
-
-def _dotted(name_node: cst.CSTNode | None) -> str:
-    if name_node is None:
-        return ""
-    return _render(name_node).strip()
-
-
-def _render_signature(fn: cst.FunctionDef) -> str:
-    params = _render(fn.params).strip()
-    ret = ""
-    if fn.returns is not None:
-        ret = " -> " + _render(fn.returns.annotation).strip()
-    prefix = "async def " if fn.asynchronous is not None else "def "
-    return f"{prefix}{fn.name.value}({params}){ret}"
+    The diff machinery below assumes parseable input; callers that need a
+    fall-back use :func:`gita.parse.parse_module` directly (it returns
+    ``None`` on parse error).
+    """
+    view = _parse_module(source)
+    if view is None:
+        raise ValueError("unparseable source")
+    return view
 
 
 # ---------------------------------------------------------------------------
