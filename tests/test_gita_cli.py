@@ -334,3 +334,139 @@ def test_cli_explain_shows_proof_section(
 
 
 
+
+
+# ---------------------------------------------------------------------------
+# phase 0 (v0.3) — who, commit-note, last-proven --json
+# ---------------------------------------------------------------------------
+
+
+
+def test_cli_who_prints_author(git_repo: Path, monkeypatch, capsys) -> None:
+    commit_file(git_repo, "u.py", "x = 1\n", "init")
+    rc = _run_cli(monkeypatch, git_repo, "who")
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "Gita Tests" in out
+    assert "gita-tests@example.invalid" in out
+    # Absent note → no agent line.
+    assert "agent:" not in out
+
+
+def test_cli_who_with_note_shows_agent_line(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    from gita import notes
+    sha = commit_file(git_repo, "u.py", "x = 1\n", "init")
+    notes.write(git_repo, sha, {"model": "claude-3.7", "session": "abc"})
+    rc = _run_cli(monkeypatch, git_repo, "who")
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "agent:" in out
+    assert "claude-3.7" in out
+    assert "abc" in out
+
+
+def test_cli_who_json(git_repo: Path, monkeypatch, capsys) -> None:
+    from gita import notes
+    sha = commit_file(git_repo, "u.py", "x = 1\n", "init")
+    notes.write(git_repo, sha, {"model": "claude"})
+    rc = _run_cli(monkeypatch, git_repo, "who", "--json")
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["commit"] == sha
+    assert payload["author_name"] == "Gita Tests"
+    assert payload["agent"] == {"model": "claude"}
+
+
+def test_cli_who_json_omits_agent_when_absent(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    commit_file(git_repo, "u.py", "x = 1\n", "init")
+    rc = _run_cli(monkeypatch, git_repo, "who", "--json")
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert "agent" not in payload
+
+
+def test_cli_who_at_rev(git_repo: Path, monkeypatch, capsys) -> None:
+    s1 = commit_file(git_repo, "u.py", "x = 1\n", "init")
+    commit_file(git_repo, "u.py", "x = 2\n", "bump")
+    rc = _run_cli(monkeypatch, git_repo, "who", s1, "--json")
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["commit"] == s1
+
+
+def test_cli_commit_note_writes_note(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    from gita import notes
+    sha = commit_file(git_repo, "u.py", "x = 1\n", "init")
+    rc = _run_cli(
+        monkeypatch, git_repo,
+        "commit-note", "--set", "model=claude", "--set", "session=abc",
+    )
+    assert rc == 0
+    assert notes.read(git_repo, sha) == {"model": "claude", "session": "abc"}
+
+
+def test_cli_commit_note_refuses_dirty_tree(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    commit_file(git_repo, "u.py", "x = 1\n", "init")
+    (git_repo / "u.py").write_text("x = 2\n", encoding="utf-8")
+    rc = _run_cli(
+        monkeypatch, git_repo,
+        "commit-note", "--set", "model=claude",
+    )
+    assert rc != 0
+    err = capsys.readouterr().err
+    assert "dirty" in err.lower() or "uncommitted" in err.lower()
+
+
+def test_cli_commit_note_requires_at_least_one_set(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    commit_file(git_repo, "u.py", "x = 1\n", "init")
+    rc = _run_cli(monkeypatch, git_repo, "commit-note")
+    assert rc != 0
+
+
+def test_cli_commit_note_rejects_malformed_pair(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    commit_file(git_repo, "u.py", "x = 1\n", "init")
+    rc = _run_cli(
+        monkeypatch, git_repo,
+        "commit-note", "--set", "no_equals_sign",
+    )
+    assert rc != 0
+    err = capsys.readouterr().err
+    assert "key=value" in err.lower() or "key=value" in err
+
+
+def test_cli_last_proven_json_shape(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    sha = commit_file(git_repo, "u.py", "x = 1\n", "init")
+    _write_proof_file(git_repo, sha, {"pytest": _ok_check()})
+    rc = _run_cli(monkeypatch, git_repo, "last-proven", "pytest", "--json")
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["commit"] == sha
+    assert payload["check"] == "pytest"
+    assert payload["ok"] is True
+    assert "ran_at" in payload
+
+
+def test_cli_last_proven_json_no_check_name(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    sha = commit_file(git_repo, "u.py", "x = 1\n", "init")
+    _write_proof_file(git_repo, sha, {"pytest": _ok_check()})
+    rc = _run_cli(monkeypatch, git_repo, "last-proven", "--json")
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["commit"] == sha
+    assert payload["check"] is None

@@ -18,8 +18,10 @@ from . import callers as callers_mod
 from . import git as gx
 from . import history as history_mod
 from . import lookup as lookup_mod
+from . import notes as notes_mod
 from . import proofs as proofs_mod
 from . import store
+from . import who as who_mod
 from .diff import build_for_commit, build_for_refs, build_for_working_tree
 
 
@@ -334,7 +336,92 @@ def _cmd_last_proven(args: argparse.Namespace) -> int:
             "gita: no proofs recorded; try 'gita prove <check> -- <cmd>'\n"
         )
         return 3
+    if args.json:
+        proof = proofs_mod.read(root, sha) or {}
+        checks = proof.get("checks", {})
+        if args.name is not None:
+            entry = checks.get(args.name, {})
+        else:
+            # No specific check requested — surface the most recently ran one.
+            entry = max(
+                checks.values(),
+                key=lambda c: c.get("ran_at", ""),
+                default={},
+            )
+        payload = {
+            "commit": sha,
+            "check": args.name,
+            "ok": entry.get("ok"),
+            "ran_at": entry.get("ran_at"),
+        }
+        sys.stdout.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+        return 0
     sys.stdout.write(f"{sha}\n")
+    return 0
+
+
+def _cmd_who(args: argparse.Namespace) -> int:
+    root = _discover_root()
+    rec = who_mod.describe(root, args.rev)
+    if args.json:
+        sys.stdout.write(
+            json.dumps(rec.to_dict(), indent=2, sort_keys=True, ensure_ascii=False)
+            + "\n"
+        )
+        return 0
+    ts = datetime.fromtimestamp(rec.timestamp, tz=timezone.utc).isoformat()
+    sys.stdout.write(
+        f"commit:  {rec.commit}\n"
+        f"author:  {rec.author_name} <{rec.author_email}>  {ts}\n"
+    )
+    if rec.agent is not None:
+        bits = []
+        model = rec.agent.get("model")
+        session = rec.agent.get("session")
+        if model:
+            bits.append(str(model))
+        if session:
+            bits.append(f"session={session}")
+        extras = {
+            k: v for k, v in rec.agent.items() if k not in {"model", "session"}
+        }
+        if extras:
+            bits.append(
+                " ".join(f"{k}={v}" for k, v in sorted(extras.items()))
+            )
+        sys.stdout.write("agent:   " + "  ".join(bits) + "\n")
+    sys.stdout.write(f"message: {rec.message}\n")
+    return 0
+
+
+def _cmd_commit_note(args: argparse.Namespace) -> int:
+    root = _discover_root()
+    pairs = args.sets or []
+    if not pairs:
+        sys.stderr.write("gita: commit-note requires at least one --set key=value\n")
+        return 2
+    parsed: dict[str, str] = {}
+    for raw in pairs:
+        if "=" not in raw:
+            sys.stderr.write(
+                f"gita: --set expects key=value, got {raw!r}\n"
+            )
+            return 2
+        k, v = raw.split("=", 1)
+        if not k:
+            sys.stderr.write(f"gita: --set expects key=value, got {raw!r}\n")
+            return 2
+        parsed[k] = v
+    if gx.status(root):
+        sys.stderr.write(
+            "gita: working tree is dirty; commit or stash before writing a note\n"
+        )
+        return 4
+    sha = gx.head_sha(root)
+    existing = notes_mod.read(root, sha) or {}
+    existing.update(parsed)
+    notes_mod.write(root, sha, existing)
+    sys.stdout.write(f"wrote note for {sha}: {sorted(parsed)}\n")
     return 0
 
 
@@ -427,7 +514,25 @@ def main(argv: list[str] | None = None) -> int:
         "--symbol", default=None,
         help="Additionally require the named symbol to exist at the commit.",
     )
+    p_lastp.add_argument("--json", action="store_true")
     p_lastp.set_defaults(func=_cmd_last_proven)
+
+    p_who = sub.add_parser(
+        "who", help="Author + optional agent identity for a commit."
+    )
+    p_who.add_argument("rev", nargs="?", default="HEAD")
+    p_who.add_argument("--json", action="store_true")
+    p_who.set_defaults(func=_cmd_who)
+
+    p_note = sub.add_parser(
+        "commit-note",
+        help="Write a note (model, session, ...) for the current HEAD.",
+    )
+    p_note.add_argument(
+        "--set", action="append", dest="sets", metavar="KEY=VALUE",
+        help="Repeatable. e.g. --set model=claude --set session=abc.",
+    )
+    p_note.set_defaults(func=_cmd_commit_note)
 
     p_mcp = sub.add_parser("mcp", help="Run as an MCP server over stdio.")
     p_mcp.set_defaults(func=_cmd_mcp)
