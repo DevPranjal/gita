@@ -28,6 +28,7 @@ from dataclasses import dataclass
 from typing import Iterator
 
 import libcst as cst
+from libcst.metadata import PositionProvider
 
 
 # ---------------------------------------------------------------------------
@@ -59,6 +60,8 @@ class Symbol:
     body_lines: int
     node: cst.CSTNode           # original node for downstream inspection
     parent: str | None = None   # enclosing class for methods, else None
+    line_start: int = 0         # 1-based line of the def/class header
+    line_end: int = 0           # 1-based line of the last body line
 
 
 @dataclass(frozen=True)
@@ -111,9 +114,12 @@ def parse_module(source: str) -> ModuleView | None:
     occasionally any ``Exception``) at every call site.
     """
     try:
-        module = cst.parse_module(source)
+        wrapper = cst.MetadataWrapper(cst.parse_module(source))
     except Exception:
         return None
+
+    module = wrapper.module
+    positions = wrapper.resolve(PositionProvider)
 
     symbols: dict[str, Symbol] = {}
     import_items: list[tuple[str, tuple[str, ...]]] = []
@@ -122,6 +128,7 @@ def parse_module(source: str) -> ModuleView | None:
         if isinstance(stmt, cst.FunctionDef):
             name = stmt.name.value
             body_text = _strip_name(_render(stmt.body), name)
+            pos = positions[stmt]
             symbols[name] = Symbol(
                 kind="function",
                 name=name,
@@ -129,10 +136,13 @@ def parse_module(source: str) -> ModuleView | None:
                 body_hash=_hash(body_text),
                 body_lines=body_text.count("\n"),
                 node=stmt,
+                line_start=pos.start.line,
+                line_end=pos.end.line,
             )
         elif isinstance(stmt, cst.ClassDef):
             name = stmt.name.value
             body_text = _strip_name(_render(stmt.body), name)
+            pos = positions[stmt]
             symbols[name] = Symbol(
                 kind="class",
                 name=name,
@@ -140,6 +150,8 @@ def parse_module(source: str) -> ModuleView | None:
                 body_hash=_hash(body_text),
                 body_lines=body_text.count("\n"),
                 node=stmt,
+                line_start=pos.start.line,
+                line_end=pos.end.line,
             )
         elif isinstance(stmt, cst.SimpleStatementLine):
             for small in stmt.body:
@@ -158,7 +170,10 @@ def parse_module(source: str) -> ModuleView | None:
         items=tuple(sorted(import_items)),
         order=tuple(import_items),
     )
-    return ModuleView(symbols=symbols, imports=imports, raw_code=source)
+    view = ModuleView(symbols=symbols, imports=imports, raw_code=source)
+    # Stash positions on the view so _iter_methods can hand them to methods.
+    object.__setattr__(view, "_positions", positions)
+    return view
 
 
 # ---------------------------------------------------------------------------
@@ -177,30 +192,37 @@ def find(view: ModuleView, name: str) -> Symbol:
       qualified candidate names.
     * No match — raises :exc:`NotFound`.
     """
+    matches = enumerate_matches(view, name)
+    if not matches:
+        raise NotFound(name)
+    if len(matches) > 1:
+        raise Ambiguous(name, sorted(_qualified(s) for s in matches))
+    return matches[0]
+
+
+def enumerate_matches(view: ModuleView, name: str) -> list[Symbol]:
+    """Return every symbol in ``view`` that resolves to ``name``.
+
+    Like :func:`find` but non-raising. Used by :mod:`gita.lookup` to
+    aggregate candidates across multiple modules before deciding whether
+    the lookup is ambiguous.
+    """
     if "." in name:
         cls_name, method_name = name.rsplit(".", 1)
         cls = view.symbols.get(cls_name)
         if cls is None or cls.kind != "class":
-            raise NotFound(name)
-        for method in _iter_methods(cls):
-            if method.name == method_name:
-                return method
-        raise NotFound(name)
+            return []
+        return [m for m in _iter_methods(view, cls) if m.name == method_name]
 
-    candidates: list[Symbol] = []
+    matches: list[Symbol] = []
     for sym in view.symbols.values():
         if sym.name == name:
-            candidates.append(sym)
+            matches.append(sym)
         if sym.kind == "class":
-            for method in _iter_methods(sym):
+            for method in _iter_methods(view, sym):
                 if method.name == name:
-                    candidates.append(method)
-
-    if not candidates:
-        raise NotFound(name)
-    if len(candidates) > 1:
-        raise Ambiguous(name, sorted(_qualified(s) for s in candidates))
-    return candidates[0]
+                    matches.append(method)
+    return matches
 
 
 def _qualified(sym: Symbol) -> str:
@@ -209,7 +231,7 @@ def _qualified(sym: Symbol) -> str:
     return f"{sym.parent}.{sym.name}"
 
 
-def _iter_methods(cls: Symbol) -> Iterator[Symbol]:
+def _iter_methods(view: ModuleView, cls: Symbol) -> Iterator[Symbol]:
     """Yield each ``def`` immediately inside ``cls``'s body.
 
     We don't descend into nested classes — Python allows them but they're
@@ -222,10 +244,16 @@ def _iter_methods(cls: Symbol) -> Iterator[Symbol]:
     body = node.body
     if not isinstance(body, cst.IndentedBlock):
         return
+    positions = getattr(view, "_positions", None)
     for stmt in body.body:
         if isinstance(stmt, cst.FunctionDef):
             mname = stmt.name.value
             body_text = _strip_name(_render(stmt.body), mname)
+            line_start = line_end = 0
+            if positions is not None and stmt in positions:
+                p = positions[stmt]
+                line_start = p.start.line
+                line_end = p.end.line
             yield Symbol(
                 kind="method",
                 name=mname,
@@ -234,6 +262,8 @@ def _iter_methods(cls: Symbol) -> Iterator[Symbol]:
                 body_lines=body_text.count("\n"),
                 node=stmt,
                 parent=cls.name,
+                line_start=line_start,
+                line_end=line_end,
             )
 
 

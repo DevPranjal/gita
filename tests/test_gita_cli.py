@@ -167,3 +167,64 @@ def test_cli_diff_nonpy_rendered_as_textual(git_repo: Path, monkeypatch, capsys)
     assert "config.yaml" in out
     assert "non-python" in out
 
+
+def test_cli_get_prints_symbol(git_repo: Path, monkeypatch, capsys) -> None:
+    commit_file(
+        git_repo, "u.py", "def fetch_user():\n    return 1\n", "init"
+    )
+    rc = _run_cli(monkeypatch, git_repo, "get", "fetch_user")
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "u.py" in out
+    assert "1-2" in out or "1:2" in out or ":1" in out
+    assert "def fetch_user" in out
+
+
+def test_cli_get_json_shape(git_repo: Path, monkeypatch, capsys) -> None:
+    commit_file(
+        git_repo, "u.py", "def fetch_user(uid):\n    return uid\n", "init"
+    )
+    rc = _run_cli(monkeypatch, git_repo, "get", "fetch_user", "--json")
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert set(payload) >= {
+        "name", "kind", "path", "line_start", "line_end",
+        "signature", "body", "rev", "requested_as",
+    }
+    assert payload["name"] == "fetch_user"
+    assert payload["kind"] == "function"
+
+
+def test_cli_get_ambiguous_exits_nonzero_with_candidates(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    commit_file(git_repo, "a.py", "def helper():\n    return 1\n", "a")
+    commit_file(git_repo, "b.py", "def helper():\n    return 2\n", "b")
+    rc = _run_cli(monkeypatch, git_repo, "get", "helper")
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "ambiguous" in err.lower()
+    assert "a.py" in err and "b.py" in err
+
+
+def test_cli_get_not_found_exits_nonzero(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    commit_file(git_repo, "u.py", "x = 1\n", "init")
+    rc = _run_cli(monkeypatch, git_repo, "get", "wat")
+    assert rc == 1
+    err = capsys.readouterr().err
+    assert "wat" in err
+    assert "not found" in err.lower()
+
+
+def test_cli_get_at_rev_syntax(git_repo: Path, monkeypatch, capsys) -> None:
+    sha_a = commit_file(git_repo, "u.py", "def foo():\n    return 1\n", "add foo")
+    commit_file(git_repo, "u.py", "x = 1\n", "delete foo")
+    rc = _run_cli(monkeypatch, git_repo, "get", f"foo@{sha_a}", "--json")
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["name"] == "foo"
+    assert payload["rev"] == sha_a
+
+

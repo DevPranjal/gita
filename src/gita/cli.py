@@ -17,6 +17,7 @@ from gita._manifest import render_manifest
 from . import callers as callers_mod
 from . import git as gx
 from . import history as history_mod
+from . import lookup as lookup_mod
 from . import store
 from .diff import build_for_commit, build_for_refs, build_for_working_tree
 
@@ -241,6 +242,46 @@ def _split_at_ref(target: str) -> tuple[str, str | None]:
     return target, None
 
 
+def _cmd_get(args: argparse.Namespace) -> int:
+    root = _discover_root()
+    name, ref = _split_at_ref(args.target)
+    rev = ref or "HEAD"
+    try:
+        sym = lookup_mod.get(root, name, rev=rev)
+    except lookup_mod.Ambiguous as exc:
+        sys.stderr.write(f"gita: {name!r} is ambiguous; candidates:\n")
+        for c in exc.candidates:
+            sys.stderr.write(f"  - {c}\n")
+        return 2
+    except lookup_mod.NotFound as exc:
+        sys.stderr.write(f"gita: {exc.name!r} not found at {rev}\n")
+        return 1
+
+    if args.json:
+        payload = {
+            "name": sym.name,
+            "kind": sym.kind,
+            "path": sym.path,
+            "line_start": sym.line_start,
+            "line_end": sym.line_end,
+            "signature": sym.signature,
+            "body": sym.body,
+            "rev": sym.rev,
+            "requested_as": sym.requested_as,
+            "parent": sym.parent,
+        }
+        sys.stdout.write(json.dumps(payload, indent=2) + "\n")
+        return 0
+
+    qual = sym.name if sym.parent is None else f"{sym.parent}.{sym.name}"
+    sys.stdout.write(
+        f"{sym.path}:{sym.line_start}-{sym.line_end}  {sym.kind} {qual}\n\n{sym.body}"
+    )
+    if not sym.body.endswith("\n"):
+        sys.stdout.write("\n")
+    return 0
+
+
 def _cmd_reindex(args: argparse.Namespace) -> int:
     root = _discover_root()
     result = history_mod.reindex(root, force=args.force)
@@ -305,6 +346,13 @@ def main(argv: list[str] | None = None) -> int:
     p_callers.add_argument("target")
     p_callers.add_argument("--json", action="store_true")
     p_callers.set_defaults(func=_cmd_callers)
+
+    p_get = sub.add_parser(
+        "get", help='Source of NAME at a rev ("name@ref" for non-HEAD).'
+    )
+    p_get.add_argument("target")
+    p_get.add_argument("--json", action="store_true")
+    p_get.set_defaults(func=_cmd_get)
 
     p_reindex = sub.add_parser("reindex", help="Backfill stored manifests.")
     p_reindex.add_argument("--force", action="store_true")
