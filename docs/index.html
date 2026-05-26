@@ -58,9 +58,9 @@
 
     /* question card */
     .q {
-      margin-top: 36px; padding-top: 28px; border-top: 1px dashed var(--line);
+      margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line);
     }
-    .q:first-of-type { border-top: none; padding-top: 0; }
+    .q:first-of-type { border-top: none; padding-top: 0; margin-top: 8px; }
     .q > summary {
       list-style: none; cursor: pointer; display: block;
       position: relative; padding-right: 36px;
@@ -137,9 +137,11 @@
 
     /* wins */
     .wins {
-      margin-top: 56px; padding: 22px 24px; border: 1px solid var(--line);
+      margin-top: 22px; padding: 22px 24px; border: 1px solid var(--line);
       border-radius: 8px; background: var(--paper);
     }
+    .wins:first-of-type { margin-top: 0; }
+    .wins + .wins { margin-top: 14px; }
     .wins h3 {
       font-family: var(--serif); font-weight: 500; font-size: 19px; margin: 0 0 10px;
     }
@@ -191,7 +193,27 @@
       </p>
     </section>
 
-    <p class="section-h">eight questions · two answers each</p>
+    <p class="section-h">what changes, for an agent</p>
+    <div class="wins">
+      <h3>the shape of the answer</h3>
+      <ul>
+        <li>a 3-line summary instead of a 60-line diff — fewer tokens, faster triage</li>
+        <li>changes named by intent (<code>add</code>, <code>body</code>, <code>signature</code>, <code>import +</code>) — not re-derived from <code>+</code>/<code>-</code> hunks</li>
+        <li>no <code>grep + sed</code> as a substitute for "give me this function"</li>
+        <li>real ground truth for "did this commit pass?" — proven, not narrated</li>
+      </ul>
+    </div>
+    <div class="wins">
+      <h3>why this matters in a loop</h3>
+      <ul>
+        <li><strong>less context bloat</strong> — structural summaries fit in tens of tokens, not thousands; long sessions stay coherent longer</li>
+        <li><strong>fewer wrong turns</strong> — named ops (<code>rename</code>, <code>signature</code>, <code>body</code>) remove the guess-the-intent step before reasoning starts</li>
+        <li><strong>self-verifying</strong> — <code>gita prove</code> + the auto-hook give the agent ground truth on its own commits, so it stops trusting its own commit messages</li>
+        <li><strong>cheap regression hunts</strong> — <code>bisect-proven</code> reuses cached proofs instead of re-running the full suite at every step</li>
+      </ul>
+    </div>
+
+    <p class="section-h">eight questions</p>
     <p class="blurb" style="margin-top:-6px; font-size:14px; color:var(--muted)">click a question to see how <code>git</code> answers it — and how <code>gita</code> does.</p>
 
     <!-- Q1 -->
@@ -516,17 +538,6 @@ EOF
         </div>
       </div>
     </details>
-
-    <!-- wins -->
-    <div class="wins">
-      <h3>what changes, for an agent</h3>
-      <ul>
-        <li>a 3-line summary instead of a 60-line diff — fewer tokens, faster triage</li>
-        <li>changes named by intent (<code>add</code>, <code>body</code>, <code>signature</code>, <code>import +</code>) — not re-derived from <code>+</code>/<code>-</code> hunks</li>
-        <li>no <code>grep + sed</code> as a substitute for "give me this function"</li>
-        <li>real ground truth for "did this commit pass?" — proven, not narrated</li>
-      </ul>
-    </div>
 
     <!-- mcp -->
     <p class="section-h">the same surface, for agents directly</p>
