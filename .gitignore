@@ -19,3 +19,6 @@ build/
 
 # Playwright MCP scratch
 .playwright-mcp/
+pytest.log
+*.tmp
+
