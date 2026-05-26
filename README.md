@@ -2,32 +2,39 @@
 
 *— every agent needs a direction.*
 
-`git` was built for humans reading lines. Agents read *symbols*, ask *who calls
-this*, and need to know *which commit last passed the tests*. `gita` is a thin
-layer on top of `git` that answers those questions directly — no LLM
-re-derivation from a textual diff, no scraping commit messages for intent.
+`git` was built for humans reading lines of text. But humans aren't the ones
+writing most code anymore — agents are. And agents don't want lines. They
+want answers.
 
-v0.2 · 116 tests · zero runtime deps beyond `libcst`.
-
----
-
-## install
-
-```sh
-git clone https://github.com/DevPranjal/gita && cd gita
-python -m venv .venv && .venv\Scripts\Activate.ps1   # or source .venv/bin/activate
-pip install -e .
-gita init   # one-time, inside any repo — creates .git/gita/
-```
+`gita` is `git` rebuilt around the questions an agent actually asks.
 
 ---
 
-## the five things gita does
+## what changes, in one table
 
-### 1 · `diff` — what changed, not which bytes moved
+| the question                                | `git` answer                                 | `gita` answer                                                  |
+| ------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------- |
+| *"what changed in this commit?"*            | a pile of `+`/`-` lines                      | *"`get_user` was renamed to `fetch_user`, body +1/-0"*         |
+| *"show me this function"*                   | `grep` for the name, then `sed -n 40,60p`    | `gita get fetch_user`                                          |
+| *"show it the way it was 5 commits ago"*    | checkout, grep, sed, checkout back           | `gita get fetch_user@HEAD~5`  (follows renames)                |
+| *"who calls this function?"*                | `grep -rn` and hope                          | `gita callers fetch_user`                                      |
+| *"when was the last commit where tests passed?"* | read commit messages, guess               | `gita last-proven pytest`                                      |
+| *"every commit that touched this function"* | `git log -S` and squint                      | `gita symbol-log fetch_user`                                   |
 
-Rename detection runs on name-neutralised bodies, so **rename + body edit in
-one commit** comes back as one rename, not add+remove.
+Everything is stored next to the repo in `.git/gita/`. Nothing escapes.
+Uninstall is `rm -rf .git/gita`.
+
+---
+
+## the four wins for an agent
+
+### 1 · diffs that name what moved
+
+A rename plus a body edit in the *same* commit is what trips every diff tool
+on earth. `git` shows it as one function deleted and another added — so the
+agent burns tokens re-deriving "oh, this was a rename."
+
+`gita` does that work once, at commit time, and stores the answer:
 
 ```text
 $ gita diff
@@ -37,93 +44,60 @@ modified  src/users.py
   body       fetch_user: +1/-0
 ```
 
-Scope to a single symbol; pipe to an agent:
+> **why agents care:** no LLM round-trips to re-discover intent from a textual
+> diff. The structural answer is in the manifest.
+
+### 2 · symbols are first-class
+
+`git` only knows files and lines. `gita` knows functions and classes.
 
 ```sh
-gita diff --symbol fetch_user
-gita diff HEAD~3 HEAD --json
+gita get fetch_user                # returns the source
+gita get UserHandler.put           # class methods too
+gita get fetch_user@HEAD~5         # at any revision, walks renames
+gita diff --symbol fetch_user      # filter diff to one thing
+gita symbol-log fetch_user         # history filtered to one thing
+gita callers fetch_user            # who calls it
 ```
 
-Non-Python files don't disappear — they come back with `parseable: false` and
-a textual diff, so the manifest never lies about what moved.
+> **why agents care:** the agent stops needing `grep + sed` as a substitute
+> for "give me this function." It just asks.
 
-### 2 · `get` — fetch a symbol's source, at any revision
+### 3 · commits remember what they meant
 
-The substrate gap. Agents shouldn't have to `grep` + `sed -n` to read a
-function.
+Every `gita`-aware commit writes a manifest next to itself. `gita explain
+HEAD` reads it back — no LLM is asked to guess intent from a `+`/`-` blob.
 
-```text
-$ gita get UserHandler.put
-src/app/handlers.py:64-71  function UserHandler.put
+### 4 · proofs — *"which commit last passed?"*
 
-    def put(self, uid, payload):
-        user = fetch_user(uid)
-        ...
-```
-
-Walks one rename hop backward, so `gita get fetch_user@HEAD~5` still resolves
-when the symbol was called `get_user` back then. Ambiguous bare names exit 2
-with qualified candidates; missing symbols exit 1.
-
-### 3 · `prove` + `last-proven` — commit-keyed check results
-
-> *"what's the last commit where pytest passed?"*
-
-Stop guessing from commit messages. `prove` runs a command, captures the
-result, and writes it next to the commit. Refuses to run on a dirty tree —
-proofs can't lie about which commit they cover.
+Long-running agents commit often. After ten commits you want to know: which
+of these does pytest still pass on? Commit messages lie. `gita prove` runs a
+check and records the result against the commit:
 
 ```sh
-gita prove pytest -- python -m pytest -q     # ✓ pytest  (exit 0, 1832 ms)
-gita prove mypy   -- mypy src                # ✗ mypy    (exit 1, 412 ms)
+gita prove pytest -- python -m pytest -q
+gita prove mypy   -- mypy src
 
-gita last-proven pytest          # → 07ac270…  (latest green for that check)
-gita last-proven --symbol parse  # latest green commit where 'parse' still exists
+gita last-proven pytest          # → sha of the last green commit
+gita symbol-log fetch_user       # ✓ / ✗ / · glyph per commit
 ```
 
-### 4 · `symbol-log` + `explain` — history that knows what it meant
+`prove` refuses to run on a dirty tree — a proof can't lie about which
+commit it covers.
 
-Every commit's manifest is stored at write time (`.git/gita/manifests/<sha>.json`).
-`explain` reads it back; `symbol-log` filters history to one thing and threads
-proof glyphs through it.
-
-```text
-$ gita symbol-log fetch_user
-07ac270  ✓  mcp: expose get/prove/last-proven
-0745f59  ✓  proofs: record/query check results
-e99880d  ·  get: walk one rename hop backward
-    [src/users.py] rename get_user → fetch_user
-```
-
-`✓` all checks green · `✗` something failed · `·` no proof recorded.
-
-### 5 · `callers` — call sites, cached by tree
-
-```text
-$ gita callers fetch_user
-3 call site(s) of 'fetch_user':
-  src/app/handlers.py:48   in UserHandler.get
-  src/app/handlers.py:71   in UserHandler.put
-  src/jobs/refresh.py:14   in run
-```
-
-Cached at `.git/gita/callers/<tree_sha>.json`, so the index survives branch
-switches when the tree is unchanged.
+> **why agents care:** an agent can bisect its own work by a real criterion
+> ("last commit where tests passed and the symbol I touched still exists")
+> instead of vibes.
 
 ---
 
-## mcp
+## the same surface, for agents directly
 
-Same surface, for agents. JSON-RPC 2.0 over stdio, protocol `2024-11-05`.
+A built-in MCP server exposes every command above as a tool:
 
 ```sh
 gita mcp
 ```
-
-Eight tools: `gita_diff` (with `symbol` filter), `gita_status`, `gita_explain`,
-`gita_symbol_log`, `gita_callers`, `gita_get`, `gita_prove`, `gita_last_proven`.
-Ambiguous lookups return JSON-RPC `-32602` with candidates in `data.candidates`;
-missing proofs return `-32000` with a hint.
 
 ```json
 {
@@ -137,15 +111,28 @@ missing proofs return `-32000` with a hint.
 }
 ```
 
+Eight tools: `gita_diff` · `gita_status` · `gita_explain` · `gita_symbol_log`
+· `gita_callers` · `gita_get` · `gita_prove` · `gita_last_proven`.
+
 ---
 
-## what it costs you
-
-Everything lives under `.git/gita/` — manifests, callers index, proofs.
-Nothing escapes the repo. Uninstalling is `rm -rf .git/gita`.
+## install + try
 
 ```sh
-.venv\Scripts\python -m pytest -q   # 116 passed
+git clone https://github.com/DevPranjal/gita && cd gita
+python -m venv .venv && .venv\Scripts\Activate.ps1   # or source .venv/bin/activate
+pip install -e .
 ```
 
-The larger vision is in [`inspiration.md`](./inspiration.md).
+Then in any repo:
+
+```sh
+gita init                                          # one-time
+gita diff                                          # see structural diff
+gita get <a function name in your codebase>        # try it
+gita prove tests -- <your test command>            # record a proof
+```
+
+v0.2 · 116 tests passing · zero runtime deps beyond `libcst`.
+
+The longer vision lives in [`inspiration.md`](./inspiration.md).
