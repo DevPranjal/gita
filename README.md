@@ -10,7 +10,7 @@ want answers.
 
 ---
 
-## what changes, in one table
+## what changes
 
 | the question                                | `git` answer                                 | `gita` answer                                                  |
 | ------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------- |
@@ -20,9 +20,6 @@ want answers.
 | *"who calls this function?"*                | `grep -rn` and hope                          | `gita callers fetch_user`                                      |
 | *"when was the last commit where tests passed?"* | read commit messages, guess               | `gita last-proven pytest`                                      |
 | *"every commit that touched this function"* | `git log -S` and squint                      | `gita symbol-log fetch_user`                                   |
-
-Everything is stored next to the repo in `.git/gita/`. Nothing escapes.
-Uninstall is `rm -rf .git/gita`.
 
 ---
 
