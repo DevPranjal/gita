@@ -1,15 +1,11 @@
-<div align="center">
-
 # gita.
 
 *— every agent needs a direction.*
 
-A little experiment: `git`, but the things it tells an agent are *structural*
-instead of textual. Same content-addressed store underneath — just trades
-unified-diff hunks for ops on named symbols. Three commands, that's the whole
-show.
-
-</div>
+Browsers, search, operating systems — everything is getting rebuilt from an
+agent-first perspective, because agents are the next customers. If humans stop
+writing code, humans stop using `git`. So what does `git` look like when its
+user was never human to begin with?
 
 ---
 
