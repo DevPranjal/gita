@@ -2,130 +2,102 @@
 
 *— every agent needs a direction.*
 
-Browsers, search, operating systems — everything is getting rebuilt from an
-agent-first perspective, because agents are the next customers. If humans stop
-writing code, humans stop using `git`. So what does `git` look like when its
-user was never human to begin with?
+`git` was built for humans reading lines. Agents read *symbols*, ask *who calls
+this*, and need to know *which commit last passed the tests*. `gita` is a thin
+layer on top of `git` that answers those questions directly — no LLM
+re-derivation from a textual diff, no scraping commit messages for intent.
+
+v0.2 · 116 tests · zero runtime deps beyond `libcst`.
 
 ---
 
 ## install
 
 ```sh
-git clone https://github.com/DevPranjal/gita
-cd gita
-python -m venv .venv && .venv/bin/activate     # or .venv\Scripts\Activate.ps1
+git clone https://github.com/DevPranjal/gita && cd gita
+python -m venv .venv && .venv\Scripts\Activate.ps1   # or source .venv/bin/activate
 pip install -e .
-```
-
-Then, inside any git repo:
-
-```sh
-gita init        # one-time, optional — sets up .git/gita/
+gita init   # one-time, inside any repo — creates .git/gita/
 ```
 
 ---
 
-## 01 · diff
+## the five things gita does
 
-### show me what changed, not which bytes moved.
+### 1 · `diff` — what changed, not which bytes moved
 
-Same edit, two readings. The left is what an agent stares at today; the right
-is what it actually wants.
-
-```diff
-# git diff — users.py
-- def get_user(uid):
-+ def fetch_user(uid):
-      row = db.lookup('users', uid)
-      if row is None:
-          return None
--     return User.from_row(row)
-+     user = User.from_row(row)
-+     return user
-```
+Rename detection runs on name-neutralised bodies, so **rename + body edit in
+one commit** comes back as one rename, not add+remove.
 
 ```text
-# gita diff — users.py
-  modified  users.py
-    rename     get_user → fetch_user  (2 ref(s))
-    signature  fetch_user: def get_user(uid)  →  def fetch_user(uid)
-    body       fetch_user: +1/-0
+$ gita diff
+modified  src/users.py
+  rename     get_user → fetch_user  (2 ref(s))
+  signature  fetch_user: def get_user(uid) → def fetch_user(uid)
+  body       fetch_user: +1/-0
 ```
 
-Rename detection runs on name-neutralised bodies (similarity ≥ 0.6, greedy
-best-first, same-kind only), so **rename + body edit in one commit** still
-comes back as a single rename, not as `add` + `remove`.
+Scope to a single symbol; pipe to an agent:
 
 ```sh
-gita diff                  # HEAD vs working tree
-gita diff HEAD~3 HEAD      # any two refs
-gita diff --staged --json  # machine-readable, for agents
+gita diff --symbol fetch_user
+gita diff HEAD~3 HEAD --json
 ```
 
----
+Non-Python files don't disappear — they come back with `parseable: false` and
+a textual diff, so the manifest never lies about what moved.
 
-## 02 · explain
+### 2 · `get` — fetch a symbol's source, at any revision
 
-### commits remember what they meant.
-
-Each commit's manifest is written next to the tree, as a small JSON blob.
-`gita explain` just reads it back — no re-deriving, no re-parsing, no LLM
-guessing from a diff.
+The substrate gap. Agents shouldn't have to `grep` + `sed -n` to read a
+function.
 
 ```text
-$ gita explain HEAD
-commit a9b54e1  Pranjal Gulati <pranjal@…>  Tue May 26 12:04
-    rename get_user, add caching
+$ gita get UserHandler.put
+src/app/handlers.py:64-71  function UserHandler.put
 
-  modified  src/users.py
-    rename     get_user → fetch_user  (2 ref(s))
-    add        function fetch_user_cached
-    body       fetch_user: +1/-0
-
-  summary: 2 logic / 1 signature / 0 cosmetic
+    def put(self, uid, payload):
+        user = fetch_user(uid)
+        ...
 ```
 
-What the manifest actually looks like on disk:
+Walks one rename hop backward, so `gita get fetch_user@HEAD~5` still resolves
+when the symbol was called `get_user` back then. Ambiguous bare names exit 2
+with qualified candidates; missing symbols exit 1.
 
-```json
-{
-  "kind": "manifest",
-  "from": "abc123…",
-  "to":   "def456…",
-  "files": [{
-    "path": "users.py",
-    "status": "modified",
-    "ops": [
-      {"op": "rename_symbol", "from": "get_user", "to": "fetch_user"},
-      {"op": "modify_body",   "name": "fetch_user", "added": 1, "removed": 0}
-    ]
-  }],
-  "summary": {"logic_ops": 2, "signature_ops": 1, "cosmetic_ops": 0}
-}
+### 3 · `prove` + `last-proven` — commit-keyed check results
+
+> *"what's the last commit where pytest passed?"*
+
+Stop guessing from commit messages. `prove` runs a command, captures the
+result, and writes it next to the commit. Refuses to run on a dirty tree —
+proofs can't lie about which commit they cover.
+
+```sh
+gita prove pytest -- python -m pytest -q     # ✓ pytest  (exit 0, 1832 ms)
+gita prove mypy   -- mypy src                # ✗ mypy    (exit 1, 412 ms)
+
+gita last-proven pytest          # → 07ac270…  (latest green for that check)
+gita last-proven --symbol parse  # latest green commit where 'parse' still exists
 ```
 
-Everything lives under `.git/gita/` — nothing escapes the repo. Uninstalling
-gita is `rm -rf .git/gita`.
+### 4 · `symbol-log` + `explain` — history that knows what it meant
 
----
-
-## 03 · ask
-
-### walk the symbol, not the lines.
-
-History is queryable by *thing*. Who renamed this function? Who calls it now?
-Answers come from stored manifests plus one CST pass.
+Every commit's manifest is stored at write time (`.git/gita/manifests/<sha>.json`).
+`explain` reads it back; `symbol-log` filters history to one thing and threads
+proof glyphs through it.
 
 ```text
 $ gita symbol-log fetch_user
-a9b54e1  rename get_user, add caching
+07ac270  ✓  mcp: expose get/prove/last-proven
+0745f59  ✓  proofs: record/query check results
+e99880d  ·  get: walk one rename hop backward
     [src/users.py] rename get_user → fetch_user
-710c2f3  faster lookup
-    [src/users.py] modify body of get_user: +3/-1
-d04a811  initial users module
-    [src/users.py] add function get_user
 ```
+
+`✓` all checks green · `✗` something failed · `·` no proof recorded.
+
+### 5 · `callers` — call sites, cached by tree
 
 ```text
 $ gita callers fetch_user
@@ -135,23 +107,23 @@ $ gita callers fetch_user
   src/jobs/refresh.py:14   in run
 ```
 
-The callers index is cached at `.git/gita/callers/<tree_sha>.json`, so it
-survives branch switches when the tree is unchanged.
+Cached at `.git/gita/callers/<tree_sha>.json`, so the index survives branch
+switches when the tree is unchanged.
 
 ---
 
 ## mcp
 
-A stdio MCP server is built in, so an agent can ask gita the same questions
-you do:
+Same surface, for agents. JSON-RPC 2.0 over stdio, protocol `2024-11-05`.
 
 ```sh
-gita mcp   # JSON-RPC 2.0 over stdio, protocol 2024-11-05
+gita mcp
 ```
 
-Tools exposed: `gita_diff`, `gita_status`, `gita_explain`, `gita_symbol_log`,
-`gita_callers`. Each accepts a `root` argument (or falls back to
-`$GITA_ROOT`, or cwd).
+Eight tools: `gita_diff` (with `symbol` filter), `gita_status`, `gita_explain`,
+`gita_symbol_log`, `gita_callers`, `gita_get`, `gita_prove`, `gita_last_proven`.
+Ambiguous lookups return JSON-RPC `-32602` with candidates in `data.candidates`;
+missing proofs return `-32000` with a hint.
 
 ```json
 {
@@ -167,18 +139,13 @@ Tools exposed: `gita_diff`, `gita_status`, `gita_explain`, `gita_symbol_log`,
 
 ---
 
-## tests
+## what it costs you
+
+Everything lives under `.git/gita/` — manifests, callers index, proofs.
+Nothing escapes the repo. Uninstalling is `rm -rf .git/gita`.
 
 ```sh
-.venv/bin/python -m pytest -q
+.venv\Scripts\python -m pytest -q   # 116 passed
 ```
 
-54 passing. Covers the git wrappers, similarity-based rename detection
-(rename + body edit in one commit still pairs as a rename), manifest
-storage, symbol-log across renames, the multi-file callers index and its
-tree-sha cache, every CLI subcommand, and the MCP request/response surface.
-
----
-
-The larger vision — the one this whole repo is a finger pointing at — is
-in [`inspiration.md`](./inspiration.md).
+The larger vision is in [`inspiration.md`](./inspiration.md).
