@@ -15,6 +15,7 @@ from pathlib import Path
 from gita._manifest import render_manifest
 
 from . import callers as callers_mod
+from . import context as context_mod
 from . import git as gx
 from . import history as history_mod
 from . import lookup as lookup_mod
@@ -425,6 +426,62 @@ def _cmd_commit_note(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_context(args: argparse.Namespace) -> int:
+    root = _discover_root()
+    try:
+        rec = context_mod.build(
+            root, args.name,
+            rev=args.rev,
+            budget=args.budget,
+            log_limit=args.log_limit,
+        )
+    except lookup_mod.NotFound as exc:
+        sys.stderr.write(f"gita: symbol not found: {exc.name}\n")
+        return 2
+    except lookup_mod.Ambiguous as exc:
+        sys.stderr.write(
+            f"gita: ambiguous symbol {exc.name!r}; candidates:\n  "
+            + "\n  ".join(exc.candidates) + "\n"
+        )
+        return 2
+    if args.json:
+        sys.stdout.write(
+            json.dumps(rec.to_dict(), indent=2, sort_keys=True, ensure_ascii=False)
+            + "\n"
+        )
+        return 0
+    # Text mode — fixed section order, blank-line separators.
+    out = sys.stdout
+    sym = rec.symbol
+    out.write(f"symbol: {sym.name}  ({sym.kind} at {sym.path}:{sym.line_start})\n")
+    out.write(f"  {sym.signature}\n")
+    if sym.body:
+        for line in sym.body.splitlines():
+            out.write(f"    {line}\n")
+    out.write("\n")
+    out.write("callers:\n")
+    if not rec.callers:
+        out.write("  (none)\n")
+    for c in rec.callers:
+        out.write(f"  {c['file']}:{c['line']}  {c['caller']}\n")
+    out.write("\n")
+    out.write("log:\n")
+    if not rec.log:
+        out.write("  (none)\n")
+    for entry in rec.log:
+        short = entry['sha'][:10]
+        ops = ", ".join(o.get('op', '?') for o in entry.get('ops', []))
+        out.write(f"  {short}  {entry['message']}  [{ops}]\n")
+    out.write("\n")
+    if rec.last_proven:
+        out.write(f"last_proven: {rec.last_proven}\n")
+    else:
+        out.write("last_proven: (none)\n")
+    if rec.dropped:
+        out.write(f"dropped (budget): {', '.join(rec.dropped)}\n")
+    return 0
+
+
 def _cmd_mcp(args: argparse.Namespace) -> int:
     from . import mcp
     mcp.serve_stdio()
@@ -533,6 +590,23 @@ def main(argv: list[str] | None = None) -> int:
         help="Repeatable. e.g. --set model=claude --set session=abc.",
     )
     p_note.set_defaults(func=_cmd_commit_note)
+
+    p_ctx = sub.add_parser(
+        "context",
+        help="Composite read for a symbol (callers + log + proof status).",
+    )
+    p_ctx.add_argument("name")
+    p_ctx.add_argument("--rev", default="HEAD")
+    p_ctx.add_argument(
+        "--budget", type=int, default=None,
+        help="Approximate max characters; drops sections oldest-log-first.",
+    )
+    p_ctx.add_argument(
+        "--log-limit", type=int, default=10,
+        help="Max log entries before budget trimming (default 10).",
+    )
+    p_ctx.add_argument("--json", action="store_true")
+    p_ctx.set_defaults(func=_cmd_context)
 
     p_mcp = sub.add_parser("mcp", help="Run as an MCP server over stdio.")
     p_mcp.set_defaults(func=_cmd_mcp)
