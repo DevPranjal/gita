@@ -219,7 +219,6 @@
     <!-- Q1 -->
     <details class="q">
       <summary>
-        <span class="num">01</span>
         <h2>"what changed in this commit?"</h2>
       </summary>
       <p class="note">A real PR touches several things at once. <code>git diff</code> tells you which bytes moved. <code>gita diff</code> tells you which <em>things</em> moved — as a short list of named operations on named symbols.</p>
@@ -280,7 +279,6 @@
     <!-- Q2 -->
     <details class="q">
       <summary>
-        <span class="num">02</span>
         <h2>"show me this function."</h2>
       </summary>
       <p class="note">The thing agents do twenty times an hour.</p>
@@ -319,7 +317,6 @@ def fetch_user(uid):
     <!-- Q3 -->
     <details class="q">
       <summary>
-        <span class="num">03</span>
         <h2>"show it the way it was 5 commits ago."</h2>
       </summary>
       <p class="note">Walks renames automatically — the symbol's old name is in the manifest chain.</p>
@@ -358,7 +355,6 @@ def get_user(uid):
     <!-- Q4 -->
     <details class="q">
       <summary>
-        <span class="num">04</span>
         <h2>"who calls this function?"</h2>
       </summary>
       <div class="pair">
@@ -390,7 +386,6 @@ def get_user(uid):
     <!-- Q5 -->
     <details class="q">
       <summary>
-        <span class="num">05</span>
         <h2>"when was the last commit where tests passed?"</h2>
       </summary>
       <p class="note">An agent that commits ten times an hour needs a real answer to this — not the commit message.</p>
@@ -426,7 +421,6 @@ def get_user(uid):
     <!-- Q6 -->
     <details class="q">
       <summary>
-        <span class="num">06</span>
         <h2>"every commit that touched this function."</h2>
       </summary>
       <p class="note">History filtered to one symbol — and annotated with whether each commit was green.</p>
@@ -462,7 +456,6 @@ def get_user(uid):
     <!-- Q7 -->
     <details class="q">
       <summary>
-        <span class="num">07</span>
         <h2>"which commit broke the tests?"</h2>
       </summary>
       <p class="note">Bisect by a real criterion. Reuses cached proofs; only runs the check on commits it hasn't seen. Merges recurse one hop into the merged-in branch so the suspect is the real culprit, not the merge node.</p>
@@ -499,7 +492,6 @@ def get_user(uid):
     <!-- Q8 -->
     <details class="q">
       <summary>
-        <span class="num">08</span>
         <h2>"re-run my checks after every commit."</h2>
       </summary>
       <p class="note">No hand-rolled hooks. <code>gita</code> installs a post-commit hook once, then anything you've <code>enable</code>d gets re-proven on every new HEAD. The hook never fails the commit — a crashing check just shows up later as a <code>✗</code> glyph.</p>
