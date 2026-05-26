@@ -228,3 +228,109 @@ def test_cli_get_at_rev_syntax(git_repo: Path, monkeypatch, capsys) -> None:
     assert payload["rev"] == sha_a
 
 
+# ---------------------------------------------------------------------------
+# phase 3 — prove / last-proven / glyph display
+# ---------------------------------------------------------------------------
+
+
+def _write_proof_file(root: Path, sha: str, checks: dict) -> None:
+    pdir = root / ".git" / "gita" / "proofs"
+    pdir.mkdir(parents=True, exist_ok=True)
+    (pdir / f"{sha}.json").write_text(
+        json.dumps({"commit": sha, "checks": checks}, indent=2),
+        encoding="utf-8",
+    )
+
+
+def _ok_check() -> dict:
+    return {
+        "ok": True, "exit_code": 0, "duration_ms": 1,
+        "ran_at": "2026-01-01T00:00:00Z", "cmd": ["true"],
+        "stdout_head": "", "stdout_tail": "", "truncated": False,
+    }
+
+
+def _fail_check() -> dict:
+    return {**_ok_check(), "ok": False, "exit_code": 1}
+
+
+def test_cli_prove_runs_command_and_records(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    import sys as _sys
+    sha = commit_file(git_repo, "u.py", "x = 1\n", "init")
+    rc = _run_cli(
+        monkeypatch, git_repo,
+        "prove", "pytest", "--", _sys.executable, "-c", "pass",
+    )
+    assert rc == 0
+    assert (git_repo / ".git" / "gita" / "proofs" / f"{sha}.json").exists()
+
+
+def test_cli_prove_dirty_tree_errors(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    import sys as _sys
+    commit_file(git_repo, "u.py", "x = 1\n", "init")
+    (git_repo / "u.py").write_text("x = 2\n", encoding="utf-8")
+    rc = _run_cli(
+        monkeypatch, git_repo,
+        "prove", "pytest", "--", _sys.executable, "-c", "pass",
+    )
+    assert rc != 0
+    err = capsys.readouterr().err
+    assert "dirty" in err.lower() or "uncommitted" in err.lower()
+
+
+def test_cli_last_proven_prints_sha(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    sha = commit_file(git_repo, "u.py", "x = 1\n", "init")
+    _write_proof_file(git_repo, sha, {"pytest": _ok_check()})
+    rc = _run_cli(monkeypatch, git_repo, "last-proven", "pytest")
+    assert rc == 0
+    assert sha in capsys.readouterr().out
+
+
+def test_cli_last_proven_empty_exits_with_hint(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    commit_file(git_repo, "u.py", "x = 1\n", "init")
+    rc = _run_cli(monkeypatch, git_repo, "last-proven", "pytest")
+    assert rc == 3
+    err = capsys.readouterr().err
+    assert "gita prove" in err
+
+
+def test_cli_symbol_log_shows_proof_glyphs(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    sha_a = commit_file(git_repo, "u.py", "def foo():\n    return 1\n", "add foo")
+    sha_b = commit_file(git_repo, "u.py", "def foo():\n    return 2\n", "edit foo")
+    sha_c = commit_file(git_repo, "u.py", "def foo():\n    return 3\n", "edit again")
+    _write_proof_file(git_repo, sha_a, {"pytest": _ok_check()})
+    _write_proof_file(git_repo, sha_b, {"pytest": _fail_check()})
+    # sha_c has no proofs
+
+    rc = _run_cli(monkeypatch, git_repo, "symbol-log", "foo")
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "\u2713" in out  # ✓
+    assert "\u2717" in out  # ✗
+    assert "\u00b7" in out  # ·
+
+
+def test_cli_explain_shows_proof_section(
+    git_repo: Path, monkeypatch, capsys
+) -> None:
+    sha = commit_file(git_repo, "u.py", "def foo():\n    return 1\n", "init")
+    _write_proof_file(git_repo, sha, {"pytest": _ok_check()})
+    rc = _run_cli(monkeypatch, git_repo, "explain", sha)
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "proofs" in out.lower()
+    assert "pytest" in out
+
+
+
+

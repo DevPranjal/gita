@@ -18,6 +18,7 @@ from . import callers as callers_mod
 from . import git as gx
 from . import history as history_mod
 from . import lookup as lookup_mod
+from . import proofs as proofs_mod
 from . import store
 from .diff import build_for_commit, build_for_refs, build_for_working_tree
 
@@ -176,8 +177,12 @@ def _cmd_explain(args: argparse.Namespace) -> int:
     sha = gx.rev_parse(root, args.ref)
     manifest = history_mod.manifest_for(root, sha)
     manifest = _filter_manifest(manifest, only=args.only, exclude=args.exclude)
+    proof = proofs_mod.read(root, sha)
     if args.json:
-        sys.stdout.write(json.dumps({"commit": sha, **manifest}, indent=2) + "\n")
+        payload: dict = {"commit": sha, **manifest}
+        if proof is not None:
+            payload["proofs"] = proof.get("checks", {})
+        sys.stdout.write(json.dumps(payload, indent=2) + "\n")
     else:
         meta = gx.commit_meta(root, sha)
         when = datetime.fromtimestamp(meta.timestamp, tz=timezone.utc).isoformat()
@@ -186,6 +191,11 @@ def _cmd_explain(args: argparse.Namespace) -> int:
         sys.stdout.write(f"  date:   {when}\n\n")
         sys.stdout.write(f"    {meta.message.splitlines()[0] if meta.message else ''}\n\n")
         sys.stdout.write(render_manifest(manifest))
+        if proof is not None and proof.get("checks"):
+            sys.stdout.write("\nproofs:\n")
+            for cname, c in proof["checks"].items():
+                g = proofs_mod.GLYPH_OK if c.get("ok") else proofs_mod.GLYPH_FAIL
+                sys.stdout.write(f"  {g} {cname}  (exit {c.get('exit_code')})\n")
     return 0
 
 
@@ -199,7 +209,10 @@ def _cmd_symbol_log(args: argparse.Namespace) -> int:
         sys.stdout.write(f"no commits touch symbol {args.name!r}\n")
         return 0
     for entry in entries:
-        sys.stdout.write(f"{entry['sha'][:12]}  {entry['message'].splitlines()[0]}\n")
+        g = proofs_mod.glyph(proofs_mod.read(root, entry["sha"]))
+        sys.stdout.write(
+            f"{entry['sha'][:12]}  {g}  {entry['message'].splitlines()[0]}\n"
+        )
         for op in entry["ops"]:
             sys.stdout.write(f"    [{op['path']}] {_render_history_op(op)}\n")
     return 0
@@ -291,6 +304,40 @@ def _cmd_reindex(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_prove(args: argparse.Namespace) -> int:
+    root = _discover_root()
+    cmd = list(args.cmd or [])
+    # argparse.REMAINDER includes the literal "--" — strip the first one.
+    if cmd and cmd[0] == "--":
+        cmd = cmd[1:]
+    if not cmd:
+        sys.stderr.write("gita: prove requires a command after '--'\n")
+        return 2
+    try:
+        result = proofs_mod.record(root, args.name, cmd=cmd)
+    except proofs_mod.DirtyTree as exc:
+        sys.stderr.write(f"gita: {exc}\n")
+        return 4
+    glyph = proofs_mod.GLYPH_OK if result.ok else proofs_mod.GLYPH_FAIL
+    sys.stdout.write(
+        f"{glyph} {result.name}  (exit {result.exit_code}, {result.duration_ms} ms)\n"
+    )
+    return 0 if result.ok else result.exit_code
+
+
+def _cmd_last_proven(args: argparse.Namespace) -> int:
+    root = _discover_root()
+    try:
+        sha = proofs_mod.last_proven(root, args.name, symbol=args.symbol)
+    except proofs_mod.NoProofs:
+        sys.stderr.write(
+            "gita: no proofs recorded; try 'gita prove <check> -- <cmd>'\n"
+        )
+        return 3
+    sys.stdout.write(f"{sha}\n")
+    return 0
+
+
 def _cmd_mcp(args: argparse.Namespace) -> int:
     from . import mcp
     mcp.serve_stdio()
@@ -357,6 +404,30 @@ def main(argv: list[str] | None = None) -> int:
     p_reindex = sub.add_parser("reindex", help="Backfill stored manifests.")
     p_reindex.add_argument("--force", action="store_true")
     p_reindex.set_defaults(func=_cmd_reindex)
+
+    p_prove = sub.add_parser(
+        "prove", help="Run a check and record the result on HEAD."
+    )
+    p_prove.add_argument("name", help="Check name, e.g. 'pytest'.")
+    p_prove.add_argument(
+        "cmd",
+        nargs=argparse.REMAINDER,
+        help="Command to run after '--'.",
+    )
+    p_prove.set_defaults(func=_cmd_prove)
+
+    p_lastp = sub.add_parser(
+        "last-proven", help="Print last commit where checks passed."
+    )
+    p_lastp.add_argument(
+        "name", nargs="?", default=None,
+        help="Optional check name; default = all recorded checks must pass.",
+    )
+    p_lastp.add_argument(
+        "--symbol", default=None,
+        help="Additionally require the named symbol to exist at the commit.",
+    )
+    p_lastp.set_defaults(func=_cmd_last_proven)
 
     p_mcp = sub.add_parser("mcp", help="Run as an MCP server over stdio.")
     p_mcp.set_defaults(func=_cmd_mcp)
