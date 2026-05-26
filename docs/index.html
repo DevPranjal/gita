@@ -180,23 +180,35 @@
     <section class="q">
       <p class="num">01</p>
       <h2>"what changed in this commit?"</h2>
-      <p class="note">A rename plus a body edit is what trips every diff tool on earth.</p>
+      <p class="note">A real PR touches several things at once. <code>git diff</code> tells you which bytes moved. <code>gita diff</code> tells you which <em>things</em> moved — as a short list of named operations on named symbols.</p>
       <div class="pair">
         <div class="term">
           <div class="term-bar">
             <span class="d"></span><span class="d"></span><span class="d"></span>
             <span class="title">git diff</span><span class="tag git">git</span>
           </div>
-<div class="term-body"><span class="prompt">$</span> <span class="out">git diff src/users.py</span>
-<span class="del">- def get_user(uid):</span>
-<span class="add">+ def fetch_user(uid):</span>
-      row = db.lookup('users', uid)
-      if row is None:
-          return None
-<span class="del">-     return User.from_row(row)</span>
-<span class="add">+     user = User.from_row(row)</span>
-<span class="add">+     return user</span>
-<span class="dim"># 8 lines. agent has to guess: was this a rename, or a delete + add?</span></div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">git diff</span>
+<span class="kw">diff --git a/src/api.py b/src/api.py</span>
+<span class="add">+from functools import lru_cache</span>
+<span class="add">+</span>
+<span class="add">+def rate_limit_check(uid):</span>
+<span class="add">+    ...</span>
+  def handle_get(req):
+<span class="del">-    u = fetch_user(req.uid)</span>
+<span class="add">+    if not authorize(req): return 403</span>
+<span class="add">+    u = fetch_user(req.uid, timeout=5)</span>
+<span class="kw">diff --git a/src/users.py b/src/users.py</span>
+<span class="del">- class UserStore:</span>
+<span class="add">+ class UserRepo:</span>
+<span class="kw">diff --git a/src/jobs.py b/src/jobs.py</span>
+<span class="del">- import os</span>
+<span class="del">- import sys</span>
+<span class="add">+ import sys</span>
+<span class="add">+ import os</span>
+<span class="kw">diff --git a/config.yaml b/config.yaml</span>
+<span class="del">-  timeout: 30</span>
+<span class="add">+  timeout: 60</span>
+<span class="dim"># ~60 lines. agent has to read all of it to learn: was the import reorder meaningful? is UserStore→UserRepo a rename or a new class? did handle_get get an auth check or just get rewritten?</span></div>
         </div>
         <div class="term">
           <div class="term-bar">
@@ -204,13 +216,23 @@
             <span class="title">gita diff</span><span class="tag gita">gita</span>
           </div>
 <div class="term-body"><span class="prompt">$</span> <span class="out">gita diff</span>
+<span class="dim">manifest: 3 logic / 2 signature / 1 cosmetic op(s), 4 symbol(s)</span>
+<span class="kw">modified</span>  src/api.py
+  <span class="acc">add</span>        function rate_limit_check
+  <span class="acc">body</span>       handle_get: +4/-1  added auth guard
+  <span class="acc">import +</span>   functools (lru_cache)
 <span class="kw">modified</span>  src/users.py
-  <span class="acc">rename</span>     get_user → fetch_user  (2 ref(s))
-  <span class="acc">signature</span>  fetch_user: def get_user(uid) → def fetch_user(uid)
-  <span class="acc">body</span>       fetch_user: +1/-0
-<span class="dim"># 4 lines. the rename is named. no guessing.</span></div>
+  <span class="acc">signature</span>  fetch_user: added timeout param
+  <span class="acc">rename</span>     UserStore → UserRepo  (3 ref(s))
+<span class="kw">modified</span>  src/jobs.py
+  <span class="acc">imports</span>    reordered (5 entries, no add/remove)
+<span class="kw">modified</span>  config.yaml  <span class="dim">(non-python, textual diff)</span>
+    -  timeout: 30
+    +  timeout: 60
+<span class="dim"># the summary line alone tells the agent: "3 logic, 2 signature, 1 cosmetic." it can decide whether to read further before spending a token.</span></div>
         </div>
       </div>
+      <p class="note" style="margin-top:14px">Op vocabulary is small and closed: <code>add</code> / <code>remove</code> / <code>rename</code> / <code>signature</code> / <code>body</code> / <code>import +</code> / <code>import -</code> / <code>imports reordered</code> / <code>format</code>. Non-Python files keep their unified diff, just labelled.</p>
     </section>
 
     <!-- Q2 -->
@@ -389,8 +411,8 @@ def get_user(uid):
     <div class="wins">
       <h3>what changes, for an agent</h3>
       <ul>
-        <li>fewer tokens — structural answers instead of paragraphs of diff</li>
-        <li>no hallucinated renames — the rename is named at commit time, once</li>
+        <li>a 3-line summary instead of a 60-line diff — fewer tokens, faster triage</li>
+        <li>changes named by intent (<code>add</code>, <code>body</code>, <code>signature</code>, <code>import +</code>) — not re-derived from <code>+</code>/<code>-</code> hunks</li>
         <li>no <code>grep + sed</code> as a substitute for "give me this function"</li>
         <li>real ground truth for "did this commit pass?" — not commit messages</li>
       </ul>

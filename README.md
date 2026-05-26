@@ -14,9 +14,9 @@ want answers.
 
 | the question                                | `git` answer                                 | `gita` answer                                                  |
 | ------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------- |
-| *"what changed in this commit?"*            | a pile of `+`/`-` lines                      | *"`get_user` was renamed to `fetch_user`, body +1/-0"*         |
+| *"what changed in this commit?"*            | a wall of `+`/`-` lines                      | a short list of named operations on named symbols              |
 | *"show me this function"*                   | `grep` for the name, then `sed -n 40,60p`    | `gita get fetch_user`                                          |
-| *"show it the way it was 5 commits ago"*    | checkout, grep, sed, checkout back           | `gita get fetch_user@HEAD~5`  (follows renames)                |
+| *"show it the way it was 5 commits ago"*    | checkout, grep, sed, checkout back           | `gita get fetch_user@HEAD~5`                                   |
 | *"who calls this function?"*                | `grep -rn` and hope                          | `gita callers fetch_user`                                      |
 | *"when was the last commit where tests passed?"* | read commit messages, guess               | `gita last-proven pytest`                                      |
 | *"every commit that touched this function"* | `git log -S` and squint                      | `gita symbol-log fetch_user`                                   |
@@ -25,24 +25,42 @@ want answers.
 
 ## the four wins for an agent
 
-### 1 · diffs that name what moved
+### 1 · diffs as a list of operations
 
-A rename plus a body edit in the *same* commit is what trips every diff tool
-on earth. `git` shows it as one function deleted and another added — so the
-agent burns tokens re-deriving "oh, this was a rename."
-
-`gita` does that work once, at commit time, and stores the answer:
+`git diff` says *"these bytes moved."*  `gita diff` says *"a function was
+added here, the body of this one grew by four lines, this import appeared,
+those were just reordered."*
 
 ```text
 $ gita diff
-modified  src/users.py
-  rename     get_user → fetch_user  (2 ref(s))
-  signature  fetch_user: def get_user(uid) → def fetch_user(uid)
-  body       fetch_user: +1/-0
+manifest: 3 logic / 2 signature / 1 cosmetic op(s), 4 symbol(s)
+  modified  src/api.py
+    add        function rate_limit_check
+    body       handle_get: +4/-1  added auth guard
+    import +   functools (lru_cache)
+  modified  src/users.py
+    signature  fetch_user: added timeout param
+    rename     UserStore → UserRepo  (3 ref(s))
+  modified  src/jobs.py
+    imports    reordered (5 entries, no add/remove)
+  modified  config.yaml  (non-python, textual diff)
+    @@ -12,7 +12,7 @@
+    -  timeout: 30
+    +  timeout: 60
 ```
 
-> **why agents care:** no LLM round-trips to re-discover intent from a textual
-> diff. The structural answer is in the manifest.
+The op vocabulary is small and closed: `add` / `remove` / `rename` /
+`signature` / `body` / `import +` / `import -` / `imports reordered` /
+`format`.  Non-Python files keep their unified diff, just labelled. The
+summary line tells the agent at a glance whether this commit is *logic*
+(`add`, `remove`, `body`) or just *signature* (renames, imports) or *purely
+cosmetic* (reorders, whitespace) — useful for triaging what's worth a
+deeper read.
+
+> **why agents care:** an agent can decide *"do I even need to look at
+> this commit?"* from the summary line alone. And when it does look, the
+> answer is structured — no re-deriving rename-vs-add-vs-remove from
+> textual hunks.
 
 ### 2 · symbols are first-class
 
@@ -68,8 +86,8 @@ HEAD` reads it back — no LLM is asked to guess intent from a `+`/`-` blob.
 ### 4 · proofs — *"which commit last passed?"*
 
 Long-running agents commit often. After ten commits you want to know: which
-of these does pytest still pass on? Commit messages lie. `gita prove` runs a
-check and records the result against the commit:
+of these does pytest still pass on? Commit messages lie. `gita prove` runs
+a check and records the result against the commit:
 
 ```sh
 gita prove pytest -- python -m pytest -q
