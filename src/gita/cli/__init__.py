@@ -13,6 +13,7 @@ from typing import TextIO
 
 from ..context import build_view, count_tokens, entity_diff, expand, query_view
 from ..revisions import diff_revisions
+from ..telemetry import record, timed
 from ..vcs.git import GitError, Repo
 from . import render
 
@@ -101,6 +102,28 @@ def _emit(out: TextIO, payload: dict, text: str, as_json: bool) -> None:
     render.write(out, json.dumps(payload, indent=2) if as_json else text)
 
 
+class _Tee:
+    """Forwards output while measuring it -- what we emit is what an agent pays."""
+
+    def __init__(self, inner):
+        self._inner = inner
+        self._chunks: list[str] = []
+
+    def write(self, text: str) -> int:
+        self._chunks.append(text)
+        return self._inner.write(text)
+
+    def flush(self) -> None:
+        self._inner.flush()
+
+    def isatty(self) -> bool:
+        return bool(getattr(self._inner, "isatty", lambda: False)())
+
+    @property
+    def text(self) -> str:
+        return "".join(self._chunks)
+
+
 def main(argv: list[str] | None = None, out: TextIO | None = None) -> int:
     out = out or sys.stdout
     parser = _parser()
@@ -120,7 +143,24 @@ def main(argv: list[str] | None = None, out: TextIO | None = None) -> int:
     command = ALIASES.get(args.command, args.command)
     colour = (not args.no_color) and render.colour_enabled(out)
     repo = Repo(args.repo)
+    tee = _Tee(out)
 
+    with timed() as elapsed:
+        code = _dispatch(command, tee, repo, args, colour, parser)
+
+    record({
+        "arm": "gita",
+        "tool": command,
+        "repo": str(args.repo),
+        "output_tokens": count_tokens(tee.text),
+        "latency_ms": elapsed.ms,
+        "ok": code == 0,
+        "budget": getattr(args, "budget", None),
+    })
+    return code
+
+
+def _dispatch(command, out, repo, args, colour, parser) -> int:
     try:
         if command == "serve":
             from ..mcp.server import serve

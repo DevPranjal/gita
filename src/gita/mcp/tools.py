@@ -10,10 +10,12 @@ an agent sees the cost of each step in the tool name it chooses.
 
 from __future__ import annotations
 
+import json
 from typing import Any, Callable
 
 from ..context import build_view, count_tokens, entity_diff, expand, query_view
 from ..revisions import diff_revisions
+from ..telemetry import record, timed
 from ..vcs.git import GitError, Repo
 
 DEFAULT_BASE = "HEAD^"
@@ -25,12 +27,22 @@ _MAX_SUGGESTIONS = 5
 
 def _guard(fn: Callable[..., dict]) -> Callable[..., dict]:
     def wrapper(*args, **kwargs) -> dict:
-        try:
-            return fn(*args, **kwargs)
-        except GitError as error:
-            return {"error": str(error)}
-        except (OSError, ValueError) as error:
-            return {"error": f"{type(error).__name__}: {error}"}
+        with timed() as elapsed:
+            try:
+                result = fn(*args, **kwargs)
+            except GitError as error:
+                result = {"error": str(error)}
+            except (OSError, ValueError) as error:
+                result = {"error": f"{type(error).__name__}: {error}"}
+
+        record({
+            "arm": "gita",
+            "tool": f"gita_{fn.__name__.removesuffix('_tool')}",
+            "output_tokens": count_tokens(json.dumps(result, default=str)),
+            "latency_ms": elapsed.ms,
+            "ok": "error" not in result,
+        })
+        return result
 
     wrapper.__name__ = fn.__name__
     wrapper.__doc__ = fn.__doc__

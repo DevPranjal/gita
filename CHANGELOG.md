@@ -139,3 +139,23 @@ Entries are grouped by workstream (WS-*) as defined in [docs/SCOPE.md](docs/SCOP
 
 **Resolved open question:** each layer is a separate MCP tool rather than a depth parameter on one
 tool, so an agent sees the cost of each step in the name it chooses.
+
+### Added - WS-8 · Telemetry
+
+- **Event capture** ([`telemetry/events.py`](src/gita/telemetry/events.py)) - append-only JSONL,
+  enabled by `GITA_TELEMETRY`. Sessions, tasks and arms are tagged via `GITA_SESSION`,
+  `GITA_TASK` and `GITA_ARM`. Every failure is swallowed: telemetry must never break the thing it
+  measures.
+- **git shim** ([`telemetry/shim.py`](src/gita/telemetry/shim.py)) - a `git` stand-in that records
+  what git returned and forwards stdout, stderr and exit code untouched. The baseline arm has to
+  be measured the same way as the treatment arm, or the comparison is worthless.
+- **Aggregation** ([`telemetry/aggregate.py`](src/gita/telemetry/aggregate.py)) - per-arm calls,
+  tokens, averages per call and per session; paired per-task reduction; and **drill depth**, the
+  share of sessions that never needed L2.
+- CLI and MCP tools emit telemetry automatically, measuring exactly what they wrote.
+- `python -m gita` and `python -m gita.cli` now work.
+- 214 tests.
+
+**Measurement caveat, recorded deliberately:** what is captured is *tokens of tool output injected
+into context*, not total model spend. The Copilot session store has no token columns, so true
+prompt cost is not recoverable locally. The dashboard must say so.
