@@ -59,17 +59,24 @@ def summarise_runs(runs: list[dict]) -> dict:
         rows = [r for r in runs if r["arm"] == arm]
         recalls = [r["recall"] for r in rows if r.get("recall") is not None]
         prompt_total = sum(r.get("prompt_tokens", 0) for r in rows)
+        # Cached context is billed at a steep discount, so uncached tokens are the
+        # closest proxy for real cost. Raw prompt totals overstate what is paid.
+        billed_total = sum(max(0, r.get("prompt_tokens", 0) - r.get("cached_tokens", 0))
+                           for r in rows)
         correct = sum(recalls)
 
         by_arm[arm] = {
             "runs": len(rows),
             "mean_recall": _mean(recalls),
             "mean_prompt_tokens": _mean([r.get("prompt_tokens", 0) for r in rows]),
+            "mean_billed_tokens": billed_total / len(rows) if rows else 0,
             "mean_tool_tokens": _mean([r.get("tool_tokens", 0) for r in rows]),
             "mean_turns": _mean([r.get("turns", 0) for r in rows]),
             "total_prompt_tokens": prompt_total,
+            "total_billed_tokens": billed_total,
             # cost and quality in one number: cheap wrong answers score badly
             "tokens_per_correct_answer": prompt_total / correct if correct else None,
+            "billed_per_correct_answer": billed_total / correct if correct else None,
         }
 
     # Only tasks present in both arms can be compared.
@@ -120,6 +127,10 @@ def summarise_runs(runs: list[dict]) -> dict:
                              if paired["git_prompt"] else None,
             "tool_tokens": (1 - paired["gita_tool"] / paired["git_tool"])
                            if paired["git_tool"] else None,
+            "billed_tokens": (1 - by_arm["gita"]["total_billed_tokens"]
+                              / by_arm["git"]["total_billed_tokens"])
+            if by_arm.get("git", {}).get("total_billed_tokens") and "gita" in by_arm
+            else None,
         },
         "adoption_rate": adoption,
         "quality_delta": quality_delta,

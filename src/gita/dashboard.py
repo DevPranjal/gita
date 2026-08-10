@@ -76,14 +76,16 @@ def _arm_table(report: dict) -> str:
             f"<tr><td>{html.escape(arm)}</td>"
             f"<td>{stats['runs']}</td>"
             f"<td>{stats['mean_recall']:.0%}</td>"
+            f"<td>{_num(stats['mean_billed_tokens'])}</td>"
             f"<td>{_num(stats['mean_prompt_tokens'])}</td>"
             f"<td>{_num(stats['mean_tool_tokens'])}</td>"
             f"<td>{stats['mean_turns']:.1f}</td>"
-            f"<td>{_num(stats['tokens_per_correct_answer'])}</td></tr>")
+            f"<td>{_num(stats['billed_per_correct_answer'])}</td></tr>")
     return (
         "<table><thead><tr><th>arm</th><th>runs</th><th>recall</th>"
-        "<th>prompt tokens / run</th><th>tool tokens / run</th><th>turns</th>"
-        "<th>tokens per correct answer</th></tr></thead>"
+        "<th>billed tokens / run</th><th>raw prompt / run</th>"
+        "<th>tool tokens / run</th><th>turns</th>"
+        "<th>billed per correct answer</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table>")
 
 
@@ -133,15 +135,20 @@ def _telemetry_section(events: list[dict]) -> str:
 
 
 CAVEATS = [
-    "Prompt tokens are summed across turns, so a tool that adds a turn costs "
-    "more even when each call is cheaper. Turns, not per-call size, dominate.",
+    "Raw prompt tokens are summed across turns and include cached context, so a "
+    "tool that adds a turn looks expensive even when little new is sent. Billed "
+    "(uncached) tokens are the honest cost figure.",
+    "The agent's baseline context here is roughly 126k tokens per turn, which "
+    "dwarfs a typical diff. Compression only shows up in total cost when the "
+    "diff is large relative to that baseline.",
     "Entity recall is substring matching against hand-curated ground truth. It "
     "rewards naming the right things, not explaining them correctly.",
     "Ground truth comes from commit messages and git's own hunk headers, never "
     "from gita.",
     "Tasks marked control are ones where gita is expected to lose; they are "
     "included so the benchmark can be lost.",
-    "Small sample: results are directional, not statistically significant.",
+    "Small sample: 10 tasks, 3 repetitions. Directional, not statistically "
+    "significant.",
 ]
 
 
@@ -157,8 +164,10 @@ def render_dashboard(results: list[dict], events: list[dict] | None = None,
     adoption = report["adoption_rate"]
 
     cards = "".join([
-        _card("Reduction in real cost", _pct(reduction),
-              "paired, prompt tokens across whole sessions"),
+        _card("Reduction in billed cost", _pct(report["reduction"].get("billed_tokens")),
+              "uncached prompt tokens -- what actually gets paid for"),
+        _card("Reduction in raw context", _pct(reduction),
+              "prompt tokens summed across turns, cached included"),
         _card("Reduction in tool output", _pct(tool_reduction),
               "what the tools themselves returned"),
         _card("Quality delta", _pct(quality),

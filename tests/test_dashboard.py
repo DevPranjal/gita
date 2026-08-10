@@ -45,7 +45,7 @@ class TestRendering:
         assert 'class="control"' in render_dashboard(RUNS, EVENTS)
 
     def test_includes_caveats(self):
-        page = render_dashboard(RUNS, EVENTS)
+        page = render_dashboard(RUNS, EVENTS).lower()
         assert "control" in page
         assert "directional" in page
 
