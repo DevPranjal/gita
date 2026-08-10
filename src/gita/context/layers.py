@@ -66,7 +66,11 @@ def _headline(changeset: ChangeSet, material: list[EntityChange],
     prefix = f"{focus} · " if focus else ""
 
     if not material:
-        return f"{prefix}no material changes"
+        # "no material changes" also describes an empty diff, which hid a harness
+        # bug for a whole evaluation run. Say which situation this is.
+        if changeset.files_changed == 0:
+            return f"{prefix}nothing to compare: no files differ between these revisions"
+        return f"{prefix}no material changes ({changeset.files_changed} files, all noise)"
 
     files = len({c.entity.path for c in material})
     interface = sum(1 for c in material if c.affects_interface)

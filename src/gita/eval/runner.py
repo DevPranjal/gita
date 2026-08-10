@@ -71,28 +71,52 @@ def copilot_executable() -> str:
     return "copilot"
 
 
-def build_prompt(task: Task) -> str:
+def resolve_revisions(task: Task, repo_root: Path) -> tuple[str, str | None]:
+    """Full SHAs, so no `^` ever reaches a shell.
+
+    cmd.exe treats `^` as an escape character, so `gita diff <sha>^ <sha>` arrives
+    as `<sha> <sha>` -- a commit diffed against itself. That silently invalidated
+    an entire evaluation run.
+    """
+    def rev_parse(rev: str) -> str:
+        result = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", rev],
+            capture_output=True, check=False)
+        resolved = result.stdout.decode("utf8", "replace").strip()
+        return resolved or rev
+
+    if task.head == "":
+        return rev_parse(task.base), None
+    return rev_parse(task.base), rev_parse(task.head)
+
+
+def build_prompt(task: Task, base: str | None = None,
+                 head: str | None = None) -> str:
     """The task, plus which revisions to look at.
 
     Without this the agent has to guess what "this commit" means -- in the first
     smoke run it inspected HEAD, found the wrong thing, and went hunting. The
     scope is identical in both arms; only the tools available differ.
     """
-    if task.head == "":
+    base = base if base is not None else task.base
+    head = task.head if head is None else head
+
+    if not head:
         scope = ("Look at the uncommitted changes in the repository in the "
                  "current directory.")
     else:
-        scope = (f"Look at the change between {task.base} and {task.head} "
+        scope = (f"Look at the change between {base} and {head} "
                  f"in the repository in the current directory.")
     return f"{task.prompt.strip()}\n\n{scope}"
 
 
 def build_command(task: Task, arm: ArmConfig, run_dir: Path,
-                  model: str = "claude-opus-5") -> list[str]:
+                  model: str = "claude-opus-5",
+                  base: str | None = None, head: str | None = None) -> list[str]:
     """Identical in both arms except for the log directory."""
     return [
         copilot_executable(),
-        "-p", build_prompt(task),
+        "-p", build_prompt(task, base, head),
         "--silent",
         "--allow-all-tools",
         "--no-color",
@@ -122,20 +146,29 @@ def build_env(arm: ArmConfig, task_id: str, run_id: str, run_dir: Path,
 
 
 def install_gita_launcher(directory: Path) -> Path:
-    """A `gita` entry point that works from cmd and from bash.
+    """Put the real `gita` executable on PATH.
 
-    The agent's shell is not necessarily cmd, and a .cmd file is invisible to
-    bash -- the first smoke run recorded no tool calls at all for this reason.
+    A .cmd wrapper is not neutral: cmd.exe eats `^` from arguments, which turned
+    every `gita diff <sha>^ <sha>` into a no-op. Copying the console script keeps
+    argument handling out of cmd entirely.
     """
     directory.mkdir(parents=True, exist_ok=True)
-    (directory / "gita.cmd").write_text(
-        f'@echo off\r\n"{sys.executable}" -m gita %*\r\n', encoding="utf8")
+    console_script = Path(sys.executable).parent / (
+        "gita.exe" if os.name == "nt" else "gita")
+
+    if console_script.exists():
+        shutil.copy2(console_script, directory / console_script.name)
+    else:  # pragma: no cover - only when the package is not installed
+        fallback = directory / ("gita.cmd" if os.name == "nt" else "gita")
+        fallback.write_text(
+            f'@echo off\r\n"{sys.executable}" -m gita %*\r\n', encoding="utf8")
 
     posix = directory / "gita"
-    posix.write_text(
-        f'#!/bin/sh\nexec "{sys.executable}" -m gita "$@"\n',
-        encoding="utf8", newline="\n")
-    posix.chmod(0o755)
+    if not posix.exists():
+        posix.write_text(
+            f'#!/bin/sh\nexec "{sys.executable}" -m gita "$@"\n',
+            encoding="utf8", newline="\n")
+        posix.chmod(0o755)
     return directory
 
 
@@ -169,7 +202,8 @@ def run_once(task: Task, arm: ArmConfig, repo_root: Path, run_dir: Path,
         agents_md.unlink()
     _apply_setup(repo_root, task)
 
-    command = build_command(task, arm, run_dir, model)
+    base, head = resolve_revisions(task, repo_root)
+    command = build_command(task, arm, run_dir, model, base, head)
     env = build_env(arm, task.id, run_id, run_dir, shim_dir, gita_bin)
 
     started = time.time()

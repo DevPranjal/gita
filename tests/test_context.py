@@ -214,7 +214,14 @@ class TestLayers:
     def test_empty_changeset_is_handled(self):
         view = build_view(ChangeSet(), budget=800)
         assert view.clusters == []
-        assert "no material changes" in view.l0.lower()
+        assert "nothing to compare" in view.l0.lower()
+
+    def test_empty_diff_is_distinguished_from_all_noise(self):
+        """An ambiguous "no material changes" hid a harness bug for a whole run."""
+        noisy = changeset(("m.py", b"def a(x,y):\n    return x+y\n",
+                           b"def a(x, y):\n    return x + y\n"))
+        assert "all noise" in build_view(noisy, budget=800).l0.lower()
+        assert "nothing to compare" in build_view(ChangeSet(), budget=800).l0.lower()
 
 
 @pytest.fixture
