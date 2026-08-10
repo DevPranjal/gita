@@ -6,6 +6,27 @@ Entries are grouped by workstream (WS-*) as defined in [docs/SCOPE.md](docs/SCOP
 
 ## [Unreleased]
 
+### Added — WS-4 · Context layers
+
+- **Token accounting** ([`context/tokens.py`](src/gita/context/tokens.py)) — tiktoken when
+  available so budgets match what an agent actually pays, with a character estimate fallback.
+- **Ranking** ([`context/rank.py`](src/gita/context/rank.py)) — deterministic weights. Interface
+  breakage outranks behaviour change outranks relocation; test paths are discounted.
+- **Clustering** ([`context/cluster.py`](src/gita/context/cluster.py)) — groups entity changes
+  under their enclosing top-level entity, ordered by score.
+- **Depth-adaptive rollup** ([`context/rollup.py`](src/gita/context/rollup.py)) — `rollup_lines`
+  collapses entity paths to N segments with a nested count; `fit_lines` picks the deepest view
+  that fits a token budget, dropping lines only as a last resort.
+- **L0/L1 assembly** ([`context/layers.py`](src/gita/context/layers.py)) — `build_view` returns a
+  `ContextView` with an L0 headline, a budgeted L1 entity view, cluster list, chosen depth and a
+  truncation flag. **L0 is built from facts alone**, so gita answers with the model switched off;
+  WS-3 will upgrade that line with intent rather than enable it.
+- **L2 on demand** ([`context/patch.py`](src/gita/context/patch.py)) — `entity_diff` returns a
+  unified diff scoped to a single entity, so hunks are paid for only after L0/L1 identified what
+  is worth reading.
+- Measured on flask `fbb6f0bc4c`: raw diff 4,324 tokens → **L0 30 tokens (99.3% reduction)**,
+  **L0+L1 528 tokens (87.8%)**, L2 for one entity 216 tokens.
+
 ### Added — WS-1 · Core engine
 
 - **Entity model** ([`entities/model.py`](src/gita/entities/model.py)) — `Entity`, `EntityKind`
@@ -32,7 +53,7 @@ Entries are grouped by workstream (WS-*) as defined in [docs/SCOPE.md](docs/SCOP
   `material()` (noise excluded) and `interface_changes()` (caller-visible) views.
 - **Git layer** ([`vcs/git.py`](src/gita/vcs/git.py), [`revisions.py`](src/gita/revisions.py)) —
   `diff_revisions(repo, base, head)` produces a `ChangeSet` for two git revisions.
-- 81 tests, including integration over real history from five corpus repositories.
+- Integration over real history from five corpus repositories.
 
 ### Added — Infrastructure
 
@@ -42,6 +63,7 @@ Entries are grouped by workstream (WS-*) as defined in [docs/SCOPE.md](docs/SCOP
 - **Language extraction tests** ([`tests/test_languages.py`](tests/test_languages.py)) — Go, Rust
   and TSX were previously only exercised by corpus integration, which proves the engine does not
   crash but not that the right entities come out.
+- 111 tests.
 
 ### Added — WS-8 · Evaluation
 
@@ -58,11 +80,14 @@ Entries are grouped by workstream (WS-*) as defined in [docs/SCOPE.md](docs/SCOP
 
 ### Fixed
 
+- Entity hashes covered the whole subtree, so a class reported a change whenever any of its
+  methods did and the same edit was counted at every level of the tree. An entity now owns only
+  the code no descendant entity has claimed. The module-entity fix below was a special case of
+  this rule; it now applies uniformly.
 - The synthetic `<module>` entity was excluded from diffing, so a commit that only touched
   imports or top-level statements produced an **empty ChangeSet**. The module entity now
-  participates in change detection, and its hash covers only top-level code *not* claimed by a
-  child entity — otherwise it would change whenever any function did and carry no signal. It is
-  still excluded from move and rename matching, since git already handles file renames.
+  participates in change detection, and is still excluded from move and rename matching, since
+  git already handles file renames.
 - Go `type_declaration` was registered as an entity, but the name lives on the inner `type_spec`,
   so every Go type extracted as `<anonymous>`.
 - Go function literals bound via `var x = func() {}` were unnamed; `_binding_name` did not know

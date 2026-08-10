@@ -114,6 +114,32 @@ def _tokens(node, spec: LanguageSpec, skip: frozenset[int] = frozenset()) -> lis
     return out
 
 
+def _own_tokens(node, spec: LanguageSpec) -> list[str]:
+    """Leaf tokens belonging to ``node`` itself, excluding nested entities.
+
+    Without this a class reports a change whenever any of its methods does, and
+    the same change is counted at every level of the tree. An entity owns only
+    the code no descendant entity has claimed.
+    """
+    if node.child_count == 0:
+        text = node.text.decode("utf8", "replace").strip()
+        return [text] if text else []
+
+    out: list[str] = []
+    stack = list(reversed(node.children))
+    while stack:
+        current = stack.pop()
+        if current.type in spec.comment_nodes or current.type in spec.entity_nodes:
+            continue
+        if current.child_count == 0:
+            text = current.text.decode("utf8", "replace").strip()
+            if text:
+                out.append(text)
+            continue
+        stack.extend(reversed(current.children))
+    return out
+
+
 def _body_nodes(node, spec: LanguageSpec) -> frozenset[int]:
     ids = set()
     for field_name in spec.body_fields:
@@ -125,16 +151,16 @@ def _body_nodes(node, spec: LanguageSpec) -> frozenset[int]:
 
 def _make_entity(node, spec, path, name, parent_id, entity_id, kind) -> Entity:
     body = _body_nodes(node, spec)
-    tokens = _tokens(node, spec)
-    signature_tokens = _tokens(node, spec, skip=body) if body else tokens
+    own = _own_tokens(node, spec)
+    signature_tokens = _tokens(node, spec, skip=body) if body else own
 
     body_tokens: list[str] = []
     for field_name in spec.body_fields:
         child = node.child_by_field_name(field_name)
         if child is not None:
-            body_tokens += _tokens(child, spec)
+            body_tokens += _own_tokens(child, spec)
     if not body:
-        body_tokens = tokens
+        body_tokens = own
 
     return Entity(
         id=entity_id,
@@ -144,35 +170,14 @@ def _make_entity(node, spec, path, name, parent_id, entity_id, kind) -> Entity:
         start_line=node.start_point[0] + 1,
         end_line=node.end_point[0] + 1,
         raw_hash=digest(node.text.decode("utf8", "replace")),
-        content_hash=digest(" ".join(tokens)),
+        content_hash=digest(" ".join(own)),
         signature_hash=digest(" ".join(signature_tokens)),
         body_hash=digest(" ".join(body_tokens)),
         body_size=len(body_tokens),
         signature=" ".join(signature_tokens)[:200],
         parent_id=parent_id,
-        tokens=tuple(tokens),
+        tokens=tuple(own),
     )
-
-
-def _module_tokens(root_node, spec: LanguageSpec) -> list[str]:
-    """Top-level tokens not claimed by any entity: imports, constants, side effects.
-
-    Without this the module hash would cover the whole file and change whenever
-    any function did, making it useless as a signal.
-    """
-    out: list[str] = []
-    stack = list(reversed(root_node.children))
-    while stack:
-        current = stack.pop()
-        if current.type in spec.entity_nodes or current.type in spec.comment_nodes:
-            continue
-        if current.child_count == 0:
-            text = current.text.decode("utf8", "replace").strip()
-            if text:
-                out.append(text)
-            continue
-        stack.extend(reversed(current.children))
-    return out
 
 
 def extract(source: bytes, path: str, spec: LanguageSpec | None = None) -> EntityTree:
@@ -185,7 +190,7 @@ def extract(source: bytes, path: str, spec: LanguageSpec | None = None) -> Entit
     root_node = tree.root_node
 
     # Spike A finding 3: top-level statements need somewhere to live.
-    root_tokens = _module_tokens(root_node, spec)
+    root_tokens = _own_tokens(root_node, spec)
     root = Entity(
         id=path,
         kind=EntityKind.MODULE,
