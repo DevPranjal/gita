@@ -83,6 +83,15 @@ def _entity_name(node, spec: LanguageSpec) -> str:
         named = node.child_by_field_name("name")
         return _text(named) or _binding_name(node)
 
+    # `impl Iterator for Walk` is a different thing from `struct Walk`, and
+    # naming both "Walk" both loses the trait and forces a #2 collision suffix.
+    if node.type == "impl_item":
+        implemented = _text(node.child_by_field_name("type"))
+        trait = _text(node.child_by_field_name("trait"))
+        if trait and implemented:
+            return f"{trait} for {implemented}"
+        return implemented or "<anonymous>"
+
     for field_name in _NAME_FIELDS:
         child = node.child_by_field_name(field_name)
         if child is not None and _text(child):

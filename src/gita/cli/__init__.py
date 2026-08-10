@@ -20,6 +20,7 @@ from ..context import (
     focus_label,
 )
 from ..context.answer import DEFAULT_BUDGET, compose, material_patch
+from ..context.resolve import Ambiguous, resolve_entity
 from ..revisions import diff_revisions
 from ..telemetry import record, timed
 from ..vcs.git import GitError, Repo
@@ -263,15 +264,41 @@ def _cmd_diff(out, repo, args, colour) -> int:
     return 0
 
 
+def _fallback_entity(changeset, entity: str, out, as_json: bool):
+    """Resolve a bare name only after the literal argument has failed.
+
+    Resolving first is harmful: `app.py::Store` is a valid container prefix, and
+    eagerly matching it to `app.py::Store::get` answers a question nobody asked.
+    """
+    try:
+        return resolve_entity([c.entity.id for c in changeset.material()], entity)
+    except Ambiguous as error:
+        _emit(out, {"entity": entity, "matches": error.matches,
+                    "error": "ambiguous"}, f"gita: {error}", as_json)
+        return False
+
+
 def _cmd_show(out, repo, args, colour) -> int:
     patch = entity_diff(repo, args.base, args.head, args.entity)
+    entity = args.entity
+
+    if not patch:
+        changeset = diff_revisions(repo, args.base, args.head)
+        resolved = _fallback_entity(changeset, args.entity, out, args.as_json)
+        if resolved is False:
+            return 5
+        if resolved:
+            entity = resolved
+            patch = entity_diff(repo, args.base, args.head, entity)
+
     if not patch:
         message = f"gita: entity not found in either revision: {args.entity}"
         _emit(out, {"entity": args.entity, "patch": "", "error": "not found"},
               message, args.as_json)
         return 4
+
     _emit(out,
-          {"entity": args.entity, "patch": patch, "tokens": count_tokens(patch)},
+          {"entity": entity, "patch": patch, "tokens": count_tokens(patch)},
           render.render_patch(patch, colour),
           args.as_json)
     return 0
@@ -279,14 +306,25 @@ def _cmd_show(out, repo, args, colour) -> int:
 
 def _cmd_expand(out, repo, args, colour) -> int:
     changeset = diff_revisions(repo, args.base, args.head)
-    lines = expand(changeset, args.entity, budget=args.budget)
+    entity = args.entity
+    lines = expand(changeset, entity, budget=args.budget)
+
+    if not lines:
+        resolved = _fallback_entity(changeset, args.entity, out, args.as_json)
+        if resolved is False:
+            return 5
+        if resolved and resolved != entity:
+            entity = resolved
+            lines = expand(changeset, entity, budget=args.budget)
+
     if not lines:
         message = f"gita: no nested changes under {args.entity}"
         _emit(out, {"entity": args.entity, "lines": [], "error": "not found"},
               message, args.as_json)
         return 4
+
     _emit(out,
-          {"entity": args.entity, "lines": lines,
+          {"entity": entity, "lines": lines,
            "tokens": count_tokens("\n".join(lines))},
           render.render_lines(lines, colour),
           args.as_json)

@@ -139,9 +139,15 @@ class TestFilters:
 
 class TestExpand:
     def test_lists_children_of_an_entity(self, repo):
-        code, output = run(repo, "expand", "app.py::Store")
+        code, output = run(repo, "expand", "app.py::Store", "HEAD^", "HEAD")
         assert code == 0
         assert "Store::get" in output
+
+    def test_accepts_a_bare_name(self, repo):
+        """Agents type `handle`, not `app.py::handle`."""
+        code, output = run(repo, "show", "handle", "HEAD^", "HEAD")
+        assert code == 0
+        assert "def handle" in output
 
     def test_unknown_parent_exits_non_zero(self, repo):
         assert run(repo, "expand", "app.py::nothing")[0] != 0

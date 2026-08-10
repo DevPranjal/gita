@@ -233,3 +233,29 @@ bytes per call -- was buying pennies while spending pounds.
 
 - Per-entity patches repeated difflib's `--- a/x` and `+++ b/x` headers, which on small diffs cost
   more than the change itself and made gita's output *larger* than plain git.
+
+## Unreleased - branch `feat/one-shot-context` (continued)
+
+### Fixed - the three tasks that regressed in iteration 3
+
+Each was diagnosed from run artifacts, not intuition.
+
+- **`gita history` demanded a fully-qualified id.** An agent asked to trace `SaveUploadedFile`
+  typed exactly that, got "no recorded changes", and fell back to `git log -L`. Entity names now
+  resolve from bare input ([`context/resolve.py`](src/gita/context/resolve.py)), and ambiguity is
+  **reported with the candidate ids rather than guessed** -- silently picking one would be the same
+  confident-wrong failure that got `ask()` withdrawn.
+- **Rust `impl` blocks were named after the type only**, so `impl Iterator for Walk` and
+  `struct Walk` collided into `Walk` and `Walk#3`. The trait was invisible, which cost recall on a
+  task whose ground truth included `Iterator`, and the `#N` suffixes discarded real information.
+  Impl blocks are now named `Trait for Type`.
+- **The evaluation harness rewrote whole files when applying setup.** `write_text(read_text() + x)`
+  round-trips LF to CRLF on Windows, so git reported every line of `helpers.py` as changed and the
+  agent was handed a huge confusing diff. Setup now works in bytes. This was a harness defect
+  reported as a gita regression.
+
+`gita show` and `gita expand` also accept bare names, but only as a **fallback** after the literal
+argument fails: resolving first turned the valid container query `app.py::Store` into
+`app.py::Store::get` and answered a question nobody asked.
+
+- 295 tests.

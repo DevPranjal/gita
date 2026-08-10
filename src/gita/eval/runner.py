@@ -181,8 +181,10 @@ def _apply_setup(repo_root: Path, task: Task) -> None:
         return
     target = repo_root / task.setup.file
     if task.setup.append:
-        target.write_text(target.read_text(encoding="utf8") + task.setup.append,
-                          encoding="utf8")
+        # Bytes, not text: read_text/write_text round-trips LF to CRLF on Windows
+        # and rewrites the whole file, so git reports every line as changed.
+        existing = target.read_bytes()
+        target.write_bytes(existing + task.setup.append.encode("utf8"))
 
 
 def _reset(repo_root: Path) -> None:
