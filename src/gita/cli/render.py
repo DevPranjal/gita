@@ -73,6 +73,25 @@ def render_lines(lines: list[str], colour: bool = False) -> str:
     return "\n".join(_paint_kind(line, colour) for line in lines)
 
 
+def render_answer(text: str, colour: bool = False) -> str:
+    """Summary lines carry entity kinds; detail sections are diff-shaped."""
+    if not colour:
+        return text
+    out = []
+    for line in text.splitlines():
+        if line.startswith("+") and not line.startswith("+++"):
+            out.append(paint(line, "green", colour))
+        elif line.startswith("-") and not line.startswith("---"):
+            out.append(paint(line, "red", colour))
+        elif line.startswith("@@"):
+            out.append(paint(line, "cyan", colour))
+        elif line.startswith("--- "):
+            out.append(paint(line, "bold", colour))
+        else:
+            out.append(_paint_kind(line, colour))
+    return "\n".join(out)
+
+
 def render_patch(patch: str, colour: bool = False) -> str:
     if not colour:
         return patch

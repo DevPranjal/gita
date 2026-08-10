@@ -14,17 +14,21 @@ from gita.mcp.tools import (
 
 
 class TestDiffTool:
-    def test_returns_layers_and_entity_ids(self, repo):
+    def test_returns_a_complete_answer_and_entity_ids(self, repo):
         result = diff_tool(str(repo.root))
-        assert result["l0"]
+        assert result["answer"]
         assert any("handle" in c["id"] for c in result["changes"])
+
+    def test_answer_includes_code_so_no_second_call_is_needed(self, repo):
+        assert "@@" in diff_tool(str(repo.root))["answer"]
 
     def test_respects_budget(self, repo):
         assert diff_tool(str(repo.root), budget=40)["tokens"] <= 40
 
-    def test_tells_the_agent_what_to_do_next(self, repo):
-        result = diff_tool(str(repo.root))
-        assert result["next"], "a tool result must be navigable"
+    def test_no_next_steps_when_nothing_was_cut(self, repo):
+        result = diff_tool(str(repo.root), budget=40000)
+        if not result["truncated"]:
+            assert result["next"] == []
 
     def test_reports_noise_it_removed(self, repo):
         assert diff_tool(str(repo.root))["noise_filtered"] > 0
@@ -54,8 +58,8 @@ class TestShowTool:
 class TestFiltering:
     def test_filter_narrows_changes(self, repo):
         result = diff_tool(str(repo.root), filter="handle")
-        assert "handle" in result["l1"]
-        assert "Store::put" not in result["l1"]
+        assert "handle" in result["answer"]
+        assert "Store::put" not in result["answer"]
 
     def test_interface_only_is_exact(self, repo):
         result = diff_tool(str(repo.root), interface_only=True)

@@ -28,19 +28,23 @@ AGENTS_MD = """\
 
 ## Reviewing changes
 
-This repo has `gita` installed, a tool that reads git changes as *context diffs*:
-it reports which named functions, classes and config keys changed rather than
-which lines moved, and costs far fewer tokens than a raw `git diff`.
+Use `gita` instead of `git diff` to read changes. One command gives you the
+summary, the changed files, the changed functions and the relevant code:
 
 ```
-gita diff <base> <head>              headline plus changed entities
-gita diff <base> <head> --budget N   cap the output at N tokens
-gita diff --interface-only           only changes that can break a caller
-gita diff --filter TERM              only entities matching TERM
-gita expand <entity>                 children of a rolled-up entity
-gita show <entity>                   exact hunks for one entity
-gita history <entity>                how one entity changed over time
-gita --help                          full usage
+gita diff <base> <head>
+```
+
+It removes formatting-only noise and costs far fewer tokens than a raw diff,
+and it is never larger than `git diff` would have been. You should not need a
+second command; if output was cut, it says so.
+
+Other forms, only if needed:
+
+```
+gita diff <base> <head> --interface-only   only changes that can break a caller
+gita diff <base> <head> --patch            a plain unified diff, noise removed
+gita history <entity>                      how one function changed over time
 ```
 
 Ordinary `git` commands are available as well.

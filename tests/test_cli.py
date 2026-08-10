@@ -55,15 +55,20 @@ class TestBudget:
         payload = json.loads(run(repo, "diff", "--budget", budget, "--json")[1])
         assert payload["tokens"] <= int(budget)
 
-    def test_generous_budget_is_not_truncated(self, repo):
-        payload = json.loads(run(repo, "diff", "--budget", "4000", "--json")[1])
-        assert payload["truncated"] is False
+    def test_output_never_exceeds_a_raw_git_diff(self, repo):
+        from gita import diff_revisions
+        from gita.context import count_tokens
+
+        payload = json.loads(run(repo, "diff", "--budget", "40000", "--json")[1])
+        changeset = diff_revisions(repo, "HEAD^", "HEAD")
+        raw = repo.raw_diff("HEAD^", "HEAD", changeset.paths())
+        assert payload["tokens"] <= count_tokens(raw)
 
 
 class TestJson:
     def test_emits_valid_json(self, repo):
         payload = json.loads(run(repo, "diff", "--json")[1])
-        assert set(payload) >= {"base", "head", "l0", "l1", "tokens", "changes"}
+        assert set(payload) >= {"base", "head", "text", "tokens", "changes"}
 
     def test_changes_carry_entity_ids(self, repo):
         payload = json.loads(run(repo, "diff", "--json")[1])
@@ -102,12 +107,22 @@ class TestFilters:
         assert "handle" in output
         assert "Store::put" not in output
 
+    def test_brief_omits_code(self, repo):
+        _, output = run(repo, "diff", "--brief")
+        assert "handle" in output
+        assert "@@" not in output
+
+    def test_patch_mode_is_a_diff(self, repo):
+        _, output = run(repo, "diff", "--patch")
+        assert "@@" in output
+        assert "self.data[key]" in output
+
     def test_interface_only_is_computed_not_guessed(self, repo):
         payload = json.loads(run(repo, "diff", "--interface-only", "--json")[1])
         assert payload["interface_only"] is True
         assert all(c["interface"] for c in payload["changes"])
-        assert "handle" in payload["l1"]          # signature changed
-        assert "Store::get" not in payload["l1"]  # body only
+        assert "handle" in payload["text"]          # signature changed
+        assert "Store::get" not in payload["text"]  # body only
 
     def test_unmatched_filter_returns_no_entities(self, repo):
         _, output = run(repo, "diff", "--filter", "kubernetes")

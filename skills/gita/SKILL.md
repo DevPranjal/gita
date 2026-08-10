@@ -1,6 +1,6 @@
 ---
 name: gita
-description: Read code changes as context diffs instead of line diffs. Use whenever you need to understand what changed in a git repository — reviewing a commit or PR, deciding what to re-test, checking whether a public API broke, or orienting yourself in unfamiliar changes. Replaces `git diff`, `git show` and `git log -p` for comprehension, and costs 50-100x fewer tokens. Triggers include "what changed", "review this commit", "did this break anything", "summarise this PR", "what should I re-test", or any point where you were about to read a raw diff.
+description: Read code changes as context diffs instead of line diffs. Use whenever you need to understand what changed in a git repository — reviewing a commit or PR, deciding what to re-test, checking whether a public API broke, or orienting yourself in unfamiliar changes. Replaces `git diff`, `git show` and `git log -p` for comprehension. A single `gita diff` returns the summary, the changed files, the changed functions and the relevant code, with formatting noise removed, and is never larger than the `git diff` it replaces. Triggers include "what changed", "review this commit", "did this break anything", "summarise this PR", or any point where you were about to read a raw diff.
 ---
 
 # gita — context diffs for agents
@@ -9,29 +9,24 @@ description: Read code changes as context diffs instead of line diffs. Use whene
 things changed, and can that break a caller*. gita answers the second question.
 
 A moderate commit is 4,000–20,000 tokens of raw diff, most of it reformatting,
-comment edits and unchanged context. The same commit is **~30 tokens** as a gita
-headline and **~500** in full. Read the headline first; pay for detail only where
-it matters.
+comment edits and unchanged context. gita gives you the same understanding for a
+fraction of that — in one command, with the code included.
 
 ## Core rule
 
-**Never read a raw `git diff` to understand a change. Start with `gita diff`.**
+**Never read a raw `git diff` to understand a change. Run `gita diff` instead.**
 
-Reach for a raw diff only when you need byte-exact context that `gita show`
-cannot give you — which is rare.
+One call gives you the summary, the changed files, the changed functions **and the
+relevant code**. You should not need a second command. gita is never larger than
+the `git diff` it replaces, and is usually far smaller.
 
-## The four steps, cheapest first
+```bash
+gita diff <base> <head>
+```
 
-| Step | Command | Cost | Use when |
-| --- | --- | --- | --- |
-| 1 | `gita diff` | ~30–500 tokens | always start here |
-| 2 | `gita expand <entity>` | ~50 tokens | a line says `(+N nested)` and you need the children |
-| 3 | `gita show <entity>` | ~200 tokens | you must read the actual code |
-
-Stop as soon as you can answer the question. Most reviews never reach step 3.
-
-For *when* something changed rather than *what* changed, use `gita history` — it is far cheaper
-than `git log -p`.
+If the budget forced anything out, the output says so and names what is missing.
+Only then is a follow-up worth it — every extra command costs a whole turn of
+re-sent context, which is far more expensive than the tokens it saves.
 
 ## Commands
 
@@ -41,30 +36,27 @@ All commands accept `-C <path>` for the repository.
 gita diff                          # uncommitted work vs HEAD -- like plain `git diff`
 gita diff HEAD^ HEAD               # the last commit
 gita diff main HEAD                # a branch or PR range
-gita diff --budget 300             # cap the cost; the number is honoured exactly
-gita diff --json                   # machine-readable, includes entity ids
 
-gita diff --interface-only         # only changes that can break a caller
-gita diff --filter teardown        # only entities whose name or path matches
+gita diff <base> <head> --interface-only   # only changes that can break a caller
+gita diff <base> <head> --patch            # plain unified diff, noise removed
+gita diff <base> <head> --brief            # summary only, no code
+gita diff <base> <head> --budget N         # cap output at N tokens
+gita diff <base> <head> --json             # machine-readable
 
-gita expand "src/app.py::Store"    # children of a rolled-up entity
-gita show   "src/app.py::Store::get"   # exact hunks for one entity
-
-gita history "src/app.py::Store::get"  # how one entity evolved, newest first
-gita history --limit 10                # what each recent commit touched
-
+gita history <entity>              # how one function changed over time
+gita show <entity>                 # exact hunks for one entity
 gita savings                       # what this cost vs a raw git diff
 ```
 
-Each command has a Gita-inspired alias, if you prefer them:
-`darshan` (diff), `vistaar` (expand), `shloka` (show), `katha` (history).
+Aliases: `darshan` (diff), `shloka` (show), `katha` (history), `vistaar` (expand).
 
 ### Answering common questions
 
 | Question | Use | Exact? |
 | --- | --- | --- |
-| Did the public API break? | `gita diff --interface-only` | **yes** — from signature hashes |
-| What changed in the auth code? | `gita diff --filter auth` | yes — name/path match |
+| What changed here? | `gita diff <base> <head>` | yes |
+| Did the public API break? | `gita diff <base> <head> --interface-only` | **yes** — from signature hashes |
+| What changed in the auth code? | `gita diff <base> <head> --filter auth` | yes — name/path match |
 | When did this function change? | `gita history <entity>` | yes |
 | What should I re-test? | **not supported** | needs a call graph; do not guess |
 
@@ -107,38 +99,40 @@ src/flask/ctx.py::AppContext::pop  [body_changed]
 **Review a commit**
 
 ```bash
-gita diff
+gita diff HEAD^ HEAD
 ```
-Read the headline. If it answers the question, stop.
+That is the whole workflow. Summary, files, functions and code in one response.
 
 **Check for a breaking change**
 
 ```bash
-gita diff --interface-only
+gita diff HEAD^ HEAD --interface-only
 ```
 
 **Review a pull request**
 
 ```bash
-gita diff origin/main HEAD --budget 800
+gita diff origin/main HEAD
 ```
 
-**Work down to the code**
+**When you want a plain diff, just smaller**
 
 ```bash
-gita diff                                  # 1. headline
-gita expand "src/flask/helpers.py::_CollectErrors"   # 2. children
-gita show "src/flask/helpers.py::_CollectErrors::__exit__"  # 3. the code
+gita diff HEAD^ HEAD --patch
 ```
+Ordinary unified diff format with formatting-only changes removed. Useful when
+you want to read hunks directly and do not want a new output shape.
 
 ## Budgets
 
-`--budget N` is a hard cap, honoured exactly at every value including zero. gita
-adapts by rolling entities up rather than cutting the list off arbitrarily, so a
-small budget still describes the whole change — just less finely.
+`--budget N` is a hard cap, honoured exactly at every value including zero.
+gita degrades by dropping detail for lower-ranked entities and rolling the
+summary up, so a small budget still describes the whole change.
 
-Rules of thumb: **300** to orient, **1000** to review (default), **3000** for a
-large PR you must understand in full.
+The default is deliberately generous. Withholding detail to save a few hundred
+tokens is a false economy: a follow-up command costs a whole turn of re-sent
+context, which is orders of magnitude more expensive. Raise the budget rather
+than making two calls.
 
 ## MCP
 

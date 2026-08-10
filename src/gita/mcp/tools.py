@@ -21,13 +21,15 @@ from ..context import (
     focus,
     focus_label,
 )
+from ..context.answer import DEFAULT_BUDGET as ANSWER_BUDGET
+from ..context.answer import compose
 from ..revisions import diff_revisions
 from ..telemetry import record, timed
 from ..vcs.git import GitError, Repo
 
 DEFAULT_BASE = "HEAD^"
 DEFAULT_HEAD = "HEAD"
-DEFAULT_BUDGET = 1000
+DEFAULT_BUDGET = ANSWER_BUDGET
 
 _MAX_SUGGESTIONS = 5
 
@@ -77,22 +79,26 @@ def _suggestions(changeset) -> list[dict[str, str]]:
 @_guard
 def diff_tool(repo: str, base: str = DEFAULT_BASE, head: str | None = DEFAULT_HEAD,
               budget: int = DEFAULT_BUDGET, filter: str = "",
-              interface_only: bool = False) -> dict[str, Any]:
-    """L0 headline plus a budgeted L1 entity view for a range of revisions."""
+              interface_only: bool = False, brief: bool = False) -> dict[str, Any]:
+    """A complete answer in one call: summary, files, entities and the code.
+
+    Returns `next` only when the budget forced something out; otherwise there is
+    nothing left to drill into and a follow-up call would waste a whole turn.
+    """
     repository = _open(repo, base, head)
     changeset = diff_revisions(repository, base, head)
     selected = focus(changeset, filter, interface_only)
-    view = build_view(selected, budget=budget,
-                      focus=focus_label(filter, interface_only) or None)
+    result = compose(repository, base, head, selected, budget=budget,
+                     detail=not brief)
 
     return {
         "base": base,
         "head": head,
-        "l0": view.l0,
-        "l1": view.l1,
-        "tokens": view.tokens,
+        "answer": result.text,
+        "tokens": result.tokens,
         "budget": budget,
-        "truncated": view.truncated,
+        "truncated": result.truncated,
+        "detailed": result.detailed,
         "files_changed": changeset.files_changed,
         "noise_filtered": len(changeset) - len(changeset.material()),
         "changes": [
@@ -100,7 +106,7 @@ def diff_tool(repo: str, base: str = DEFAULT_BASE, head: str | None = DEFAULT_HE
              "interface": c.affects_interface}
             for c in selected.material()
         ],
-        "next": _suggestions(selected),
+        "next": _suggestions(selected) if result.truncated else [],
     }
 
 

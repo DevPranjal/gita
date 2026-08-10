@@ -19,6 +19,7 @@ from ..context import (
     focus,
     focus_label,
 )
+from ..context.answer import DEFAULT_BUDGET, compose, material_patch
 from ..revisions import diff_revisions
 from ..telemetry import record, timed
 from ..vcs.git import GitError, Repo
@@ -32,7 +33,7 @@ ALIASES = {
     "sarathi": "serve",     # charioteer -- guides the one who acts
 }
 
-DEFAULT_BUDGET = 1000
+DEFAULT_BUDGET = DEFAULT_BUDGET
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -72,6 +73,10 @@ def _parser() -> argparse.ArgumentParser:
                       help="only entities whose name or path contains TERM")
     diff.add_argument("--interface-only", action="store_true",
                       help="only changes that can break a caller")
+    diff.add_argument("--brief", action="store_true",
+                      help="summary only, without the code")
+    diff.add_argument("--patch", action="store_true",
+                      help="unified diff with noise removed")
 
     show = sub.add_parser("show", aliases=["shloka"], parents=[common],
                           help="exact hunks for one entity")
@@ -207,12 +212,35 @@ def _dispatch(command, out, repo, args, colour, parser) -> int:
 def _cmd_diff(out, repo, args, colour) -> int:
     changeset = diff_revisions(repo, args.base, args.head)
     selected = focus(changeset, args.filter, args.interface_only)
-    view = build_view(selected, budget=args.budget,
-                      focus=focus_label(args.filter, args.interface_only) or None)
-    payload = render.view_payload(view, selected, args.base, args.head)
-    payload["filter"] = args.filter
-    payload["interface_only"] = args.interface_only
-    _emit(out, payload, render.render_view(view, colour), args.as_json)
+
+    if args.patch:
+        patch = material_patch(repo, args.base, args.head, selected,
+                               budget=args.budget)
+        _emit(out, {"patch": patch, "tokens": count_tokens(patch)},
+              render.render_patch(patch, colour) or "no material changes",
+              args.as_json)
+        return 0
+
+    # One call should answer the question: a follow-up costs a whole turn of
+    # re-sent context, which dwarfs anything saved by withholding detail.
+    result = compose(repo, args.base, args.head, selected,
+                     budget=args.budget, detail=not args.brief)
+
+    payload = {
+        "base": args.base,
+        "head": args.head,
+        "text": result.text,
+        "tokens": result.tokens,
+        "budget": result.budget,
+        "truncated": result.truncated,
+        "detailed": result.detailed,
+        "filter": args.filter,
+        "interface_only": args.interface_only,
+        "files_changed": selected.files_changed,
+        "noise_filtered": len(changeset) - len(changeset.material()),
+        "changes": [render.change_payload(c) for c in selected.material()],
+    }
+    _emit(out, payload, render.render_answer(result.text, colour), args.as_json)
     return 0
 
 

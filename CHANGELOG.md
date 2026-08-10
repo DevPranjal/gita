@@ -202,3 +202,34 @@ a stated gap beats a confident wrong list.
 
 Also fixed: the JSON payload listed every change while `l1` honoured the filter, so the two
 disagreed. Both now derive from the same focused ChangeSet.
+
+## Unreleased - branch `feat/one-shot-context`
+
+### Changed - answer in one call instead of making the agent drill
+
+Iterations 1 and 2 both measured gita costing about **+1.25 turns** per task. A turn is
+roughly **126,000 tokens** of re-sent context; gita's entire output is ~1,500. Output is
+therefore about **100x cheaper than a turn**, and progressive disclosure -- which optimises
+bytes per call -- was buying pennies while spending pounds.
+
+- **`gita diff` now answers completely in one call** ([`context/answer.py`](src/gita/context/answer.py)):
+  headline, changed files, changed entities, **and the actual hunks** for the highest-ranked
+  entities, all within budget. The agent should not need a second command.
+- **New invariant: gita output is never larger than the `git diff` it replaces.** The budget is
+  capped by the raw diff size, so adopting gita cannot cost more than not adopting it. Tested.
+- **`--patch`** emits an ordinary unified diff with formatting-only changes removed. Familiar
+  format, no new syntax, no drilling -- the lowest-friction way to save an agent tokens.
+- **`--brief`** restores the previous summary-only behaviour.
+- **Default budget raised from 1,000 to 6,000 tokens.** Being stingy with output to avoid a
+  follow-up call is a false economy at ~126k per turn.
+- **Changed files are named in the headline.** Iteration 2 lost recall on a file-level question
+  because an entity list alone cannot answer "which files changed".
+- MCP `gita_diff` returns `answer` rather than `l0`/`l1`, and only returns `next` when the budget
+  actually forced something out -- suggesting a follow-up that is not needed costs a turn.
+- `AGENTS.md` and `SKILL.md` rewritten around a single canonical command, to remove the
+  orientation turn the agent was spending on discovery.
+
+### Fixed
+
+- Per-entity patches repeated difflib's `--- a/x` and `+++ b/x` headers, which on small diffs cost
+  more than the change itself and made gita's output *larger* than plain git.
