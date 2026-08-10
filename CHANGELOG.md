@@ -24,8 +24,13 @@ Entries are grouped by workstream (WS-*) as defined in [docs/SCOPE.md](docs/SCOP
 - **L2 on demand** ([`context/patch.py`](src/gita/context/patch.py)) — `entity_diff` returns a
   unified diff scoped to a single entity, so hunks are paid for only after L0/L1 identified what
   is worth reading.
-- Measured on flask `fbb6f0bc4c`: raw diff 4,324 tokens → **L0 30 tokens (99.3% reduction)**,
-  **L0+L1 528 tokens (87.8%)**, L2 for one entity 216 tokens.
+- **Drill-down and query slicing** ([`context/navigate.py`](src/gita/context/navigate.py)) —
+  `expand(changes, entity_id, budget)` returns the descendants of a rolled-up L1 line, and
+  `query_view(changeset, question, budget)` narrows a view to the changes a question is about via
+  deterministic term and intent matching. Query routing falls back to the full view when nothing
+  matches: an empty answer to a badly-worded question is worse than an unfocused one.
+- Measured on flask `fbb6f0bc4c`: raw diff 4,324 tokens → **L0 28 tokens (99.4% reduction)**,
+  **L0+L1 528 tokens (87.8%)**, expand one cluster 60 tokens, L2 for one entity 216 tokens.
 
 ### Added — WS-1 · Core engine
 
@@ -63,7 +68,7 @@ Entries are grouped by workstream (WS-*) as defined in [docs/SCOPE.md](docs/SCOP
 - **Language extraction tests** ([`tests/test_languages.py`](tests/test_languages.py)) — Go, Rust
   and TSX were previously only exercised by corpus integration, which proves the engine does not
   crash but not that the right entities come out.
-- 111 tests.
+- 136 tests.
 
 ### Added — WS-8 · Evaluation
 
@@ -80,6 +85,9 @@ Entries are grouped by workstream (WS-*) as defined in [docs/SCOPE.md](docs/SCOP
 
 ### Fixed
 
+- `build_view` emitted L0 unconditionally, so any budget below its own cost was silently
+  exceeded — the contract an agent relies on to size its context was not actually enforced.
+  L0 is now trimmed to fit, and `view.tokens <= budget` holds for every budget including zero.
 - Entity hashes covered the whole subtree, so a class reported a change whenever any of its
   methods did and the same edit was counted at every level of the tree. An entity now owns only
   the code no descendant entity has claimed. The module-entity fix below was a special case of

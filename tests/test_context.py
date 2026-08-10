@@ -15,7 +15,9 @@ from gita.context import (
     cluster_changes,
     count_tokens,
     entity_diff,
+    expand,
     fit_lines,
+    query_view,
     rollup_lines,
     score_change,
 )
@@ -255,3 +257,100 @@ class TestL2:
         view = build_view(diff_revisions(tiny_repo, "HEAD^", "HEAD"), budget=800)
         patch = entity_diff(tiny_repo, "HEAD^", "HEAD", "m.py::target")
         assert count_tokens(patch) > count_tokens(view.l0)
+
+
+def sample_changeset() -> ChangeSet:
+    return changeset(
+        ("src/app.py",
+         b"def handle(req):\n    return req\n",
+         b"def handle(req, ctx):\n    return req\n\n\ndef boot():\n    return 1\n"),
+        ("tests/test_app.py",
+         b"def test_handle():\n    assert handle(1)\n",
+         b"def test_handle():\n    assert handle(1, 2)\n"),
+    )
+
+
+def nested_changes():
+    previous = (b"describe('R', () => {\n"
+                b"  it('a', () => { expect(1).toBe(1); });\n"
+                b"  it('b', () => { expect(2).toBe(2); });\n"
+                b"  it('c', () => { expect(3).toBe(3); });\n"
+                b"});\n")
+    current = previous.replace(b"toBe(1)", b"toBe(9)") \
+                      .replace(b"toBe(2)", b"toBe(8)") \
+                      .replace(b"toBe(3)", b"toBe(7)")
+    return changes(previous, current, "t.js")
+
+
+class TestBudgetContract:
+    """A budget an agent cannot rely on is not a budget."""
+
+    @pytest.mark.parametrize("budget", [0, 1, 3, 8, 15, 40, 200, 2000])
+    def test_view_never_exceeds_its_budget(self, budget):
+        assert build_view(sample_changeset(), budget=budget).tokens <= budget
+
+    def test_zero_budget_produces_nothing(self):
+        view = build_view(sample_changeset(), budget=0)
+        assert view.tokens == 0
+        assert view.truncated
+
+    def test_a_tiny_budget_still_says_something(self):
+        view = build_view(sample_changeset(), budget=15)
+        assert view.l0.strip()
+
+    def test_empty_changeset_respects_budget(self):
+        assert build_view(ChangeSet(), budget=2).tokens <= 2
+
+
+class TestExpand:
+    """The middle of the protocol: L1 rolls up, expand drills into one line."""
+
+    def test_expands_children_of_a_rolled_entity(self):
+        lines = expand(nested_changes(), "t.js::describe('R')", budget=400)
+        assert len(lines) == 3
+        assert any("it('a')" in line for line in lines)
+
+    def test_parent_itself_is_not_repeated(self):
+        lines = expand(nested_changes(), "t.js::describe('R')", budget=400)
+        assert not any(line.endswith("describe('R')") for line in lines)
+
+    def test_unknown_entity_expands_to_nothing(self):
+        assert expand(nested_changes(), "t.js::nope", budget=400) == []
+
+    def test_expansion_respects_budget(self):
+        lines = expand(nested_changes(), "t.js::describe('R')", budget=5)
+        assert count_tokens("\n".join(lines)) <= 5
+
+    def test_accepts_a_changeset(self):
+        cs = ChangeSet()
+        cs.extend(nested_changes())
+        assert expand(cs, "t.js::describe('R')", budget=400)
+
+
+class TestQueryDrivenSlicing:
+    """Deterministic keyword routing. WS-3 may replace the router, never the facts."""
+
+    def test_query_narrows_to_matching_entities(self):
+        view = query_view(sample_changeset(), "boot", budget=800)
+        assert "boot" in view.l1
+        assert "test_handle" not in view.l1
+
+    def test_interface_intent_surfaces_signature_changes(self):
+        view = query_view(sample_changeset(), "did the public api break?", budget=800)
+        assert "handle" in view.l1
+
+    def test_unmatched_query_falls_back_rather_than_returning_nothing(self):
+        view = query_view(sample_changeset(), "kubernetes", budget=800)
+        assert view.l1.strip()
+
+    def test_query_is_recorded_in_the_headline(self):
+        view = query_view(sample_changeset(), "boot", budget=800)
+        assert "boot" in view.l0
+
+    @pytest.mark.parametrize("budget", [0, 5, 30, 800])
+    def test_query_view_respects_budget(self, budget):
+        assert query_view(sample_changeset(), "boot", budget=budget).tokens <= budget
+
+    def test_empty_query_behaves_like_a_plain_view(self):
+        plain = build_view(sample_changeset(), budget=800)
+        assert query_view(sample_changeset(), "", budget=800).l1 == plain.l1

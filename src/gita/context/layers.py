@@ -42,10 +42,31 @@ def _plural(count: int, word: str) -> str:
     return f"{count} {word}" if count == 1 else f"{count} {word}s"
 
 
+def fit_text(text: str, budget: int) -> str:
+    """Trim ``text`` to fit ``budget``, word by word.
+
+    L0 used to be emitted unconditionally, so any budget below its own cost was
+    silently blown. A budget an agent cannot rely on is not a budget.
+    """
+    if budget <= 0 or not text:
+        return ""
+    if count_tokens(text) <= budget:
+        return text
+
+    kept: list[str] = []
+    for word in text.split():
+        if count_tokens(" ".join([*kept, word])) > budget:
+            break
+        kept.append(word)
+    return " ".join(kept)
+
+
 def _headline(changeset: ChangeSet, material: list[EntityChange],
-              clusters: list[Cluster], budget: int) -> str:
+              clusters: list[Cluster], budget: int, focus: str | None = None) -> str:
+    prefix = f'query: "{focus}" · ' if focus else ""
+
     if not material:
-        return "no material changes"
+        return f"{prefix}no material changes"
 
     files = len({c.entity.path for c in material})
     interface = sum(1 for c in material if c.affects_interface)
@@ -56,7 +77,7 @@ def _headline(changeset: ChangeSet, material: list[EntityChange],
         parts.append(f"{interface} interface")
     if noise:
         parts.append(f"{noise} noise filtered")
-    headline = " · ".join(parts)
+    headline = prefix + " · ".join(parts)
 
     titles = ", ".join(c.title for c in clusters[:_MAX_HEADLINE_TITLES])
     if not titles:
@@ -68,12 +89,14 @@ def _headline(changeset: ChangeSet, material: list[EntityChange],
     return headline
 
 
-def build_view(changeset: ChangeSet, budget: int = 1000) -> ContextView:
+def build_view(changeset: ChangeSet, budget: int = 1000,
+               focus: str | None = None) -> ContextView:
     """Assemble a budgeted L0 + L1 view of a ChangeSet."""
     material = changeset.material()
     clusters = cluster_changes(list(changeset))
 
-    l0 = _headline(changeset, material, clusters, budget)
+    l0_full = _headline(changeset, material, clusters, budget, focus)
+    l0 = fit_text(l0_full, budget)
     remaining = max(0, budget - count_tokens(l0))
 
     lines, depth = fit_lines(material, remaining)
@@ -84,6 +107,6 @@ def build_view(changeset: ChangeSet, budget: int = 1000) -> ContextView:
         l1="\n".join(lines),
         clusters=clusters,
         depth=depth,
-        truncated=lines != full,
+        truncated=lines != full or l0 != l0_full,
         budget=budget,
     )
