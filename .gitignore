@@ -14,3 +14,6 @@ dist/
 # editor / os
 .DS_Store
 Thumbs.db
+
+# eval artifacts: per-run copilot logs are megabytes each
+evals/runs/
