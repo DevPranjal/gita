@@ -1,0 +1,18 @@
+I'll check the current commit's CI changes.
+
+The HEAD commit doesn't touch CI. Let me find the most recent CI-config change.
+
+Note: HEAD (`a371447`) is a `hbs` 4.2.0 → 4.2.1 bump in `package.json` — no CI change. The most recent CI-config commit is **`5175d2f`**:
+
+**`build(deps): bump actions/checkout from 6.0.2 to 7.0.0` (#7345, dependabot)**
+
+- Action: `actions/checkout`
+- SHA pin: `de0fac2e4500dabe0009e67214ff5f5447ce83dd` (v6.0.2) → `9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0` (v7.0.0) — semver-major
+- 7 occurrences across 4 workflows:
+  - `ci.yml` — 3 (lint, test matrix, test-coverage job)
+  - `legacy.yml` — 2
+  - `codeql.yml` — 1
+  - `scorecard.yml` — 1
+
+Only the pinned SHA/version comment changed; `with: persist-credentials: false` is unchanged everywhere.
+

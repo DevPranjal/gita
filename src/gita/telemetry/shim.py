@@ -97,21 +97,32 @@ def main(argv: list[str] | None = None) -> int:
 def install(directory: str | Path) -> Path:
     """Write a `git` shim into ``directory`` and return that directory.
 
-    Prepend the result to PATH to capture the baseline arm.
+    Both a .cmd and an extensionless POSIX script are written: the agent may
+    shell out through cmd, powershell or bash, and a .cmd is invisible to bash.
+
+    The real git path is baked in at install time. Discovering it at runtime is
+    unreliable -- under `python -m` the shim cannot see its own directory, so it
+    re-finds itself on PATH and recurses.
     """
     target = Path(directory)
     target.mkdir(parents=True, exist_ok=True)
     python = sys.executable
+    real_git = shutil.which("git") or "git"
 
-    if os.name == "nt":
-        script = target / "git.cmd"
-        script.write_text(
-            f'@echo off\r\n"{python}" -m gita.telemetry.shim %*\r\n', encoding="utf8")
-    else:
-        script = target / "git"
-        script.write_text(
-            f'#!/bin/sh\nexec "{python}" -m gita.telemetry.shim "$@"\n', encoding="utf8")
-        script.chmod(0o755)
+    (target / "git.cmd").write_text(
+        "@echo off\r\n"
+        f'set "{ENV_REAL_GIT}={real_git}"\r\n'
+        f'"{python}" -m gita.telemetry.shim %*\r\n',
+        encoding="utf8")
+
+    posix = target / "git"
+    posix.write_text(
+        "#!/bin/sh\n"
+        f'{ENV_REAL_GIT}="{real_git}"\n'
+        f"export {ENV_REAL_GIT}\n"
+        f'exec "{python}" -m gita.telemetry.shim "$@"\n',
+        encoding="utf8", newline="\n")
+    posix.chmod(0o755)
 
     return target
 

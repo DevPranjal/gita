@@ -1,0 +1,125 @@
+# Evaluation tasks.
+#
+# Ground truth is hand-curated from commit messages and git's own hunk headers.
+# It never comes from gita -- a benchmark scored by the tool under test is worthless.
+#
+# Prompts are identical in both arms. gita is discovered via PATH + AGENTS.md,
+# never mentioned in the prompt.
+
+- id: flask-teardown-review
+  repo: flask
+  base: fbb6f0bc4c^
+  head: fbb6f0bc4c
+  category: review
+  prompt: |
+    Summarise what this commit changes and why it matters, for a code reviewer.
+    Name the specific functions and classes involved.
+  must_mention: [_CollectErrors, do_teardown_request, do_teardown_appcontext, AppContext]
+  note: multi-file single logical change; needs synthesis
+
+- id: express-send-condition
+  repo: express
+  base: 18e5985^
+  head: 18e5985
+  category: review
+  prompt: |
+    What behaviour changes in this commit, and under what conditions does the
+    new behaviour apply? Name the function involved.
+  must_mention: [send, Content-Length, Transfer-Encoding]
+  note: a summary that omits the condition is wrong
+
+- id: gin-public-api
+  repo: gin
+  base: 96ece6a^
+  head: 96ece6a
+  category: interface
+  prompt: |
+    Does this commit add, change or remove any public API? List exactly what,
+    including the method name and its receiver type.
+  must_mention: [Scheme, Context]
+  note: two tokens required; "Scheme" alone could match incidental prose
+
+- id: gin-copy-fix
+  repo: gin
+  base: 293ad7e^
+  head: 293ad7e
+  category: interface
+  prompt: |
+    What behaviour changes for callers of this code? Name the method and the
+    fields affected.
+  must_mention: [Copy, Errors, Accepted]
+  note: narrow fix; tests precision rather than recall
+
+- id: ripgrep-walker
+  repo: ripgrep
+  base: 435f59f^
+  head: 435f59f
+  category: locate
+  prompt: |
+    Which parts of the directory walker changed in this commit, and what is the
+    effect? Name the types involved.
+  must_mention: [WalkBuilder, Walk, Iterator]
+  note: Rust coverage; hunk headers give clean independent ground truth
+
+- id: got-new-option
+  repo: got
+  base: 1c88e88^
+  head: 1c88e88
+  category: large
+  prompt: |
+    What new option does this commit add, and where is it handled? Name the
+    option exactly.
+  must_mention: [allowAbsoluteUrls]
+  note: 13 files, 1413 insertions -- where gita should win biggest
+
+- id: express-ci-bump
+  repo: express
+  base: 5175d2f^
+  head: 5175d2f
+  category: config
+  prompt: |
+    What exactly changed in the CI configuration in this commit? Be specific
+    about the action and the versions.
+  must_mention: [actions/checkout, 7.0.0]
+  expect_no_benefit: true
+  note: CONTROL -- 7 lines across 4 files. gita should not help here.
+
+- id: flask-dependency-update
+  repo: flask
+  base: ff6fa22^
+  head: ff6fa22
+  category: config
+  prompt: |
+    What changed in this dependency update, and which files were affected?
+  must_mention: [uv.lock, pyproject.toml]
+  note: noise stress test; ground truth is file-level and weaker than the rest
+
+- id: gin-history
+  repo: gin
+  base: HEAD~40
+  head: HEAD
+  category: history
+  prompt: |
+    When was the SaveUploadedFile function last changed in this range, and what
+    changed about it? Give the commit and describe the change.
+  must_mention: [chmod, SaveUploadedFile]
+  note: gita history vs git log -S; ground truth from git log -S
+
+- id: flask-uncommitted
+  repo: flask
+  base: HEAD
+  head: ""
+  category: worktree
+  prompt: |
+    Review my uncommitted changes in this repository. What did I change, and is
+    anything incomplete or unwired?
+  must_mention: [_eval_probe]
+  setup:
+    file: src/flask/helpers.py
+    append: |
+
+
+      def _eval_probe(value):
+          """Added by the evaluation harness; intentionally unused."""
+          return value * 2
+  note: ground truth exact by construction; the function is deliberately unwired

@@ -1,0 +1,40 @@
+{
+  "by_arm": {
+    "git": {
+      "runs": 1,
+      "mean_recall": 1.0,
+      "mean_prompt_tokens": 248514.0,
+      "mean_tool_tokens": 1786.0,
+      "mean_turns": 2.0,
+      "total_prompt_tokens": 248514,
+      "tokens_per_correct_answer": 248514.0
+    },
+    "gita": {
+      "runs": 1,
+      "mean_recall": 1.0,
+      "mean_prompt_tokens": 620641.0,
+      "mean_tool_tokens": 1341.0,
+      "mean_turns": 5.0,
+      "total_prompt_tokens": 620641,
+      "tokens_per_correct_answer": 620641.0
+    }
+  },
+  "reduction": {
+    "prompt_tokens": -1.4974085966987776,
+    "tool_tokens": 0.2491601343784995
+  },
+  "adoption_rate": 1.0,
+  "quality_delta": 0.0,
+  "tasks": [
+    {
+      "task": "express-ci-bump",
+      "git_prompt_tokens": 248514,
+      "gita_prompt_tokens": 620641,
+      "git_tool_tokens": 1786,
+      "gita_tool_tokens": 1341,
+      "git_recall": 1.0,
+      "gita_recall": 1.0,
+      "reduction": -1.4974085966987776
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+#!/bin/sh
+GITA_REAL_GIT="C:\Program Files\Git\cmd\git.EXE"
+export GITA_REAL_GIT
+exec "Q:\projects\gita\.venv\Scripts\python.exe" -m gita.telemetry.shim "$@"

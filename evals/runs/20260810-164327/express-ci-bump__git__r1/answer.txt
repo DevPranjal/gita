@@ -1,0 +1,14 @@
+Commit `5175d2f` — a Dependabot bump (PR #7345): **`actions/checkout` from v6.0.2 → v7.0.0** (major update).
+
+Pinned SHA changed in every usage:
+- old: `de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2`
+- new: `9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0`
+
+7 occurrences across 4 workflows:
+- `.github/workflows/ci.yml` — 3 (lint, test matrix, coverage/checks job)
+- `.github/workflows/legacy.yml` — 2
+- `.github/workflows/codeql.yml` — 1
+- `.github/workflows/scorecard.yml` — 1
+
+Nothing else changed; `with: persist-credentials: false` was left intact everywhere, and no other actions or Node versions were touched.
+

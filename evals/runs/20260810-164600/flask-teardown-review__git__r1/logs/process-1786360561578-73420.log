@@ -1,0 +1,44 @@
+2026-08-10T11:16:01.579Z [DEBUG] [nativeRuntime] in-process mode: loading the native runtime .node addon into this process
+2026-08-10T11:16:01.580Z [WARNING] [userSettings] Ignoring unknown top-level key(s) in user settings file "C:\\Users\\prgulati\\.copilot\\settings.json": "alt_screen". They are not recognized user settings and have no effect.
+2026-08-10T11:16:01.580Z [DEBUG] [MDM] No managed settings found at C:\Program Files\GitHubCopilot\managed-settings.json
+2026-08-10T11:16:01.580Z [DEBUG] [MDM] Read 3 managed setting(s) from registry key HKLM\SOFTWARE\Policies\GitHubCopilot
+2026-08-10T11:16:01.580Z [DEBUG] [rust:log] setting the default credential store to Store { vendor: "Windows Credential Manager, https://crates.io/crates/windows-native-keyring-store", id: "Crate version 1.1.0, Instantiated at 1786360561.5770051", delimiters: ["", ".", ""], service_no_divider: false } {"log.target":"keyring_core","log.module_path":"keyring_core","log.file":"C:\\Users\\runneradmin\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\keyring-core-1.0.0\\src\\lib.rs","log.line":66}
+2026-08-10T11:16:01.580Z [DEBUG] [rust:log] creating entry with service copilot-cli, user https://github.com:prgulati_microsoft {"log.target":"keyring_core","log.module_path":"keyring_core","log.file":"C:\\Users\\runneradmin\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\keyring-core-1.0.0\\src\\lib.rs","log.line":131}
+2026-08-10T11:16:01.580Z [DEBUG] [rust:log] create entry wrapping Cred { target_name: "https://github.com:prgulati_microsoft.copilot-cli", specifiers: Some(("copilot-cli", "https://github.com:prgulati_microsoft")), persistence: Enterprise } {"log.target":"keyring_core","log.module_path":"keyring_core","log.file":"C:\\Users\\runneradmin\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\keyring-core-1.0.0\\src\\lib.rs","log.line":166}
+2026-08-10T11:16:01.580Z [DEBUG] [rust:log] created entry Cred { target_name: "https://github.com:prgulati_microsoft.copilot-cli", specifiers: Some(("copilot-cli", "https://github.com:prgulati_microsoft")), persistence: Enterprise } {"log.target":"keyring_core","log.module_path":"keyring_core","log.file":"C:\\Users\\runneradmin\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\keyring-core-1.0.0\\src\\lib.rs","log.line":133}
+2026-08-10T11:16:01.581Z [DEBUG] [rust:log] get password from entry Cred { target_name: "https://github.com:prgulati_microsoft.copilot-cli", specifiers: Some(("copilot-cli", "https://github.com:prgulati_microsoft")), persistence: Enterprise } {"log.target":"keyring_core","log.module_path":"keyring_core","log.file":"C:\\Users\\runneradmin\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\keyring-core-1.0.0\\src\\lib.rs","log.line":262}
+2026-08-10T11:16:01.582Z [INFO] Shell completions: no supported shell detected, skipping
+2026-08-10T11:16:01.695Z [DEBUG] [rust:copilot_runtime::auth::gh] GitHub CLI authenticated with valid token
+2026-08-10T11:16:01.696Z [DEBUG] [rust:log] starting new connection 'Some("api.github.com")' {"log.target":"reqwest::connect","log.module_path":"reqwest::connect","log.file":"C:\\Users\\runneradmin\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\reqwest-0.13.4\\src\\connect.rs","log.line":929}
+2026-08-10T11:16:01.708Z [DEBUG] [rust:hyper_util::client::legacy::connect::http] connecting to 20.205.243.168:443
+2026-08-10T11:16:01.709Z [DEBUG] [rust:hyper_util::client::legacy::connect::http] connected to 20.205.243.168:443
+2026-08-10T11:16:02.339Z [DEBUG] [rust:hyper_util::client::legacy::pool] pooling idle connection for ("https", api.github.com)
+2026-08-10T11:16:02.343Z [DEBUG] [rust:otel] OpenTelemetry not enabled (no env config)
+2026-08-10T11:16:02.343Z [INFO] Session indexing debug: SESSION_INDEXING=true, repository=undefined
+2026-08-10T11:16:02.347Z [DEBUG] [MDM] No managed settings found at C:\Program Files\GitHubCopilot\managed-settings.json
+2026-08-10T11:16:02.347Z [DEBUG] [MDM] Read 3 managed setting(s) from registry key HKLM\SOFTWARE\Policies\GitHubCopilot
+2026-08-10T11:16:02.347Z [INFO] [managedSettings] device MDM policy loaded: bypassDisabled=false, keys=[remoteControl]
+2026-08-10T11:16:02.347Z [INFO] [managedSettings] server policy: none for this account served from fresh cache (age 1336522ms) from https://github.com
+2026-08-10T11:16:02.347Z [INFO] [managedSettings] effective policy resolved: source=mdm, bypassDisabled=false, serverFetchFailed=false
+2026-08-10T11:16:02.347Z [DEBUG] [rust:otel] OpenTelemetry disabled after applying managed telemetry
+2026-08-10T11:16:02.599Z [DEBUG] [rust:hyper_util::client::legacy::pool] reuse idle connection for ("https", api.github.com)
+2026-08-10T11:16:02.830Z [DEBUG] No policy subkeys found in registry
+2026-08-10T11:16:02.830Z [DEBUG] Policy directory C:\ProgramData\GitHub\Copilot\policy.d not readable — no file policies loaded
+2026-08-10T11:16:02.840Z [ERROR] Invalid hooks config for plugin "bug-assessor" at "C:\Users\prgulati\.copilot\installed-plugins\agency\bug-assessor\hooks\hooks.json": hooks: hooks must be an object
+2026-08-10T11:16:02.848Z [INFO] [managedSettings] applied: no bypass restriction in force (managed policy absent)
+2026-08-10T11:16:02.852Z [DEBUG] No model backend (auth, legacy provider, or BYOK registry) available, skipping custom agents load
+2026-08-10T11:16:02.871Z [INFO] Workspace initialized: 27601ec1-eaf4-4951-be3b-ba7334bd356b (checkpoints: 0)
+2026-08-10T11:16:02.899Z [DEBUG] dynamic context: flag=false, repo=pallets/flask, branch=main
+2026-08-10T11:16:02.904Z [DEBUG] [rust:copilot_runtime::github_telemetry::service] Sending telemetry event: cli.telemetry (kind: session_start)
+2026-08-10T11:16:02.905Z [DEBUG] [rust:copilot_runtime::github_telemetry::service] Sending telemetry event: cli.telemetry (kind: memory_usage)
+2026-08-10T11:16:02.905Z [DEBUG] [rust:copilot_runtime::github_telemetry::service] Sending telemetry event: cli.telemetry (kind: first_launch)
+2026-08-10T11:16:02.907Z [DEBUG] [rust:copilot_runtime::github_telemetry::service] Sending telemetry event: cli.telemetry (kind: copilot_user_info)
+2026-08-10T11:16:02.912Z [INFO] Starting Copilot CLI: 1.0.79-9
+2026-08-10T11:16:02.912Z [INFO] Node.js version: v24.18.1
+2026-08-10T11:16:02.913Z [DEBUG] Remote exporter setup: enableRemote=false, effectiveEnableRemote=true, shouldStart=undefined, connectMode=false
+2026-08-10T11:16:03.077Z [DEBUG] [rust:copilot_runtime::github_telemetry::service] Sending telemetry event: cli.telemetry (kind: tgrep_startup)
+2026-08-10T11:16:03.083Z [DEBUG] [rust:hyper_util::client::legacy::pool] pooling idle connection for ("https", api.github.com)
+2026-08-10T11:16:03.086Z [INFO] No update needed, current version is 1.0.79-9, fetched latest release is v1.0.79-9
+2026-08-10T11:16:03.094Z [DEBUG] [rust:log] starting new connection 'Some("api.enterprise.githubcopilot.com")' {"log.target":"reqwest::connect","log.module_path":"reqwest::connect","log.file":"C:\\Users\\runneradmin\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\reqwest-0.13.4\\src\\connect.rs","log.line":929}
+2026-08-10T11:16:03.100Z [DEBUG] [rust:hyper_util::client::legacy::connect::http] connecting to 140.82.113.22:443
+2026-08-10T11:16:03.101Z [DEBUG] [rust:hyper_util::client::legacy::connect::http] connected to 140.82.113.22:443

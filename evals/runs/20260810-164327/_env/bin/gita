@@ -1,0 +1,2 @@
+#!/bin/sh
+exec "Q:\projects\gita\.venv\Scripts\python.exe" -m gita "$@"

@@ -1,0 +1,1 @@
+Warning: Ignoring unknown top-level key(s) in user settings file "C:\\Users\\prgulati\\.copilot\\settings.json": "alt_screen". They are not recognized user settings and have no effect.
