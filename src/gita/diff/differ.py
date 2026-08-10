@@ -87,9 +87,11 @@ def reconcile_moves(changes: list[EntityChange]) -> list[EntityChange]:
     every file pair is quadratic, and a cross-file guess is a bad trade.
     """
     added = {c.current.id: c.current for c in changes
-             if c.kind is ChangeKind.ADDED and c.current is not None}
+             if c.kind is ChangeKind.ADDED and c.current is not None
+             and not c.current.synthetic}
     removed = {c.previous.id: c.previous for c in changes
-               if c.kind is ChangeKind.REMOVED and c.previous is not None}
+               if c.kind is ChangeKind.REMOVED and c.previous is not None
+               and not c.previous.synthetic}
     if not added or not removed:
         return changes
 
@@ -134,14 +136,12 @@ def diff_trees(previous: EntityTree | None, current: EntityTree | None,
     if previous is None and current is None:
         return []
     if previous is None:
-        return [EntityChange(ChangeKind.ADDED, current=e)
-                for e in current.walk() if not e.synthetic]
+        return [EntityChange(ChangeKind.ADDED, current=e) for e in current.walk()]
     if current is None:
-        return [EntityChange(ChangeKind.REMOVED, previous=e)
-                for e in previous.walk() if not e.synthetic]
+        return [EntityChange(ChangeKind.REMOVED, previous=e) for e in previous.walk()]
 
-    old_entities = {e.id: e for e in previous.walk() if not e.synthetic}
-    new_entities = {e.id: e for e in current.walk() if not e.synthetic}
+    old_entities = {e.id: e for e in previous.walk()}
+    new_entities = {e.id: e for e in current.walk()}
 
     changes: list[EntityChange] = []
 
@@ -149,8 +149,12 @@ def diff_trees(previous: EntityTree | None, current: EntityTree | None,
     for entity_id in old_entities.keys() & new_entities.keys():
         changes.append(_classify_matched(old_entities[entity_id], new_entities[entity_id]))
 
-    removed = {i: e for i, e in old_entities.items() if i not in new_entities}
-    added = {i: e for i, e in new_entities.items() if i not in old_entities}
+    # A module is bound to its file; git handles file renames, so it never
+    # participates in move or rename matching.
+    removed = {i: e for i, e in old_entities.items()
+               if i not in new_entities and not e.synthetic}
+    added = {i: e for i, e in new_entities.items()
+             if i not in old_entities and not e.synthetic}
 
     # pass 2 -- identical content, then identical body, matched only where
     # the hash is unambiguous on both sides

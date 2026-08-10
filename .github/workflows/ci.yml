@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: unit · python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+
+      - name: Install
+        run: python -m pip install --upgrade pip && pip install -e ".[dev]"
+
+      # Corpus tests self-skip when the corpus is absent; they run in the job below.
+      - name: Test
+        run: pytest -q
+
+  corpus:
+    name: integration · real repositories
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: python -m pip install --upgrade pip && pip install -e ".[dev]"
+
+      - name: Clone corpus
+        run: |
+          mkdir -p spikes/attribution/corpus
+          cd spikes/attribution/corpus
+          clone() { git clone --quiet --depth 30 --single-branch "$1" "$2"; }
+          clone https://github.com/expressjs/express.git   express
+          clone https://github.com/pallets/flask.git       flask
+          clone https://github.com/gin-gonic/gin.git       gin
+          clone https://github.com/sindresorhus/got.git    got
+          clone https://github.com/BurntSushi/ripgrep.git  ripgrep
+
+      - name: Integration tests
+        run: pytest tests/test_corpus.py -q
+
+      - name: Attribution benchmark
+        run: python spikes/attribution/spike.py --commits 10

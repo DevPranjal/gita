@@ -32,7 +32,16 @@ Entries are grouped by workstream (WS-*) as defined in [docs/SCOPE.md](docs/SCOP
   `material()` (noise excluded) and `interface_changes()` (caller-visible) views.
 - **Git layer** ([`vcs/git.py`](src/gita/vcs/git.py), [`revisions.py`](src/gita/revisions.py)) —
   `diff_revisions(repo, base, head)` produces a `ChangeSet` for two git revisions.
-- 63 tests, including integration over real history from five corpus repositories.
+- 81 tests, including integration over real history from five corpus repositories.
+
+### Added — Infrastructure
+
+- **CI** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) — unit tests on Python 3.11 and
+  3.12, plus an integration job that clones the corpus, runs the real-history tests and executes
+  the attribution benchmark.
+- **Language extraction tests** ([`tests/test_languages.py`](tests/test_languages.py)) — Go, Rust
+  and TSX were previously only exercised by corpus integration, which proves the engine does not
+  crash but not that the right entities come out.
 
 ### Added — WS-8 · Evaluation
 
@@ -49,6 +58,15 @@ Entries are grouped by workstream (WS-*) as defined in [docs/SCOPE.md](docs/SCOP
 
 ### Fixed
 
+- The synthetic `<module>` entity was excluded from diffing, so a commit that only touched
+  imports or top-level statements produced an **empty ChangeSet**. The module entity now
+  participates in change detection, and its hash covers only top-level code *not* claimed by a
+  child entity — otherwise it would change whenever any function did and carry no signal. It is
+  still excluded from move and rename matching, since git already handles file renames.
+- Go `type_declaration` was registered as an entity, but the name lives on the inner `type_spec`,
+  so every Go type extracted as `<anonymous>`.
+- Go function literals bound via `var x = func() {}` were unnamed; `_binding_name` did not know
+  about `var_spec`, `const_spec`, `short_var_declaration` or `expression_list`.
 - `content_hash` included an entity's own name, so a pure rename never matched by hash and fell
   through to fuzzy scoring at 0.6 confidence. Added `body_hash`; renames now match exactly.
 - The JavaScript `function` node was registered as an entity. In the current tree-sitter grammar

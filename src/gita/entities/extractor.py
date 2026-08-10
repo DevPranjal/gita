@@ -18,6 +18,7 @@ _TRANSPARENT = frozenset({
     "return_statement", "array", "expression_statement", "await_expression",
     "non_null_expression", "as_expression", "satisfies_expression",
     "type_assertion", "spread_element", "ternary_expression", "pair_pattern",
+    "expression_list", "var_declaration", "assignment_statement",
 })
 
 _NAME_FIELDS = ("name", "type", "declarator", "pattern")
@@ -52,8 +53,11 @@ def _binding_name(node) -> str:
         kind = parent.type
 
         if kind in ("variable_declarator", "public_field_definition",
-                    "field_definition", "property_signature", "short_var_declaration"):
+                    "field_definition", "property_signature", "var_spec",
+                    "const_spec"):
             return _text(parent.child_by_field_name("name")) or MODULE_ENTITY
+        if kind == "short_var_declaration":
+            return _text(parent.child_by_field_name("left")) or MODULE_ENTITY
         if kind == "pair":
             return _text(parent.child_by_field_name("key")) or MODULE_ENTITY
         if kind == "assignment_expression":
@@ -150,6 +154,27 @@ def _make_entity(node, spec, path, name, parent_id, entity_id, kind) -> Entity:
     )
 
 
+def _module_tokens(root_node, spec: LanguageSpec) -> list[str]:
+    """Top-level tokens not claimed by any entity: imports, constants, side effects.
+
+    Without this the module hash would cover the whole file and change whenever
+    any function did, making it useless as a signal.
+    """
+    out: list[str] = []
+    stack = list(reversed(root_node.children))
+    while stack:
+        current = stack.pop()
+        if current.type in spec.entity_nodes or current.type in spec.comment_nodes:
+            continue
+        if current.child_count == 0:
+            text = current.text.decode("utf8", "replace").strip()
+            if text:
+                out.append(text)
+            continue
+        stack.extend(reversed(current.children))
+    return out
+
+
 def extract(source: bytes, path: str, spec: LanguageSpec | None = None) -> EntityTree:
     """Parse one revision of one file into an entity tree."""
     spec = spec or for_path(path)
@@ -160,7 +185,7 @@ def extract(source: bytes, path: str, spec: LanguageSpec | None = None) -> Entit
     root_node = tree.root_node
 
     # Spike A finding 3: top-level statements need somewhere to live.
-    root_tokens = _tokens(root_node, spec)
+    root_tokens = _module_tokens(root_node, spec)
     root = Entity(
         id=path,
         kind=EntityKind.MODULE,

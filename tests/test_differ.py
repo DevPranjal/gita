@@ -68,8 +68,32 @@ class TestNoiseFiltering:
 
         changeset = ChangeSet()
         changeset.extend(diff_trees(old, new))
-        assert len(changeset) == 1
+        # the module entity is reported alongside the function; both are noise
+        assert len(changeset) == 2
         assert changeset.material() == []
+
+
+class TestModuleEntity:
+    """Top-level code is owned by a synthetic <module> entity, and must diff."""
+
+    def test_import_only_change_is_material(self):
+        result = changes_by_id(b"import os\n\n\ndef a():\n    return 1\n",
+                               b"import os\nimport sys\n\n\ndef a():\n    return 1\n")
+        assert result["m.py"].kind is ChangeKind.BODY_CHANGED
+        assert result["m.py::a"].kind is ChangeKind.UNCHANGED
+
+    def test_module_hash_ignores_changes_inside_entities(self):
+        result = changes_by_id(b"import os\n\n\ndef a():\n    return 1\n",
+                               b"import os\n\n\ndef a():\n    return 999\n")
+        # only the function moved; the module's own code is untouched
+        assert result["m.py"].kind is ChangeKind.COSMETIC
+        assert result["m.py"].is_noise
+        assert result["m.py::a"].kind is ChangeKind.BODY_CHANGED
+
+    def test_top_level_statement_change_is_material(self):
+        result = changes_by_id(b"app = build()\napp.use(logger)\n",
+                               b"app = build()\napp.use(logger)\napp.use(auth)\n")
+        assert result["m.py"].kind is ChangeKind.BODY_CHANGED
 
 
 class TestMoveAndRename:

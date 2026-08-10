@@ -91,7 +91,8 @@ SPECS: tuple[LanguageSpec, ...] = (
         kinds={
             "function_declaration": EntityKind.FUNCTION,
             "method_declaration": EntityKind.METHOD,
-            "type_declaration": EntityKind.TYPE,
+            # the name lives on type_spec; type_declaration is just the `type (...)` wrapper
+            "type_spec": EntityKind.TYPE,
             "func_literal": EntityKind.FUNCTION,
         },
         comment_nodes=frozenset({"comment"}),
