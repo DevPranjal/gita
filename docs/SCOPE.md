@@ -301,3 +301,32 @@ retries. That preserves the graceful-degradation property in §2.
 - Rename-detection similarity threshold — tune empirically on the corpus.
 - **Blocked on hardware:** which SLM clears the grounding bar at acceptable latency? (Spike B)
 - **Blocked on hardware:** what is the minimum viable model size — does 3B suffice, or is 7B the floor?
+
+---
+
+## 10. Naming
+
+The project is named for the Bhagavad Gita — hence *every agent needs a direction*.
+
+**Decision:** conventional verbs are canonical; Gita-inspired names are first-class aliases.
+`gita diff` is what a judge or a new user will guess and what `--help` leads with; the alias carries
+the identity. Discoverability wins the demo, identity wins the memory.
+
+- Aliases are chosen **per command, as each is built** — not reserved up front.
+- **Internal layer names stay `L0` / `L1` / `L2`.** Code and docs should read plainly; the poetry
+  belongs on the surface, not in the call graph.
+
+Candidate vocabulary, for reference when each command lands:
+
+| Term | Meaning | Natural fit |
+| --- | --- | --- |
+| `darshan` | beholding, seeing truly | the context diff |
+| `saar` | essence, gist | L0 headline |
+| `shloka` | the verse itself | L2 exact hunks |
+| `prashna` | question | ask about a change |
+| `smriti` | memory | the local index (WS-5) |
+| `kshetra` | the field (ch. 13) | survey of the codebase |
+| `sarathi` | charioteer, guide | the MCP server |
+
+`sanjaya` — who narrates the battlefield to a king who cannot see it — is the closest analogue to
+what gita does, and is held in reserve.
