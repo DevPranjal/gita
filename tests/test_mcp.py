@@ -6,7 +6,6 @@ import pytest
 
 from gita.mcp.tools import (
     TOOLS,
-    ask_tool,
     diff_tool,
     expand_tool,
     savings_tool,
@@ -52,13 +51,15 @@ class TestShowTool:
         assert "error" in show_tool(str(repo.root), "app.py::nope")
 
 
-class TestAskTool:
-    def test_narrows_to_the_question(self, repo):
-        result = ask_tool(str(repo.root), "handle")
+class TestFiltering:
+    def test_filter_narrows_changes(self, repo):
+        result = diff_tool(str(repo.root), filter="handle")
         assert "handle" in result["l1"]
+        assert "Store::put" not in result["l1"]
 
-    def test_echoes_the_question(self, repo):
-        assert ask_tool(str(repo.root), "handle")["question"] == "handle"
+    def test_interface_only_is_exact(self, repo):
+        result = diff_tool(str(repo.root), interface_only=True)
+        assert "error" not in result
 
 
 class TestSavingsTool:
@@ -71,7 +72,6 @@ class TestSavingsTool:
 class TestFailureModes:
     @pytest.mark.parametrize("tool,args", [
         (diff_tool, ()),
-        (ask_tool, ("anything",)),
         (savings_tool, ()),
     ])
     def test_non_repository_reports_an_error(self, tmp_path, tool, args):

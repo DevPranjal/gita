@@ -11,7 +11,14 @@ import json
 import sys
 from typing import TextIO
 
-from ..context import build_view, count_tokens, entity_diff, expand, query_view
+from ..context import (
+    build_view,
+    count_tokens,
+    entity_diff,
+    expand,
+    focus,
+    focus_label,
+)
 from ..revisions import diff_revisions
 from ..telemetry import record, timed
 from ..vcs.git import GitError, Repo
@@ -20,7 +27,6 @@ from . import render
 ALIASES = {
     "darshan": "diff",      # beholding -- seeing what truly changed
     "shloka": "show",       # the verse itself -- exact text
-    "prashna": "ask",       # question
     "vistaar": "expand",    # elaboration
     "katha": "history",     # the story -- how it came to be
     "sarathi": "serve",     # charioteer -- guides the one who acts
@@ -62,17 +68,15 @@ def _parser() -> argparse.ArgumentParser:
                           help="context diff between two revisions")
     revisions(diff)
     budget(diff)
+    diff.add_argument("--filter", default="", metavar="TERM",
+                      help="only entities whose name or path contains TERM")
+    diff.add_argument("--interface-only", action="store_true",
+                      help="only changes that can break a caller")
 
     show = sub.add_parser("show", aliases=["shloka"], parents=[common],
                           help="exact hunks for one entity")
     show.add_argument("entity")
     revisions(show)
-
-    ask = sub.add_parser("ask", aliases=["prashna"], parents=[common],
-                         help="ask a question about the change")
-    ask.add_argument("question")
-    revisions(ask)
-    budget(ask)
 
     exp = sub.add_parser("expand", aliases=["vistaar"], parents=[common],
                          help="drill into a rolled-up entity")
@@ -185,8 +189,6 @@ def _dispatch(command, out, repo, args, colour, parser) -> int:
             return _cmd_diff(out, repo, args, colour)
         if command == "show":
             return _cmd_show(out, repo, args, colour)
-        if command == "ask":
-            return _cmd_ask(out, repo, args, colour)
         if command == "expand":
             return _cmd_expand(out, repo, args, colour)
         if command == "savings":
@@ -204,19 +206,12 @@ def _dispatch(command, out, repo, args, colour, parser) -> int:
 
 def _cmd_diff(out, repo, args, colour) -> int:
     changeset = diff_revisions(repo, args.base, args.head)
-    view = build_view(changeset, budget=args.budget)
-    _emit(out,
-          render.view_payload(view, changeset, args.base, args.head),
-          render.render_view(view, colour),
-          args.as_json)
-    return 0
-
-
-def _cmd_ask(out, repo, args, colour) -> int:
-    changeset = diff_revisions(repo, args.base, args.head)
-    view = query_view(changeset, args.question, budget=args.budget)
-    payload = render.view_payload(view, changeset, args.base, args.head)
-    payload["question"] = args.question
+    selected = focus(changeset, args.filter, args.interface_only)
+    view = build_view(selected, budget=args.budget,
+                      focus=focus_label(args.filter, args.interface_only) or None)
+    payload = render.view_payload(view, selected, args.base, args.head)
+    payload["filter"] = args.filter
+    payload["interface_only"] = args.interface_only
     _emit(out, payload, render.render_view(view, colour), args.as_json)
     return 0
 

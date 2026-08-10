@@ -13,7 +13,14 @@ from __future__ import annotations
 import json
 from typing import Any, Callable
 
-from ..context import build_view, count_tokens, entity_diff, expand, query_view
+from ..context import (
+    build_view,
+    count_tokens,
+    entity_diff,
+    expand,
+    focus,
+    focus_label,
+)
 from ..revisions import diff_revisions
 from ..telemetry import record, timed
 from ..vcs.git import GitError, Repo
@@ -68,12 +75,15 @@ def _suggestions(changeset) -> list[dict[str, str]]:
 
 
 @_guard
-def diff_tool(repo: str, base: str = DEFAULT_BASE, head: str = DEFAULT_HEAD,
-              budget: int = DEFAULT_BUDGET) -> dict[str, Any]:
+def diff_tool(repo: str, base: str = DEFAULT_BASE, head: str | None = DEFAULT_HEAD,
+              budget: int = DEFAULT_BUDGET, filter: str = "",
+              interface_only: bool = False) -> dict[str, Any]:
     """L0 headline plus a budgeted L1 entity view for a range of revisions."""
     repository = _open(repo, base, head)
     changeset = diff_revisions(repository, base, head)
-    view = build_view(changeset, budget=budget)
+    selected = focus(changeset, filter, interface_only)
+    view = build_view(selected, budget=budget,
+                      focus=focus_label(filter, interface_only) or None)
 
     return {
         "base": base,
@@ -88,9 +98,9 @@ def diff_tool(repo: str, base: str = DEFAULT_BASE, head: str = DEFAULT_HEAD,
         "changes": [
             {"id": c.entity.id, "kind": c.kind.value,
              "interface": c.affects_interface}
-            for c in changeset.material()
+            for c in selected.material()
         ],
-        "next": _suggestions(changeset),
+        "next": _suggestions(selected),
     }
 
 
@@ -129,29 +139,8 @@ def show_tool(repo: str, entity: str, base: str = DEFAULT_BASE,
 
 
 @_guard
-def ask_tool(repo: str, question: str, base: str = DEFAULT_BASE,
-             head: str = DEFAULT_HEAD,
-             budget: int = DEFAULT_BUDGET) -> dict[str, Any]:
-    """A view narrowed to the changes a question is about."""
-    repository = _open(repo, base, head)
-    changeset = diff_revisions(repository, base, head)
-    view = query_view(changeset, question, budget=budget)
-
-    return {
-        "question": question,
-        "base": base,
-        "head": head,
-        "l0": view.l0,
-        "l1": view.l1,
-        "tokens": view.tokens,
-        "truncated": view.truncated,
-        "next": _suggestions(changeset),
-    }
-
-
-@_guard
 def savings_tool(repo: str, base: str = DEFAULT_BASE,
-                 head: str = DEFAULT_HEAD,
+                 head: str | None = DEFAULT_HEAD,
                  budget: int = DEFAULT_BUDGET) -> dict[str, Any]:
     """What this context diff costs versus sending the raw git diff."""
     repository = _open(repo, base, head)
@@ -175,6 +164,5 @@ TOOLS = {
     "gita_diff": diff_tool,
     "gita_expand": expand_tool,
     "gita_show": show_tool,
-    "gita_ask": ask_tool,
     "gita_savings": savings_tool,
 }

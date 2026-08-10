@@ -1,11 +1,15 @@
-"""Drill-down and query-driven slicing — the navigable half of the protocol.
+"""Drill-down and filtering — the navigable half of the protocol.
 
 L1 rolls a subtree up to ``Parent (+4 nested)``. Without ``expand`` an agent that
 wants those four has to re-request the whole changeset at a larger budget, or
 jump straight to L2 using an entity id it was never given.
 
-Routing here is deterministic keyword matching, and is labelled as such. WS-3 may
-replace the router with a model; it may not let the model invent entities.
+There is deliberately no question-answering here. An earlier `ask()` matched
+query words against entity ids, so "what should I re-test?" returned every entity
+with "test" in its path -- a confidently shaped answer that omitted the untouched
+tests actually at risk. Filtering is what this code really does, so that is what
+it is called. Question answering waits for WS-3, grounded in facts, and for WS-2
+to supply the caller edges it needs.
 """
 
 from __future__ import annotations
@@ -15,43 +19,32 @@ from typing import Iterable
 
 from ..diff.changes import ChangeSet, EntityChange
 from .layers import ContextView, build_view
-from .rank import score_change
 from .rollup import MAX_DEPTH, fit_lines
 
 _WORD = re.compile(r"[a-z0-9_]+")
 
-_STOPWORDS = frozenset({
-    "the", "and", "for", "did", "does", "what", "which", "was", "were", "are",
-    "any", "all", "this", "that", "with", "from", "has", "have", "had", "how",
-    "why", "who", "when", "where", "show", "give", "tell", "about", "into",
-    "changed", "change", "changes", "diff", "commit", "please",
-})
 
-#: Intent keywords -> a predicate over changes. Crude on purpose, and honest.
-_INTENTS: dict[str, frozenset[str]] = {
-    "interface": frozenset({"api", "interface", "signature", "break", "breaking",
-                            "compat", "compatible", "caller", "callers", "public",
-                            "contract"}),
-    "test": frozenset({"test", "tests", "retest", "testing", "spec", "coverage"}),
-    "added": frozenset({"new", "added", "add", "introduced"}),
-    "removed": frozenset({"removed", "deleted", "gone", "dropped"}),
-}
+def terms_of(text: str) -> list[str]:
+    return [w for w in _WORD.findall(text.lower()) if len(w) > 1]
 
 
-def terms_of(question: str) -> list[str]:
-    return [w for w in _WORD.findall(question.lower())
-            if len(w) > 2 and w not in _STOPWORDS]
+def matches(change: EntityChange, terms: Iterable[str]) -> bool:
+    """Whether an entity's name or path contains every term."""
+    entity = change.entity
+    name = entity.qualname.lower()
+    path = entity.path.lower()
+    return all(term in name or term in path for term in terms)
 
 
-def intents_of(question: str) -> set[str]:
-    words = set(_WORD.findall(question.lower()))
-    return {name for name, keywords in _INTENTS.items() if words & keywords}
-
-
-def relevance(change: EntityChange, terms: Iterable[str]) -> int:
-    """How many query terms appear in an entity's identity or signature."""
-    haystack = f"{change.entity.id} {change.entity.signature}".lower()
-    return sum(1 for term in terms if term in haystack)
+def filter_changes(changes: Iterable[EntityChange], term: str = "",
+                   interface_only: bool = False) -> list[EntityChange]:
+    selected = [c for c in changes if not c.is_noise]
+    if interface_only:
+        selected = [c for c in selected if c.affects_interface]
+    if term:
+        terms = terms_of(term)
+        selected = [c for c in selected if matches(c, terms)]
+    return selected
 
 
 def expand(changes: Iterable[EntityChange], entity_id: str,
@@ -66,36 +59,40 @@ def expand(changes: Iterable[EntityChange], entity_id: str,
     return lines
 
 
-def query_view(changeset: ChangeSet, question: str,
-               budget: int = 1000) -> ContextView:
-    """A view narrowed to the changes a question is about.
+def focus(changeset: ChangeSet, term: str = "",
+          interface_only: bool = False) -> ChangeSet:
+    """A ChangeSet restricted to matching entities.
 
-    Falls back to the full view when nothing matches -- an empty answer to a
-    badly-worded question is worse than an unfocused one.
+    Callers render *and* serialise from this, so a JSON payload can never
+    disagree with the text view about what was selected.
     """
-    question = (question or "").strip()
-    if not question:
-        return build_view(changeset, budget=budget)
+    if not term and not interface_only:
+        return changeset
 
-    material = changeset.material()
-    terms = terms_of(question)
-    intents = intents_of(question)
-
-    selected = [c for c in material if relevance(c, terms)] if terms else []
-
-    if "interface" in intents:
-        by_intent = [c for c in material if c.affects_interface]
-        selected = [c for c in selected if c.affects_interface] or selected or by_intent
-    if "added" in intents:
-        selected = selected or [c for c in material if c.kind.value == "added"]
-    if "removed" in intents:
-        selected = selected or [c for c in material if c.kind.value == "removed"]
-
-    if not selected:
-        selected = material
-
+    selected = filter_changes(changeset.material(), term, interface_only)
     focused = ChangeSet()
     focused.files_changed = len({c.entity.path for c in selected})
-    focused.extend(sorted(selected, key=lambda c: -score_change(c)))
+    focused.extend(selected)
+    return focused
 
-    return build_view(focused, budget=budget, focus=question)
+
+def focus_label(term: str = "", interface_only: bool = False) -> str:
+    return " ".join(filter(None, [
+        f'filter "{term}"' if term else "",
+        "interface-only" if interface_only else "",
+    ]))
+
+
+def filtered_view(changeset: ChangeSet, term: str = "",
+                  interface_only: bool = False,
+                  budget: int = 1000) -> ContextView:
+    """A view restricted to matching entities.
+
+    An empty result stays empty: silently widening the filter would be the same
+    dishonesty as answering a question we cannot answer.
+    """
+    if not term and not interface_only:
+        return build_view(changeset, budget=budget)
+
+    return build_view(focus(changeset, term, interface_only), budget=budget,
+                      focus=focus_label(term, interface_only))

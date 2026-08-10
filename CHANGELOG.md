@@ -180,3 +180,25 @@ report both levels: per-call tool output (micro) and real session spend (macro).
 - Root commits now diff against git's empty tree rather than failing on `<sha>^`.
 - 238 tests.
 
+
+### Changed - `ask` deferred, replaced by exact filters
+
+`gita ask` and the `gita_ask` MCP tool have been withdrawn until WS-3.
+
+They matched query words against entity ids, so `ask "what should I re-test?"` returned every
+entity with "test" in its path. That answer *looked* right and omitted exactly the tests at risk:
+the ones covering changed source that did not themselves change. Every other gita surface degrades
+to blunt-but-correct; this one degraded to confidently wrong, which is worse.
+
+Replaced by two exact flags on `gita diff`:
+
+- `--interface-only` - only changes that can break a caller, computed from signature hashes.
+  This answers "did the public API break?" without guessing.
+- `--filter TERM` - only entities whose name or path matches. It is a filter, and now says so.
+
+An unmatched filter returns nothing rather than silently widening. `gita history` covers "when did
+this change". "What should I re-test?" is now explicitly unsupported pending WS-2 caller edges -
+a stated gap beats a confident wrong list.
+
+Also fixed: the JSON payload listed every change while `l1` honoured the filter, so the two
+disagreed. Both now derive from the same focused ChangeSet.

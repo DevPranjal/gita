@@ -95,18 +95,23 @@ class TestShow:
                run(repo, "show", "app.py::Store::get")[1]
 
 
-class TestAsk:
-    def test_narrows_to_the_question(self, repo):
-        code, output = run(repo, "ask", "handle")
+class TestFilters:
+    def test_filter_narrows_output(self, repo):
+        code, output = run(repo, "diff", "--filter", "handle")
         assert code == 0
         assert "handle" in output
+        assert "Store::put" not in output
 
-    def test_question_is_echoed(self, repo):
-        _, output = run(repo, "ask", "handle")
-        assert "handle" in output
+    def test_interface_only_is_computed_not_guessed(self, repo):
+        payload = json.loads(run(repo, "diff", "--interface-only", "--json")[1])
+        assert payload["interface_only"] is True
+        assert all(c["interface"] for c in payload["changes"])
+        assert "handle" in payload["l1"]          # signature changed
+        assert "Store::get" not in payload["l1"]  # body only
 
-    def test_alias_prashna(self, repo):
-        assert run(repo, "prashna", "handle")[1] == run(repo, "ask", "handle")[1]
+    def test_unmatched_filter_returns_no_entities(self, repo):
+        _, output = run(repo, "diff", "--filter", "kubernetes")
+        assert "app.py::handle" not in output
 
 
 class TestExpand:

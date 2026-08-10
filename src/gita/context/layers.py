@@ -63,7 +63,7 @@ def fit_text(text: str, budget: int) -> str:
 
 def _headline(changeset: ChangeSet, material: list[EntityChange],
               clusters: list[Cluster], budget: int, focus: str | None = None) -> str:
-    prefix = f'query: "{focus}" · ' if focus else ""
+    prefix = f"{focus} · " if focus else ""
 
     if not material:
         return f"{prefix}no material changes"

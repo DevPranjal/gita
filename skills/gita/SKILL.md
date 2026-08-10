@@ -27,12 +27,11 @@ cannot give you — which is rare.
 | 1 | `gita diff` | ~30–500 tokens | always start here |
 | 2 | `gita expand <entity>` | ~50 tokens | a line says `(+N nested)` and you need the children |
 | 3 | `gita show <entity>` | ~200 tokens | you must read the actual code |
-| 4 | `gita ask "<question>"` | ~200 tokens | you have a specific question |
 
 Stop as soon as you can answer the question. Most reviews never reach step 3.
 
-For *when* something changed rather than *what* changed, use `gita history` instead — it is far
-cheaper than `git log -p`.
+For *when* something changed rather than *what* changed, use `gita history` — it is far cheaper
+than `git log -p`.
 
 ## Commands
 
@@ -45,9 +44,11 @@ gita diff main HEAD                # a branch or PR range
 gita diff --budget 300             # cap the cost; the number is honoured exactly
 gita diff --json                   # machine-readable, includes entity ids
 
+gita diff --interface-only         # only changes that can break a caller
+gita diff --filter teardown        # only entities whose name or path matches
+
 gita expand "src/app.py::Store"    # children of a rolled-up entity
 gita show   "src/app.py::Store::get"   # exact hunks for one entity
-gita ask    "did the public API break?"
 
 gita history "src/app.py::Store::get"  # how one entity evolved, newest first
 gita history --limit 10                # what each recent commit touched
@@ -56,7 +57,19 @@ gita savings                       # what this cost vs a raw git diff
 ```
 
 Each command has a Gita-inspired alias, if you prefer them:
-`darshan` (diff), `vistaar` (expand), `shloka` (show), `prashna` (ask), `katha` (history).
+`darshan` (diff), `vistaar` (expand), `shloka` (show), `katha` (history).
+
+### Answering common questions
+
+| Question | Use | Exact? |
+| --- | --- | --- |
+| Did the public API break? | `gita diff --interface-only` | **yes** — from signature hashes |
+| What changed in the auth code? | `gita diff --filter auth` | yes — name/path match |
+| When did this function change? | `gita history <entity>` | yes |
+| What should I re-test? | **not supported** | needs a call graph; do not guess |
+
+gita has no natural-language question interface, on purpose. It reports facts it
+computed and refuses questions it cannot answer exactly.
 
 ## Reading the output
 
@@ -98,17 +111,10 @@ gita diff
 ```
 Read the headline. If it answers the question, stop.
 
-**Decide what to re-test**
-
-```bash
-gita ask "what should I re-test?"
-```
-Focus on `signature_changed` and `removed` entities and their tests.
-
 **Check for a breaking change**
 
 ```bash
-gita diff --json | jq '.changes[] | select(.interface == true)'
+gita diff --interface-only
 ```
 
 **Review a pull request**
@@ -137,9 +143,9 @@ large PR you must understand in full.
 ## MCP
 
 If gita is available as an MCP server, the same layers are exposed as
-`gita_diff`, `gita_expand`, `gita_show`, `gita_ask` and `gita_savings`. Every
-result carries a `next` field naming the entities you can act on — follow it
-rather than guessing entity ids.
+`gita_diff`, `gita_expand`, `gita_show` and `gita_savings`. `gita_diff` takes
+`filter` and `interface_only`. Every result carries a `next` field naming the
+entities you can act on — follow it rather than guessing entity ids.
 
 Start `gita serve` (alias `sarathi`) to run the server over stdio.
 

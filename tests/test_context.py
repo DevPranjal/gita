@@ -16,8 +16,8 @@ from gita.context import (
     count_tokens,
     entity_diff,
     expand,
+    filtered_view,
     fit_lines,
-    query_view,
     rollup_lines,
     score_change,
 )
@@ -327,30 +327,36 @@ class TestExpand:
         assert expand(cs, "t.js::describe('R')", budget=400)
 
 
-class TestQueryDrivenSlicing:
-    """Deterministic keyword routing. WS-3 may replace the router, never the facts."""
+class TestFiltering:
+    """Filtering is exact. Question answering is deliberately absent until WS-3."""
 
-    def test_query_narrows_to_matching_entities(self):
-        view = query_view(sample_changeset(), "boot", budget=800)
+    def test_filter_narrows_to_matching_entities(self):
+        view = filtered_view(sample_changeset(), term="boot", budget=800)
         assert "boot" in view.l1
         assert "test_handle" not in view.l1
 
-    def test_interface_intent_surfaces_signature_changes(self):
-        view = query_view(sample_changeset(), "did the public api break?", budget=800)
+    def test_interface_only_uses_computed_facts_not_keywords(self):
+        view = filtered_view(sample_changeset(), interface_only=True, budget=800)
         assert "handle" in view.l1
 
-    def test_unmatched_query_falls_back_rather_than_returning_nothing(self):
-        view = query_view(sample_changeset(), "kubernetes", budget=800)
-        assert view.l1.strip()
+    def test_an_unmatched_filter_stays_empty(self):
+        view = filtered_view(sample_changeset(), term="kubernetes", budget=800)
+        assert view.l1.strip() == ""
 
-    def test_query_is_recorded_in_the_headline(self):
-        view = query_view(sample_changeset(), "boot", budget=800)
+    def test_filter_is_recorded_in_the_headline(self):
+        view = filtered_view(sample_changeset(), term="boot", budget=800)
         assert "boot" in view.l0
 
     @pytest.mark.parametrize("budget", [0, 5, 30, 800])
-    def test_query_view_respects_budget(self, budget):
-        assert query_view(sample_changeset(), "boot", budget=budget).tokens <= budget
+    def test_filtered_view_respects_budget(self, budget):
+        assert filtered_view(sample_changeset(), term="boot",
+                             budget=budget).tokens <= budget
 
-    def test_empty_query_behaves_like_a_plain_view(self):
+    def test_no_filter_behaves_like_a_plain_view(self):
         plain = build_view(sample_changeset(), budget=800)
-        assert query_view(sample_changeset(), "", budget=800).l1 == plain.l1
+        assert filtered_view(sample_changeset(), budget=800).l1 == plain.l1
+
+    def test_path_terms_match_too(self):
+        view = filtered_view(sample_changeset(), term="tests/", budget=800)
+        assert "tests/test_app.py" in view.l1
+        assert "src/app.py" not in view.l1
