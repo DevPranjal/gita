@@ -51,10 +51,16 @@ class Answer:
         return count_tokens(self.text)
 
 
-def _headline(changeset: ChangeSet, material: list[EntityChange]) -> str:
+def _headline(changeset: ChangeSet, material: list[EntityChange],
+              worktree: bool = False) -> str:
     if not material:
         if changeset.files_changed == 0:
-            return "nothing to compare: no files differ between these revisions"
+            base = "nothing to compare: no files differ between these revisions"
+            # Without a next step the agent has to guess, and a guess costs a turn.
+            if worktree:
+                return ("working tree is clean, nothing uncommitted to review\n"
+                        "to review the last commit: gita diff HEAD^ HEAD")
+            return base
         return f"no material changes ({changeset.files_changed} files, all noise)"
 
     files = sorted({c.entity.path for c in material})
@@ -102,6 +108,7 @@ def compose(repo: Repo, base: str, head: str | None, changeset: ChangeSet,
             respect_raw_diff: bool = True) -> Answer:
     """A complete answer in one call, within budget and never costlier than git."""
     material = changeset.material()
+    worktree = head is None or head == ""
 
     if respect_raw_diff and material:
         raw = repo.raw_diff(base, head, changeset.paths())
@@ -109,10 +116,10 @@ def compose(repo: Repo, base: str, head: str | None, changeset: ChangeSet,
         if raw_tokens:
             budget = min(budget, raw_tokens)
 
-    headline = fit_text(_headline(changeset, material), budget)
+    headline = fit_text(_headline(changeset, material, worktree), budget)
     if not material or budget <= 0:
         return Answer(text=headline, budget=budget,
-                      truncated=headline != _headline(changeset, material))
+                      truncated=headline != _headline(changeset, material, worktree))
 
     summary_budget = max(0, int(budget * SUMMARY_SHARE) - count_tokens(headline))
     lines, _ = fit_lines(material, summary_budget)

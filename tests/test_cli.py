@@ -157,10 +157,12 @@ class TestSavings:
 
 
 class TestErrors:
-    def test_no_command_prints_help(self, repo):
+    def test_no_command_prints_short_usage(self, repo):
         code, output = run(repo)
         assert code != 0
-        assert "usage" in output.lower()
+        assert "gita diff" in output
+        # orientation should be cheap: an agent reading this pays for every line
+        assert len(output.splitlines()) <= 14
 
     def test_unknown_command_exits_non_zero(self, repo):
         assert run(repo, "wat")[0] != 0

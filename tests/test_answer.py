@@ -28,6 +28,12 @@ class TestCompleteness:
     def test_includes_the_headline(self, repo):
         assert "file" in answer(repo).text.splitlines()[0]
 
+    def test_clean_working_tree_says_what_to_run_instead(self, repo):
+        """Without a next step the agent must guess, and a guess costs a turn."""
+        text = answer(repo, base="HEAD", head=None).text
+        assert "clean" in text.lower()
+        assert "HEAD^" in text
+
     def test_names_the_changed_files(self, repo):
         """Iteration 2 lost recall on a file-level question: entities are not enough."""
         text = answer(repo).text

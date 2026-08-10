@@ -33,8 +33,8 @@ re-sent context, which is far more expensive than the tokens it saves.
 All commands accept `-C <path>` for the repository.
 
 ```bash
-gita diff                          # uncommitted work vs HEAD -- like plain `git diff`
-gita diff HEAD^ HEAD               # the last commit
+gita diff HEAD^ HEAD               # the last commit (the default)
+gita diff HEAD                     # uncommitted work, like plain `git diff`
 gita diff main HEAD                # a branch or PR range
 
 gita diff <base> <head> --interface-only   # only changes that can break a caller

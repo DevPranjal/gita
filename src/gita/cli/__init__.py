@@ -33,6 +33,19 @@ ALIASES = {
     "sarathi": "serve",     # charioteer -- guides the one who acts
 }
 
+USAGE = """\
+gita - context diffs for agent coders
+
+  gita diff <base> <head>     what changed: summary, files, functions and code
+  gita diff <base> <head> --interface-only   only changes that can break a caller
+  gita diff <base> <head> --patch            plain unified diff, noise removed
+  gita history <entity>       how one function changed over time
+  gita show <entity>          exact hunks for one entity
+  gita savings                cost versus a raw git diff
+
+One `gita diff` should answer the question; it says so when output was cut.
+Run `gita <command> --help` for details."""
+
 DEFAULT_BUDGET = DEFAULT_BUDGET
 
 
@@ -155,7 +168,9 @@ def main(argv: list[str] | None = None, out: TextIO | None = None) -> int:
         return int(exit_code.code or 2)
 
     if not args.command:
-        render.write(out, parser.format_help())
+        # Full argparse help is expensive for an agent to read; point at the one
+        # command that answers the question.
+        render.write(out, USAGE)
         return 2
 
     command = ALIASES.get(args.command, args.command)
