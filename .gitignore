@@ -1,0 +1,16 @@
+# spike corpus — cloned on demand, never committed
+spikes/*/corpus/
+spikes/*/results.json
+
+# python
+.venv/
+__pycache__/
+*.py[cod]
+
+# node
+node_modules/
+dist/
+
+# editor / os
+.DS_Store
+Thumbs.db
