@@ -121,3 +121,21 @@ Entries are grouped by workstream (WS-*) as defined in [docs/SCOPE.md](docs/SCOP
 - Blast radius, call graphs and caller resolution are not implemented — that is WS-2.
 - No layering, rollup or token budgeting yet — that is WS-4.
 - No model integration — that is WS-3, blocked on GPU hardware.
+
+### Added — WS-6 · Consumers
+
+- **CLI** ([`cli/`](src/gita/cli/)) — `gita diff`, `show`, `ask`, `expand`, `savings`, `serve`,
+  with `-C`, `--budget`, `--json` and colour that disappears when piped. Gita-inspired aliases:
+  `darshan`, `shloka`, `prashna`, `vistaar`, `sarathi`.
+- **MCP server** ([`mcp/`](src/gita/mcp/)) — `gita_diff`, `gita_expand`, `gita_show`, `gita_ask`,
+  `gita_savings`. Tool logic lives in `tools.py`, free of the SDK, so the contract an agent
+  depends on is testable without a transport. Every result carries a `next` field naming the
+  entities an agent can act on, making progressive disclosure discoverable rather than
+  documented. Supports MCP SDK 1.x and 2.x.
+- **Agent skill** ([`skills/gita/SKILL.md`](skills/gita/SKILL.md)) — teaches an agent to reach for
+  gita instead of `git diff`, with the four-step drill-down, how to read entity ids and change
+  kinds, worked examples, and an explicit limits section.
+- 186 tests.
+
+**Resolved open question:** each layer is a separate MCP tool rather than a depth parameter on one
+tool, so an agent sees the cost of each step in the name it chooses.
