@@ -18,48 +18,56 @@ def run(repo, *args) -> tuple[int, str]:
 
 class TestDiff:
     def test_reports_changed_entities(self, repo):
-        code, output = run(repo, "diff")
+        code, output = run(repo, "diff", "HEAD^", "HEAD")
         assert code == 0
         assert "handle" in output
         assert "Store::get" in output
 
-    def test_defaults_to_last_commit(self, repo):
-        assert run(repo, "diff")[1] == run(repo, "diff", "HEAD^", "HEAD")[1]
+    def test_defaults_to_the_working_tree_like_git(self, repo):
+        """Bare `gita diff` must mean what bare `git diff` means.
+
+        Defaulting to HEAD^..HEAD silently answered the wrong question when an
+        agent asked about uncommitted work, costing 12 turns in evaluation.
+        """
+        code, output = run(repo, "diff")
+        assert code == 0
+        assert "clean" in output.lower()
+        assert "HEAD^" in output          # and it says what to run instead
 
     def test_accepts_explicit_revisions(self, repo):
         code, output = run(repo, "diff", "HEAD^", "HEAD")
-        assert code == 0 and output.strip()
+        assert code == 0 and "handle" in output
 
     def test_suppresses_noise_by_default(self, repo):
-        _, output = run(repo, "diff")
+        _, output = run(repo, "diff", "HEAD^", "HEAD")
         assert "unchanged" not in output
         assert "cosmetic" not in output
 
     def test_headline_precedes_detail(self, repo):
-        _, output = run(repo, "diff")
+        _, output = run(repo, "diff", "HEAD^", "HEAD")
         assert output.index("file") < output.index("app.py::handle")
 
     def test_alias_darshan_matches_diff(self, repo):
-        assert run(repo, "darshan")[1] == run(repo, "diff")[1]
+        assert run(repo, "darshan", "HEAD^", "HEAD")[1] == run(repo, "diff", "HEAD^", "HEAD")[1]
 
 
 class TestBudget:
     def test_budget_is_reported_and_honoured(self, repo):
-        _, output = run(repo, "diff", "--budget", "40", "--json")
+        _, output = run(repo, "diff", "HEAD^", "HEAD", "--budget", "40", "--json")
         payload = json.loads(output)
         assert payload["tokens"] <= 40
         assert payload["budget"] == 40
 
     @pytest.mark.parametrize("budget", ["0", "5", "25", "100", "4000"])
     def test_any_budget_holds(self, repo, budget):
-        payload = json.loads(run(repo, "diff", "--budget", budget, "--json")[1])
+        payload = json.loads(run(repo, "diff", "HEAD^", "HEAD", "--budget", budget, "--json")[1])
         assert payload["tokens"] <= int(budget)
 
     def test_output_never_exceeds_a_raw_git_diff(self, repo):
         from gita import diff_revisions
         from gita.context import count_tokens
 
-        payload = json.loads(run(repo, "diff", "--budget", "40000", "--json")[1])
+        payload = json.loads(run(repo, "diff", "HEAD^", "HEAD", "--budget", "40000", "--json")[1])
         changeset = diff_revisions(repo, "HEAD^", "HEAD")
         raw = repo.raw_diff("HEAD^", "HEAD", changeset.paths())
         assert payload["tokens"] <= count_tokens(raw)
@@ -67,17 +75,17 @@ class TestBudget:
 
 class TestJson:
     def test_emits_valid_json(self, repo):
-        payload = json.loads(run(repo, "diff", "--json")[1])
+        payload = json.loads(run(repo, "diff", "HEAD^", "HEAD", "--json")[1])
         assert set(payload) >= {"base", "head", "text", "tokens", "changes"}
 
     def test_changes_carry_entity_ids(self, repo):
-        payload = json.loads(run(repo, "diff", "--json")[1])
+        payload = json.loads(run(repo, "diff", "HEAD^", "HEAD", "--json")[1])
         ids = [c["id"] for c in payload["changes"]]
         assert "app.py::handle" in ids
         assert all("kind" in c for c in payload["changes"])
 
     def test_entity_ids_are_usable_with_show(self, repo):
-        payload = json.loads(run(repo, "diff", "--json")[1])
+        payload = json.loads(run(repo, "diff", "HEAD^", "HEAD", "--json")[1])
         entity_id = next(c["id"] for c in payload["changes"] if "handle" in c["id"])
         code, output = run(repo, "show", entity_id)
         assert code == 0 and output.strip()
@@ -102,30 +110,30 @@ class TestShow:
 
 class TestFilters:
     def test_filter_narrows_output(self, repo):
-        code, output = run(repo, "diff", "--filter", "handle")
+        code, output = run(repo, "diff", "HEAD^", "HEAD", "--filter", "handle")
         assert code == 0
         assert "handle" in output
         assert "Store::put" not in output
 
     def test_brief_omits_code(self, repo):
-        _, output = run(repo, "diff", "--brief")
+        _, output = run(repo, "diff", "HEAD^", "HEAD", "--brief")
         assert "handle" in output
         assert "@@" not in output
 
     def test_patch_mode_is_a_diff(self, repo):
-        _, output = run(repo, "diff", "--patch")
+        _, output = run(repo, "diff", "HEAD^", "HEAD", "--patch")
         assert "@@" in output
         assert "self.data[key]" in output
 
     def test_interface_only_is_computed_not_guessed(self, repo):
-        payload = json.loads(run(repo, "diff", "--interface-only", "--json")[1])
+        payload = json.loads(run(repo, "diff", "HEAD^", "HEAD", "--interface-only", "--json")[1])
         assert payload["interface_only"] is True
         assert all(c["interface"] for c in payload["changes"])
         assert "handle" in payload["text"]          # signature changed
         assert "Store::get" not in payload["text"]  # body only
 
     def test_unmatched_filter_returns_no_entities(self, repo):
-        _, output = run(repo, "diff", "--filter", "kubernetes")
+        _, output = run(repo, "diff", "HEAD^", "HEAD", "--filter", "kubernetes")
         assert "app.py::handle" not in output
 
 

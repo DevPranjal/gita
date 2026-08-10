@@ -70,9 +70,13 @@ def _parser() -> argparse.ArgumentParser:
 
     sub = parser.add_subparsers(dest="command")
 
-    def revisions(sp):
-        sp.add_argument("base", nargs="?", default="HEAD^")
-        sp.add_argument("head", nargs="?", default="HEAD")
+    def revisions(sp, worktree_default: bool = False):
+        # `gita diff` must mean what `git diff` means. Defaulting to HEAD^..HEAD
+        # silently showed the last commit when the agent asked about uncommitted
+        # work -- one evaluation task spent 12 turns on that.
+        sp.add_argument("base", nargs="?", default="HEAD" if worktree_default else "HEAD^")
+        sp.add_argument("head", nargs="?",
+                        default=None if worktree_default else "HEAD")
 
     def budget(sp):
         sp.add_argument("--budget", type=int, default=DEFAULT_BUDGET,
@@ -80,7 +84,7 @@ def _parser() -> argparse.ArgumentParser:
 
     diff = sub.add_parser("diff", aliases=["darshan"], parents=[common],
                           help="context diff between two revisions")
-    revisions(diff)
+    revisions(diff, worktree_default=True)
     budget(diff)
     diff.add_argument("--filter", default="", metavar="TERM",
                       help="only entities whose name or path contains TERM")
