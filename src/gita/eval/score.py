@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from .pricing import credits
+
 
 def recall(answer: str, must_mention: list[str]) -> float | None:
     """Fraction of required entities the answer actually named."""
@@ -40,6 +42,8 @@ def score_run(answer: str, must_mention: list[str], usage: dict,
         "prompt_tokens": int(usage.get("prompt_tokens", 0)),
         "completion_tokens": int(usage.get("completion_tokens", 0)),
         "cached_tokens": int(usage.get("cached_tokens", 0)),
+        "cache_creation_tokens": int(usage.get("cache_creation_tokens", 0)),
+        "credits": credits(usage),
         "peak_prompt_tokens": int(usage.get("peak_prompt_tokens", 0)),
         "turns": int(usage.get("turns", 0)),
     }
@@ -59,8 +63,9 @@ def summarise_runs(runs: list[dict]) -> dict:
         rows = [r for r in runs if r["arm"] == arm]
         recalls = [r["recall"] for r in rows if r.get("recall") is not None]
         prompt_total = sum(r.get("prompt_tokens", 0) for r in rows)
-        # Cached context is billed at a steep discount, so uncached tokens are the
-        # closest proxy for real cost. Raw prompt totals overstate what is paid.
+        # Credits are the only cost figure that survives scrutiny: the four token
+        # classes differ in price by 50x, so token totals mislead in both directions.
+        credit_total = sum(r.get("credits", 0.0) for r in rows)
         billed_total = sum(max(0, r.get("prompt_tokens", 0) - r.get("cached_tokens", 0))
                            for r in rows)
         correct = sum(recalls)
@@ -68,13 +73,15 @@ def summarise_runs(runs: list[dict]) -> dict:
         by_arm[arm] = {
             "runs": len(rows),
             "mean_recall": _mean(recalls),
+            "mean_credits": credit_total / len(rows) if rows else 0,
+            "total_credits": credit_total,
+            "credits_per_correct_answer": credit_total / correct if correct else None,
             "mean_prompt_tokens": _mean([r.get("prompt_tokens", 0) for r in rows]),
             "mean_billed_tokens": billed_total / len(rows) if rows else 0,
             "mean_tool_tokens": _mean([r.get("tool_tokens", 0) for r in rows]),
             "mean_turns": _mean([r.get("turns", 0) for r in rows]),
             "total_prompt_tokens": prompt_total,
             "total_billed_tokens": billed_total,
-            # cost and quality in one number: cheap wrong answers score badly
             "tokens_per_correct_answer": prompt_total / correct if correct else None,
             "billed_per_correct_answer": billed_total / correct if correct else None,
         }
@@ -130,6 +137,10 @@ def summarise_runs(runs: list[dict]) -> dict:
             "billed_tokens": (1 - by_arm["gita"]["total_billed_tokens"]
                               / by_arm["git"]["total_billed_tokens"])
             if by_arm.get("git", {}).get("total_billed_tokens") and "gita" in by_arm
+            else None,
+            "credits": (1 - by_arm["gita"]["total_credits"]
+                        / by_arm["git"]["total_credits"])
+            if by_arm.get("git", {}).get("total_credits") and "gita" in by_arm
             else None,
         },
         "adoption_rate": adoption,

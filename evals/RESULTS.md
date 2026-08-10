@@ -155,3 +155,53 @@ an extra turn costs roughly 14-23k equivalents, an extra 5k of output roughly 7k
 3. `gin-history` +32%: `gita history` walks commits one at a time and is slow.
 4. Baseline noise is real: `gin-public-api` scored 67% recall for git and 100% for gita.
 5. 10 tasks, 3 repetitions, one model. Directional, not significant.
+
+### Correction, again: actual credits, not token proxies
+
+Real GitHub Copilot pricing for Claude Opus 5, credits per 1M tokens:
+input **500**, output **2500**, cache read **50**, cache write **625**.
+
+Three readings of the *same* iteration-3 run disagree:
+
+| Metric | Reading | Verdict |
+| --- | ---: | --- |
+| raw prompt tokens | gita **-15%** | ignores that 93% are cached |
+| prompt minus cached | gita **+3.8%** | treats cache reads as free and ignores output |
+| **actual credits** | **gita -8.3%** | **the true figure** |
+
+| arm | fresh | cache read | cache write | output | credits/run |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| git | 8 | 456,975 | 26,528 | 1,070 | **42.11** |
+| gita | 7 | 385,863 | 27,524 | 842 | **38.60** |
+
+Where the money actually goes:
+
+| arm | fresh | cache read | cache write | output |
+| --- | ---: | ---: | ---: | ---: |
+| git | 0% | **54%** | 39% | 6% |
+| gita | 0% | 50% | 45% | 5% |
+
+**Cache reads are the largest single line item** in both arms, despite costing a tenth of
+list rate, purely because there are so many of them. gita wins by re-reading less context
+(fewer turns) and by making the model **generate 21% fewer output tokens** -- the most
+expensive class at 5x. It loses slightly on cache writes, because its output is fresh
+content.
+
+Per task, in credits:
+
+| task | git | gita | |
+| --- | ---: | ---: | ---: |
+| flask-dependency-update | 64.96 | 35.36 | **-46%** |
+| flask-teardown-review | 76.33 | 48.08 | **-37%** |
+| gin-copy-fix | 31.26 | 28.65 | -8% |
+| got-new-option | 45.75 | 45.02 | -2% |
+| express-ci-bump *(control)* | 23.63 | 23.73 | +0% |
+| express-send-condition | 30.09 | 30.89 | +3% |
+| gin-public-api | 43.04 | 44.23 | +3% |
+| ripgrep-walker | 36.05 | 42.63 | +18% |
+| flask-uncommitted | 36.35 | 45.58 | +25% |
+| gin-history | 33.62 | 41.87 | +25% |
+| **total** | **421.07** | **386.04** | **-8.3%** |
+
+The pricing model now lives in [`eval/pricing.py`](../src/gita/eval/pricing.py) and the
+harness records credits per run, so this is never hand-computed again.
