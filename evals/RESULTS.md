@@ -58,3 +58,35 @@ The same defect affected `git.cmd`, so the baseline arm was partly degraded too:
 Every gita call returned `ok=True`. Nothing crashed, nothing errored, and the
 aggregate numbers were plausible. The tool was answering a question it had been
 asked wrongly, and only the *size* of its answer gave it away.
+
+---
+
+## Design validation — one-shot answers (offline, no model)
+
+Measured directly on the nine committed evaluation tasks, comparing output size only.
+
+| task | raw git | brief (old) | one-shot | vs git | includes code |
+| --- | ---: | ---: | ---: | ---: | :--: |
+| flask-dependency-update | 220,377 | 721 | 2,203 | **-99%** | yes |
+| gin-history | 76,637 | 992 | 5,817 | **-92%** | yes |
+| got-new-option | 16,713 | 996 | 5,133 | **-69%** | yes |
+| ripgrep-walker | 622 | 118 | 471 | -24% | yes |
+| gin-public-api | 1,140 | 57 | 908 | -20% | yes |
+| express-ci-bump *(control)* | 1,057 | 153 | 948 | -10% | yes |
+| flask-teardown-review | 4,659 | 553 | 4,463 | -4% | yes |
+| express-send-condition | 703 | 190 | 682 | -3% | yes |
+| gin-copy-fix | 665 | 85 | 661 | -1% | yes |
+| **total** | **322,573** | **3,865** | **21,286** | **-93%** | |
+
+The old output was 98.8% smaller than git but **incomplete**, which forced a drill-down and cost
+~1.25 turns at ~126,000 tokens each. The new output is 5.5x larger and **self-sufficient**: every
+task includes the actual hunks, so no follow-up is required.
+
+Two properties matter more than the headline:
+
+- **The invariant holds on every task.** gita is never larger than the `git diff` it replaces,
+  so adopting it cannot cost more than not adopting it.
+- **On small diffs gita is roughly the same size as git** (-1% to -10%), so there is no penalty
+  where there is nothing to compress. The wins are concentrated exactly where they should be.
+
+This predicts the turn penalty should disappear. Iteration 3 will test that against a live agent.
