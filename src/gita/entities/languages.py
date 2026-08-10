@@ -23,6 +23,8 @@ class LanguageSpec:
     anonymous_nodes: frozenset[str] = frozenset()
     #: Node fields excluded from the signature hash.
     body_fields: tuple[str, ...] = ("body",)
+    #: Child node types to read a name from, when no name field exists.
+    name_children: tuple[str, ...] = ()
 
     @property
     def entity_nodes(self) -> frozenset[str]:
@@ -116,6 +118,43 @@ SPECS: tuple[LanguageSpec, ...] = (
         body_fields=("body", "declaration_list"),
     ),
 )
+
+# Docs and config are not code, but they are most of what changes in a repo and
+# were previously invisible: gita saw one of three changed files.
+DATA_SPECS: tuple[LanguageSpec, ...] = (
+    LanguageSpec(
+        name="markdown",
+        extensions=(".md", ".markdown", ".mdx"),
+        kinds={"section": EntityKind.SECTION},
+        comment_nodes=frozenset({"html_block"}),
+        body_fields=(),
+        name_children=("atx_heading", "setext_heading"),
+    ),
+    LanguageSpec(
+        name="yaml",
+        extensions=(".yaml", ".yml"),
+        kinds={"block_mapping_pair": EntityKind.SECTION},
+        comment_nodes=frozenset({"comment"}),
+        body_fields=("value",),
+    ),
+    LanguageSpec(
+        name="json",
+        extensions=(".json",),
+        kinds={"pair": EntityKind.SECTION},
+        comment_nodes=frozenset({"comment"}),
+        body_fields=("value",),
+    ),
+    LanguageSpec(
+        name="toml",
+        extensions=(".toml",),
+        kinds={"table": EntityKind.SECTION, "pair": EntityKind.SECTION},
+        comment_nodes=frozenset({"comment"}),
+        body_fields=("value",),
+        name_children=("bare_key", "dotted_key", "quoted_key"),
+    ),
+)
+
+SPECS = SPECS + DATA_SPECS
 
 BY_NAME: dict[str, LanguageSpec] = {spec.name: spec for spec in SPECS}
 BY_EXTENSION: dict[str, LanguageSpec] = {

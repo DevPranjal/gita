@@ -156,6 +156,27 @@ tool, so an agent sees the cost of each step in the name it chooses.
 - `python -m gita` and `python -m gita.cli` now work.
 - 214 tests.
 
-**Measurement caveat, recorded deliberately:** what is captured is *tokens of tool output injected
-into context*, not total model spend. The Copilot session store has no token columns, so true
-prompt cost is not recoverable locally. The dashboard must say so.
+**Measurement caveat, recorded deliberately:** what these events capture is *tokens of tool output
+injected into context*, not total model spend. ~~The Copilot session store has no token columns, so
+true prompt cost is not recoverable locally.~~ **Corrected:** the session store has no token
+columns, but the Copilot CLI logs do record real `prompt_tokens`, `completion_tokens` and cache
+details per request. End-to-end session cost is therefore measurable, and the dashboard should
+report both levels: per-call tool output (micro) and real session spend (macro).
+
+### Added - Coverage and history
+
+- **Working-tree and staged diffs** - `diff_revisions(repo, "HEAD", None)` compares against the
+  working tree and `STAGED` against the index, matching `git diff` and `git diff --cached`.
+  Previously the most common thing an agent looks at -- *what did I just change?* -- failed
+  outright with a `GitError`.
+- **Docs and config are no longer invisible** - Markdown (heading tree), YAML, JSON and TOML
+  (key paths) are parsed into entities, and any other text file falls back to a single whole-file
+  entity. gita previously saw one of three changed files and reported nothing for the rest, which
+  reads as *unchanged* -- a silent wrong answer. Binary files are still skipped, deliberately.
+- **Series-of-events view** ([`history.py`](src/gita/history.py)) - `series()` gives per-commit
+  entity changes and `entity_history()` follows one entity across a range. A two-revision diff is
+  cumulative and loses the sequence; this answers *when* behaviour actually changed. Exposed as
+  `gita history` (alias `katha`).
+- Root commits now diff against git's empty tree rather than failing on `<sha>^`.
+- 238 tests.
+

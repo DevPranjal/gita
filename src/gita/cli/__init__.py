@@ -22,6 +22,7 @@ ALIASES = {
     "shloka": "show",       # the verse itself -- exact text
     "prashna": "ask",       # question
     "vistaar": "expand",    # elaboration
+    "katha": "history",     # the story -- how it came to be
     "sarathi": "serve",     # charioteer -- guides the one who acts
 }
 
@@ -83,6 +84,14 @@ def _parser() -> argparse.ArgumentParser:
                              help="token cost versus a raw git diff")
     revisions(savings)
     budget(savings)
+
+    hist = sub.add_parser("history", aliases=["katha"], parents=[common],
+                          help="how entities changed across a range of commits")
+    hist.add_argument("entity", nargs="?",
+                      help="limit to one entity; omit for every commit")
+    hist.add_argument("--since", default=None)
+    hist.add_argument("--until", default="HEAD")
+    hist.add_argument("--limit", type=int, default=20)
 
     serve = sub.add_parser("serve", aliases=["sarathi"], parents=[common],
                            help="run the MCP server for agents")
@@ -167,6 +176,9 @@ def _dispatch(command, out, repo, args, colour, parser) -> int:
 
             return serve(repo_path=args.repo)
 
+        if command == "history":
+            return _cmd_history(out, repo, args, colour)
+
         _resolve(repo, args.base, args.head)
 
         if command == "diff":
@@ -236,6 +248,40 @@ def _cmd_expand(out, repo, args, colour) -> int:
            "tokens": count_tokens("\n".join(lines))},
           render.render_lines(lines, colour),
           args.as_json)
+    return 0
+
+
+def _cmd_history(out, repo, args, colour) -> int:
+    from ..history import entity_history, series
+
+    if args.entity:
+        events = entity_history(repo, args.entity, since=args.since,
+                                until=args.until, limit=args.limit)
+        if not events:
+            _emit(out, {"entity": args.entity, "events": [], "error": "no history"},
+                  f"gita: no recorded changes to {args.entity}", args.as_json)
+            return 4
+        payload = {
+            "entity": args.entity,
+            "events": [{"sha": e.sha, "subject": e.subject, "date": e.date,
+                        "kind": e.kind.value} for e in events],
+        }
+        text = "\n".join(str(e) for e in events)
+    else:
+        summaries = series(repo, since=args.since, until=args.until, limit=args.limit)
+        payload = {
+            "commits": [{"sha": s.sha, "subject": s.subject, "date": s.date,
+                         "changes": [c.entity.id for c in s.material()]}
+                        for s in summaries],
+        }
+        lines = []
+        for summary in summaries:
+            names = ", ".join(c.entity.qualname for c in summary.material()[:4]) or "-"
+            lines.append(f"{summary.short}  {summary.date[:10]}  "
+                         f"{summary.subject[:44]:<44}  {names}")
+        text = "\n".join(lines)
+
+    _emit(out, payload, text, args.as_json)
     return 0
 
 

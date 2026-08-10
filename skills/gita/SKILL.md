@@ -31,12 +31,16 @@ cannot give you — which is rare.
 
 Stop as soon as you can answer the question. Most reviews never reach step 3.
 
+For *when* something changed rather than *what* changed, use `gita history` instead — it is far
+cheaper than `git log -p`.
+
 ## Commands
 
-All commands accept `-C <path>` for the repository, and default to `HEAD^ HEAD`.
+All commands accept `-C <path>` for the repository.
 
 ```bash
-gita diff                          # last commit
+gita diff                          # uncommitted work vs HEAD -- like plain `git diff`
+gita diff HEAD^ HEAD               # the last commit
 gita diff main HEAD                # a branch or PR range
 gita diff --budget 300             # cap the cost; the number is honoured exactly
 gita diff --json                   # machine-readable, includes entity ids
@@ -44,11 +48,15 @@ gita diff --json                   # machine-readable, includes entity ids
 gita expand "src/app.py::Store"    # children of a rolled-up entity
 gita show   "src/app.py::Store::get"   # exact hunks for one entity
 gita ask    "did the public API break?"
+
+gita history "src/app.py::Store::get"  # how one entity evolved, newest first
+gita history --limit 10                # what each recent commit touched
+
 gita savings                       # what this cost vs a raw git diff
 ```
 
 Each command has a Gita-inspired alias, if you prefer them:
-`darshan` (diff), `vistaar` (expand), `shloka` (show), `prashna` (ask).
+`darshan` (diff), `vistaar` (expand), `shloka` (show), `prashna` (ask), `katha` (history).
 
 ## Reading the output
 
@@ -142,8 +150,13 @@ Start `gita serve` (alias `sarathi`) to run the server over stdio.
 - gita reports **what changed, not why**. It has no intent narrative yet.
 - It does **not yet compute callers or blast radius**, so "what does this affect"
   is answered by name matching, not by a call graph. Verify before relying on it.
-- Supported languages: Python, JavaScript, TypeScript, TSX, Go, Rust. Files in
-  other languages are skipped silently — check `files_changed` if a change seems
-  to be missing.
+- Entity-level detail covers Python, JavaScript, TypeScript, TSX, Go, Rust,
+  Markdown, YAML, JSON and TOML. **Any other text file is reported as a single
+  whole-file change** — you will see that it changed, but not where. Use
+  `gita show` or fall back to `git diff` for those.
+- **Binary files are skipped entirely.** Check `files_changed` against
+  `git diff --name-only` if a change seems to be missing.
 - A helper that is moved *and* edited in the same commit may report as an
   addition plus a deletion rather than a move.
+- `gita history` walks commits one at a time, so a large `--limit` is slow. It
+  also does not follow an entity across a rename yet.

@@ -21,7 +21,7 @@ _TRANSPARENT = frozenset({
     "expression_list", "var_declaration", "assignment_statement",
 })
 
-_NAME_FIELDS = ("name", "type", "declarator", "pattern")
+_NAME_FIELDS = ("name", "key", "type", "declarator", "pattern")
 
 _IDENTIFIER_NODES = frozenset({
     "identifier", "type_identifier", "field_identifier",
@@ -86,11 +86,21 @@ def _entity_name(node, spec: LanguageSpec) -> str:
     for field_name in _NAME_FIELDS:
         child = node.child_by_field_name(field_name)
         if child is not None and _text(child):
-            return _text(child)
+            return _clean(_text(child))
+
+    for child in node.children:
+        if child.type in spec.name_children:
+            return _clean(_text(child))
+
     for child in node.children:
         if child.type in _IDENTIFIER_NODES:
             return _text(child)
     return "<anonymous>"
+
+
+def _clean(text: str) -> str:
+    """Strip markup that decorates a heading or key rather than naming it."""
+    return text.lstrip("#").strip().strip('"\'').strip() or "<anonymous>"
 
 
 def _tokens(node, spec: LanguageSpec, skip: frozenset[int] = frozenset()) -> list[str]:
@@ -242,6 +252,35 @@ def extract(source: bytes, path: str, spec: LanguageSpec | None = None) -> Entit
     return entity_tree
 
 
+def extract_plain(source: bytes, path: str) -> EntityTree:
+    """A whole file as a single entity, for types gita cannot parse.
+
+    Dockerfiles, lockfiles and shell scripts still change, and reporting nothing
+    is worse than reporting coarsely: a silent omission reads as "unchanged".
+    """
+    text = source.decode("utf8", "replace")
+    normalised = " ".join(text.split())
+    tree = EntityTree(path=path, language="plain", root_id=path)
+    tree.add(Entity(
+        id=path,
+        kind=EntityKind.MODULE,
+        name=MODULE_ENTITY,
+        path=path,
+        start_line=1,
+        end_line=max(1, text.count("\n") + 1),
+        raw_hash=digest(text),
+        content_hash=digest(normalised),
+        signature_hash="",
+        body_hash=digest(normalised),
+        body_size=len(normalised.split()),
+        parent_id=None,
+        synthetic=True,
+    ))
+    return tree
+
+
 def extract_path(source: bytes, path: str) -> EntityTree | None:
     spec = for_path(path)
-    return extract(source, path, spec) if spec else None
+    if spec is not None:
+        return extract(source, path, spec)
+    return extract_plain(source, path)
