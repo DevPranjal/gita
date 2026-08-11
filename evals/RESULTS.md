@@ -205,3 +205,57 @@ Per task, in credits:
 
 The pricing model now lives in [`eval/pricing.py`](../src/gita/eval/pricing.py) and the
 harness records credits per run, so this is never hand-computed again.
+
+## Iteration 5 — 2026-08-11 · regressions fixed · **VALID**
+
+60 runs. Artifacts: `evals/runs/20260811-054629/`
+
+| metric | git | gita | |
+| --- | ---: | ---: | --- |
+| **credits / task** | 38.94 | **32.42** | **-16.7%** |
+| turns | 3.67 | **3.00** | -18% |
+| recall | 100% | **100%** | equal |
+| adoption | - | **100%** | |
+
+Progression across iterations, credits versus plain git:
+
+| iteration | design | result |
+| --- | --- | ---: |
+| 1-2 | progressive disclosure, agent drills | **+44%** |
+| 3 | one-shot answers | -8.3% |
+| 4 | regression fixes, one new defect | -4.4% |
+| **5** | ASCII output, history detail, discovery | **-16.7%** |
+
+Per task, credits versus git:
+
+| task | it3 | it4 | **it5** |
+| --- | ---: | ---: | ---: |
+| flask-teardown-review | -37% | -50% | **-60%** |
+| flask-dependency-update | -46% | -40% | **-27%** |
+| express-send-condition | +3% | -5% | **-25%** |
+| ripgrep-walker | +18% | -7% | **-18%** |
+| gin-public-api | +3% | -20% | **-8%** |
+| got-new-option | -2% | +149% | **-1%** |
+| gin-copy-fix | -8% | -8% | **-0%** |
+| express-ci-bump *(control)* | +0% | +0% | **+0%** |
+| gin-history | +25% | +29% | **+6%** |
+| flask-uncommitted | +25% | +19% | **+26%** |
+
+**Nine of ten tasks now match or beat plain git**, and the control sits at exactly +0%.
+
+Every cycle-2 diagnosis was confirmed by the numbers:
+
+- `got-new-option` +149% -> -1% once output stopped raising `UnicodeEncodeError` on a
+  piped Windows shell. The encoding defect was the entire regression.
+- `gin-history` +29% -> +6% once history reported *what* changed, not only *when*.
+- `ripgrep-walker` -7% -> -18% with `impl Trait for Type` naming.
+
+### Remaining: flask-uncommitted (+26%)
+
+Identical in all three repetitions: `gita diff` answered in 86 tokens, then the agent ran
+`git status --short`, then `git diff`. Probing why exposed a **correctness gap rather than a
+cost one**: `git diff HEAD` does not list untracked files, so a module an agent has just
+written is invisible to gita. "What did I change" includes files that do not exist in HEAD
+yet, and answering half the question sends the agent to git for the other half.
+
+Untracked files are now included when diffing the working tree.

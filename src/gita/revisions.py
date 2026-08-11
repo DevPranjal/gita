@@ -8,7 +8,7 @@ from .diff.changes import ChangeSet
 from .diff.differ import RENAME_THRESHOLD, diff_trees, reconcile_moves
 from .entities.extractor import extract_path
 from .entities.model import EntityTree
-from .vcs.git import STAGED, WORKTREE, Repo
+from .vcs.git import STAGED, WORKTREE, ChangedFile, Repo
 
 _BINARY_SNIFF = 8000
 
@@ -35,11 +35,22 @@ def diff_revisions(repo: str | Path | Repo, base: str = "HEAD",
     changeset = ChangeSet()
     collected = []
 
+    changed = repo.changed_files(base, head, supported_only=False)
+
+    # `git diff HEAD` cannot see untracked files, so a module an agent has just
+    # written would not appear at all. Only the working tree has them.
+    if head is WORKTREE:
+        known = {c.path for c in changed}
+        changed += [ChangedFile("A", path) for path in repo.untracked()
+                    if path not in known]
+
     # Every text file counts: unparseable types fall back to a whole-file entity
     # rather than vanishing, because a silent omission reads as "unchanged".
-    for changed in repo.changed_files(base, head, supported_only=False):
-        previous = None if changed.is_added else _tree_at(repo, base, changed.source_path)
-        current = None if changed.is_deleted else _tree_at(repo, head, changed.path)
+    for changed_file in changed:
+        previous = (None if changed_file.is_added
+                    else _tree_at(repo, base, changed_file.source_path))
+        current = (None if changed_file.is_deleted
+                   else _tree_at(repo, head, changed_file.path))
 
         if previous is None and current is None:
             changeset.files_skipped += 1

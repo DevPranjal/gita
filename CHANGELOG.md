@@ -277,3 +277,14 @@ argument fails: resolving first turned the valid container query `app.py::Store`
   show the bare form, and state that bare function names are accepted.
 
 - 304 tests.
+
+### Added - untracked files are part of "what did I change"
+
+`git diff HEAD` cannot see untracked files, so a module an agent had just written was
+invisible to `gita diff`. On the uncommitted-work task the agent called gita, then
+`git status --short`, then `git diff` -- in every repetition -- because gita answered only
+half the question. Working-tree diffs now include untracked files (respecting `.gitignore`),
+with their entities extracted normally. Commit ranges are unaffected: history has no
+working tree.
+
+- 313 tests.

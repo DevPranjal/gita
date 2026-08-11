@@ -88,6 +88,15 @@ class Repo:
         parts = self.text("rev-list", "--parents", "-n1", rev, check=False).split()
         return parts[1] if len(parts) >= 2 else EMPTY_TREE
 
+    def untracked(self) -> list[str]:
+        """Files that exist only in the working tree.
+
+        `git diff HEAD` cannot see these, so a file an agent has just written is
+        invisible unless we ask for it separately. Ignored files stay ignored.
+        """
+        raw = self.text("ls-files", "--others", "--exclude-standard", check=False)
+        return [line.strip() for line in raw.splitlines() if line.strip()]
+
     def _diff_args(self, base: str, head: str | None) -> list[str]:
         if head is WORKTREE:
             return [base]          # base vs working tree
