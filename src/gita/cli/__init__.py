@@ -346,10 +346,12 @@ def _cmd_history(out, repo, args, colour) -> int:
                   f"gita: no recorded changes to {args.entity}", args.as_json)
             return 4
 
-        # "When" without "what" sent the agent straight back to git log and git show.
-        header = fit_text("\n".join(str(event) for event in events), args.budget)
+        # The budget bounds what lands in the agent's context, and `write` appends
+        # a line terminator that the agent also pays for.
+        header = fit_text("\n".join(str(event) for event in events),
+                          max(0, args.budget - 1))
         lines = [header] if header else []
-        spent = count_tokens(header)
+        spent = count_tokens(header) + 1
         payload_events = []
 
         for event in events:
