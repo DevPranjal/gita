@@ -384,3 +384,66 @@ repetition guessed `gita show Walk --at <rev>`; `--at` does not exist, and the
 error printed the *global* usage rather than `gita show`'s own signature. Fixed,
 but the honest position is that gita has little to offer on a diff this small,
 which is what the invariant already predicts.
+
+---
+
+## Iteration 13 - 2026-08-11 - **control run: no code change**
+
+60 runs. Artifacts: `evals/runs/20260811-160809/`. gita's behaviour is
+byte-identical to iteration 12; only the scoring code changed between them.
+
+**The point of the run was to measure how much moves when nothing does.**
+
+| | it12 | it13 | |
+| --- | ---: | ---: | --- |
+| credits, cache-clean | -20.1% | **-10.3%** | **10 points apart** |
+| turns | 3.93 -> 2.67 | 3.57 -> 2.93 | stable |
+| tool output | -95% | -93% | stable |
+| recall | 1.000 / 0.989 | 1.000 / 1.000 | stable |
+
+Per task, with no code change at all:
+
+| task | it12 | it13 | swing |
+| --- | ---: | ---: | ---: |
+| got-new-option | -20% | +63% | **82pt** |
+| ripgrep-walker | -6% | +39% | 45pt |
+| gin-public-api | -47% | -8% | 39pt |
+| flask-teardown-review | -70% | -33% | 38pt |
+| gin-copy-fix | +55% | +23% | 31pt |
+| gin-history | -16% | +15% | 31pt |
+| express-send-condition | -2% | -28% | 26pt |
+| flask-dependency-update | -31% | -52% | 21pt |
+| flask-uncommitted | +2% | +15% | 13pt |
+| express-ci-bump *(control)* | -8% | -9% | 1pt |
+
+**At three repetitions, per-task cost deltas are noise.** Every per-task story
+told in iterations 8 through 12 needs re-reading with that in mind.
+
+### What this does and does not invalidate
+
+It does **not** invalidate the fixes. Each one was verified by mechanism, not by
+watching a number move:
+
+- the TOML/YAML value bug was caught by a unit test that fails without the fix
+- `gin-history`'s wasted turns were deterministic, in all three repetitions, and
+  reproducible by hand at the command line
+- the test-churn roll-up was verified by measuring the answer directly:
+  5,273 -> 3,969 tokens, with `allowAbsoluteUrls` moving into view
+
+It **does** invalidate the cost attributions -- "this fix took the task from +41%
+to -17%" is not a claim three repetitions can support.
+
+### The honest number
+
+Pooling the two identical-behaviour sweeps gives 110 cache-clean runs, six
+repetitions per task per arm:
+
+| | git | gita | |
+| --- | ---: | ---: | ---: |
+| credits / task | 36.2 | **30.6** | **-15.4%** |
+| turns / task | 3.62 | **2.78** | **-23.1%** |
+| tool output / run | 35,163 | **2,689** | **-92.4%** |
+| recall | 100% | 99% | -0.6pt |
+
+Eight of ten tasks cheaper. **Turns and tool output are the stable results; cost
+is the noisy one.** Published figures now use the pooled number.

@@ -323,19 +323,19 @@
         <th style="text-align:right">plain git</th>
         <th style="text-align:right">with gita</th>
       </tr>
-      <tr><td>credits per task</td><td class="num">44.3</td><td class="num win">33.8 &nbsp; −23%</td></tr>
-      <tr><td>turns per task</td><td class="num">3.93</td><td class="num win">2.67</td></tr>
-      <tr><td>tool output per run</td><td class="num">47,744</td><td class="num win">2,237</td></tr>
-      <tr><td>entity recall</td><td class="num">100%</td><td class="num">98.9%</td></tr>
-      <tr><td>adoption, unprompted</td><td class="num dim">—</td><td class="num">97%</td></tr>
+      <tr><td>credits per task</td><td class="num">36.2</td><td class="num win">30.6 &nbsp; −15%</td></tr>
+      <tr><td>turns per task</td><td class="num">3.62</td><td class="num win">2.78 &nbsp; −23%</td></tr>
+      <tr><td>tool output per run</td><td class="num">35,163</td><td class="num win">2,689 &nbsp; −92%</td></tr>
+      <tr><td>entity recall</td><td class="num">100%</td><td class="num">99%</td></tr>
+      <tr><td>adoption, unprompted</td><td class="num dim">—</td><td class="num">98%</td></tr>
     </table>
 
     <p class="blurb" style="font-size:14px; color:var(--muted); margin-top:12px">
-      Latest sweep, with runs that lost the model's prompt cache excluded — a
-      cache miss costs two to three times a normal task and says nothing about
-      either tool. Across recent sweeps the cost margin sits between −10% and
-      −23%, median around −18%. Turn count and tool output are the steadier
-      signals; both arms always run in the same session.
+      110 runs — six repetitions of every task in both arms, pooled across two
+      sweeps, with runs that lost the model's prompt cache excluded. Eight of ten
+      tasks come out cheaper. A single sweep is not enough to trust: repeating one
+      with no code change at all moved the cost figure by ten points, so
+      per-task numbers are reported here only in aggregate.
     </p>
 
     <div class="wins">

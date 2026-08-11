@@ -115,18 +115,28 @@ priced in real credits from the model's own logs.
 | 10 | TOML/YAML value changes were being dropped | −15.0% |
 | 11 | consistent surface: positional revisions, working-tree state | −27.7% |
 | 12 | subcommand-aware errors | −23.7% |
+| 13 | *(control: no code change)* | −10.3% |
 
-On the latest sweep: turns **3.93 → 2.67**, tool output **−95%**, recall **98.9%**,
-adoption **97%**, and nine of ten tasks beat plain git.
+**Those per-iteration figures are not trustworthy, and iteration 13 is why.** It
+repeated iteration 12 with byte-identical behaviour and came out ten points apart.
+Per-task, with nothing changed, individual tasks swung by as much as 82 points. At
+three repetitions the per-task cost numbers are noise, and any story told from them
+is a story about noise.
 
-**Read the cost margin as a band, not a number.** Two things move it. The git baseline
-drifts between sweeps (36.4 credits in one run, 44.8 in another). And roughly one run in
-fifteen loses the model's prompt cache, which costs two to three times a normal task and
-says nothing about either tool — worse, it lands systematically, because the first task
-of a sweep always starts cold and the git arm runs first. The harness now reports a
-cache-clean figure alongside the raw one; on that basis recent sweeps land between
-**−10% and −23%, median near −18%**. Turn count and tool output are the steadier
-signals.
+The honest figure pools the two identical-behaviour sweeps — **110 runs**, six
+repetitions of every task in both arms, with prompt-cache-miss runs excluded:
+
+| | plain git | with gita | |
+| --- | ---: | ---: | ---: |
+| credits per task | 36.2 | 30.6 | **−15.4%** |
+| turns per task | 3.62 | 2.78 | **−23.1%** |
+| tool output per run | 35,163 | 2,689 | **−92.4%** |
+| entity recall | 100% | 99% | −0.6pt |
+
+Eight of ten tasks come out cheaper. Turns and tool output are the steady signals;
+cost is the noisy one. The fixes that mattered were verified by mechanism — a failing
+test, a reproduced command, a measured output size — not by watching a cost number
+move.
 
 The invariant holds on every task — gita is never larger than the `git diff` it
 replaces — so adopting it cannot cost more than not adopting it. On small diffs it is

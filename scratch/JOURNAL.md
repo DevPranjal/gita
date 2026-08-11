@@ -194,3 +194,28 @@ sweeps at -16.7 / -16.8 / -19.5 / -18.1 are the honest band; single-task deltas
 are not worth chasing unless they are large or repeat.
 
 **State:** 360 tests. `c41b55c`. Iteration 10 running.
+
+### Session 5 - the control run, and what it cost me to skip it
+
+Thirteen iterations in, I ran the sweep that should have been run second: the
+same code twice. Iteration 12 and 13 differ only in scoring code, and the
+headline moved **10 points**. One task moved **82**.
+
+I had been diagnosing per-task regressions at n=3 and telling causal stories
+about them. Some of those stories were true -- but I could not have known which
+from the numbers alone, and I did not check.
+
+**Rule added, and it outranks the others:** a number is evidence only after you
+know what it does when nothing changes. Measure the noise floor before trusting
+a delta above it.
+
+The saving grace is that the loop had a second discipline running alongside:
+every fix was reproduced by hand first -- a failing unit test for the TOML value
+bug, a deterministic command-line repro for `gita history <name> <rev>`, a direct
+before/after token measurement for the test roll-up. Those hold up. The cost
+attributions attached to them do not.
+
+Published numbers now pool the two identical sweeps: 110 runs, six repetitions
+per task per arm, cache-misses excluded. **-15.4% credits, -23.1% turns, -92.4%
+tool output**, 8 of 10 tasks cheaper. Turns and tool output are stable across
+every sweep; cost is not, and the README and the site now say so.
