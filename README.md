@@ -107,17 +107,20 @@ priced in real credits from the model's own logs.
 | 8 | unreferenced-addition reporting | −9.5% *(regression, diagnosed and fixed)* |
 | 9 | bulk test churn rolled up | −18.1% |
 | 10 | TOML/YAML value changes were being dropped | −15.0% |
-| 11 | consistent surface: positional revisions, working-tree state | **−27.7%** |
+| 11 | consistent surface: positional revisions, working-tree state | −27.7% |
+| 12 | subcommand-aware errors | −23.7% |
 
-On the latest sweep: turns **3.93 → 2.73**, tool output **−94%**, entity recall
-**98.3% → 100%** (gita above the git arm), adoption **100% unprompted**, and nine of
-ten tasks beat plain git.
+On the latest sweep: turns **3.93 → 2.67**, tool output **−95%**, recall **98.9%**,
+adoption **97%**, and nine of ten tasks beat plain git.
 
-**Read the cost margin as a band, not a number.** The git baseline drifts between
-sweeps — it was 36.4 credits in one run and 44.8 in another — so part of any single
-margin is the baseline moving. Recent sweeps land between −15% and −28%, median near
-−18%. Turn count and tool output are the steadier signals, and both arms always run
-in the same session against the same tasks.
+**Read the cost margin as a band, not a number.** Two things move it. The git baseline
+drifts between sweeps (36.4 credits in one run, 44.8 in another). And roughly one run in
+fifteen loses the model's prompt cache, which costs two to three times a normal task and
+says nothing about either tool — worse, it lands systematically, because the first task
+of a sweep always starts cold and the git arm runs first. The harness now reports a
+cache-clean figure alongside the raw one; on that basis recent sweeps land between
+**−10% and −23%, median near −18%**. Turn count and tool output are the steadier
+signals.
 
 The invariant holds on every task — gita is never larger than the `git diff` it
 replaces — so adopting it cannot cost more than not adopting it. On small diffs it is

@@ -237,3 +237,45 @@ class TestRunConstruction:
         assert env["GITA_SESSION"] == "run-9"
         assert env["GITA_ARM"] == "gita"
         assert env["GITA_TELEMETRY"].endswith("telemetry.jsonl")
+
+
+class TestPromptCacheMissesAreNotResults:
+    """A run that lost the prompt cache costs 2-3x, and says nothing about gita.
+
+    Cache writes are priced 12.5x cache reads. A single miss adds ~60 credits --
+    about double an entire normal task -- and misses land randomly. Worse, they
+    land systematically: the first task of a sweep always starts cold, and the
+    git arm runs first, so the noise was biased in gita's favour.
+    """
+
+    def runs(self, miss_arm: str | None = None) -> list[dict]:
+        out = []
+        for arm in ("git", "gita"):
+            for rep in range(3):
+                cold = miss_arm == arm and rep == 0
+                out.append({
+                    "task": "t", "arm": arm, "recall": 1.0, "used_gita": arm == "gita",
+                    "prompt_tokens": 100_000, "tool_tokens": 100, "turns": 3,
+                    "cached_tokens": 90_000,
+                    "cache_creation_tokens": 120_000 if cold else 18_000,
+                    "credits": 90.0 if cold else 30.0,
+                })
+        return out
+
+    def test_a_cache_miss_is_flagged(self):
+        summary = summarise_runs(self.runs(miss_arm="git"))
+        assert summary["cache_misses"] == 1
+
+    def test_a_clean_figure_is_reported_alongside_the_raw_one(self):
+        summary = summarise_runs(self.runs(miss_arm="git"))
+        assert summary["reduction"]["credits"] != summary["reduction"]["credits_cache_clean"]
+
+    def test_the_clean_figure_ignores_the_miss(self):
+        """Both arms cost the same; only a cache miss made git look worse."""
+        summary = summarise_runs(self.runs(miss_arm="git"))
+        assert abs(summary["reduction"]["credits_cache_clean"]) < 0.01
+
+    def test_a_sweep_without_misses_agrees_with_itself(self):
+        summary = summarise_runs(self.runs())
+        assert summary["cache_misses"] == 0
+        assert summary["reduction"]["credits"] == summary["reduction"]["credits_cache_clean"]

@@ -7,6 +7,7 @@ headline metric divides one by the other.
 
 from __future__ import annotations
 
+import statistics
 from collections import defaultdict
 
 from .pricing import credits
@@ -53,10 +54,41 @@ def _mean(values: list[float]) -> float:
     return sum(values) / len(values) if values else 0.0
 
 
+def _credit_delta(runs: list[dict]) -> float | None:
+    """Paired credit difference over whichever runs are given."""
+    totals: dict[str, float] = {"git": 0.0, "gita": 0.0}
+    counts: dict[str, int] = {"git": 0, "gita": 0}
+    for run in runs:
+        arm = run["arm"]
+        if arm in totals:
+            totals[arm] += run.get("credits", 0.0)
+            counts[arm] += 1
+    if not counts["git"] or not counts["gita"]:
+        return None
+    git = totals["git"] / counts["git"]
+    gita = totals["gita"] / counts["gita"]
+    return (1 - gita / git) if git else None
+
+
+def _cache_missed(runs: list[dict]) -> list[bool]:
+    """Which runs lost the prompt cache.
+
+    Cache writes are priced 12.5x cache reads, so one miss adds roughly double a
+    normal task's entire cost. It says nothing about either tool, and it is not
+    evenly distributed: the first task of a sweep always starts cold.
+    """
+    created = [r.get("cache_creation_tokens", 0) for r in runs]
+    typical = statistics.median(created) if created else 0
+    return [c > 3 * typical for c in created] if typical else [False] * len(runs)
+
+
 def summarise_runs(runs: list[dict]) -> dict:
     if not runs:
         return {"by_arm": {}, "reduction": {}, "adoption_rate": None,
-                "quality_delta": None, "tasks": []}
+                "quality_delta": None, "tasks": [], "cache_misses": 0}
+
+    missed = _cache_missed(runs)
+    clean = [r for r, miss in zip(runs, missed) if not miss]
 
     by_arm: dict[str, dict] = {}
     for arm in sorted({r["arm"] for r in runs}):
@@ -129,6 +161,7 @@ def summarise_runs(runs: list[dict]) -> dict:
 
     return {
         "by_arm": by_arm,
+        "cache_misses": sum(missed),
         "reduction": {
             "prompt_tokens": (1 - paired["gita_prompt"] / paired["git_prompt"])
                              if paired["git_prompt"] else None,
@@ -142,6 +175,7 @@ def summarise_runs(runs: list[dict]) -> dict:
                         / by_arm["git"]["total_credits"])
             if by_arm.get("git", {}).get("total_credits") and "gita" in by_arm
             else None,
+            "credits_cache_clean": _credit_delta(clean),
         },
         "adoption_rate": adoption,
         "quality_delta": quality_delta,
