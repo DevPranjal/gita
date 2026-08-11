@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>gita — git for agents</title>
+  <meta name="description" content="git rebuilt for a world of agent coders. Context diffs instead of line diffs: what named things changed, and can that break a caller." />
+  <style>
+    :root {
+      --bg: #f7f6f2;
+      --paper: #fffdf8;
+      --ink: #1c1b1a;
+      --muted: #8a857c;
+      --line: #e6e2d6;
+      --accent: #b34a1c;
+      --accent-soft: #f3d9c5;
+      --term-bg: #faf8f3;
+      --term-ink: #1c1b1a;
+      --term-prompt: #b34a1c;
+      --term-comment: #8a857c;
+      --term-str: #2f6b3a;
+      --term-key: #4b3a8c;
+      --term-del: #a23a2a;
+      --mono: "JetBrains Mono", "Cascadia Code", ui-monospace, Consolas, monospace;
+      --serif: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+      --sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+      font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+
+    .wrap { max-width: 920px; margin: 0 auto; padding: 64px 28px 80px; }
+
+    .hero { margin-bottom: 56px; }
+    .name {
+      font-family: var(--serif); font-size: 96px; line-height: 1; font-weight: 400;
+      letter-spacing: -0.04em; margin: 0;
+    }
+    .name .dot { color: var(--accent); }
+    .sanskrit {
+      font-family: var(--serif); font-style: italic; color: var(--muted);
+      font-size: 19px; margin: 14px 0 0; line-height: 1.5;
+    }
+    .blurb {
+      font-family: var(--sans); color: var(--ink); font-size: 17px; line-height: 1.65;
+      margin: 22px 0 0; max-width: 640px;
+    }
+    .blurb code, .note code, p code, li code {
+      font-family: var(--mono); font-size: 13.5px; background: var(--accent-soft);
+      padding: 1px 6px; border-radius: 4px; color: #5a2509;
+    }
+
+    .section-h {
+      font-family: var(--mono); color: var(--muted); font-size: 12px;
+      letter-spacing: 0.18em; text-transform: uppercase; margin: 60px 0 14px;
+    }
+
+    .q { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); }
+    .q:first-of-type { border-top: none; padding-top: 0; margin-top: 8px; }
+    .q > summary {
+      list-style: none; cursor: pointer; display: block;
+      position: relative; padding-right: 36px;
+    }
+    .q > summary::-webkit-details-marker { display: none; }
+    .q > summary::after {
+      content: "+"; position: absolute; right: 4px; top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--mono); font-size: 22px; color: var(--muted);
+      line-height: 1; transition: transform 0.15s ease, color 0.15s ease;
+    }
+    .q[open] > summary::after { content: "−"; color: var(--accent); }
+    .q > summary:hover h2 { color: var(--accent); }
+    .q > summary h2 { transition: color 0.15s ease; }
+    .q h2 {
+      font-family: var(--serif); font-size: 24px; font-weight: 500;
+      letter-spacing: -0.01em; margin: 0;
+    }
+    .q .note {
+      font-family: var(--sans); color: var(--muted); font-size: 15px;
+      margin: 14px 0 0; max-width: 640px; line-height: 1.55;
+    }
+
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+    .pair.single { grid-template-columns: 1fr; }
+    .term {
+      background: var(--term-bg); border: 1px solid var(--line); border-radius: 8px;
+      overflow: hidden; box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+    }
+    .term-bar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 12px; border-bottom: 1px solid var(--line); background: #f0ede4;
+    }
+    .term-bar .d {
+      width: 11px; height: 11px; border-radius: 50%; background: #d9d4c6;
+      border: 1px solid #c5bfae;
+    }
+    .term-bar .title {
+      margin-left: 10px; color: var(--muted); font-family: var(--mono); font-size: 12px;
+    }
+    .term-bar .tag {
+      margin-left: auto; font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 3px;
+    }
+    .tag.git  { background: #efe9d8; color: var(--muted); }
+    .tag.gita { background: var(--accent-soft); color: #5a2509; }
+    .term-body {
+      padding: 14px 16px 16px;
+      font-family: var(--mono); font-size: 13px; line-height: 1.6;
+      color: var(--term-ink); white-space: pre-wrap; word-break: break-word;
+    }
+    .prompt { color: var(--term-prompt); }
+    .out { color: #3a3a36; }
+    .dim { color: var(--term-comment); font-style: italic; }
+    .ok  { color: var(--term-str); }
+    .bad { color: var(--term-del); }
+    .kw  { color: var(--term-key); }
+    .acc { color: var(--accent); }
+    .add { color: var(--term-str); }
+    .del { color: var(--term-del); }
+
+    .wins {
+      margin-top: 22px; padding: 22px 24px; border: 1px solid var(--line);
+      border-radius: 8px; background: var(--paper);
+    }
+    .wins:first-of-type { margin-top: 0; }
+    .wins + .wins { margin-top: 14px; }
+    .wins h3 { font-family: var(--serif); font-weight: 500; font-size: 19px; margin: 0 0 10px; }
+    .wins ul { margin: 0; padding-left: 18px; color: var(--ink); font-size: 15px; line-height: 1.7; }
+    .wins ul code {
+      font-family: var(--mono); font-size: 13px; color: var(--ink);
+      background: #efebde; padding: 0 5px; border-radius: 3px;
+    }
+    .wins p { font-size: 15px; line-height: 1.7; margin: 0 0 10px; }
+    .wins p:last-child { margin-bottom: 0; }
+
+    table.tbl {
+      width: 100%; border-collapse: collapse; margin-top: 18px;
+      font-size: 14.5px;
+    }
+    table.tbl th, table.tbl td {
+      text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    table.tbl th {
+      font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--muted); font-weight: 400;
+    }
+    table.tbl td.num {
+      font-family: var(--mono); text-align: right; white-space: nowrap;
+    }
+    table.tbl tr:last-child td { border-bottom: none; }
+    table.tbl code {
+      font-family: var(--mono); font-size: 12.5px; background: #efebde;
+      padding: 0 5px; border-radius: 3px;
+    }
+    .win { color: var(--term-str); }
+    .loss { color: var(--term-del); }
+
+    .install { margin-top: 56px; }
+    .install pre {
+      background: var(--term-bg); border: 1px solid var(--line); border-radius: 8px;
+      padding: 14px 16px; font-family: var(--mono); font-size: 13px;
+      line-height: 1.6; color: var(--ink); overflow-x: auto;
+    }
+
+    footer {
+      margin-top: 72px; padding-top: 24px; border-top: 1px dashed var(--line);
+      font-family: var(--mono); font-size: 12px; color: var(--muted);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 10px;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 720px) {
+      .wrap { padding: 40px 18px; }
+      .name { font-size: 64px; }
+      .term-body { font-size: 12.5px; }
+      .pair { grid-template-columns: 1fr; }
+      table.tbl { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <section class="hero">
+      <h1 class="name">gita<span class="dot">.</span></h1>
+      <p class="sanskrit">— every agent needs a direction.</p>
+      <p class="blurb">
+        <code>git</code> was built for humans reading lines of text. But humans
+        aren't the ones writing most code anymore — agents are. And agents
+        don't want lines. They want answers.
+      </p>
+      <p class="blurb">
+        <code>git diff</code> answers <em>which bytes moved</em>. An agent needs
+        <em>which named things changed, and can that break a caller</em>.
+        <code>gita</code> answers the second question, in one command, and is
+        never larger than the <code>git diff</code> it replaces.
+      </p>
+    </section>
+
+    <p class="section-h">the shape of the answer</p>
+
+    <div class="pair">
+      <div class="term">
+        <div class="term-bar">
+          <span class="d"></span><span class="d"></span><span class="d"></span>
+          <span class="title">git diff</span><span class="tag git">git</span>
+        </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">git diff 66ca4e0 1c88e88</span>
+<span class="kw">diff --git a/source/core/options.ts b/source/core/options.ts</span>
+<span class="kw">index 3f2a1b9..8c4d0e2 100644</span>
+<span class="kw">@@ -1204,6 +1204,31 @@</span>
+   const options = this._internals.options;
+<span class="add">+  allowAbsoluteUrls?: boolean;</span>
+<span class="add">+</span>
+<span class="add">+  function isAbsoluteUrl(url: string) {</span>
+<span class="add">+    ...</span>
+   return options;
+<span class="kw">diff --git a/test/hooks.ts b/test/hooks.ts</span>
+<span class="add">+ test('allowAbsoluteUrls false rejects ...')</span>
+<span class="dim">... 13 files, 1,413 insertions, 159 test cases ...</span>
+
+<span class="bad">16,713 tokens</span></div>
+      </div>
+
+      <div class="term">
+        <div class="term-bar">
+          <span class="d"></span><span class="d"></span><span class="d"></span>
+          <span class="title">gita diff</span><span class="tag gita">gita</span>
+        </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">gita diff 66ca4e0 1c88e88</span>
+<span class="dim">13 files | 192 changes | 172 interface | 1900 noise filtered</span>
+
+<span class="acc">source/core/options.ts::Options::allowAbsoluteUrls</span>  <span class="ok">[added]</span>
+<span class="acc">source/core/options.ts::applyUrlOverride</span>  <span class="bad">[signature_changed]</span>
+<span class="acc">source/core/options.ts::isAbsoluteUrl</span>  <span class="ok">[added]</span>
+<span class="out">test/hooks.ts</span>       <span class="dim">(58 tests: 57 added, 1 body_changed)</span>
+<span class="out">test/pagination.ts</span>  <span class="dim">(47 tests: 46 added, 1 body_changed)</span>
+
+<span class="dim">--- source/core/options.ts::Options::allowAbsoluteUrls [added]</span>
+<span class="add">+  allowAbsoluteUrls?: boolean;</span>
+
+<span class="ok">3,969 tokens</span></div>
+      </div>
+    </div>
+
+    <div class="wins" style="margin-top:18px">
+      <p>Same commit. The question was <em>“what new option was added?”</em> — and
+      <code>gita</code> names <code>allowAbsoluteUrls</code> on the third line,
+      because 159 test cases whose titles all restate the option are summarised
+      rather than listed.</p>
+    </div>
+
+    <p class="section-h">why raw git output is bad context</p>
+
+    <table class="tbl">
+      <tr>
+        <th>problem</th><th>why it hurts</th><th>what gita does</th>
+      </tr>
+      <tr>
+        <td><strong>lost in the middle</strong></td>
+        <td>Diffs land in the attention trough between the system prompt and the
+            task, pushing instructions further away every turn.</td>
+        <td>Ranked, not chronological. Interface breakage on line 3, not line 400 —
+            and small enough to have no middle.</td>
+      </tr>
+      <tr>
+        <td><strong>tokenizer overhead</strong></td>
+        <td>Per-line <code>+</code>/<code>-</code> prefixes, repeated filenames,
+            <code>@@</code> headers. Measured <span class="loss">+25.2%</span>;
+            one 40-char SHA costs <span class="loss">20 tokens</span>.</td>
+        <td>Entity ids instead of hunk headers, no line prefixes, filenames stated
+            once, no SHAs in the body.</td>
+      </tr>
+      <tr>
+        <td><strong>low signal density</strong></td>
+        <td>Three context lines around every hunk, whitespace churn, timestamps,
+            advice text.</td>
+        <td>Formatting, comment and import-order churn removed by comparing
+            normalised hashes — and the count reported.</td>
+      </tr>
+      <tr>
+        <td><strong>zombie tokens</strong></td>
+        <td>Tool output is re-billed on every later turn. 16,713 tokens across
+            5 turns is <span class="loss">83,565 token-turns</span>.</td>
+        <td>One self-sufficient answer: <span class="win">19,845</span> for the
+            same five turns — and it cuts the turn count too.</td>
+      </tr>
+      <tr>
+        <td><strong>induced failures</strong></td>
+        <td>Deleted code stays visible and gets called again; agents oscillate
+            re-reading their own edits; a lockfile diff blows the window.</td>
+        <td>Removal is a fact (<code>[removed]</code>), not lingering source text.
+            Hard token budget. Dependency update:
+            <span class="win">220,377 → 2,203</span>.</td>
+      </tr>
+    </table>
+
+    <p class="section-h">does it actually work</p>
+
+    <p class="blurb">
+      Ten tasks over five real repositories — Flask, Express, Gin, ripgrep, got —
+      three repetitions, two arms: an agent with plain <code>git</code>, and the
+      same agent with <code>gita</code> also on <code>PATH</code>.
+      <strong>gita is never mentioned in the prompt.</strong> It has to be
+      discovered and chosen, or it does not count. Cost is priced in real credits
+      from the model's own logs.
+    </p>
+
+    <table class="tbl">
+      <tr><th>iteration</th><th>design change</th><th style="text-align:right">vs plain git</th></tr>
+      <tr><td class="num">1–2</td><td>progressive disclosure, agent drills down</td><td class="num loss">+44%</td></tr>
+      <tr><td class="num">3</td><td>one-shot self-sufficient answers</td><td class="num win">−8.3%</td></tr>
+      <tr><td class="num">5</td><td>ASCII-safe output, history detail</td><td class="num win">−16.7%</td></tr>
+      <tr><td class="num">7</td><td>harness scaffolding excluded</td><td class="num win"><strong>−19.5%</strong></td></tr>
+      <tr><td class="num">8</td><td>unreferenced-addition reporting <span class="dim">(regression, diagnosed and fixed)</span></td><td class="num loss">−9.5%</td></tr>
+      <tr><td class="num">9</td><td>bulk test churn rolled up</td><td class="num win">−18.1%</td></tr>
+      <tr><td class="num">10</td><td>TOML/YAML value fix, recall restored</td><td class="num win">−15.0%</td></tr>
+    </table>
+
+    <div class="wins">
+      <h3>the numbers that matter more than the headline</h3>
+      <ul>
+        <li>turns per task <code>3.33 → 2.67</code>, the clearest signal — a turn
+            re-sends the whole context</li>
+        <li>tool output <code>−79% to −93%</code>, wall clock <code>−55%</code></li>
+        <li>entity recall <code>100%</code> in both arms; adoption
+            <code>100%</code>, unprompted</li>
+        <li>the invariant holds on every task: gita is never larger than the
+            <code>git diff</code> it replaces, so adopting it cannot cost more
+            than not adopting it</li>
+      </ul>
+    </div>
+
+    <div class="wins">
+      <h3>the cost number is a bug detector</h3>
+      <p>Every cost regression so far turned out to be a correctness or robustness
+      defect wearing a cost disguise — an encoding crash on a Windows pipe,
+      history that said <em>when</em> but not <em>what</em>, Rust
+      <code>impl Trait for Type</code> losing the trait, 159 test names burying
+      the one API change asked about.</p>
+      <p>And the quality number is a better detector still. A single recall miss
+      led to finding that <strong>TOML and YAML value changes were being
+      classified as cosmetic and filtered out</strong> — gita was answering
+      “no material changes” for a dependency version bump. That bug sat inside a
+      task scoring −41% for nine iterations, because a cost win was masking a
+      correctness hole.</p>
+    </div>
+
+    <p class="section-h">the commands</p>
+
+    <div class="pair single">
+      <div class="term">
+        <div class="term-bar">
+          <span class="d"></span><span class="d"></span><span class="d"></span>
+          <span class="title">gita</span><span class="tag gita">gita</span>
+        </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">gita diff</span>                      <span class="dim">uncommitted work, untracked files included</span>
+<span class="prompt">$</span> <span class="out">gita diff HEAD^ HEAD</span>          <span class="dim">one commit</span>
+<span class="prompt">$</span> <span class="out">gita diff main HEAD</span>           <span class="dim">a branch or PR range</span>
+
+    <span class="acc">--interface-only</span>   <span class="dim">only changes that can break a caller</span>
+    <span class="acc">--patch</span>            <span class="dim">plain unified diff, noise removed</span>
+    <span class="acc">--filter auth</span>      <span class="dim">narrow by name or path</span>
+    <span class="acc">--budget N</span>         <span class="dim">hard cap, honoured exactly</span>
+    <span class="acc">--json</span>             <span class="dim">machine-readable</span>
+
+<span class="prompt">$</span> <span class="out">gita show &lt;name&gt;</span>              <span class="dim">exact hunks for one entity</span>
+<span class="prompt">$</span> <span class="out">gita history &lt;name&gt;</span>           <span class="dim">how one function changed, with the code</span>
+<span class="prompt">$</span> <span class="out">gita savings</span>                  <span class="dim">what this cost vs a raw git diff</span>
+<span class="prompt">$</span> <span class="out">gita serve</span>                    <span class="dim">MCP server</span></div>
+      </div>
+    </div>
+
+    <p class="blurb" style="font-size:15px; color:var(--muted)">
+      Bare names work — <code>gita history fetch</code>, not just
+      <code>gita history svc.py::fetch</code>. Ambiguity is reported, never guessed.
+      Every command takes revisions positionally, because a surface that has to be
+      read is a surface that costs a turn.
+    </p>
+
+    <p class="section-h">how it works</p>
+
+    <div class="wins">
+      <h3>deterministic core, probabilistic garnish</h3>
+      <p>Every fact is computed: a tree-sitter parse, then matching by stable
+      entity id, then by content hash, then by similarity. No model decides what
+      changed. A model may later improve the <em>prose</em> of a summary line; it
+      may never supply a fact. gita degrades to worse prose, never to wrong facts.</p>
+      <p>Change kinds come from four separate hashes per entity — raw, normalised,
+      signature-only and body-only — so <code>signature_changed</code> is a fact
+      rather than an inference. Python, JavaScript, TypeScript, TSX, Go and Rust,
+      plus structural Markdown, YAML, JSON and TOML. Unsupported files degrade to
+      a whole-file entity rather than vanishing.</p>
+    </div>
+
+    <p class="section-h">what gita does not do</p>
+
+    <div class="wins">
+      <ul>
+        <li><strong>No call graph.</strong> <code>unreferenced</code> is name
+            matching: it catches dead code, not dependents. Labelled as such
+            wherever it appears.</li>
+        <li><strong>No “what should I re-test?”</strong> That needs real caller
+            edges. gita refuses rather than guesses.</li>
+        <li><strong>No natural-language questions.</strong> An earlier
+            <code>ask()</code> was withdrawn for degrading to confidently wrong
+            instead of bluntly right.</li>
+        <li><strong>Prose diffing is structural only</strong> — sections and keys,
+            not meaning.</li>
+        <li><strong>Bulk tests are summarised</strong> when they accompany source
+            changes; <code>--filter</code> to expand them.</li>
+      </ul>
+    </div>
+
+    <section class="install">
+      <p class="section-h" style="margin-top:0">install</p>
+      <pre>pip install -e ".[dev]"     <span class="dim"># Python 3.11+</span>
+
+gita diff HEAD^ HEAD</pre>
+    </section>
+
+    <footer>
+      <span>369 tests passing · tree-sitter + tiktoken · evaluated against a live agent</span>
+      <span><a href="https://github.com/DevPranjal/gita">github</a></span>
+    </footer>
+  </div>
+</body>
+</html>
