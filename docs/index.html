@@ -253,7 +253,6 @@
       because 159 test cases whose titles all restate the option are summarised
       rather than listed.</p>
     </div>
-
     <p class="section-h">why raw git output is bad context</p>
 
     <table class="tbl">
@@ -311,43 +310,25 @@
     </p>
 
     <table class="tbl">
-      <tr><th>iteration</th><th>design change</th><th style="text-align:right">vs plain git</th></tr>
-      <tr><td class="num">1–2</td><td>progressive disclosure, agent drills down</td><td class="num loss">+44%</td></tr>
-      <tr><td class="num">3</td><td>one-shot self-sufficient answers</td><td class="num win">−8.3%</td></tr>
-      <tr><td class="num">5</td><td>ASCII-safe output, history detail</td><td class="num win">−16.7%</td></tr>
-      <tr><td class="num">7</td><td>harness scaffolding excluded</td><td class="num win"><strong>−19.5%</strong></td></tr>
-      <tr><td class="num">8</td><td>unreferenced-addition reporting <span class="dim">(regression, diagnosed and fixed)</span></td><td class="num loss">−9.5%</td></tr>
-      <tr><td class="num">9</td><td>bulk test churn rolled up</td><td class="num win">−18.1%</td></tr>
-      <tr><td class="num">10</td><td>TOML/YAML value fix, recall restored</td><td class="num win">−15.0%</td></tr>
+      <tr>
+        <th>measure</th>
+        <th style="text-align:right">plain git</th>
+        <th style="text-align:right">with gita</th>
+      </tr>
+      <tr><td>credits per task</td><td class="num">42.8</td><td class="num win">36.4 &nbsp; −15%</td></tr>
+      <tr><td>turns per task</td><td class="num">3.67</td><td class="num win">3.03</td></tr>
+      <tr><td>tool output per run</td><td class="num">48,224</td><td class="num win">9,692</td></tr>
+      <tr><td>entity recall</td><td class="num">100%</td><td class="num">100%</td></tr>
+      <tr><td>adoption, unprompted</td><td class="num dim">—</td><td class="num">100%</td></tr>
     </table>
 
     <div class="wins">
-      <h3>the numbers that matter more than the headline</h3>
-      <ul>
-        <li>turns per task <code>3.33 → 2.67</code>, the clearest signal — a turn
-            re-sends the whole context</li>
-        <li>tool output <code>−79% to −93%</code>, wall clock <code>−55%</code></li>
-        <li>entity recall <code>100%</code> in both arms; adoption
-            <code>100%</code>, unprompted</li>
-        <li>the invariant holds on every task: gita is never larger than the
-            <code>git diff</code> it replaces, so adopting it cannot cost more
-            than not adopting it</li>
-      </ul>
-    </div>
-
-    <div class="wins">
-      <h3>the cost number is a bug detector</h3>
-      <p>Every cost regression so far turned out to be a correctness or robustness
-      defect wearing a cost disguise — an encoding crash on a Windows pipe,
-      history that said <em>when</em> but not <em>what</em>, Rust
-      <code>impl Trait for Type</code> losing the trait, 159 test names burying
-      the one API change asked about.</p>
-      <p>And the quality number is a better detector still. A single recall miss
-      led to finding that <strong>TOML and YAML value changes were being
-      classified as cosmetic and filtered out</strong> — gita was answering
-      “no material changes” for a dependency version bump. That bug sat inside a
-      task scoring −41% for nine iterations, because a cost win was masking a
-      correctness hole.</p>
+      <p>The invariant holds on every task: gita is never larger than the
+      <code>git diff</code> it replaces, so adopting it cannot cost more than not
+      adopting it. On small diffs it is about the same size as git — the wins
+      concentrate where the pain is. The dependency update is
+      <span class="win">−99%</span>, the large history query
+      <span class="win">−92%</span>.</p>
     </div>
 
     <p class="section-h">the commands</p>
@@ -378,8 +359,6 @@
     <p class="blurb" style="font-size:15px; color:var(--muted)">
       Bare names work — <code>gita history fetch</code>, not just
       <code>gita history svc.py::fetch</code>. Ambiguity is reported, never guessed.
-      Every command takes revisions positionally, because a surface that has to be
-      read is a surface that costs a turn.
     </p>
 
     <p class="section-h">how it works</p>
@@ -390,11 +369,10 @@
       entity id, then by content hash, then by similarity. No model decides what
       changed. A model may later improve the <em>prose</em> of a summary line; it
       may never supply a fact. gita degrades to worse prose, never to wrong facts.</p>
-      <p>Change kinds come from four separate hashes per entity — raw, normalised,
+      <p>Change kinds come from four hashes per entity — raw, normalised,
       signature-only and body-only — so <code>signature_changed</code> is a fact
       rather than an inference. Python, JavaScript, TypeScript, TSX, Go and Rust,
-      plus structural Markdown, YAML, JSON and TOML. Unsupported files degrade to
-      a whole-file entity rather than vanishing.</p>
+      plus structural Markdown, YAML, JSON and TOML.</p>
     </div>
 
     <p class="section-h">what gita does not do</p>
