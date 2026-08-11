@@ -176,8 +176,8 @@ def main(argv: list[str] | None = None, out: TextIO | None = None) -> int:
     try:
         args = parser.parse_args(argv)
     except SystemExit as exit_code:
-        if exit_code.code not in (0, None):
-            render.write(out, parser.format_usage())
+        # argparse has already printed usage and named the offending argument;
+        # printing our own copy gave the agent the same block twice.
         return int(exit_code.code or 2)
 
     if not args.command:
@@ -228,12 +228,17 @@ def _dispatch(command, out, repo, args, colour, parser) -> int:
             return _cmd_savings(out, repo, args, colour)
 
     except GitError as error:
-        render.write(out, f"gita: {error}")
+        # A bad revision and a missing repository look identical from inside git,
+        # and "unknown revision: HEAD" sent agents hunting for a branch.
+        if not repo.is_repository():
+            render.write(out, f"gita: not a git repository: {repo.root}")
+        else:
+            render.write(out, f"gita: {error}")
         return 3
     except KeyboardInterrupt:  # pragma: no cover
         return 130
 
-    render.write(out, parser.format_usage())
+    render.write(out, USAGE)
     return 2
 
 
@@ -253,6 +258,18 @@ def _cmd_diff(out, repo, args, colour) -> int:
     # re-sent context, which dwarfs anything saved by withholding detail.
     result = compose(repo, args.base, args.head, selected,
                      budget=args.budget, detail=not args.brief)
+
+    # Silence that exits zero is the worst answer available: an agent cannot tell
+    # "nothing changed" from "your budget bought nothing".
+    if not result.text.strip() and selected.material():
+        needed = count_tokens(compose(repo, args.base, args.head, selected,
+                                      budget=DEFAULT_BUDGET, detail=False).text)
+        _emit(out, {"error": "budget too small", "budget": args.budget,
+                    "summary_tokens": needed},
+              f"gita: budget {args.budget} is too small to say anything; "
+              f"the summary alone needs about {needed} tokens",
+              args.as_json)
+        return 6
 
     payload = {
         "base": args.base,
@@ -301,7 +318,9 @@ def _cmd_show(out, repo, args, colour) -> int:
             patch = entity_diff(repo, args.base, args.head, entity)
 
     if not patch:
-        message = f"gita: entity not found in either revision: {args.entity}"
+        changeset = diff_revisions(repo, args.base, args.head)
+        message = _absent_entity_message(repo, changeset, args.entity,
+                                         args.base, args.head)
         _emit(out, {"entity": args.entity, "patch": "", "error": "not found"},
               message, args.as_json)
         return 4
@@ -311,6 +330,24 @@ def _cmd_show(out, repo, args, colour) -> int:
           render.render_patch(patch, colour),
           args.as_json)
     return 0
+
+
+def _absent_entity_message(repo, changeset, entity: str, base, head) -> str:
+    """Absent from a diff is not the same as absent from the codebase.
+
+    Reporting a function that simply did not change as "not found" sends an
+    agent hunting for a deletion that never happened.
+    """
+    name = entity.rsplit("::", 1)[-1]
+    exists = bool(repo.text("grep", "-F", "-l", "--", name, check=False).strip())
+    where = f"{base}..{head}" if head else "the working tree"
+    if exists:
+        return (f"gita: {entity} did not change in {where}\n"
+                f"it still exists; run `gita diff {base} {head or ''}`".rstrip()
+                + " to see what did change")
+    return (f"gita: no entity named {entity} in {where}\n"
+            f"run `gita diff {base} {head or ''}`".rstrip()
+            + " to see what changed")
 
 
 def _cmd_expand(out, repo, args, colour) -> int:
@@ -348,7 +385,11 @@ def _cmd_history(out, repo, args, colour) -> int:
                                 until=args.until, limit=args.limit)
         if not events:
             _emit(out, {"entity": args.entity, "events": [], "error": "no history"},
-                  f"gita: no recorded changes to {args.entity}", args.as_json)
+                  f"gita: no recorded changes to {args.entity} "
+                  f"in the last {args.limit} commits\n"
+                  f"run `gita diff {args.until}^ {args.until}` to see recent changes, "
+                  f"or raise --limit",
+                  args.as_json)
             return 4
 
         # The budget bounds what lands in the agent's context, and `write` appends

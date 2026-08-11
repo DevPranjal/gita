@@ -21,6 +21,34 @@ MAX_DEPTH = 6
 #: the new option pushed the API change out of the agent's view entirely.
 TEST_ROLLUP_MIN = 5
 
+#: The same edit in this many sibling files is one fact, not N. Two is not a
+#: pattern, and grouping a pair hides as much as it saves.
+MIN_PARALLEL_FILES = 3
+
+#: Beyond this the headline's file list is the better place to look.
+MAX_NAMED_PATHS = 8
+
+
+def _by_shape(
+    groups: dict[tuple[str, str], list[EntityChange]],
+) -> dict[tuple[str, tuple[str, ...]], list[tuple[str, list[EntityChange]]]]:
+    """Index groups by what changed, so the same change in N files is visible."""
+    shapes: dict[tuple[str, tuple[str, ...]], list[tuple[str, list[EntityChange]]]] = \
+        defaultdict(list)
+    for (path, head), group in groups.items():
+        kinds = tuple(sorted({change.kind.value for change in group}))
+        shapes[(head, kinds)].append((path, group))
+    for members in shapes.values():
+        members.sort(key=lambda item: item[0])
+    return shapes
+
+
+def _parallel_line(head: str, kinds: tuple[str, ...], paths: list[str]) -> str:
+    shown = ", ".join(paths[:MAX_NAMED_PATHS])
+    if len(paths) > MAX_NAMED_PATHS:
+        shown += f", +{len(paths) - MAX_NAMED_PATHS} more"
+    return f"{head}  [{', '.join(kinds)}] in {len(paths)} files: {shown}"
+
 
 def _render(path: str, head: str, group: list[EntityChange]) -> str:
     if len(group) == 1:
@@ -62,15 +90,23 @@ def rollup_lines(changes: list[EntityChange], depth: int = 1) -> list[str]:
     for change in listed:
         groups[(change.entity.path, head_of(change, depth))].append(change)
 
-    ranked = sorted(
-        groups.items(),
-        key=lambda item: (
-            -max(score_change(c) for c in item[1]),
-            -sum(score_change(c) for c in item[1]),
-            item[0],
-        ),
-    )
-    lines = [_render(path, head, group) for (path, head), group in ranked]
+    rendered: list[tuple[float, float, str, str]] = []
+    for (head, kinds), members in _by_shape(groups).items():
+        if len(members) >= MIN_PARALLEL_FILES:
+            flat = [c for _, group in members for c in group]
+            rendered.append((max(score_change(c) for c in flat),
+                             sum(score_change(c) for c in flat),
+                             members[0][0],
+                             _parallel_line(head, kinds, [p for p, _ in members])))
+        else:
+            for path, group in members:
+                rendered.append((max(score_change(c) for c in group),
+                                 sum(score_change(c) for c in group),
+                                 path,
+                                 _render(path, head, group)))
+
+    rendered.sort(key=lambda item: (-item[0], -item[1], item[2], item[3]))
+    lines = [line for *_, line in rendered]
 
     by_file: dict[str, list[EntityChange]] = defaultdict(list)
     for change in bulk_tests:

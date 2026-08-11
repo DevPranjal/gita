@@ -44,6 +44,21 @@ class GitError(RuntimeError):
     pass
 
 
+def _readable(args: tuple[str, ...], stderr: bytes) -> str:
+    """git's diagnostics are written for a human at a terminal, not for an agent.
+
+    A failed revision returned four lines, three of them advice about `--`, plus
+    our own flags -- the exact low-signal noise gita exists to remove.
+    """
+    lines = [line.strip() for line in
+             stderr.decode("utf8", "replace").splitlines() if line.strip()]
+    first = lines[0] if lines else ""
+    for prefix in ("fatal: ", "error: "):
+        if first.startswith(prefix):
+            first = first[len(prefix):]
+    return first or f"git {args[0]} failed"
+
+
 class Repo:
     def __init__(self, root: str | Path):
         self.root = Path(root)
@@ -55,8 +70,7 @@ class Repo:
         )
         # A bad flag yields empty stdout, which reads exactly like "no changes".
         if check and result.returncode != 0:
-            detail = result.stderr.decode("utf8", "replace").strip()
-            raise GitError(f"git {' '.join(args)} failed ({result.returncode}): {detail}")
+            raise GitError(_readable(args, result.stderr))
         return result.stdout
 
     def text(self, *args: str, check: bool = True) -> str:
@@ -76,9 +90,14 @@ class Repo:
         return data or None
 
     def resolve(self, rev: str | None) -> str:
-        if is_pseudo_rev(rev):
+        if is_pseudo_rev(rev) or rev == EMPTY_TREE:
             return rev or "WORKTREE"
-        return self.text("rev-parse", rev, check=False).strip()
+        # Plain `rev-parse` echoes an unknown argument back on stdout, so its
+        # output is truthy even on failure and every guard built on it passed.
+        return self.text("rev-parse", "--verify", "--quiet", rev, check=False).strip()
+
+    def is_repository(self) -> bool:
+        return bool(self.text("rev-parse", "--git-dir", check=False).strip())
 
     def parent(self, rev: str) -> str:
         return self.text("rev-parse", f"{rev}^").strip()

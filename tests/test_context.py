@@ -210,6 +210,53 @@ class TestTestChurnRollup:
         assert any(line.startswith("test/") and "::" in line for line in lines)
 
 
+class TestParallelFileRollup:
+    """The same edit repeated across sibling files is one fact, not N.
+
+    On `flask-dependency-update` an isort block added to four `examples/*/
+    pyproject.toml` files produced 25 mentions of `pyproject.toml` against two
+    of `uv.lock`. One repetition drowned out the other half of the answer, and
+    a repetition scored recall 0.5 by naming only the loud one.
+    """
+
+    def parallel(self, files: int = 4) -> ChangeSet:
+        before = b"[tool.ruff]\nline-length = 88\n"
+        after = (b"[tool.ruff]\nline-length = 88\n\n"
+                 b"[tool.ruff.lint.isort]\nforce-single-line = true\n")
+        pairs = [(f"examples/app{i}/pyproject.toml", before, after)
+                 for i in range(files)]
+        pairs.append(("lockfile.toml", b"[package]\nflask = \"3.0\"\n",
+                      b"[package]\nflask = \"3.1\"\n"))
+        return changeset(*pairs)
+
+    def test_the_repeated_change_is_stated_once(self):
+        """Once per entity, not once per file."""
+        lines = rollup_lines(self.parallel().material(), depth=6)
+        isort = [line for line in lines if "isort" in line]
+        assert all("in 4 files" in line for line in isort)
+        assert len(isort) < 4
+
+    def test_it_says_how_many_files_and_names_them(self):
+        line = next(line for line in rollup_lines(self.parallel().material(), depth=6)
+                    if "isort" in line)
+        assert "4 files" in line
+        assert "examples/app0/pyproject.toml" in line
+
+    def test_the_quiet_file_is_not_crowded_out(self):
+        lines = rollup_lines(self.parallel().material(), depth=6)
+        assert any(line.startswith("lockfile.toml") for line in lines)
+
+    def test_two_files_are_not_a_pattern(self):
+        """Grouping a pair hides as much as it saves."""
+        lines = rollup_lines(self.parallel(files=2).material(), depth=6)
+        assert len([line for line in lines if "isort" in line]) >= 2
+
+    def test_grouping_costs_fewer_tokens(self):
+        grouped = "\n".join(rollup_lines(self.parallel(files=6).material(), depth=6))
+        singly = "\n".join(rollup_lines(self.parallel(files=2).material(), depth=6))
+        assert count_tokens(grouped) < count_tokens(singly) * 3
+
+
 class TestFit:
     nested_changes = TestRollup.nested_changes
 

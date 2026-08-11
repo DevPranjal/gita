@@ -139,23 +139,45 @@ def _own_tokens(node, spec: LanguageSpec) -> list[str]:
     Without this a class reports a change whenever any of its methods does, and
     the same change is counted at every level of the tree. An entity owns only
     the code no descendant entity has claimed.
-    """
-    if node.child_count == 0:
-        text = node.text.decode("utf8", "replace").strip()
-        return [text] if text else []
 
+    Children do not always tile their parent: tree-sitter gives a TOML string two
+    quote children with the value in the gap between them. Taking only leaves
+    dropped that gap, so a dependency version bump hashed as unchanged.
+    """
     out: list[str] = []
-    stack = list(reversed(node.children))
+    stack: list = [node]
+
     while stack:
         current = stack.pop()
-        if current.type in spec.comment_nodes or current.type in spec.entity_nodes:
+        if isinstance(current, str):
+            out.append(current)
             continue
         if current.child_count == 0:
             text = current.text.decode("utf8", "replace").strip()
             if text:
                 out.append(text)
             continue
-        stack.extend(reversed(current.children))
+
+        raw = current.text
+        base = current.start_byte
+        items: list = []
+        cursor = 0
+        for child in current.children:
+            start = child.start_byte - base
+            if start > cursor:
+                gap = raw[cursor:start].decode("utf8", "replace").strip()
+                if gap:
+                    items.append(gap)
+            if (child.type not in spec.comment_nodes
+                    and child.type not in spec.entity_nodes):
+                items.append(child)
+            cursor = child.end_byte - base
+        if cursor < len(raw):
+            tail = raw[cursor:].decode("utf8", "replace").strip()
+            if tail:
+                items.append(tail)
+        stack.extend(reversed(items))
+
     return out
 
 

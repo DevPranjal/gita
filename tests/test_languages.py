@@ -4,6 +4,8 @@ Corpus integration proves the engine does not crash on Go, Rust and TSX. It does
 not prove the right entities come out. These do.
 """
 
+import pytest
+
 from gita import ChangeKind, EntityKind, diff_trees, extract
 
 GO = b'''
@@ -159,3 +161,33 @@ class TestTsx:
 
     def test_no_parse_error_on_jsx(self):
         assert not extract(TSX, "ui.tsx").parse_error
+
+
+class TestValuesInsideDataFiles:
+    """A version bump is the whole point of a dependency update.
+
+    tree-sitter gives a TOML string two quote children with the value in the gap
+    between them and no node of its own. Collecting only leaf tokens dropped the
+    value, so `flask = "3.0"` and `"3.1"` hashed identically and were filtered
+    out as cosmetic -- gita reported "no material changes" for a version bump.
+    """
+
+    CASES = [
+        ("uv.toml", b'[package]\nflask = "3.0"\n', b'[package]\nflask = "3.1"\n'),
+        ("compose.yaml",
+         b'services:\n  web:\n    image: "flask:3.0"\n',
+         b'services:\n  web:\n    image: "flask:3.1"\n'),
+        ("package.json", b'{"deps": {"flask": "3.0"}}', b'{"deps": {"flask": "3.1"}}'),
+    ]
+
+    @pytest.mark.parametrize("path,before,after", CASES)
+    def test_a_value_change_is_material(self, path, before, after):
+        changes = diff_trees(extract(before, path), extract(after, path))
+        assert [c for c in changes if not c.is_noise], f"{path}: value change lost"
+
+    @pytest.mark.parametrize("path,before,after", CASES)
+    def test_reformatting_the_same_value_is_still_noise(self, path, before, after):
+        """The fix must not make gita blind to formatting-only edits."""
+        spaced = before.replace(b" = ", b"  =  ").replace(b": ", b":  ")
+        changes = diff_trees(extract(before, path), extract(spaced, path))
+        assert not [c for c in changes if not c.is_noise]

@@ -58,10 +58,20 @@ class TestBudget:
         assert payload["tokens"] <= 40
         assert payload["budget"] == 40
 
-    @pytest.mark.parametrize("budget", ["0", "5", "25", "100", "4000"])
+    @pytest.mark.parametrize("budget", ["5", "25", "100", "4000"])
     def test_any_budget_holds(self, repo, budget):
         payload = json.loads(run(repo, "diff", "HEAD^", "HEAD", "--budget", budget, "--json")[1])
         assert payload["tokens"] <= int(budget)
+
+    def test_a_budget_too_small_to_answer_says_so(self, repo):
+        """The budget bounds the answer, and a diagnostic is not an answer.
+
+        Returning nothing at all and exiting zero was indistinguishable from
+        "nothing changed", which is a different fact entirely.
+        """
+        code, output = run(repo, "diff", "HEAD^", "HEAD", "--budget", "0", "--json")
+        assert code != 0
+        assert json.loads(output)["error"] == "budget too small"
 
     def test_output_never_exceeds_a_raw_git_diff(self, repo):
         from gita import diff_revisions
@@ -101,7 +111,8 @@ class TestShow:
     def test_unknown_entity_exits_non_zero(self, repo):
         code, output = run(repo, "show", "app.py::missing")
         assert code != 0
-        assert "not found" in output.lower()
+        assert "app.py::missing" in output
+        assert "gita diff" in output          # and what to run instead
 
     def test_alias_shloka(self, repo):
         assert run(repo, "shloka", "app.py::Store::get")[1] == \
