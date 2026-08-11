@@ -90,3 +90,66 @@ so it stays discoverable without being part of the diff.
 
 **Rule reinforced:** when a fix makes a number worse, find out why before reverting. The
 fix was correct; the environment was lying.
+
+### Session 3 - iteration 8: a fix that worked, and a task that fell apart
+
+`flask-uncommitted` was **fixed** by the reference reporting: +19% -> -2%, and the
+`git status` + `git diff -U15` follow-up calls disappeared. The diagnosis held.
+
+But the headline went **-19.5% -> -9.5%**, because `got-new-option` went
+**-38% -> +111%** at 7.7 turns. One task, four separate defects underneath it.
+
+#### 1. Bulk test churn crowded out the answer
+
+The commit adds one option and **159 test cases** whose names all restate it. The
+summary listed 20 of them, each a truncated 100-character `test('allowAbsoluteUrls
+false rejects whitespace-prefixed scheme-relative URL from retryWithMergedOpt...`,
+and the actual API change sat below them. The agent read files by hand instead.
+
+Test files now collapse to one line each. The summary now names `allowAbsoluteUrls`
+directly, and the answer fell 5,273 -> 3,969 tokens (git diff: 16,713).
+
+Guarded: roll-up only applies when tests are bulk **and** something else changed. A
+test-only commit is about its tests, and hiding them would hide the answer.
+
+#### 2. The dead-code check raised 159 false alarms
+
+Every added test was reported as "unreferenced". A test is invoked by its runner,
+never by name. And because only 25 lookups are affordable, **all 25 were spent on
+tests before reaching a single source change** -- the feature could not have worked
+on any repo with tests. Same failure mode as `ask()`: confidently wrong.
+
+#### 3. My telemetry had been lying for three iterations
+
+`got-new-option` reported 10,546 output tokens. The real figure was 5,273 -- exactly
+half. `render.write` retries after a failed encode, and the measuring tee counted the
+*attempt* as well as the retry. Only this task carries non-ASCII text, so only this
+task was inflated, in iterations 6, 7 and 8.
+
+Reported credits come from the model's own logs, so the headline numbers stand. But I
+published a tool-token figure that was 2x wrong and did not notice for three cycles.
+
+**Rule added:** an instrument that can only be wrong in one direction, on one input,
+is the hardest kind to catch. Measure the measurement against ground truth
+occasionally -- `count_tokens(actual stdout)` versus what telemetry claims.
+
+#### 4. We were corrupting source text
+
+The cp1252 fallback turned an arrow inside a quoted documentation line into `?`.
+Small, but it is the one thing gita promises never to do: degrade to worse prose,
+never wrong facts. `?` in a quoted line is a wrong fact. We now ask the stream for
+UTF-8 first.
+
+#### Performance, because 10 seconds is a correctness problem too
+
+`entity_diff` re-read and re-parsed the same file for every entity -- `options.ts`
+parsed ~15 times in one call. 11.2s -> 6.2s. An agent that waits ten seconds starts
+working around the tool, which is exactly what the turn count showed.
+
+#### State
+
+335 tests. `9ef8033`. Iteration 9 queued.
+
+**Expected:** `got-new-option` returns to negative; `flask-uncommitted` stays fixed;
+headline returns to at least -19.5%. If `got-new-option` does not move, the test
+roll-up was not the cause and gets reverted.

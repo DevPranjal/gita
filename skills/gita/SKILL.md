@@ -81,6 +81,31 @@ src/flask/ctx.py::AppContext::pop  [body_changed]
 - **`src/app.py::Class::method`** is an entity id. Pass it verbatim to
   `expand` or `show`.
 
+### Test churn is summarised, not listed
+
+When a change touches tests in bulk alongside source, each test file collapses
+to one line:
+
+```
+test/hooks.ts  (58 tests: 57 added, 1 body_changed)
+```
+
+Fifty-eight near-identical test names tell you nothing that this line does not,
+and listing them pushes the change you asked about off the top of the output.
+Use `gita diff <base> <head> --filter test/hooks.ts` if you do need them
+individually. A commit that changes **only** tests is listed in full, because
+then the tests are the answer.
+
+### Additions nothing references
+
+```
+unreferenced (name appears nowhere else): src/flask/helpers.py::_eval_probe
+```
+
+This is **name matching, not a call graph**. It reliably catches dead code and
+half-wired additions; it does not tell you what depends on something. Tests are
+excluded — a test is invoked by its runner, never by name.
+
 ### Change kinds
 
 | Kind | Meaning | Can it break a caller? |

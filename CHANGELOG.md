@@ -310,3 +310,37 @@ real caller edges (WS-2). Only additions are checked -- a modified function alre
 callers. Lookups are capped and names shorter than three characters are skipped.
 
 - 323 tests.
+
+### Fixed - iteration 8: bulk test churn buried the answer
+
+`got-new-option` regressed from -38% to **+111%** against plain git, taking 7.7 turns
+instead of 3.3. Four distinct faults, found in the run artifacts:
+
+- **Test churn crowded out the answer.** The commit adds one option and 159 test cases whose
+  names all restate it. Listing each one filled the summary with 20 near-identical, truncated
+  titles and pushed the real API change off the top, so the agent went back to reading files
+  by hand. Test files now roll up to one line each --
+  `test/hooks.ts  (58 tests: 57 added, 1 body_changed)` -- but only when tests are bulk *and*
+  something else changed, because a test-only commit is about its tests. The summary now names
+  `allowAbsoluteUrls` outright, and the answer fell from 5,273 to **3,969 tokens** against
+  16,713 for `git diff`.
+- **Every added test was reported as unreferenced.** A test is invoked by its runner, never by
+  name, so the dead-code check raised 159 false alarms. Worse, it can only afford 25 lookups,
+  so all of them were spent on tests before reaching a single source change. Tests are now
+  excluded and the remaining lookups go to the highest-ranked changes first.
+- **Telemetry counted the answer twice.** `render.write` retries after a failed encode, and the
+  measuring tee recorded the attempt *and* the retry. Every measurement of the one task carrying
+  non-ASCII text was inflated 2x, in iterations 6, 7 and 8. The tee now records only what
+  actually left the process. Reported credits came from the model's own logs and are unaffected.
+- **Non-ASCII source was corrupted.** The cp1252 fallback turned an arrow inside a quoted
+  documentation line into `?`, which is a fact reported wrong. `render.write` now asks the
+  stream for UTF-8 first and only replaces characters as a last resort.
+
+### Changed - one parse per revision, not one per entity
+
+`entity_diff` accepts a shared cache, so a file with many changed entities is read and parsed
+once per revision instead of once per entity. The largest task in the corpus went from
+**11.2s to 6.2s**. A ten-second call is one an agent works around.
+
+- 335 tests.
+
