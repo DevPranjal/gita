@@ -11,11 +11,13 @@ the agent to git for the other half.
 
 from __future__ import annotations
 
+import io
 import subprocess
 
 import pytest
 
 from gita import diff_revisions
+from gita.cli import main
 from gita.vcs.git import Repo
 
 
@@ -87,3 +89,31 @@ class TestRepoUntracked:
         (workspace.root / ".gitignore").write_bytes(b"secret.txt\n")
         (workspace.root / "secret.txt").write_bytes(b"shh\n")
         assert "secret.txt" not in workspace.untracked()
+
+
+class TestWorkingTreeStatesAreNamed:
+    """An agent ran `git status --short` right after `gita diff`, every time.
+
+    gita listed the files but not whether they were new, modified or untracked,
+    so the question "what is the state of my tree" still needed a second command.
+    """
+
+    def dirty(self, workspace):
+        (workspace.root / "service.py").write_bytes(b"def start(port):\n    return port\n")
+        (workspace.root / "app.py").write_bytes(b"def handle(request):\n    return 0\n")
+        out = io.StringIO()
+        main(["-C", str(workspace.root), "diff"], out=out)
+        return out.getvalue()
+
+    def test_untracked_files_are_labelled(self, workspace):
+        assert "service.py (untracked)" in self.dirty(workspace)
+
+    def test_modified_files_are_labelled(self, workspace):
+        assert "app.py (modified)" in self.dirty(workspace)
+
+    def test_a_commit_range_is_not_annotated(self, workspace):
+        """History has no working tree, and the labels would be noise."""
+        self.dirty(workspace)
+        out = io.StringIO()
+        main(["-C", str(workspace.root), "diff", "HEAD", "HEAD"], out=out)
+        assert "untracked" not in out.getvalue()

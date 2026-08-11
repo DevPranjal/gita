@@ -72,6 +72,7 @@ def focus(changeset: ChangeSet, term: str = "",
     selected = filter_changes(changeset.material(), term, interface_only)
     focused = ChangeSet()
     focused.files_changed = len({c.entity.path for c in selected})
+    focused.file_status = changeset.file_status
     focused.extend(selected)
     return focused
 

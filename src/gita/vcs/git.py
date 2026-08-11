@@ -29,7 +29,7 @@ class ChangedFile:
 
     @property
     def is_added(self) -> bool:
-        return self.status == "A"
+        return self.status in ("A", "?")
 
     @property
     def is_deleted(self) -> bool:
@@ -143,7 +143,25 @@ class Repo:
 
     def raw_diff(self, base: str, head: str | None = WORKTREE,
                  paths: list[str] | None = None) -> str:
+        """What git costs to convey the same change.
+
+        `git diff` cannot show an untracked file at all, so comparing against it
+        alone budgets gita to nothing for content only gita can see. The honest
+        baseline is what the agent actually runs: the diff, plus reading the
+        files git omitted.
+        """
         args = ["diff", "--no-color", "--no-ext-diff", *self._diff_args(base, head)]
         if paths:
             args += ["--", *paths]
-        return self.text(*args)
+        raw = self.text(*args)
+
+        if head is WORKTREE:
+            wanted = set(paths) if paths else None
+            for path in self.untracked():
+                if wanted is not None and path not in wanted:
+                    continue
+                blob = self.blob(WORKTREE, path)
+                if blob is not None:
+                    raw += f"\n--- /dev/null\n+++ b/{path}\n"
+                    raw += blob.decode("utf8", "replace")
+        return raw

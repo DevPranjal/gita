@@ -78,11 +78,43 @@ def _headline(changeset: ChangeSet, material: list[EntityChange],
     # File names matter: an entity list alone cannot answer "which files changed",
     # which cost real recall in iteration 2.
     # ASCII only: a middle dot in this line broke a piped Windows shell.
-    return " | ".join(parts) + "\nfiles: " + ", ".join(files)
+    return " | ".join(parts) + "\nfiles: " + ", ".join(_named(changeset, files, worktree))
+
+
+#: Mirrors `git status --short`, which agents ran straight after `gita diff`
+#: on every repetition because we did not say which files were new.
+_STATUS = {"A": "new", "?": "untracked", "M": "modified",
+           "D": "deleted", "R": "renamed"}
+
+
+def _named(changeset: ChangeSet, files: list[str], worktree: bool) -> list[str]:
+    if not worktree:
+        return files
+    return [f"{path} ({_STATUS[status]})"
+            if (status := changeset.file_status.get(path, "")) in _STATUS
+            else path
+            for path in files]
 
 
 def _ranked(material: list[EntityChange]) -> list[EntityChange]:
     return sorted(material, key=lambda c: (-score_change(c), c.entity.id))
+
+
+#: Detail below this is not worth reserving budget for -- a couple of context
+#: lines with nowhere to sit.
+MIN_USEFUL_DETAIL = 80
+
+
+def _summary_budget(budget: int, headline: int) -> int:
+    """Naming what changed outranks showing it.
+
+    The share is there to leave room for hunks. When the leftover could not buy
+    a useful hunk anyway, spend it on the summary: an answer that says
+    "3 changes" and then lists none of them is not an answer.
+    """
+    remaining = max(0, budget - headline)
+    share = max(0, int(budget * SUMMARY_SHARE) - headline)
+    return remaining if remaining - share < MIN_USEFUL_DETAIL else share
 
 
 def _detail(repo: Repo, base: str, head: str | None, change: EntityChange,
@@ -122,7 +154,7 @@ def compose(repo: Repo, base: str, head: str | None, changeset: ChangeSet,
         return Answer(text=headline, budget=budget,
                       truncated=headline != _headline(changeset, material, worktree))
 
-    summary_budget = max(0, int(budget * SUMMARY_SHARE) - count_tokens(headline))
+    summary_budget = _summary_budget(budget, count_tokens(headline))
     lines, _ = fit_lines(material, summary_budget)
 
     # "Is this wired in?" is the first question asked of an addition. Without an

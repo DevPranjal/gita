@@ -12,11 +12,14 @@ than the raw diff would have.
 
 from __future__ import annotations
 
+import subprocess
+
 import pytest
 
 from gita import diff_revisions
 from gita.context import count_tokens
 from gita.context.answer import DEFAULT_BUDGET, compose, material_patch
+from gita.vcs.git import Repo
 
 
 def answer(repo, base="HEAD^", head="HEAD", **kwargs):
@@ -131,3 +134,38 @@ class TestRanking:
         detail = text.split("---", 1)[1] if "---" in text else text
         # handle's signature changed; Store::get only changed its body
         assert detail.index("handle") < detail.index("Store::get")
+
+
+class TestSmallChangesStillNameWhatChanged:
+    """"3 changes" followed by nothing is not an answer.
+
+    The budget is capped by the raw `git diff`, and on a small diff the headline
+    plus file list consumed all of it, so the entity lines -- the actual answer --
+    were squeezed out. The agent was told how many things changed but not what.
+    """
+
+    def tiny(self, tmp_path):
+        def git(*args):
+            subprocess.run(["git", "-C", str(tmp_path), *args], check=True,
+                           capture_output=True)
+        (tmp_path / "m.py").write_bytes(b"def a():\n    return 1\n")
+        git("init", "-q", "-b", "main")
+        git("config", "user.email", "t@t")
+        git("config", "user.name", "t")
+        git("add", "-A")
+        git("commit", "-q", "-m", "first")
+        (tmp_path / "m.py").write_bytes(b"def a():\n    return 99\n")
+        git("commit", "-qam", "second")
+        return Repo(tmp_path)
+
+    def test_the_changed_entity_is_named(self, tmp_path):
+        repo = self.tiny(tmp_path)
+        answer = compose(repo, "HEAD^", "HEAD", diff_revisions(repo, "HEAD^", "HEAD"))
+        assert "m.py::a" in answer.text
+
+    def test_still_never_larger_than_git(self, tmp_path):
+        repo = self.tiny(tmp_path)
+        changeset = diff_revisions(repo, "HEAD^", "HEAD")
+        answer = compose(repo, "HEAD^", "HEAD", changeset)
+        raw = count_tokens(repo.raw_diff("HEAD^", "HEAD", changeset.paths()))
+        assert answer.tokens <= raw

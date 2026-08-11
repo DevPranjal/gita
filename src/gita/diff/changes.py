@@ -78,6 +78,9 @@ class ChangeSet:
     files_changed: int = 0
     files_skipped: int = 0
     parse_errors: int = 0
+    #: path -> git status letter, so "what is the state of my tree" needs no
+    #: second command. `?` is untracked, as in `git status --short`.
+    file_status: dict[str, str] = field(default_factory=dict)
 
     def add(self, change: EntityChange) -> None:
         self.changes.append(change)

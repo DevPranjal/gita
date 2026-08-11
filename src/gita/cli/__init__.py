@@ -117,8 +117,15 @@ def _parser() -> argparse.ArgumentParser:
                           help="how entities changed across a range of commits")
     hist.add_argument("entity", nargs="?",
                       help="limit to one entity; omit for every commit")
+    # Every other command takes revisions positionally. Requiring --since here
+    # cost two turns per run: the agent tried `gita history <name> <rev>`, read
+    # the help, then retried.
+    hist.add_argument("base", nargs="?", default=None,
+                      help="oldest revision to look back to")
+    hist.add_argument("head", nargs="?", default=None,
+                      help="newest revision to look at (default HEAD)")
     hist.add_argument("--since", default=None)
-    hist.add_argument("--until", default="HEAD")
+    hist.add_argument("--until", default=None)
     hist.add_argument("--limit", type=int, default=20)
     hist.add_argument("--brief", action="store_true",
                       help="commits only, without the code")
@@ -380,14 +387,18 @@ def _cmd_expand(out, repo, args, colour) -> int:
 def _cmd_history(out, repo, args, colour) -> int:
     from ..history import entity_history, series
 
+    # Positional and flag forms mean the same thing; the flags came first.
+    since = args.since or args.base
+    until = args.until or args.head or "HEAD"
+
     if args.entity:
-        events = entity_history(repo, args.entity, since=args.since,
-                                until=args.until, limit=args.limit)
+        events = entity_history(repo, args.entity, since=since,
+                                until=until, limit=args.limit)
         if not events:
             _emit(out, {"entity": args.entity, "events": [], "error": "no history"},
                   f"gita: no recorded changes to {args.entity} "
                   f"in the last {args.limit} commits\n"
-                  f"run `gita diff {args.until}^ {args.until}` to see recent changes, "
+                  f"run `gita diff {until}^ {until}` to see recent changes, "
                   f"or raise --limit",
                   args.as_json)
             return 4
@@ -418,7 +429,7 @@ def _cmd_history(out, repo, args, colour) -> int:
               render.render_answer("\n".join(lines), colour), args.as_json)
         return 0
 
-    summaries = series(repo, since=args.since, until=args.until, limit=args.limit)
+    summaries = series(repo, since=since, until=until, limit=args.limit)
     payload = {
         "commits": [{"sha": s.sha, "subject": s.subject, "date": s.date,
                      "changes": [c.entity.id for c in s.material()]}

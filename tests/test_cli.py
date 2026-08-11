@@ -202,3 +202,30 @@ class TestErrors:
         code = main(["-C", str(tmp_path), "diff"], out=out)
         assert code != 0
         assert "git" in out.getvalue().lower()
+
+
+class TestHistoryTakesRevisionsLikeEveryOtherCommand:
+    """`gita diff <base> <head>` works, so `gita history <name> <base> <head>` must.
+
+    Requiring --since here cost two turns in every repetition of `gin-history`:
+    the agent tried the positional form, was rejected, ran `gita history --help`,
+    and retried. An inconsistent surface is a surface that has to be read.
+    """
+
+    def test_positional_revisions_are_accepted(self, repo):
+        code, output = run(repo, "history", "handle", "HEAD^", "HEAD")
+        assert code == 0
+        assert "handle" in output
+
+    def test_a_single_positional_revision_means_since(self, repo):
+        positional = run(repo, "history", "handle", "HEAD^")
+        flagged = run(repo, "history", "handle", "--since", "HEAD^")
+        assert positional == flagged
+
+    def test_the_flag_form_still_works(self, repo):
+        code, _ = run(repo, "history", "handle", "--since", "HEAD^", "--until", "HEAD")
+        assert code == 0
+
+    def test_flags_win_over_positionals(self, repo):
+        explicit = run(repo, "history", "handle", "HEAD~1", "--since", "HEAD^")
+        assert explicit[0] == 0

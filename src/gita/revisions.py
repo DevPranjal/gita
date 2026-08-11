@@ -41,7 +41,7 @@ def diff_revisions(repo: str | Path | Repo, base: str = "HEAD",
     # written would not appear at all. Only the working tree has them.
     if head is WORKTREE:
         known = {c.path for c in changed}
-        changed += [ChangedFile("A", path) for path in repo.untracked()
+        changed += [ChangedFile("?", path) for path in repo.untracked()
                     if path not in known]
 
     # Every text file counts: unparseable types fall back to a whole-file entity
@@ -57,6 +57,7 @@ def diff_revisions(repo: str | Path | Repo, base: str = "HEAD",
             continue
 
         changeset.files_changed += 1
+        changeset.file_status[changed_file.path] = changed_file.status
         for tree in (previous, current):
             if tree is not None and tree.parse_error:
                 changeset.parse_errors += 1
