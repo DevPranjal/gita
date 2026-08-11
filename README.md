@@ -103,14 +103,21 @@ priced in real credits from the model's own logs.
 | 1–2 | progressive disclosure, agent drills down | **+44%** |
 | 3 | one-shot self-sufficient answers | −8.3% |
 | 5 | ASCII-safe output, history detail | −16.7% |
-| 7 | harness scaffolding excluded | **−19.5%** |
+| 7 | harness scaffolding excluded | −19.5% |
 | 8 | unreferenced-addition reporting | −9.5% *(regression, diagnosed and fixed)* |
-| 9 | bulk test churn rolled up | **−18.1%**, turns 3.33 → 2.67 |
+| 9 | bulk test churn rolled up | −18.1% |
+| 10 | TOML/YAML value changes were being dropped | −15.0% |
+| 11 | consistent surface: positional revisions, working-tree state | **−27.7%** |
 
-Also: tool output **−79% to −93%**, wall clock **−55%**, entity recall **100%**, adoption
-**100% unprompted**. Four clean sweeps land at −16.7 / −16.8 / −19.5 / −18.1, and the git
-baseline itself moves several percent between sweeps — so the aggregate is the honest
-number and single-task deltas are mostly noise.
+On the latest sweep: turns **3.93 → 2.73**, tool output **−94%**, entity recall
+**98.3% → 100%** (gita above the git arm), adoption **100% unprompted**, and nine of
+ten tasks beat plain git.
+
+**Read the cost margin as a band, not a number.** The git baseline drifts between
+sweeps — it was 36.4 credits in one run and 44.8 in another — so part of any single
+margin is the baseline moving. Recent sweeps land between −15% and −28%, median near
+−18%. Turn count and tool output are the steadier signals, and both arms always run
+in the same session against the same tasks.
 
 The invariant holds on every task — gita is never larger than the `git diff` it
 replaces — so adopting it cannot cost more than not adopting it. On small diffs it is

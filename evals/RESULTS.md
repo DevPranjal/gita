@@ -322,3 +322,65 @@ under a task that was scoring -41%. A cost win was masking a correctness hole.
 **Lesson:** a recall miss is worth more attention than a cost regression. The
 cost numbers found five bugs by being bad; this one was found by a quality
 number moving 1.7 points while the cost number looked fine.
+
+---
+
+## Iteration 11 - 2026-08-11 - consistent surface - **VALID**
+
+60 runs. Artifacts: `evals/runs/20260811-134253/`
+
+| metric | git | gita | |
+| --- | ---: | ---: | --- |
+| credits / task | 44.8 | **32.4** | **-27.7%** |
+| turns | 3.93 | **2.73** | **-31%** |
+| tool output / run | 48,224 | **2,873** | -94% |
+| recall | 98.3% | **100%** | **+1.7pt** |
+| adoption | - | **100%** | |
+
+**Nine of ten tasks beat plain git**, and every task that had regressed is fixed:
+
+| task | it9 | it10 | **it11** |
+| --- | ---: | ---: | ---: |
+| flask-dependency-update | -13% | -34% | **-52%** |
+| gin-copy-fix | -15% | -8% | **-43%** |
+| express-send-condition | -22% | -22% | **-32%** |
+| flask-uncommitted | +12% | +52% | **-31%** |
+| flask-teardown-review | -58% | -67% | **-26%** |
+| got-new-option | -30% | -14% | **-18%** |
+| gin-history | +3% | +41% | **-17%** |
+| express-ci-bump *(control)* | -1% | -8% | **-9%** |
+| gin-public-api | -8% | -8% | **-8%** |
+| ripgrep-walker | +1% | +15% | **+7%** |
+
+`gin-history` (+41% -> -17%) and `flask-uncommitted` (+52% -> -31%) were both pure
+surface defects, not answer quality: gita's output was byte-identical before and
+after. One demanded `--since` where every other command takes revisions
+positionally; the other made the agent run `git status` because gita would not
+say which files were new.
+
+### Do not read -27.7% as the headline
+
+The git baseline drifts between sweeps, and this time it drifted up:
+
+| run | git | gita | delta |
+| --- | ---: | ---: | ---: |
+| it9 | 36.4 | **29.8** | -18.1% |
+| it10 | 42.8 | 36.4 | -15.0% |
+| it11 | **44.8** | 32.4 | -27.7% |
+
+gita's own cost, 32.4, is not its lowest -- it9 was cheaper in absolute terms.
+Part of this sweep's margin is git getting more expensive, not gita getting
+cheaper. The defensible claim is **a band of -15% to -28% with a median near
+-18%**, on a paired design where both arms run in the same session.
+
+The baseline-independent results are the stronger ones: **turns 3.93 -> 2.73**,
+**tool output -94%**, and **recall above the git arm for the first time**.
+
+### Remaining: ripgrep-walker (+7%)
+
+The smallest task in the corpus -- 622 tokens of raw diff, so there is almost
+nothing to compress and any second call costs more than gita saves. One
+repetition guessed `gita show Walk --at <rev>`; `--at` does not exist, and the
+error printed the *global* usage rather than `gita show`'s own signature. Fixed,
+but the honest position is that gita has little to offer on a diff this small,
+which is what the invariant already predicts.
