@@ -20,6 +20,7 @@ from ..context import (
     focus_label,
 )
 from ..context.answer import DEFAULT_BUDGET, compose, material_patch
+from ..context.layers import fit_text
 from ..context.resolve import Ambiguous, resolve_entity
 from ..revisions import diff_revisions
 from ..telemetry import record, timed
@@ -119,6 +120,9 @@ def _parser() -> argparse.ArgumentParser:
     hist.add_argument("--since", default=None)
     hist.add_argument("--until", default="HEAD")
     hist.add_argument("--limit", type=int, default=20)
+    hist.add_argument("--brief", action="store_true",
+                      help="commits only, without the code")
+    budget(hist)
 
     serve = sub.add_parser("serve", aliases=["sarathi"], parents=[common],
                            help="run the MCP server for agents")
@@ -341,27 +345,43 @@ def _cmd_history(out, repo, args, colour) -> int:
             _emit(out, {"entity": args.entity, "events": [], "error": "no history"},
                   f"gita: no recorded changes to {args.entity}", args.as_json)
             return 4
-        payload = {
-            "entity": args.entity,
-            "events": [{"sha": e.sha, "subject": e.subject, "date": e.date,
-                        "kind": e.kind.value} for e in events],
-        }
-        text = "\n".join(str(e) for e in events)
-    else:
-        summaries = series(repo, since=args.since, until=args.until, limit=args.limit)
-        payload = {
-            "commits": [{"sha": s.sha, "subject": s.subject, "date": s.date,
-                         "changes": [c.entity.id for c in s.material()]}
-                        for s in summaries],
-        }
-        lines = []
-        for summary in summaries:
-            names = ", ".join(c.entity.qualname for c in summary.material()[:4]) or "-"
-            lines.append(f"{summary.short}  {summary.date[:10]}  "
-                         f"{summary.subject[:44]:<44}  {names}")
-        text = "\n".join(lines)
 
-    _emit(out, payload, text, args.as_json)
+        # "When" without "what" sent the agent straight back to git log and git show.
+        header = fit_text("\n".join(str(event) for event in events), args.budget)
+        lines = [header] if header else []
+        spent = count_tokens(header)
+        payload_events = []
+
+        for event in events:
+            entry = {"sha": event.sha, "subject": event.subject,
+                     "date": event.date, "kind": event.kind.value}
+            if not args.brief:
+                patch = entity_diff(repo, f"{event.sha}^", event.sha,
+                                    event.entity_id)
+                cost = count_tokens(patch)
+                if patch and spent + cost <= args.budget:
+                    lines.append(f"\n--- {event.short} {event.entity_id}\n"
+                                 f"{patch.rstrip()}")
+                    entry["patch"] = patch
+                    spent += cost
+            payload_events.append(entry)
+
+        _emit(out, {"entity": args.entity, "events": payload_events},
+              render.render_answer("\n".join(lines), colour), args.as_json)
+        return 0
+
+    summaries = series(repo, since=args.since, until=args.until, limit=args.limit)
+    payload = {
+        "commits": [{"sha": s.sha, "subject": s.subject, "date": s.date,
+                     "changes": [c.entity.id for c in s.material()]}
+                    for s in summaries],
+    }
+    lines = []
+    for summary in summaries:
+        names = ", ".join(c.entity.qualname for c in summary.material()[:4]) or "-"
+        lines.append(f"{summary.short}  {summary.date[:10]}  "
+                     f"{summary.subject[:44]:<44}  {names}")
+    _emit(out, payload, "\n".join(lines), args.as_json)
     return 0
 
 

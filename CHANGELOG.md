@@ -259,3 +259,21 @@ argument fails: resolving first turned the valid container query `app.py::Store`
 `app.py::Store::get` and answered a question nobody asked.
 
 - 295 tests.
+
+### Fixed - iteration 4 findings
+
+- **gita died on piped output on Windows.** The headline used a middle dot; a Windows shell pipe
+  is cp1252, so `gita diff` raised `UnicodeEncodeError`. The agent retried with
+  `PYTHONIOENCODING=utf-8` and that single task cost **+149%** against plain git. Output is now
+  ASCII, and `render.write` falls back to a lossy encode rather than losing the answer. A tool
+  that fails when its output is redirected is not production-ready.
+- **`gita history` said *when* but not *what*.** Knowing a function changed in commit `d9307db`
+  does not answer "what changed about it", so the agent went back to `git log` and `git show`.
+  History now includes the hunks for each change, within budget, with `--brief` to opt out. This
+  is the same incompleteness that made `gita diff` expensive before one-shot answers -- learned
+  once, missed in a second place.
+- **Agents did not know gita handles uncommitted work.** `AGENTS.md` and `SKILL.md` only showed
+  `gita diff <base> <head>`, so on the working-tree task gita was never invoked at all. Both now
+  show the bare form, and state that bare function names are accepted.
+
+- 304 tests.

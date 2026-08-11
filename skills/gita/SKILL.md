@@ -43,8 +43,8 @@ gita diff <base> <head> --brief            # summary only, no code
 gita diff <base> <head> --budget N         # cap output at N tokens
 gita diff <base> <head> --json             # machine-readable
 
-gita history <entity>              # how one function changed over time
-gita show <entity>                 # exact hunks for one entity
+gita history <name>                # how one function changed over time, with the code
+gita show <name>                   # exact hunks for one entity
 gita savings                       # what this cost vs a raw git diff
 ```
 
@@ -160,3 +160,7 @@ Start `gita serve` (alias `sarathi`) to run the server over stdio.
   addition plus a deletion rather than a move.
 - `gita history` walks commits one at a time, so a large `--limit` is slow. It
   also does not follow an entity across a rename yet.
+
+
+\gita history\ and \gita show\ accept a bare function name; you do not need the full \path::Entity\ id. If a name is ambiguous, gita lists the candidates rather than guessing.
+

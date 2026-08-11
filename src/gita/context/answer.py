@@ -75,7 +75,8 @@ def _headline(changeset: ChangeSet, material: list[EntityChange],
 
     # File names matter: an entity list alone cannot answer "which files changed",
     # which cost real recall in iteration 2.
-    return " · ".join(parts) + "\nfiles: " + ", ".join(files)
+    # ASCII only: a middle dot in this line broke a piped Windows shell.
+    return " | ".join(parts) + "\nfiles: " + ", ".join(files)
 
 
 def _ranked(material: list[EntityChange]) -> list[EntityChange]:

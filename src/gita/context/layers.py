@@ -63,7 +63,8 @@ def fit_text(text: str, budget: int) -> str:
 
 def _headline(changeset: ChangeSet, material: list[EntityChange],
               clusters: list[Cluster], budget: int, focus: str | None = None) -> str:
-    prefix = f"{focus} · " if focus else ""
+    # ASCII only: a middle dot here broke a piped Windows shell in evaluation.
+    prefix = f"{focus} | " if focus else ""
 
     if not material:
         # "no material changes" also describes an empty diff, which hid a harness
@@ -81,7 +82,7 @@ def _headline(changeset: ChangeSet, material: list[EntityChange],
         parts.append(f"{interface} interface")
     if noise:
         parts.append(f"{noise} noise filtered")
-    headline = prefix + " · ".join(parts)
+    headline = prefix + " | ".join(parts)
 
     titles = ", ".join(c.title for c in clusters[:_MAX_HEADLINE_TITLES])
     if not titles:

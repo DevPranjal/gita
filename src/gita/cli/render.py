@@ -163,7 +163,18 @@ def view_payload(view: ContextView, changeset: ChangeSet,
 
 
 def write(out, text: str) -> None:
-    print(text, file=out)
+    """Never let an encoding fault lose the answer.
+
+    A Windows console pipe is cp1252. In evaluation, a single non-ASCII
+    separator raised UnicodeEncodeError, the agent retried with
+    PYTHONIOENCODING set, and that task cost 149% more than plain git.
+    """
+    try:
+        print(text, file=out)
+    except UnicodeEncodeError:
+        encoding = getattr(out, "encoding", None) or "ascii"
+        print(text.encode(encoding, "replace").decode(encoding, "replace"),
+              file=out)
 
 
 def stdout_is_tty() -> bool:

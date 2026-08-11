@@ -32,7 +32,8 @@ Use `gita` instead of `git diff` to read changes. One command gives you the
 summary, the changed files, the changed functions and the relevant code:
 
 ```
-gita diff <base> <head>
+gita diff                     uncommitted work, like plain `git diff`
+gita diff <base> <head>       a commit or a range
 ```
 
 It removes formatting-only noise and costs far fewer tokens than a raw diff,
@@ -44,8 +45,10 @@ Other forms, only if needed:
 ```
 gita diff <base> <head> --interface-only   only changes that can break a caller
 gita diff <base> <head> --patch            a plain unified diff, noise removed
-gita history <entity>                      how one function changed over time
+gita history <name>           how one function changed over time, with the code
 ```
+
+`gita history` and `gita show` accept a bare function name.
 
 Ordinary `git` commands are available as well.
 """
