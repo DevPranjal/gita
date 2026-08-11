@@ -122,3 +122,15 @@ class TestUsage:
         main(["-C", str(repo.root), "diff", "--oops"], out=out)
         combined = out.getvalue() + capsys.readouterr().err
         assert "--oops" in combined
+
+    def test_an_unknown_flag_shows_that_subcommand_usage(self, repo, capsys):
+        """An agent guessed `gita show Walk --at <rev>` and got the global usage.
+
+        Listing every subcommand tells it nothing about the one it just used.
+        """
+        out = io.StringIO()
+        main(["-C", str(repo.root), "show", "handle", "--at", "HEAD"], out=out)
+        combined = out.getvalue() + capsys.readouterr().err
+        assert "--at" in combined
+        assert "gita show" in combined
+        assert "darshan" not in combined     # not the whole command list

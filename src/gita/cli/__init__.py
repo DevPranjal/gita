@@ -135,6 +135,10 @@ def _parser() -> argparse.ArgumentParser:
                            help="run the MCP server for agents")
     serve.add_argument("--transport", default="stdio", choices=["stdio"])
 
+    # Keyed by every name and alias, so an unknown flag can be reported against
+    # the subcommand the agent actually used rather than the whole command list.
+    parser.subcommands = {name: sp for name, sp in sub.choices.items()}
+
     return parser
 
 
@@ -181,11 +185,17 @@ def main(argv: list[str] | None = None, out: TextIO | None = None) -> int:
 
     argv = list(sys.argv[1:] if argv is None else argv)
     try:
-        args = parser.parse_args(argv)
+        args, extras = parser.parse_known_args(argv)
     except SystemExit as exit_code:
         # argparse has already printed usage and named the offending argument;
         # printing our own copy gave the agent the same block twice.
         return int(exit_code.code or 2)
+
+    if extras:
+        sub = getattr(parser, "subcommands", {}).get(getattr(args, "command", None))
+        usage = (sub or parser).format_usage().strip()
+        render.write(out, f"gita: unrecognized argument: {extras[0]}\n{usage}")
+        return 2
 
     if not args.command:
         # Full argparse help is expensive for an agent to read; point at the one
