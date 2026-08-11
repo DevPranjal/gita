@@ -258,6 +258,7 @@ def _cmd_diff(out, repo, args, colour) -> int:
         "budget": result.budget,
         "truncated": result.truncated,
         "detailed": result.detailed,
+        "unreferenced": result.unreferenced,
         "filter": args.filter,
         "interface_only": args.interface_only,
         "files_changed": selected.files_changed,

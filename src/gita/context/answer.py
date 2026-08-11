@@ -25,6 +25,7 @@ from ..vcs.git import Repo
 from .layers import fit_text
 from .patch import entity_diff
 from .rank import score_change
+from .references import unreferenced
 from .rollup import MAX_DEPTH, fit_lines, rollup_lines
 from .tokens import count_tokens
 
@@ -43,6 +44,7 @@ MAX_DETAILED = 20
 class Answer:
     text: str
     detailed: list[str] = field(default_factory=list)
+    unreferenced: list[str] = field(default_factory=list)
     truncated: bool = False
     budget: int = 0
 
@@ -106,7 +108,8 @@ def _detail(repo: Repo, base: str, head: str | None, change: EntityChange,
 
 def compose(repo: Repo, base: str, head: str | None, changeset: ChangeSet,
             budget: int = DEFAULT_BUDGET, detail: bool = True,
-            respect_raw_diff: bool = True) -> Answer:
+            respect_raw_diff: bool = True,
+            check_references: bool = True) -> Answer:
     """A complete answer in one call, within budget and never costlier than git."""
     material = changeset.material()
     worktree = head is None or head == ""
@@ -124,11 +127,20 @@ def compose(repo: Repo, base: str, head: str | None, changeset: ChangeSet,
 
     summary_budget = max(0, int(budget * SUMMARY_SHARE) - count_tokens(headline))
     lines, _ = fit_lines(material, summary_budget)
+
+    # "Is this wired in?" is the first question asked of an addition. Without an
+    # answer the agent reaches for git grep or a wider diff.
+    orphans = unreferenced(repo, changeset) if check_references else []
+    if orphans:
+        lines.append("unreferenced (name appears nowhere else): "
+                     + ", ".join(orphans[:5]))
+
     summary = "\n".join([headline, "", *lines]) if lines else headline
 
     if not detail:
         full_lines = rollup_lines(material, MAX_DEPTH)
-        return Answer(text=summary, budget=budget, truncated=lines != full_lines)
+        return Answer(text=summary, unreferenced=orphans, budget=budget,
+                      truncated=lines != full_lines)
 
     sections: list[str] = []
     detailed: list[str] = []
@@ -150,8 +162,8 @@ def compose(repo: Repo, base: str, head: str | None, changeset: ChangeSet,
 
     text = summary if not sections else summary + "\n\n" + "\n".join(sections)
     full_lines = rollup_lines(material, MAX_DEPTH)
-    return Answer(text=text, detailed=detailed, budget=budget,
-                  truncated=skipped or lines != full_lines)
+    return Answer(text=text, detailed=detailed, unreferenced=orphans,
+                  budget=budget, truncated=skipped or lines != full_lines)
 
 
 def material_patch(repo: Repo, base: str, head: str | None,

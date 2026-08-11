@@ -1,0 +1,92 @@
+"""Is this used anywhere?
+
+On the uncommitted-work task the agent asked "is anything incomplete or unwired?"
+and answered it with `git status` plus `git diff -U15` -- reaching for surrounding
+context because gita could not say whether a new function was referenced. gita
+became an extra call rather than a replacement.
+
+Dead-code detection is the smallest genuinely useful slice of blast radius, and
+it is the question a reviewer actually asks about an addition.
+"""
+
+from __future__ import annotations
+
+import subprocess
+
+import pytest
+
+from gita import diff_revisions
+from gita.context.references import reference_counts, unreferenced
+from gita.vcs.git import Repo
+
+
+@pytest.fixture
+def repo(tmp_path):
+    def git(*args):
+        subprocess.run(["git", "-C", str(tmp_path), *args], check=True,
+                       capture_output=True)
+
+    (tmp_path / "core.py").write_bytes(
+        b"def used_helper():\n    return 1\n\n\n"
+        b"def caller():\n    return used_helper()\n")
+    git("init", "-q", "-b", "main")
+    git("config", "user.email", "t@t")
+    git("config", "user.name", "t")
+    git("add", "-A")
+    git("commit", "-q", "-m", "first")
+    return Repo(tmp_path)
+
+
+class TestReferenceCounts:
+    def test_counts_uses_excluding_the_definition(self, repo):
+        counts = reference_counts(repo, ["used_helper"])
+        assert counts["used_helper"] >= 1
+
+    def test_unused_name_scores_zero(self, repo):
+        (repo.root / "core.py").write_bytes(
+            (repo.root / "core.py").read_bytes()
+            + b"\n\ndef orphan():\n    return 2\n")
+        assert reference_counts(repo, ["orphan"])["orphan"] == 0
+
+    def test_unknown_name_scores_zero(self, repo):
+        assert reference_counts(repo, ["nowhere_at_all"])["nowhere_at_all"] == 0
+
+    def test_handles_many_names_at_once(self, repo):
+        counts = reference_counts(repo, ["used_helper", "caller", "missing"])
+        assert set(counts) == {"used_helper", "caller", "missing"}
+
+    def test_empty_input_is_safe(self, repo):
+        assert reference_counts(repo, []) == {}
+
+    def test_regex_metacharacters_are_literal(self, repo):
+        """A name like `Iterator for Walk` must not be treated as a pattern."""
+        assert reference_counts(repo, ["a.*b"])["a.*b"] == 0
+
+
+class TestUnreferenced:
+    def test_flags_an_added_but_unused_entity(self, repo):
+        (repo.root / "core.py").write_bytes(
+            (repo.root / "core.py").read_bytes()
+            + b"\n\ndef orphan():\n    return 2\n")
+        changeset = diff_revisions(repo, "HEAD", None)
+        added = unreferenced(repo, changeset)
+        assert any("orphan" in name for name in added)
+
+    def test_does_not_flag_a_used_entity(self, repo):
+        (repo.root / "core.py").write_bytes(
+            b"def used_helper():\n    return 1\n\n\n"
+            b"def caller():\n    return used_helper()\n\n\n"
+            b"def wrapper():\n    return caller()\n")
+        changeset = diff_revisions(repo, "HEAD", None)
+        assert not any("caller" in n for n in unreferenced(repo, changeset))
+
+    def test_only_considers_additions(self, repo):
+        """A modified function is obviously referenced or the caller knows why."""
+        (repo.root / "core.py").write_bytes(
+            b"def used_helper():\n    return 99\n\n\n"
+            b"def caller():\n    return used_helper()\n")
+        changeset = diff_revisions(repo, "HEAD", None)
+        assert unreferenced(repo, changeset) == []
+
+    def test_empty_changeset_is_safe(self, repo):
+        assert unreferenced(repo, diff_revisions(repo, "HEAD", None)) == []

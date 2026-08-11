@@ -288,3 +288,25 @@ with their entities extracted normally. Commit ranges are unaffected: history ha
 working tree.
 
 - 313 tests.
+
+### Added - "is this wired in?" answered without being asked
+
+On the uncommitted-work task the agent asked whether anything was "incomplete or unwired"
+and answered it with `git status` plus `git diff -U15` -- reaching for surrounding context
+because gita could not say whether a new function was referenced anywhere. gita became an
+extra call instead of a replacement.
+
+`gita diff` now reports additions whose name appears nowhere else:
+
+```
+src/flask/helpers.py::_eval_probe  [added]
+unreferenced (name appears nowhere else): src/flask/helpers.py::_eval_probe
+```
+
+This is **name matching, not a call graph** ([`context/references.py`](src/gita/context/references.py)),
+and is labelled as such wherever it appears. It answers "is this dead code", which is the
+first question asked of an addition; it does not answer "what does this affect", which needs
+real caller edges (WS-2). Only additions are checked -- a modified function already had
+callers. Lookups are capped and names shorter than three characters are skipped.
+
+- 323 tests.
