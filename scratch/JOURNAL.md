@@ -153,3 +153,44 @@ working around the tool, which is exactly what the turn count showed.
 **Expected:** `got-new-option` returns to negative; `flask-uncommitted` stays fixed;
 headline returns to at least -19.5%. If `got-new-option` does not move, the test
 roll-up was not the cause and gets reverted.
+
+### Session 4 - iteration 9, and the bug the quality number found
+
+Headline **-18.1%**, turns **3.33 -> 2.67** (best yet). `got-new-option`
+**+111% -> -30%** at 2.0 turns: the test-churn diagnosis was right.
+
+But recall fell to 98.3%, the first time gita has scored below git. One
+`flask-dependency-update` repetition named `pyproject.toml` and not `uv.lock`.
+
+Chasing it found that **a TOML or YAML value change was classified cosmetic and
+filtered out as noise**. tree-sitter gives a TOML string two quote children with
+the value in the gap between them, owning no node of its own; `_own_tokens`
+collected leaves only, so it saw `"` and `"` and dropped `3.0`. A dependency
+version bump -- the entire point of the task -- hashed as unchanged.
+
+gita said *no material changes* for a version bump. That is the failure mode the
+whole design exists to prevent: not a worse answer, a wrong one. It survived
+nine iterations inside a task scoring -41%, because a cost win was sitting on
+top of a correctness hole.
+
+**Rule added:** a recall miss outranks a cost regression. Five bugs so far were
+found by cost going the wrong way; this one was found by a quality number moving
+1.7 points while cost looked healthy. Watch the quality column first.
+
+**Also this cycle**, without waiting for a number to justify it:
+
+- The same edit across sibling files now collapses to one line. Four
+  `examples/*/pyproject.toml` isort blocks produced 25 mentions of
+  `pyproject.toml` against 2 of `uv.lock`. Same defect as the test churn,
+  different shape -- worth fixing once the pattern was visible twice.
+- Six error paths audited and fixed. The worst: `resolve` was structurally
+  broken because `git rev-parse` **echoes an unknown argument on stdout while
+  failing**, so every guard built on its truthiness passed. Errors now state
+  what happened and what to run next, in one line, with git's advice text
+  stripped.
+
+Per-task noise is real: the git baseline moved 7% between sweeps. Four clean
+sweeps at -16.7 / -16.8 / -19.5 / -18.1 are the honest band; single-task deltas
+are not worth chasing unless they are large or repeat.
+
+**State:** 360 tests. `c41b55c`. Iteration 10 running.

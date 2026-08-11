@@ -259,3 +259,66 @@ written is invisible to gita. "What did I change" includes files that do not exi
 yet, and answering half the question sends the agent to git for the other half.
 
 Untracked files are now included when diffing the working tree.
+
+---
+
+## Iteration 9 - 2026-08-11 - test churn rolled up - **VALID**
+
+60 runs. Artifacts: `evals/runs/20260811-104841/`
+
+| metric | git | gita | |
+| --- | ---: | ---: | --- |
+| **credits / task** | 36.37 | **29.79** | **-18.1%** |
+| turns | 3.33 | **2.67** | **-20%** (best so far) |
+| tool tokens | 9,317 | **1,940** | -79% |
+| recall | 100% | 98.3% | **-1.7pt** |
+| adoption | - | **100%** | |
+
+### The regression was where the diagnosis said it was
+
+`got-new-option` **+111% -> -30%**, turns **7.7 -> 2.0**. Rolling 159 test cases
+up to one line per file put `allowAbsoluteUrls` back in the agent's view.
+
+| task | it7 | it8 | **it9** |
+| --- | ---: | ---: | ---: |
+| flask-teardown-review | -56% | -52% | **-58%** |
+| got-new-option | +16% | +111% | **-30%** |
+| express-send-condition | -22% | -20% | **-22%** |
+| gin-copy-fix | +1% | -0% | **-15%** |
+| flask-dependency-update | -41% | -42% | **-13%** |
+| gin-public-api | -20% | -8% | **-8%** |
+| express-ci-bump *(control)* | -2% | -9% | **-1%** |
+| ripgrep-walker | -9% | -5% | **+1%** |
+| gin-history | -15% | -9% | **+3%** |
+| flask-uncommitted | +41% | -2% | **+12%** |
+
+The git baseline itself moved 7% between sweeps (390 -> 364 total credits), so
+per-task deltas carry real noise. The aggregate is the number to trust, and
+-16.7 / -16.8 / -19.5 / -18.1 across four clean sweeps is a stable band.
+
+### The recall miss was worth more than the cost win
+
+One `flask-dependency-update` repetition scored **0.50**: it named `pyproject.toml`
+but not `uv.lock`. All three repetitions ran identical commands and gita returned
+byte-identical output, so this was agent variance -- but probing why exposed two
+real defects.
+
+**gita mentioned `pyproject.toml` 25 times and `uv.lock` twice.** Four
+`examples/*/pyproject.toml` files gained the same isort block, and each was
+listed separately. The same repetition defect as the test churn, in a different
+shape. Identical changes across three or more files now collapse to one line.
+
+**A dependency version bump was invisible.** Chasing the lockfile led to this:
+tree-sitter gives a TOML string two quote children with the value in the gap
+between them, owning no node. `_own_tokens` took only leaves, so it collected
+`"` and `"` and dropped the value. `flask = "3.0"` and `"3.1"` hashed
+identically and were filtered as **cosmetic**. gita reported *no material
+changes* for a version bump, in TOML and YAML alike.
+
+This is the worst class of bug gita can have -- not an unhelpful answer, a
+confidently wrong one -- and it sat in the config category the whole time,
+under a task that was scoring -41%. A cost win was masking a correctness hole.
+
+**Lesson:** a recall miss is worth more attention than a cost regression. The
+cost numbers found five bugs by being bad; this one was found by a quality
+number moving 1.7 points while the cost number looked fine.

@@ -105,9 +105,12 @@ priced in real credits from the model's own logs.
 | 5 | ASCII-safe output, history detail | −16.7% |
 | 7 | harness scaffolding excluded | **−19.5%** |
 | 8 | unreferenced-addition reporting | −9.5% *(regression, diagnosed and fixed)* |
+| 9 | bulk test churn rolled up | **−18.1%**, turns 3.33 → 2.67 |
 
-Also: turns **3.73 → 3.00**, tool output **−89% to −93%**, wall clock **−55%**, entity
-recall **100% in both arms**, adoption **100% unprompted**.
+Also: tool output **−79% to −93%**, wall clock **−55%**, entity recall **100%**, adoption
+**100% unprompted**. Four clean sweeps land at −16.7 / −16.8 / −19.5 / −18.1, and the git
+baseline itself moves several percent between sweeps — so the aggregate is the honest
+number and single-task deltas are mostly noise.
 
 The invariant holds on every task — gita is never larger than the `git diff` it
 replaces — so adopting it cannot cost more than not adopting it. On small diffs it is
@@ -117,6 +120,12 @@ roughly the same size as git; the wins concentrate where the pain is.
 — an encoding crash on a Windows pipe, history that said *when* but not *what*, Rust
 `impl Trait for Type` losing the trait, 159 test names burying the one API change
 asked about. The cost number is a bug detector.
+
+And the quality number is a better one. A single recall miss led to the discovery that
+**TOML and YAML value changes were being classified as cosmetic and filtered out** —
+gita was answering "no material changes" for a dependency version bump. That bug sat
+inside a task scoring −41% for nine iterations, because a cost win was masking a
+correctness hole.
 
 ## What gita does not do
 

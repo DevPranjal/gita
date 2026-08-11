@@ -344,3 +344,38 @@ once per revision instead of once per entity. The largest task in the corpus wen
 
 - 335 tests.
 
+### Fixed - iteration 9: a version bump reported as no change at all
+
+Iteration 9 restored the headline to **-18.1%** with turns **3.33 -> 2.67**, and
+`got-new-option` went **+111% -> -30%**. But recall fell to 98.3% -- the first time gita
+has scored below plain git -- and chasing that one point found a far worse bug.
+
+- **TOML and YAML value changes were invisible.** tree-sitter represents a TOML string as
+  two quote children with the value sitting in the gap between them, owning no node of its
+  own. `_own_tokens` collected only leaf tokens, so it saw `"` and `"` and dropped the
+  value. `flask = "3.0"` and `flask = "3.1"` hashed identically, were classified
+  `cosmetic`, and were filtered out as noise -- **gita answered "no material changes" for a
+  dependency version bump**. Tokens are now collected gap-aware, so text that no child
+  claims still belongs to its parent. Code languages were unaffected.
+- **The same edit across sibling files is one fact, not N.** Four `examples/*/pyproject.toml`
+  files gaining the same isort block produced 25 mentions of `pyproject.toml` against 2 of
+  `uv.lock`, drowning out half the answer. Changes sharing an entity and kind across three
+  or more files now collapse to one line naming them; two files is not a pattern.
+
+### Fixed - errors that tell an agent what to do next
+
+An audit of every failure path found six that did not meet that bar:
+
+- **`resolve` was structurally broken.** `git rev-parse nosuchref` echoes the argument on
+  stdout while exiting non-zero, so `resolve` returned a truthy value and every guard built
+  on it passed. The failure surfaced four calls later as raw plumbing. Now `--verify --quiet`.
+- **git's diagnostics leaked verbatim**, including our own flags and three lines of advice
+  about `--` -- the exact low-signal noise gita exists to remove. Now one line.
+- **"unknown revision: HEAD"** was reported for a directory that is not a git repository.
+- **`show` said "not found"** for an entity that exists and simply did not change.
+- **`--budget 0` exited zero with no output**, indistinguishable from "nothing changed".
+  The budget bounds the answer; a diagnostic is not an answer.
+- **Usage was printed twice**, once by argparse on stderr and once by us on stdout.
+
+- 360 tests.
+
