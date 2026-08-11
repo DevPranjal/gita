@@ -189,15 +189,15 @@
       <h1 class="name">gita<span class="dot">.</span></h1>
       <p class="sanskrit">— every agent needs a direction.</p>
       <p class="blurb">
-        <code>git</code> was built for humans reading lines of text. But humans
-        aren't the ones writing most code anymore — agents are. And agents
-        don't want lines. They want answers.
+        When a coding agent needs to understand a change, it runs
+        <code>git diff</code> and reads every changed line. That is a wall of
+        text, most of it irrelevant — and the agent pays for all of it, again,
+        on every step that follows.
       </p>
       <p class="blurb">
-        <code>git diff</code> answers <em>which bytes moved</em>. An agent needs
-        <em>which named things changed, and can that break a caller</em>.
-        <code>gita</code> answers the second question, in one command, and is
-        never larger than the <code>git diff</code> it replaces.
+        <code>gita</code> answers the question instead: <strong>which functions
+        changed, and does anything break?</strong> One command, and never bigger
+        than the <code>git diff</code> it replaces.
       </p>
     </section>
 
@@ -253,48 +253,56 @@
       because 159 test cases whose titles all restate the option are summarised
       rather than listed.</p>
     </div>
-    <p class="section-h">why raw git output is bad context</p>
+    <p class="section-h">the problem, plainly</p>
+
+    <p class="blurb" style="margin-bottom:4px">
+      An agent reads code through a context window it pays for by the token, and a
+      raw diff is a poor way to fill it.
+    </p>
 
     <table class="tbl">
       <tr>
-        <th>problem</th><th>why it hurts</th><th>what gita does</th>
+        <th>what goes wrong</th><th>why</th><th>what gita does</th>
       </tr>
       <tr>
-        <td><strong>lost in the middle</strong></td>
-        <td>Diffs land in the attention trough between the system prompt and the
-            task, pushing instructions further away every turn.</td>
-        <td>Ranked, not chronological. Interface breakage on line 3, not line 400 —
-            and small enough to have no middle.</td>
+        <td><strong>the answer is buried</strong></td>
+        <td>A diff is ordered by file, not by importance. The one function that
+            broke sits somewhere inside 400 lines — and models pay least attention
+            to the middle of a long input.</td>
+        <td>Puts what matters first. The broken signature is on line 3, and the
+            answer is short enough that there is no middle to get lost in.</td>
       </tr>
       <tr>
-        <td><strong>tokenizer overhead</strong></td>
-        <td>Per-line <code>+</code>/<code>-</code> prefixes, repeated filenames,
-            <code>@@</code> headers. Measured <span class="loss">+25.2%</span>;
-            one 40-char SHA costs <span class="loss">20 tokens</span>.</td>
-        <td>Entity ids instead of hunk headers, no line prefixes, filenames stated
-            once, no SHAs in the body.</td>
+        <td><strong>most of it is not the change</strong></td>
+        <td>Reformatting, reordered imports, and three unchanged lines printed
+            around every single edit.</td>
+        <td>Removes it, and says how much it removed:
+            <code>1900 noise filtered</code>.</td>
       </tr>
       <tr>
-        <td><strong>low signal density</strong></td>
-        <td>Three context lines around every hunk, whitespace churn, timestamps,
-            advice text.</td>
-        <td>Formatting, comment and import-order churn removed by comparing
-            normalised hashes — and the count reported.</td>
+        <td><strong>the formatting itself costs money</strong></td>
+        <td>Every line carries a <code>+</code> or <code>-</code>, filenames repeat
+            three times per file, and commit hashes are long random strings.
+            Measured here: <span class="loss">25% extra tokens</span>, and
+            <span class="loss">20 tokens</span> for one commit hash.</td>
+        <td>Names each file once. No per-line prefixes, no hashes in the body.</td>
       </tr>
       <tr>
-        <td><strong>zombie tokens</strong></td>
-        <td>Tool output is re-billed on every later turn. 16,713 tokens across
-            5 turns is <span class="loss">83,565 token-turns</span>.</td>
-        <td>One self-sufficient answer: <span class="win">19,845</span> for the
-            same five turns — and it cuts the turn count too.</td>
+        <td><strong>you pay for it again on every step</strong></td>
+        <td>Tool output is re-sent to the model on every later step. A
+            16,713-token diff read early in a five-step task is billed five times
+            — <span class="loss">83,565 tokens</span>.</td>
+        <td>One answer of 3,969 tokens is <span class="win">19,845</span> over the
+            same five steps — and it usually needs fewer steps.</td>
       </tr>
       <tr>
-        <td><strong>induced failures</strong></td>
-        <td>Deleted code stays visible and gets called again; agents oscillate
-            re-reading their own edits; a lockfile diff blows the window.</td>
-        <td>Removal is a fact (<code>[removed]</code>), not lingering source text.
-            Hard token budget. Dependency update:
-            <span class="win">220,377 → 2,203</span>.</td>
+        <td><strong>it causes real mistakes</strong></td>
+        <td>Deleted code still looks like working code in the window, so agents
+            call functions that no longer exist. One lockfile update can fill the
+            entire window.</td>
+        <td>States a deletion as a fact (<code>[removed]</code>) instead of leaving
+            it lying around as source. Hard size limit: a dependency update goes
+            from <span class="win">220,377 tokens to 2,203</span>.</td>
       </tr>
     </table>
 

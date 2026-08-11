@@ -2,9 +2,12 @@
 
 **git, rebuilt for a world of agent coders.**
 
-`git diff` answers *which bytes moved*. An agent needs *which named things changed,
-and can that break a caller*. gita answers the second question, in one command, and
-is **never larger than the `git diff` it replaces**.
+When a coding agent needs to understand a change, it runs `git diff` and reads every
+changed line. That is a wall of text, most of it irrelevant — and the agent pays for
+all of it, again, on every step that follows.
+
+gita answers the question instead: **which functions changed, and does anything
+break?** One command, and never bigger than the `git diff` it replaces.
 
 ```bash
 gita diff HEAD^ HEAD
@@ -28,15 +31,18 @@ included — and names `allowAbsoluteUrls`, which is what you actually asked.
 
 ---
 
-## Why raw git output is bad context, and what gita does instead
+## The problem, plainly
 
-| Problem | Why it hurts | gita's answer |
+An agent reads code through a context window it pays for by the token, and a raw diff
+is a poor way to fill it.
+
+| What goes wrong | Why | What gita does |
 | --- | --- | --- |
-| **Lost in the middle** | Diffs land in the attention trough between system prompt and task, pushing instructions further away each turn | Ranked, not chronological: interface breakage on line 3, not line 400. Small enough to have no middle |
-| **Tokenizer overhead** | Per-line `+`/`-` prefixes, repeated filenames, `@@` headers. Measured **+25.2%** here; one 40-char SHA costs **20 tokens** | Entity ids, no line prefixes, filenames once, no SHAs in the body |
-| **Low signal density** | 3 context lines around every hunk, whitespace churn, timestamps, advice text | Formatting, comment and import-order churn removed by comparing normalised hashes, and the count reported (`1900 noise filtered`) |
-| **Zombie tokens** | Tool output is re-billed every following turn. 16,713 tokens over 5 turns = **83,565 token-turns** | One self-sufficient answer: 3,969 over 5 turns = **19,845** — and it cuts turns too (3.73 → 3.00) |
-| **Induced failures** | Deleted code stays visible and gets called again; agents oscillate re-reading their own edits; a lockfile diff blows the window | Removal is a fact (`[removed]`), not lingering source text. Hard token budget. Dependency-update task: **220,377 → 2,203 tokens** |
+| **The answer is buried** | A diff is ordered by file, not by importance. The one function that broke sits somewhere inside 400 lines, and models pay least attention to the middle of a long input. | Puts what matters first. The broken signature is on line 3, and the whole answer is short enough that there is no middle to get lost in. |
+| **Most of it is not the change** | Reformatting, reordered imports, and three unchanged lines printed around every edit. | Removes it, and says how much it removed: `1900 noise filtered`. |
+| **The formatting itself costs money** | Every line carries a `+` or `-`, filenames repeat three times per file, and commit hashes are long random strings. Measured here: **25% extra tokens**, and **20 tokens** for a single commit hash. | Names each file once, no per-line prefixes, no hashes in the body. |
+| **You pay for it again on every step** | Tool output is re-sent to the model on every later step. A 16,713-token diff read early in a five-step task is billed five times — **83,565 tokens**. | One answer of 3,969 tokens is **19,845** over the same five steps, and it usually needs fewer steps. |
+| **It causes real mistakes** | Deleted code still looks like working code in the window, so agents call functions that no longer exist. One lockfile update can fill the entire window. | States a deletion as a fact (`[removed]`) rather than leaving it lying around as source. Hard size limit: a dependency update goes from **220,377 tokens to 2,203**. |
 
 ---
 
