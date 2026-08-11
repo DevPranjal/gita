@@ -193,8 +193,30 @@ def _apply_setup(repo_root: Path, task: Task) -> None:
 def _reset(repo_root: Path) -> None:
     subprocess.run(["git", "-C", str(repo_root), "checkout", "--", "."],
                    capture_output=True, check=False)
-    subprocess.run(["git", "-C", str(repo_root), "clean", "-fd"],
+    # -x also removes files hidden by .git/info/exclude, such as AGENTS.md
+    subprocess.run(["git", "-C", str(repo_root), "clean", "-fdx"],
                    capture_output=True, check=False)
+
+
+def _write_agents_md(repo_root: Path, enabled: bool) -> None:
+    """Place the discovery document without it becoming part of the diff.
+
+    AGENTS.md is scaffolding, not the user's work. Once gita learned to report
+    untracked files, the agent started reviewing the harness's own file as a
+    change -- contaminating the very task it was meant to support.
+    """
+    agents_md = repo_root / "AGENTS.md"
+    exclude = repo_root / ".git" / "info" / "exclude"
+
+    if enabled:
+        agents_md.write_text(AGENTS_MD, encoding="utf8")
+        exclude.parent.mkdir(parents=True, exist_ok=True)
+        existing = exclude.read_text(encoding="utf8") if exclude.exists() else ""
+        if "AGENTS.md" not in existing:
+            exclude.write_text(existing.rstrip("\n") + "\nAGENTS.md\n",
+                               encoding="utf8")
+    elif agents_md.exists():
+        agents_md.unlink()
 
 
 def run_once(task: Task, arm: ArmConfig, repo_root: Path, run_dir: Path,
@@ -204,11 +226,7 @@ def run_once(task: Task, arm: ArmConfig, repo_root: Path, run_dir: Path,
     run_id = run_dir.name
 
     _reset(repo_root)
-    agents_md = repo_root / "AGENTS.md"
-    if arm.has_gita:
-        agents_md.write_text(AGENTS_MD, encoding="utf8")
-    elif agents_md.exists():
-        agents_md.unlink()
+    _write_agents_md(repo_root, arm.has_gita)
     _apply_setup(repo_root, task)
 
     base, head = resolve_revisions(task, repo_root)

@@ -48,3 +48,45 @@ A convenience that overrides a correct input is not a convenience.
 - flask-uncommitted: diff shrinks to one function instead of a whole file
 
 If any of these does not move, the fix was wrong and gets reverted.
+
+### Session 2 — iterations 5 and 6
+
+**Result is stable and reproducible.** Two independent 60-run sweeps:
+
+| | it5 | it6 |
+| --- | ---: | ---: |
+| credits vs git | -16.7% | **-16.8%** |
+| turns | 3.67 -> 3.00 | 3.73 -> 3.00 |
+| recall | 100% / 100% | 100% / 100% |
+| adoption | 100% | 100% |
+
+### Pattern across every cycle so far
+
+Every cost regression turned out to be a **correctness or robustness defect wearing a
+cost disguise**. Not one was a tuning problem.
+
+| symptom | actual defect |
+| --- | --- |
+| +149% on one task | `UnicodeEncodeError` on a piped Windows shell |
+| +29% on history | reported *when* but not *what* |
+| +18%, recall 78% | Rust impl blocks named after the type, losing the trait |
+| +25% on uncommitted | harness rewrote whole files via LF->CRLF |
+| gita never invoked | AGENTS.md did not mention the bare form |
+
+This is worth stating in any pitch: the evaluation is not measuring compression, it is
+finding bugs. The cost number is a *detector*.
+
+### Failure this cycle: untracked support made the target task worse
+
+Added untracked files to working-tree diffs (a genuine correctness fix -- a file an agent
+had just written was invisible). `flask-uncommitted` went **+26% -> +41%**, turns 4.0 -> 6.0.
+
+Cause: the harness writes its own `AGENTS.md` into the repo. Once gita could see untracked
+files, it correctly reported `AGENTS.md` as a change, and the agent spent turns reviewing
+the harness's scaffolding as if it were the user's work.
+
+gita was right. The harness was wrong. `AGENTS.md` is now added to `.git/info/exclude`
+so it stays discoverable without being part of the diff.
+
+**Rule reinforced:** when a fix makes a number worse, find out why before reverting. The
+fix was correct; the environment was lying.
