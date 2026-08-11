@@ -87,10 +87,7 @@ def _ranked(material: list[EntityChange]) -> list[EntityChange]:
 
 def _detail(repo: Repo, base: str, head: str | None, change: EntityChange,
             cache: dict) -> str:
-    key = (base, head, change.entity.id)
-    if key not in cache:
-        cache[key] = entity_diff(repo, base, head, change.entity.id)
-    patch = cache[key]
+    patch = entity_diff(repo, base, head, change.entity.id, cache=cache)
     if not patch:
         return ""
 

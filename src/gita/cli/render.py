@@ -163,18 +163,43 @@ def view_payload(view: ContextView, changeset: ChangeSet,
 
 
 def write(out, text: str) -> None:
-    """Never let an encoding fault lose the answer.
+    """Never let an encoding fault lose or corrupt the answer.
 
     A Windows console pipe is cp1252. In evaluation, a single non-ASCII
     separator raised UnicodeEncodeError, the agent retried with
     PYTHONIOENCODING set, and that task cost 149% more than plain git.
+
+    Replacing the offending character is the last resort, not the first: source
+    code is not ours to mangle, and an arrow turning into `?` in a quoted line
+    is a fact we got wrong. So we first ask the stream for UTF-8.
     """
     try:
         print(text, file=out)
+        return
     except UnicodeEncodeError:
-        encoding = getattr(out, "encoding", None) or "ascii"
-        print(text.encode(encoding, "replace").decode(encoding, "replace"),
-              file=out)
+        pass
+
+    if _reconfigure_utf8(out):
+        try:
+            print(text, file=out)
+            return
+        except UnicodeEncodeError:
+            pass
+
+    encoding = getattr(out, "encoding", None) or "ascii"
+    print(text.encode(encoding, "replace").decode(encoding, "replace"), file=out)
+
+
+def _reconfigure_utf8(out) -> bool:
+    """Switch a text stream to UTF-8 in place, if it will allow it."""
+    reconfigure = getattr(out, "reconfigure", None)
+    if reconfigure is None:
+        return False
+    try:
+        reconfigure(encoding="utf-8", errors="replace")
+    except (ValueError, OSError, AttributeError, TypeError):
+        return False
+    return True
 
 
 def stdout_is_tty() -> bool:

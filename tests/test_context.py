@@ -158,6 +158,61 @@ class TestRollup:
         flat = "\n".join(rollup_lines(self.nested_changes(), depth=1))
         assert count_tokens(flat) < count_tokens(deep)
 
+
+class TestTestChurnRollup:
+    """Bulk test churn is context, not the answer.
+
+    In `got-new-option` a new option was added alongside 100+ tests whose names
+    all restate the option. Listing each one buried the API change under 20
+    near-identical lines and the agent went back to reading files by hand.
+    """
+
+    def bulk(self, files: int = 6) -> ChangeSet:
+        source = ("source/options.ts",
+                  b"export const defaults = {retry: 2};\n",
+                  b"export const defaults = {retry: 2, allowAbsoluteUrls: true};\n")
+        pairs = [source]
+        for index in range(files):
+            current = (
+                "describe('r', () => {\n"
+                f"  it('allowAbsoluteUrls case {index} rejects an absolute URL',"
+                " () => { expect(1).toBe(1); });\n"
+                "});\n"
+            ).encode()
+            pairs.append((f"test/case{index}.ts", b"describe('r', () => {\n});\n", current))
+        return changeset(*pairs)
+
+    def test_each_test_file_collapses_to_one_line(self):
+        lines = rollup_lines(self.bulk().material(), depth=6)
+        test_lines = [line for line in lines if line.startswith("test/")]
+        assert len(test_lines) == 6
+
+    def test_the_source_change_is_listed_before_test_churn(self):
+        lines = rollup_lines(self.bulk().material(), depth=6)
+        assert lines[0].startswith("source/options.ts")
+
+    def test_rolled_up_line_says_how_many_and_what_kind(self):
+        line = next(line for line in rollup_lines(self.bulk().material(), depth=6)
+                    if line.startswith("test/case0.ts"))
+        assert "tests:" in line and "1 added" in line
+
+    def test_a_test_only_change_is_still_listed_in_full(self):
+        """When tests are the whole story, rolling them up would hide it."""
+        pairs = [(f"test/case{i}.ts", b"describe('r', () => {\n});\n",
+                  ("describe('r', () => {\n"
+                   f"  it('case {i}', () => {{ expect(1).toBe(1); }});\n"
+                   "});\n").encode()) for i in range(6)]
+        lines = rollup_lines(changeset(*pairs).material(), depth=6)
+        assert any("::" in line for line in lines)
+
+    def test_a_handful_of_tests_is_not_worth_rolling_up(self):
+        lines = rollup_lines(self.bulk(files=2).material(), depth=6)
+        assert any(line.startswith("test/") and "::" in line for line in lines)
+
+
+class TestFit:
+    nested_changes = TestRollup.nested_changes
+
     def test_fit_respects_a_tight_budget(self):
         lines, _ = fit_lines(self.nested_changes(), budget=12)
         assert count_tokens("\n".join(lines)) <= 12
@@ -264,6 +319,21 @@ class TestL2:
         view = build_view(diff_revisions(tiny_repo, "HEAD^", "HEAD"), budget=800)
         patch = entity_diff(tiny_repo, "HEAD^", "HEAD", "m.py::target")
         assert count_tokens(patch) > count_tokens(view.l0)
+
+    def test_a_shared_cache_reads_each_revision_once(self, tiny_repo):
+        """A large diff asks for many entities from one file.
+
+        Re-reading and re-parsing per entity made the biggest task in the corpus
+        a ten-second call, and a ten-second call is one an agent works around.
+        """
+        reads: list[tuple] = []
+        original = tiny_repo.blob
+        tiny_repo.blob = lambda rev, path: (reads.append((rev, path)),
+                                            original(rev, path))[1]
+        cache: dict = {}
+        for entity_id in ("m.py::target", "m.py::keep", "m.py::target"):
+            entity_diff(tiny_repo, "HEAD^", "HEAD", entity_id, cache=cache)
+        assert len(reads) == 2  # one per revision, not one per entity
 
 
 def sample_changeset() -> ChangeSet:

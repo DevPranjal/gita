@@ -18,6 +18,8 @@ import subprocess
 import pytest
 
 from gita.cli import main
+from gita.cli import render
+from gita.cli import _Tee
 from gita.vcs.git import Repo
 
 
@@ -69,6 +71,49 @@ class TestAsciiSafeOutput:
         stream.flush()
         assert code == 0
         assert b"fetch" in buffer.getvalue()
+
+
+class TestNonAsciiSourceIsNotMangled:
+    """Source code is not ours to corrupt.
+
+    `got-new-option` carries a `->` arrow inside a quoted doc line. On a cp1252
+    stream the old fallback turned it into `?`, which is a fact reported wrong,
+    and the retry double-counted every token we claimed to have emitted.
+    """
+
+    TEXT = "left \u2192 right"
+
+    def test_utf8_is_preserved_on_a_cp1252_stream(self):
+        buffer = io.BytesIO()
+        stream = io.TextIOWrapper(buffer, encoding="cp1252", newline="")
+        render.write(stream, self.TEXT)
+        stream.flush()
+        assert "\u2192" in buffer.getvalue().decode("utf8")
+
+    def test_a_stream_that_cannot_reconfigure_still_gets_the_answer(self):
+        class Stubborn:
+            encoding = "ascii"
+
+            def __init__(self):
+                self.written = []
+
+            def write(self, text):
+                text.encode("ascii")  # raises on non-ASCII, like a real stream
+                self.written.append(text)
+                return len(text)
+
+        out = Stubborn()
+        render.write(out, self.TEXT)
+        assert "right" in "".join(out.written)
+
+    def test_the_retry_is_not_counted_twice(self):
+        """What we bill an agent for must be what the agent received."""
+        buffer = io.BytesIO()
+        stream = io.TextIOWrapper(buffer, encoding="cp1252", newline="")
+        tee = _Tee(stream)
+        render.write(tee, self.TEXT)
+        stream.flush()
+        assert tee.text.count("right") == 1
 
 
 class TestHistoryAnswersWhatChanged:

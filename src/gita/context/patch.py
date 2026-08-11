@@ -9,21 +9,42 @@ from __future__ import annotations
 import difflib
 
 from ..entities.extractor import extract_path
-from ..entities.model import Entity
+from ..entities.model import Entity, EntityTree
 from ..vcs.git import Repo
 
 
-def _entity_at(repo: Repo, rev: str, path: str, entity_id: str) -> tuple[Entity | None, list[str]]:
+def _load(repo: Repo, rev: str | None, path: str,
+          cache: dict | None) -> tuple[EntityTree | None, list[str]]:
+    """Parse one revision of one file, at most once per cache.
+
+    A large diff asks for many entities from the same file. Re-reading and
+    re-parsing it per entity made `got-new-option` a ten-second call, which is
+    long enough that an agent starts reading files by hand instead.
+    """
+    key = (rev, path)
+    if cache is not None and key in cache:
+        return cache[key]
+
+    result: tuple[EntityTree | None, list[str]] = (None, [])
     blob = repo.blob(rev, path)
-    if blob is None or b"\x00" in blob[:8000]:
-        return None, []
-    try:
-        tree = extract_path(blob, path)
-    except (ValueError, RecursionError):
-        return None, []
+    if blob is not None and b"\x00" not in blob[:8000]:
+        try:
+            tree = extract_path(blob, path)
+        except (ValueError, RecursionError):
+            tree = None
+        if tree is not None:
+            result = (tree, blob.decode("utf8", "replace").splitlines(keepends=True))
+
+    if cache is not None:
+        cache[key] = result
+    return result
+
+
+def _entity_at(repo: Repo, rev: str, path: str, entity_id: str,
+               cache: dict | None = None) -> tuple[Entity | None, list[str]]:
+    tree, source = _load(repo, rev, path, cache)
     if tree is None:
         return None, []
-    source = blob.decode("utf8", "replace").splitlines(keepends=True)
     return tree.get(entity_id), source
 
 
@@ -34,15 +55,16 @@ def _slice(entity: Entity | None, source: list[str]) -> list[str]:
 
 
 def entity_diff(repo: Repo, base: str, head: str, entity_id: str,
-                context_lines: int = 3) -> str:
+                context_lines: int = 3, cache: dict | None = None) -> str:
     """Unified diff of one entity between two revisions.
 
-    Returns an empty string when the entity exists on neither side.
+    Returns an empty string when the entity exists on neither side. Pass a
+    shared ``cache`` dict when diffing several entities from the same files.
     """
     path = entity_id.split("::", 1)[0]
 
-    previous, old_source = _entity_at(repo, base, path, entity_id)
-    current, new_source = _entity_at(repo, head, path, entity_id)
+    previous, old_source = _entity_at(repo, base, path, entity_id, cache)
+    current, new_source = _entity_at(repo, head, path, entity_id, cache)
     if previous is None and current is None:
         return ""
 

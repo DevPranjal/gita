@@ -150,8 +150,12 @@ class _Tee:
         self._chunks: list[str] = []
 
     def write(self, text: str) -> int:
+        # Record only what actually left the process. `render.write` retries a
+        # failed encode, and counting the attempt as well as the retry doubled
+        # every measurement of the one task whose diff carried non-ASCII text.
+        written = self._inner.write(text)
         self._chunks.append(text)
-        return self._inner.write(text)
+        return written
 
     def flush(self) -> None:
         self._inner.flush()

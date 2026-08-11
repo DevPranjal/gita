@@ -90,3 +90,37 @@ class TestUnreferenced:
 
     def test_empty_changeset_is_safe(self, repo):
         assert unreferenced(repo, diff_revisions(repo, "HEAD", None)) == []
+
+
+class TestTestsAreNotDeadCode:
+    """A test is called by its runner, never by name.
+
+    On `got-new-option` every one of the 25 lookups we can afford was spent on
+    added test cases, all of which were then reported as unreferenced. That is a
+    false alarm that also starved the source changes of any check at all.
+    """
+
+    def test_added_tests_are_never_reported(self, repo):
+        (repo.root / "test").mkdir()
+        (repo.root / "test" / "core_test.py").write_bytes(
+            b"def test_orphan():\n    assert True\n")
+        found = unreferenced(repo, diff_revisions(repo, "HEAD", None))
+        assert not any("core_test" in entity_id for entity_id in found)
+
+    def test_source_is_still_checked_when_tests_dominate(self, repo):
+        (repo.root / "test").mkdir()
+        (repo.root / "test" / "core_test.py").write_bytes(
+            b"".join(f"def test_case_{i}():\n    assert True\n\n\n".encode()
+                     for i in range(60)))
+        (repo.root / "core.py").write_bytes(
+            (repo.root / "core.py").read_bytes()
+            + b"\n\ndef orphan():\n    return 2\n")
+        found = unreferenced(repo, diff_revisions(repo, "HEAD", None))
+        assert any("orphan" in entity_id for entity_id in found)
+
+    def test_the_same_name_is_not_reported_twice(self, repo):
+        (repo.root / "core.py").write_bytes(
+            (repo.root / "core.py").read_bytes()
+            + b"\n\ndef orphan():\n    return 2\n")
+        found = unreferenced(repo, diff_revisions(repo, "HEAD", None))
+        assert len(found) == len(set(found))

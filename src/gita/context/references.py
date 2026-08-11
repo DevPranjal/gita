@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from ..diff.changes import ChangeKind, ChangeSet
 from ..vcs.git import Repo
+from .rank import is_test_path, score_change
 
 #: Looking up hundreds of names would cost more than the answer is worth.
 MAX_LOOKUPS = 25
@@ -46,11 +47,20 @@ def unreferenced(repo: Repo, changeset: ChangeSet) -> list[str]:
 
     Only additions are considered: a modified function already had callers, or
     the person modifying it knows why it does not.
+
+    Tests are excluded. A test case is invoked by its runner and never by name,
+    so every added test would be reported as dead code -- a false alarm that
+    also spends the whole lookup budget before reaching any source change.
     """
     added = [c for c in changeset.material()
-             if c.kind is ChangeKind.ADDED and not c.entity.synthetic]
+             if c.kind is ChangeKind.ADDED
+             and not c.entity.synthetic
+             and not is_test_path(c.entity.path)]
     if not added:
         return []
+
+    # The lookup cap is small, so spend it on the changes that matter most.
+    added.sort(key=lambda c: (-score_change(c), c.entity.id))
 
     by_name: dict[str, list[str]] = {}
     for change in added:
@@ -59,4 +69,4 @@ def unreferenced(repo: Repo, changeset: ChangeSet) -> list[str]:
     counts = reference_counts(repo, list(by_name))
     return [entity_id
             for name, ids in by_name.items() if counts.get(name, 1) == 0
-            for entity_id in ids]
+            for entity_id in dict.fromkeys(ids)]
