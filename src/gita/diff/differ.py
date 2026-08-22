@@ -11,6 +11,8 @@ Whatever survives all three is genuinely added or removed.
 
 from __future__ import annotations
 
+import re
+
 from collections import defaultdict
 
 from ..entities.model import Entity, EntityTree
@@ -110,6 +112,66 @@ def reconcile_moves(changes: list[EntityChange]) -> list[EntityChange]:
     return _sorted(kept + matched)
 
 
+_ORDINAL = re.compile(r"#\d+$")
+
+
+def _slot_group(entity_id: str) -> str:
+    """The id with its position stripped: what it is, not which slot it sits in."""
+    return _ORDINAL.sub("", entity_id)
+
+
+def _resolve_group(sources: list[Entity], targets: list[Entity]) -> list[EntityChange]:
+    """Decide a set of same-named siblings together.
+
+    `url`, `url#2`, `url#3` are slots, not identities. Inserting one member
+    shifts every later one, so matching by id reports untouched members as
+    edited. Content is matched first, then equal ids, then whatever is left in
+    order -- so a genuine edit is still an edit.
+    """
+    changes: list[EntityChange] = []
+    pool = list(sources)
+    pending: list[Entity] = []
+
+    for target in targets:
+        moved = next((i for i, s in enumerate(pool)
+                      if s.raw_hash == target.raw_hash and s.kind is target.kind), None)
+        if moved is None:
+            pending.append(target)
+        else:
+            changes.append(EntityChange(ChangeKind.UNCHANGED, target, pool.pop(moved)))
+
+    for target in list(pending):
+        same = next((i for i, s in enumerate(pool) if s.id == target.id), None)
+        if same is not None:
+            changes.append(_classify_matched(pool.pop(same), target))
+            pending.remove(target)
+
+    while pending and pool:
+        changes.append(_classify_matched(pool.pop(0), pending.pop(0)))
+
+    changes += [EntityChange(ChangeKind.ADDED, current=t) for t in pending]
+    changes += [EntityChange(ChangeKind.REMOVED, previous=s) for s in pool]
+    return changes
+
+
+def _ordinal_groups(old_entities: dict, new_entities: dict) -> dict[str, tuple[list, list]]:
+    """Sibling groups where more than one entity shares a name."""
+    old_groups: dict[str, list[Entity]] = defaultdict(list)
+    new_groups: dict[str, list[Entity]] = defaultdict(list)
+    for entity in old_entities.values():
+        old_groups[_slot_group(entity.id)].append(entity)
+    for entity in new_entities.values():
+        new_groups[_slot_group(entity.id)].append(entity)
+
+    groups = {}
+    for base in old_groups.keys() | new_groups.keys():
+        sources, targets = old_groups.get(base, []), new_groups.get(base, [])
+        if len(sources) > 1 or len(targets) > 1:
+            groups[base] = (sorted(sources, key=lambda e: e.start_line),
+                            sorted(targets, key=lambda e: e.start_line))
+    return groups
+
+
 def _sorted(changes: list[EntityChange]) -> list[EntityChange]:
     return sorted(changes, key=lambda c: (c.entity.path, c.entity.start_line, c.entity.id))
 
@@ -145,16 +207,28 @@ def diff_trees(previous: EntityTree | None, current: EntityTree | None,
 
     changes: list[EntityChange] = []
 
+    # pass 0 -- same-named siblings, decided together and by content first.
+    # `url`, `url#2`, `url#3` are slots: inserting one member shifts the rest,
+    # and matching by id would report the untouched ones as edited.
+    groups = _ordinal_groups(old_entities, new_entities)
+    handled: set[str] = set()
+    for sources, targets in groups.values():
+        changes += _resolve_group(sources, targets)
+        handled.update(e.id for e in sources)
+        handled.update(e.id for e in targets)
+
     # pass 1 -- stable id
     for entity_id in old_entities.keys() & new_entities.keys():
+        if entity_id in handled:
+            continue
         changes.append(_classify_matched(old_entities[entity_id], new_entities[entity_id]))
 
     # A module is bound to its file; git handles file renames, so it never
     # participates in move or rename matching.
     removed = {i: e for i, e in old_entities.items()
-               if i not in new_entities and not e.synthetic}
+               if i not in new_entities and i not in handled and not e.synthetic}
     added = {i: e for i, e in new_entities.items()
-             if i not in old_entities and not e.synthetic}
+             if i not in old_entities and i not in handled and not e.synthetic}
 
     # pass 2 -- identical content, then identical body, matched only where
     # the hash is unambiguous on both sides

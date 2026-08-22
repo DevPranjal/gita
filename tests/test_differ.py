@@ -237,3 +237,57 @@ class TestJavaScript:
         result = {c.id: c for c in diff_trees(extract(previous, "t.js"), extract(current, "t.js"))}
         target = "t.js::describe('R')::it('works')"
         assert result[target].kind is ChangeKind.BODY_CHANGED
+
+
+class TestRenumberingIsNotAChange:
+    """`url`, `url#2`, `url#3` are positions, not identities.
+
+    Inserting one same-named member ahead of two existing ones reported three
+    changes: the newcomer took slot 1, so the two untouched members appeared to
+    have been edited. Across 125 real commits this fabricated 1.54% of all
+    reported changes -- wrong facts, which outrank everything else here.
+    """
+
+    BEFORE = (b"class A {\n"
+              b"  get url() { return this._u; }\n"
+              b"  set url(v) { this._u = v; }\n"
+              b"}\n")
+
+    def test_inserting_a_sibling_reports_only_the_addition(self):
+        after = (b"class A {\n"
+                 b"  get url() { return 0; }\n"
+                 b"  get url() { return this._u; }\n"
+                 b"  set url(v) { this._u = v; }\n"
+                 b"}\n")
+        changes = [c for c in diff_trees(extract(self.BEFORE, "a.ts"),
+                                         extract(after, "a.ts")) if not c.is_noise]
+        assert [c.kind for c in changes] == [ChangeKind.ADDED]
+
+    def test_removing_a_sibling_reports_only_the_removal(self):
+        before = (b"class A {\n"
+                  b"  get url() { return 0; }\n"
+                  b"  get url() { return this._u; }\n"
+                  b"  set url(v) { this._u = v; }\n"
+                  b"}\n")
+        changes = [c for c in diff_trees(extract(before, "a.ts"),
+                                         extract(self.BEFORE, "a.ts")) if not c.is_noise]
+        assert [c.kind for c in changes] == [ChangeKind.REMOVED]
+
+    def test_a_real_edit_to_a_numbered_sibling_is_still_reported(self):
+        """Suppressing renumbering must not suppress actual edits."""
+        after = (b"class A {\n"
+                 b"  get url() { return this._u; }\n"
+                 b"  set url(v) { this._u = v.trim(); }\n"
+                 b"}\n")
+        changes = [c for c in diff_trees(extract(self.BEFORE, "a.ts"),
+                                         extract(after, "a.ts")) if not c.is_noise]
+        assert [c.kind for c in changes] == [ChangeKind.BODY_CHANGED]
+
+    def test_reordering_same_named_siblings_is_not_a_change(self):
+        swapped = (b"class A {\n"
+                   b"  set url(v) { this._u = v; }\n"
+                   b"  get url() { return this._u; }\n"
+                   b"}\n")
+        changes = [c for c in diff_trees(extract(self.BEFORE, "a.ts"),
+                                         extract(swapped, "a.ts")) if not c.is_noise]
+        assert changes == []
