@@ -144,31 +144,9 @@ def show_tool(repo: str, entity: str, base: str = DEFAULT_BASE,
     return {"entity": entity, "patch": patch, "tokens": count_tokens(patch)}
 
 
-@_guard
-def savings_tool(repo: str, base: str = DEFAULT_BASE,
-                 head: str | None = DEFAULT_HEAD,
-                 budget: int = DEFAULT_BUDGET) -> dict[str, Any]:
-    """What this context diff costs versus sending the raw git diff."""
-    repository = _open(repo, base, head)
-    changeset = diff_revisions(repository, base, head)
-    view = build_view(changeset, budget=budget)
-    raw_tokens = count_tokens(repository.raw_diff(base, head, changeset.paths()))
-
-    return {
-        "base": base,
-        "head": head,
-        "raw_tokens": raw_tokens,
-        "l0_tokens": count_tokens(view.l0),
-        "l1_tokens": view.tokens,
-        "reduction": (1 - view.tokens / raw_tokens) if raw_tokens else 0.0,
-        "files_changed": changeset.files_changed,
-        "noise_filtered": len(changeset) - len(changeset.material()),
-    }
-
-
+#: The whole agent-facing surface, in the order an agent should reach for it.
 TOOLS = {
     "gita_diff": diff_tool,
     "gita_expand": expand_tool,
     "gita_show": show_tool,
-    "gita_savings": savings_tool,
 }

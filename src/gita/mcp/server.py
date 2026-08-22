@@ -17,7 +17,6 @@ Start with gita_diff for a headline and a list of changed entities. It is cheap.
 Then drill only where you need to:
   gita_expand   children of a rolled-up entity ("Parent (+4 nested)")
   gita_show     the exact hunks for one entity  -- the expensive layer
-  gita_savings  what this cost versus a raw git diff
 
 gita_diff takes `filter` to restrict to entities matching a term, and
 `interface_only` to show just the changes that can break a caller. Both are
@@ -75,12 +74,6 @@ def build_server(repo_path: str | None = None):
                   head: str = tools.DEFAULT_HEAD, repo: str = "") -> dict:
         """Exact hunks for one entity. Call only after diff or expand named it."""
         return tools.show_tool(repo or root, entity, base=base, head=head)
-
-    @server.tool()
-    def gita_savings(base: str = tools.DEFAULT_BASE, head: str = tools.DEFAULT_HEAD,
-                     repo: str = "") -> dict:
-        """Token cost of the context diff versus the raw git diff."""
-        return tools.savings_tool(repo or root, base=base, head=head)
 
     return server
 

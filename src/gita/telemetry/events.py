@@ -33,8 +33,6 @@ TOOL_LAYER = {
     "expand": "L1",
     "gita_show": "L2",
     "show": "L2",
-    "gita_savings": "L0",
-    "savings": "L0",
 }
 
 _PROCESS_SESSION = f"proc-{uuid.uuid4().hex[:12]}"

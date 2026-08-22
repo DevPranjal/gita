@@ -168,19 +168,6 @@ class TestExpand:
                run(repo, "expand", "app.py::Store")[1]
 
 
-class TestSavings:
-    def test_compares_against_raw_diff(self, repo):
-        code, output = run(repo, "savings")
-        assert code == 0
-        assert "raw" in output.lower()
-        assert "%" in output
-
-    def test_json_carries_the_numbers(self, repo):
-        payload = json.loads(run(repo, "savings", "--json")[1])
-        assert payload["raw_tokens"] > payload["l1_tokens"] > 0
-        assert 0 < payload["reduction"] < 1
-
-
 class TestErrors:
     def test_no_command_prints_short_usage(self, repo):
         code, output = run(repo)
@@ -229,3 +216,44 @@ class TestHistoryTakesRevisionsLikeEveryOtherCommand:
     def test_flags_win_over_positionals(self, repo):
         explicit = run(repo, "history", "handle", "HEAD~1", "--since", "HEAD^")
         assert explicit[0] == 0
+
+
+class TestSpeaksGitsDialect:
+    """Agents transfer git habits, and a rejected guess costs a whole turn.
+
+    Across 1,209 recorded invocations they typed flags gita did not have:
+    `--base`/`--head` (12), `--no-pager` (9), `--stat` (4), `--oneline` (3).
+    Where git's spelling means the same thing here, accept it.
+    """
+
+    def test_base_and_head_may_be_flags(self, repo):
+        positional = run(repo, "diff", "HEAD^", "HEAD")
+        flagged = run(repo, "diff", "--base", "HEAD^", "--head", "HEAD")
+        assert flagged == positional
+
+    def test_no_pager_is_accepted_and_ignored(self, repo):
+        assert run(repo, "--no-pager", "diff", "HEAD^", "HEAD") == \
+               run(repo, "diff", "HEAD^", "HEAD")
+
+    def test_stat_means_summary_only(self, repo):
+        assert run(repo, "diff", "HEAD^", "HEAD", "--stat") == \
+               run(repo, "diff", "HEAD^", "HEAD", "--brief")
+
+    def test_oneline_means_summary_only(self, repo):
+        assert run(repo, "diff", "HEAD^", "HEAD", "--oneline") == \
+               run(repo, "diff", "HEAD^", "HEAD", "--brief")
+
+    def test_history_accepts_them_too(self, repo):
+        code, _ = run(repo, "history", "handle", "--oneline")
+        assert code == 0
+
+
+class TestSavingsIsGone:
+    """Zero uses in 1,209 invocations. Surface an agent must read past is a cost."""
+
+    def test_the_command_no_longer_exists(self, repo):
+        code, _ = run(repo, "savings")
+        assert code != 0
+
+    def test_usage_does_not_advertise_it(self, repo):
+        assert "savings" not in run(repo)[1]

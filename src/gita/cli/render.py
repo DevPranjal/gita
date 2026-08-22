@@ -106,26 +106,6 @@ def render_patch(patch: str, colour: bool = False) -> str:
         else:
             out.append(line)
     return "\n".join(out)
-
-
-def render_savings(raw: str, view: ContextView, colour: bool = False) -> str:
-    raw_tokens = count_tokens(raw)
-    l0_tokens = count_tokens(view.l0)
-
-    def row(label: str, tokens: int) -> str:
-        if not raw_tokens:
-            return f"  {label:<16}{tokens:>8,} tokens"
-        cut = 1 - tokens / raw_tokens
-        return f"  {label:<16}{tokens:>8,} tokens{cut:>10.1%} less"
-
-    return "\n".join([
-        paint("token cost of this change", "bold", colour),
-        f"  {'raw git diff':<16}{raw_tokens:>8,} tokens",
-        row("gita L0", l0_tokens),
-        row("gita L0+L1", view.tokens),
-    ])
-
-
 def change_payload(change: EntityChange) -> dict:
     entity = change.entity
     return {

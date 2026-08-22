@@ -8,7 +8,6 @@ from gita.mcp.tools import (
     TOOLS,
     diff_tool,
     expand_tool,
-    savings_tool,
     show_tool,
 )
 
@@ -66,17 +65,9 @@ class TestFiltering:
         assert "error" not in result
 
 
-class TestSavingsTool:
-    def test_compares_against_raw_diff(self, repo):
-        result = savings_tool(str(repo.root))
-        assert result["raw_tokens"] > result["l1_tokens"] > 0
-        assert 0 < result["reduction"] < 1
-
-
 class TestFailureModes:
     @pytest.mark.parametrize("tool,args", [
         (diff_tool, ()),
-        (savings_tool, ()),
     ])
     def test_non_repository_reports_an_error(self, tmp_path, tool, args):
         assert "error" in tool(str(tmp_path), *args)

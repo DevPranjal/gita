@@ -43,7 +43,6 @@ gita - context diffs for agent coders
   gita diff <base> <head> --patch            plain unified diff, noise removed
   gita history <entity>       how one function changed over time
   gita show <entity>          exact hunks for one entity
-  gita savings                cost versus a raw git diff
 
 One `gita diff` should answer the question; it says so when output was cut.
 Run `gita <command> --help` for details."""
@@ -69,6 +68,9 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--json", action="store_true", dest="as_json",
                         help="emit machine-readable output")
     parser.add_argument("--no-color", action="store_true", help="disable colour")
+    # git's own global flag. It means nothing here, but agents type it out of
+    # habit and a rejected guess costs a whole turn.
+    parser.add_argument("--no-pager", action="store_true", help=argparse.SUPPRESS)
 
     sub = parser.add_subparsers(dest="command")
 
@@ -79,6 +81,11 @@ def _parser() -> argparse.ArgumentParser:
         sp.add_argument("base", nargs="?", default="HEAD" if worktree_default else "HEAD^")
         sp.add_argument("head", nargs="?",
                         default=None if worktree_default else "HEAD")
+        # Agents reached for these 12 times; they mean the positionals.
+        sp.add_argument("--base", dest="base_flag", default=None,
+                        help=argparse.SUPPRESS)
+        sp.add_argument("--head", dest="head_flag", default=None,
+                        help=argparse.SUPPRESS)
 
     def budget(sp):
         sp.add_argument("--budget", type=int, default=DEFAULT_BUDGET,
@@ -92,7 +99,8 @@ def _parser() -> argparse.ArgumentParser:
                       help="only entities whose name or path contains TERM")
     diff.add_argument("--interface-only", action="store_true",
                       help="only changes that can break a caller")
-    diff.add_argument("--brief", action="store_true",
+    # `--stat` and `--oneline` are git's words for "less detail".
+    diff.add_argument("--brief", "--stat", "--oneline", action="store_true",
                       help="summary only, without the code")
     diff.add_argument("--patch", action="store_true",
                       help="unified diff with noise removed")
@@ -108,11 +116,6 @@ def _parser() -> argparse.ArgumentParser:
     revisions(exp)
     budget(exp)
 
-    savings = sub.add_parser("savings", parents=[common],
-                             help="token cost versus a raw git diff")
-    revisions(savings)
-    budget(savings)
-
     hist = sub.add_parser("history", aliases=["katha"], parents=[common],
                           help="how entities changed across a range of commits")
     hist.add_argument("entity", nargs="?",
@@ -127,7 +130,7 @@ def _parser() -> argparse.ArgumentParser:
     hist.add_argument("--since", default=None)
     hist.add_argument("--until", default=None)
     hist.add_argument("--limit", type=int, default=20)
-    hist.add_argument("--brief", action="store_true",
+    hist.add_argument("--brief", "--stat", "--oneline", action="store_true",
                       help="commits only, without the code")
     budget(hist)
 
@@ -203,6 +206,11 @@ def main(argv: list[str] | None = None, out: TextIO | None = None) -> int:
         render.write(out, USAGE)
         return 2
 
+    if getattr(args, "base_flag", None):
+        args.base = args.base_flag
+    if getattr(args, "head_flag", None):
+        args.head = args.head_flag
+
     command = ALIASES.get(args.command, args.command)
     colour = (not args.no_color) and render.colour_enabled(out)
     repo = Repo(args.repo)
@@ -241,8 +249,6 @@ def _dispatch(command, out, repo, args, colour, parser) -> int:
             return _cmd_show(out, repo, args, colour)
         if command == "expand":
             return _cmd_expand(out, repo, args, colour)
-        if command == "savings":
-            return _cmd_savings(out, repo, args, colour)
 
     except GitError as error:
         # A bad revision and a missing repository look identical from inside git,
@@ -452,27 +458,3 @@ def _cmd_history(out, repo, args, colour) -> int:
                      f"{summary.subject[:44]:<44}  {names}")
     _emit(out, payload, "\n".join(lines), args.as_json)
     return 0
-
-
-def _cmd_savings(out, repo, args, colour) -> int:
-    changeset = diff_revisions(repo, args.base, args.head)
-    view = build_view(changeset, budget=args.budget)
-    raw = repo.raw_diff(args.base, args.head, changeset.paths())
-    raw_tokens = count_tokens(raw)
-
-    payload = {
-        "base": args.base,
-        "head": args.head,
-        "raw_tokens": raw_tokens,
-        "l0_tokens": count_tokens(view.l0),
-        "l1_tokens": view.tokens,
-        "reduction": (1 - view.tokens / raw_tokens) if raw_tokens else 0.0,
-        "files_changed": changeset.files_changed,
-        "noise_filtered": len(changeset) - len(changeset.material()),
-    }
-    _emit(out, payload, render.render_savings(raw, view, colour), args.as_json)
-    return 0
-
-
-if __name__ == "__main__":  # pragma: no cover
-    raise SystemExit(main())
