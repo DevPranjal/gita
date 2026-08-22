@@ -219,3 +219,74 @@ Published numbers now pool the two identical sweeps: 110 runs, six repetitions
 per task per arm, cache-misses excluded. **-15.4% credits, -23.1% turns, -92.4%
 tool output**, 8 of 10 tasks cheaper. Turns and tool output are stable across
 every sweep; cost is not, and the README and the site now say so.
+
+---
+
+## Session 6 (2026-08-22) - the data structures, not the surface
+
+Direction: fewer features, stronger primitives, git-like maturity. Every change
+below was chosen from a measurement and defended by one.
+
+### What the profiler said, in order
+
+| finding | measured | action |
+| --- | --- | --- |
+| 98 git subprocesses per history query, 67ms of spawn each | 6.53s of 12.08s | plumbing: `cat-file --batch`, one walk, path pruning |
+| 43% of parses were of identical content | 4.2MB parsed per query | content-addressed `TreeStore` |
+| one `git grep` per added entity | 0.93s of 2.59s | one call, count in Python |
+| `entity_nodes` rebuilt per node | 603,193 calls | field, not property |
+| entity subtree walked three times | 1.47s self time | one walk yields own + body |
+| slot numbers treated as identities | 25 false changes / 2,858 | resolve sibling groups by content |
+
+    gita diff (got, 13 files)   11.20s -> 1.82s   6.1x
+    gita history (gin)          12.08s -> 2.75s   4.4x
+    git subprocesses per query  98 -> 2
+
+### Method notes worth keeping
+
+**Equivalence, not hope.** Every fast path kept its slow path alive behind a
+flag so tests can prove they agree: `series(batched=False)`,
+`entity_history(prune=False)`. The hashing refactor was checked by fingerprinting
+1,433 entities from five real repositories under both implementations --
+identical digest, `9617c160d769225a1c910594d98bebce`.
+
+**A loose metric flatters.** The renumbering fix first measured 44 false alarms;
+most were new test callbacks whose content coincided with an existing one, which
+are real additions. Restricting to the same name group gave 25, and 14 after the
+fix. Reporting the loose number would have claimed roughly double the win.
+
+**A step that changes nothing gets removed.** A second matching pass on the
+normalised hash was written, measured, moved neither the metric nor a test, and
+was deleted.
+
+**Python's `splitlines()` treats \x1e as a line boundary.** A record separator
+cannot be found with it. Cost twenty minutes.
+
+### Stacked next
+
+Experiments, cheapest first:
+
+1. **Startup is now the floor.** 0.45s of every invocation is interpreter and
+   imports, against 1.8s of work for the largest task. Measure what a lazy
+   import of tiktoken and the language pack buys on the small tasks, where it is
+   proportionally worst.
+2. **Does any of this reach the agent?** Wall clock fell 4-6x but the eval
+   measures credits and turns. Run a sweep at five repetitions rather than three
+   -- the control run at three repetitions moved 10 points on its own, so three
+   cannot resolve what this is worth.
+3. **`expand` was used 4 times in 1,209 invocations.** Either it is redundant
+   with one-shot answers, or the output never tells an agent it exists. Read the
+   sessions where it was used before deciding which.
+4. **14 renumbering false alarms remain.** All involve content that also
+   changed. Determine whether sibling groups need similarity matching or whether
+   this is the honest floor.
+
+Data decisions pending:
+
+- The `#N` scheme is stable under insertion of *differently* named siblings
+  (measured, hypothesis disproved) and unstable only within a name group. That
+  bounds how much a content-addressed id scheme could buy -- probably not enough
+  to justify ids that change when a body is edited.
+- `history` now walks 20 commits *that touched the entity*, which is git's
+  meaning of `-n`, not the old "look at the last 20 commits". Better answers,
+  more work per query. Worth confirming against agent behaviour, not intuition.
