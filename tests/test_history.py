@@ -93,3 +93,109 @@ class TestEntityHistory:
     def test_carries_commit_identity(self, evolving):
         event = entity_history(evolving, "svc.py::fetch", limit=10)[0]
         assert event.sha and event.subject and event.date
+
+
+class TestPruningByPath:
+    """git answers `git log -- <path>` in milliseconds because it compares tree
+    hashes and never opens a file that cannot have changed. gita walked every
+    file of every commit to answer a question about one entity: 9.75s and 65
+    file parses to produce a single event, against 0.078s for git's equivalent.
+
+    Pruning must make it cheaper without making it different.
+    """
+
+    def noisy(self, tmp_path):
+        """One commit touching the entity, many touching everything else."""
+        def git(*args):
+            subprocess.run(["git", "-C", str(tmp_path), *args], check=True,
+                           capture_output=True)
+        git("init", "-q", "-b", "main")
+        git("config", "user.email", "t@t")
+        git("config", "user.name", "t")
+        (tmp_path / "svc.py").write_text("def fetch(url):\n    return get(url)\n")
+        git("add", "-A")
+        git("commit", "-q", "-m", "add fetch")
+
+        for i in range(8):
+            (tmp_path / f"noise{i}.py").write_text(f"def noise{i}():\n    return {i}\n")
+            git("add", "-A")
+            git("commit", "-q", "-m", f"unrelated {i}")
+
+        (tmp_path / "svc.py").write_text(
+            "def fetch(url, timeout=5):\n    return get(url, timeout)\n")
+        git("add", "-A")
+        git("commit", "-q", "-m", "add timeout")
+        return Repo(tmp_path)
+
+    def test_pruning_does_not_change_the_answer(self, tmp_path):
+        repo = self.noisy(tmp_path)
+        pruned = entity_history(repo, "svc.py::fetch", limit=20)
+        full = entity_history(repo, "svc.py::fetch", limit=20, prune=False)
+        assert [(e.short, e.kind) for e in pruned] == [(e.short, e.kind) for e in full]
+
+    def test_a_bare_name_is_pruned_too(self, tmp_path):
+        """Agents type `fetch`, so the fast path cannot depend on the full id."""
+        repo = self.noisy(tmp_path)
+        assert [e.kind for e in entity_history(repo, "fetch", limit=20)] == \
+               [e.kind for e in entity_history(repo, "fetch", limit=20, prune=False)]
+
+    def test_files_that_cannot_contain_the_entity_are_never_parsed(self, tmp_path):
+        repo = self.noisy(tmp_path)
+        from gita import revisions
+        seen = []
+        original = revisions.extract_path
+
+        def spy(blob, path, *args, **kwargs):
+            seen.append(path)
+            return original(blob, path, *args, **kwargs)
+
+        revisions.extract_path = spy
+        try:
+            entity_history(repo, "svc.py::fetch", limit=20)
+        finally:
+            revisions.extract_path = original
+        assert seen, "expected at least one parse"
+        assert not [p for p in seen if p.startswith("noise")]
+
+    def test_an_unknown_name_still_returns_nothing(self, tmp_path):
+        repo = self.noisy(tmp_path)
+        assert entity_history(repo, "not_a_function", limit=20) == []
+
+
+class TestOneWalkNotOnePerCommit:
+    """`series` asked git for the parent and the file list of every commit
+    separately: 20 commits meant 40 processes. `git log --name-status` answers
+    both in one. The walk must stay identical, merges included.
+    """
+
+    def test_walk_reports_parent_and_files(self, evolving):
+        records = evolving.walk(limit=4)
+        assert len(records) == 4
+        assert all(r.sha and r.subject for r in records)
+        newest = records[0]
+        assert newest.parent
+        assert any(f.path.endswith(".py") for f in newest.files)
+
+    def test_walk_matches_per_commit_queries(self, evolving):
+        for record in evolving.walk(limit=4):
+            assert record.parent == evolving.base_of(record.sha)
+            expected = {(f.status, f.path)
+                        for f in evolving.changed_files(record.parent, record.sha,
+                                                        supported_only=False)}
+            assert {(f.status, f.path) for f in record.files} == expected
+
+    def test_a_root_commit_has_no_parent_commit(self, evolving):
+        oldest = evolving.walk(limit=50)[-1]
+        assert oldest.parent == evolving.base_of(oldest.sha)
+
+    def test_paths_restrict_the_walk(self, evolving):
+        restricted = evolving.walk(limit=50, paths=["other.py"])
+        assert restricted
+        assert all(any(f.path == "other.py" for f in r.files) for r in restricted)
+
+    def test_series_is_unchanged_by_batching(self, evolving):
+        from gita.history import series
+        batched = series(evolving, limit=4)
+        single = series(evolving, limit=4, batched=False)
+        assert [(s.sha, sorted(c.entity.id for c in s.changes)) for s in batched] == \
+               [(s.sha, sorted(c.entity.id for c in s.changes)) for s in single]

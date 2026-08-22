@@ -19,6 +19,12 @@ from .vcs.git import Repo
 
 DEFAULT_LIMIT = 20
 
+#: Grep is only a prefilter, but a very short name matches most of a repo.
+MIN_NAME_LENGTH = 3
+
+#: A name found in this many files is not selective enough to be worth pruning by.
+MAX_CANDIDATE_PATHS = 20
+
 _FORMAT = "%H%x1f%s%x1f%aI"
 
 
@@ -54,10 +60,17 @@ class EntityEvent:
 
 
 def commits(repo: Repo, since: str | None = None, until: str = "HEAD",
-            limit: int = DEFAULT_LIMIT) -> list[tuple[str, str, str]]:
-    """Newest-first ``(sha, subject, iso_date)`` triples."""
+            limit: int = DEFAULT_LIMIT,
+            paths: list[str] | None = None) -> list[tuple[str, str, str]]:
+    """Newest-first ``(sha, subject, iso_date)`` triples.
+
+    ``paths`` is handed to git, which prunes by comparing tree hashes instead of
+    walking file contents. That pruning is why `git log -- <path>` is instant.
+    """
     span = f"{since}..{until}" if since else until
-    raw = repo.text("log", f"--format={_FORMAT}", f"-n{limit}", span, check=False)
+    limit_args = ["--", *paths] if paths else []
+    raw = repo.text("log", f"--format={_FORMAT}", f"-n{limit}", span,
+                    *limit_args, check=False)
 
     out = []
     for line in raw.splitlines():
@@ -68,21 +81,57 @@ def commits(repo: Repo, since: str | None = None, until: str = "HEAD",
 
 
 def series(repo: str | Path | Repo, since: str | None = None, until: str = "HEAD",
-           limit: int = DEFAULT_LIMIT) -> list[CommitSummary]:
-    """Per-commit entity changes, newest first."""
+           limit: int = DEFAULT_LIMIT,
+           paths: list[str] | None = None,
+           batched: bool = True) -> list[CommitSummary]:
+    """Per-commit entity changes, newest first.
+
+    ``batched=False`` asks git once per commit instead of once in total; it
+    exists so tests can prove the two agree.
+    """
     repo = repo if isinstance(repo, Repo) else Repo(repo)
 
+    if not batched:
+        return [CommitSummary(sha=sha, subject=subject, date=date,
+                              changes=diff_revisions(repo, repo.base_of(sha), sha,
+                                                     paths=paths).material())
+                for sha, subject, date in commits(repo, since, until, limit, paths)]
+
     summaries = []
-    for sha, subject, date in commits(repo, since, until, limit):
-        changeset = diff_revisions(repo, repo.base_of(sha), sha)
-        summaries.append(CommitSummary(sha=sha, subject=subject, date=date,
+    for record in repo.walk(since, until, limit, paths):
+        changeset = diff_revisions(repo, record.parent, record.sha, paths=paths,
+                                   changed=record.files)
+        summaries.append(CommitSummary(sha=record.sha, subject=record.subject,
+                                       date=record.date,
                                        changes=changeset.material()))
     return summaries
 
 
+def paths_holding(repo: Repo, name: str, rev: str = "HEAD") -> list[str]:
+    """Tracked files that mention ``name`` at ``rev``.
+
+    A bare name carries no path, so the fast route needs one. Grep is a coarse
+    filter and that is fine: it only has to be a superset of the files that could
+    define the entity, because the entity diff still decides what actually changed.
+    """
+    if "::" in name:
+        return [name.split("::", 1)[0]]
+    if len(name) < MIN_NAME_LENGTH:
+        return []
+    raw = repo.text("grep", "-l", "-F", "--", name, rev, check=False)
+    found = []
+    for line in raw.splitlines():
+        # `git grep <rev>` prefixes each hit with `<rev>:`.
+        _, _, path = line.partition(":")
+        if path.strip():
+            found.append(path.strip())
+    return found[:MAX_CANDIDATE_PATHS]
+
+
 def entity_history(repo: str | Path | Repo, entity_id: str,
                    since: str | None = None, until: str = "HEAD",
-                   limit: int = DEFAULT_LIMIT) -> list[EntityEvent]:
+                   limit: int = DEFAULT_LIMIT,
+                   prune: bool = True) -> list[EntityEvent]:
     """How one entity changed across a range, newest first.
 
     ``entity_id`` may be a bare name: agents type `fetch`, not
@@ -90,8 +139,17 @@ def entity_history(repo: str | Path | Repo, entity_id: str,
 
     Commits that left the entity alone are omitted -- the point is the sequence
     of real changes, not a list of every commit.
+
+    Only the files that could hold the entity are compared. ``prune=False``
+    walks everything, which exists so tests can prove the two agree.
     """
-    summaries = series(repo, since, until, limit)
+    repo = repo if isinstance(repo, Repo) else Repo(repo)
+
+    paths = paths_holding(repo, entity_id, until) if prune else None
+    if prune and not paths:
+        return []
+
+    summaries = series(repo, since, until, limit, paths)
 
     seen = {c.entity.id for s in summaries for c in s.changes}
     resolved = entity_id if entity_id in seen else resolve_entity(seen, entity_id)

@@ -25,24 +25,34 @@ def _tree_at(repo: Repo, rev: str | None, path: str) -> EntityTree | None:
 
 def diff_revisions(repo: str | Path | Repo, base: str = "HEAD",
                    head: str | None = WORKTREE,
-                   rename_threshold: float = RENAME_THRESHOLD) -> ChangeSet:
+                   rename_threshold: float = RENAME_THRESHOLD,
+                   paths: list[str] | None = None,
+                   changed: list[ChangedFile] | None = None) -> ChangeSet:
     """Context diff between two revisions.
 
     ``head`` may be a revision, ``None`` for the working tree, or ``STAGED``
     for the index -- matching what `git diff` and `git diff --cached` compare.
+
+    ``paths`` restricts the comparison before any file is read, so git can prune
+    by tree hash rather than gita parsing files it will only discard. ``changed``
+    supplies that file list when a caller already has it, saving a git call.
     """
     repo = repo if isinstance(repo, Repo) else Repo(repo)
     changeset = ChangeSet()
     collected = []
 
-    changed = repo.changed_files(base, head, supported_only=False)
+    if changed is None:
+        changed = repo.changed_files(base, head, supported_only=False, paths=paths)
+    else:
+        changed = list(changed)
 
     # `git diff HEAD` cannot see untracked files, so a module an agent has just
     # written would not appear at all. Only the working tree has them.
     if head is WORKTREE:
         known = {c.path for c in changed}
+        wanted = set(paths) if paths else None
         changed += [ChangedFile("?", path) for path in repo.untracked()
-                    if path not in known]
+                    if path not in known and (wanted is None or path in wanted)]
 
     # Every text file counts: unparseable types fall back to a whole-file entity
     # rather than vanishing, because a silent omission reads as "unchanged".
