@@ -124,3 +124,55 @@ class TestTestsAreNotDeadCode:
             + b"\n\ndef orphan():\n    return 2\n")
         found = unreferenced(repo, diff_revisions(repo, "HEAD", None))
         assert len(found) == len(set(found))
+
+
+class TestLookupsAreBatched:
+    """One process per name was the last O(n) spawn pattern left.
+
+    On a 13-file change `gita diff` spent 0.93s of 2.59s in 13 `git grep`
+    processes. git can take every pattern in one call; the counting is ours to
+    do afterwards.
+    """
+
+    def many(self, repo):
+        (repo.root / "core.py").write_bytes(
+            b"def used_helper():\n    return 1\n\n\n"
+            b"def caller():\n    return used_helper()\n\n\n"
+            b"def orphan_one():\n    return 2\n\n\n"
+            b"def orphan_two():\n    return 3\n")
+        return ["used_helper", "caller", "orphan_one", "orphan_two", "missing_name"]
+
+    def test_batched_counts_match_one_call_per_name(self, repo):
+        names = self.many(repo)
+        batched = reference_counts(repo, names)
+        one_by_one = {n: reference_counts(repo, [n])[n] for n in names}
+        assert batched == one_by_one
+
+    def test_all_names_are_answered_in_one_process(self, repo, monkeypatch):
+        names = self.many(repo)
+        greps = []
+        original = type(repo)._run
+
+        def counting(self, *args, **kwargs):
+            if args and args[0] == "grep":
+                greps.append(args)
+            return original(self, *args, **kwargs)
+
+        monkeypatch.setattr(type(repo), "_run", counting)
+        reference_counts(repo, names)
+        assert len(greps) == 1
+
+    def test_metacharacters_stay_literal_when_batched(self, repo):
+        counts = reference_counts(repo, ["a.*b", "used_helper"])
+        assert counts["a.*b"] == 0
+
+    def test_short_names_are_still_skipped(self, repo):
+        assert reference_counts(repo, ["ab", "used_helper"])["ab"] == 0
+
+    def test_no_names_makes_no_call(self, repo, monkeypatch):
+        calls = []
+        original = type(repo)._run
+        monkeypatch.setattr(type(repo), "_run",
+                            lambda self, *a, **k: (calls.append(a), original(self, *a, **k))[1])
+        assert reference_counts(repo, []) == {}
+        assert not calls
