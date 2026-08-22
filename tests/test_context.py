@@ -21,6 +21,7 @@ from gita.context import (
     rollup_lines,
     score_change,
 )
+from gita.context import tokens
 from gita.diff.changes import ChangeSet
 from gita.vcs.git import Repo
 
@@ -484,3 +485,42 @@ class TestFiltering:
         view = filtered_view(sample_changeset(), term="tests/", budget=800)
         assert "tests/test_app.py" in view.l1
         assert "src/app.py" not in view.l1
+
+
+class TestBudgetHoldsWithoutTiktoken:
+    """`--budget N` is documented as a hard cap, and a cap cannot be honoured by
+    an estimate that guesses low.
+
+    tiktoken was an optional extra, so a plain `pip install gita` produced a
+    build where budget 60 emitted 79 real tokens. Measured over 59 corpus files,
+    the old divisor of 4.0 chars/token underestimated 61% of the time.
+    """
+
+    def sample(self):
+        return ("def handle(request, timeout=5):\n"
+                "    result = fetch(request.url, timeout=timeout)\n"
+                "    return result.json()\n") * 6
+
+    def test_the_estimate_never_guesses_low(self):
+        text = self.sample()
+        exact = tokens.count_tokens(text)
+        estimated = tokens.estimate_tokens(text)
+        assert estimated >= exact, "an estimate used as a cap must err high"
+
+    def test_it_does_not_err_absurdly_high(self):
+        """Conservative, not useless: answers would shrink to nothing."""
+        text = self.sample()
+        assert tokens.estimate_tokens(text) <= tokens.count_tokens(text) * 3
+
+    @pytest.mark.parametrize("text", [
+        "x = 1\n",
+        "{\"a\": [1, 2, 3], \"b\": {\"c\": true}}",
+        "# Heading\n\nSome prose about the change.\n",
+        "func F(a int) (int, error) { return a + 1, nil }\n",
+    ])
+    def test_holds_across_content_shapes(self, text):
+        assert tokens.estimate_tokens(text) >= tokens.count_tokens(text)
+
+    def test_the_method_in_use_is_reportable(self):
+        """An agent must be able to tell an exact budget from an approximate one."""
+        assert tokens.token_method() in ("tiktoken/cl100k_base", "approx")

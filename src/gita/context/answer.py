@@ -39,6 +39,9 @@ SUMMARY_SHARE = 0.35
 #: Detailing hundreds of entities helps nobody and re-parses the same files.
 MAX_DETAILED = 20
 
+#: Beyond a handful the list stops being a finding and becomes a wall.
+MAX_ORPHANS_SHOWN = 5
+
 
 @dataclass(slots=True)
 class Answer:
@@ -94,6 +97,20 @@ def _named(changeset: ChangeSet, files: list[str], worktree: bool) -> list[str]:
             if (status := changeset.file_status.get(path, "")) in _STATUS
             else path
             for path in files]
+
+
+_ORPHAN_PREFIX = "unreferenced (name appears nowhere else): "
+
+
+def _orphan_line(orphans: list[str], spare: int) -> str:
+    """The finding, trimmed to whatever budget is left, or nothing."""
+    if not orphans or spare <= 0:
+        return ""
+    for count in range(min(len(orphans), MAX_ORPHANS_SHOWN), 0, -1):
+        line = _ORPHAN_PREFIX + ", ".join(orphans[:count])
+        if count_tokens(line) <= spare:
+            return line
+    return ""
 
 
 def _ranked(material: list[EntityChange]) -> list[EntityChange]:
@@ -156,43 +173,54 @@ def compose(repo: Repo, base: str, head: str | None, changeset: ChangeSet,
 
     summary_budget = _summary_budget(budget, count_tokens(headline))
     lines, _ = fit_lines(material, summary_budget)
+    # The blank line between headline and entities costs a token of its own, so
+    # the assembled text is what gets measured, never the sum of its parts.
+    while lines and count_tokens("\n".join([headline, "", *lines])) > budget:
+        lines.pop()
 
     # "Is this wired in?" is the first question asked of an addition. Without an
-    # answer the agent reaches for git grep or a wider diff.
+    # answer the agent reaches for git grep or a wider diff. It is budgeted like
+    # everything else: appending it unmeasured made `--budget 120` emit 211.
     orphans = unreferenced(repo, changeset) if check_references else []
-    if orphans:
-        lines.append("unreferenced (name appears nowhere else): "
-                     + ", ".join(orphans[:5]))
+    spare = budget - count_tokens("\n".join([headline, "", *lines]))
+    shown = _orphan_line(orphans, spare)
+    if shown:
+        lines.append(shown)
 
     summary = "\n".join([headline, "", *lines]) if lines else headline
+    lost_orphans = bool(orphans) and not shown
 
     if not detail:
         full_lines = rollup_lines(material, MAX_DEPTH)
         return Answer(text=summary, unreferenced=orphans, budget=budget,
-                      truncated=lines != full_lines)
+                      truncated=lines != full_lines or lost_orphans)
 
     sections: list[str] = []
     detailed: list[str] = []
     cache: dict = {}
-    spent = count_tokens(summary)
     skipped = False
+
+    def assembled(extra: str) -> str:
+        return summary + "\n\n" + "\n".join([*sections, extra])
 
     for change in _ranked(material)[:MAX_DETAILED]:
         section = _detail(repo, base, head, change, cache)
         if not section:
             continue
-        cost = count_tokens(section)
-        if spent + cost > budget:
+        # Measure the text as it will actually be emitted. Summing the parts
+        # missed the separator between them, which put one answer one token
+        # over the raw diff it promises never to exceed.
+        if count_tokens(assembled(section)) > budget:
             skipped = True
             continue  # a later, smaller entity may still fit
         sections.append(section)
         detailed.append(change.entity.id)
-        spent += cost
 
     text = summary if not sections else summary + "\n\n" + "\n".join(sections)
     full_lines = rollup_lines(material, MAX_DEPTH)
     return Answer(text=text, detailed=detailed, unreferenced=orphans,
-                  budget=budget, truncated=skipped or lines != full_lines)
+                  budget=budget,
+                  truncated=skipped or lines != full_lines or lost_orphans)
 
 
 def material_patch(repo: Repo, base: str, head: str | None,

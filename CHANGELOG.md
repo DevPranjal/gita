@@ -4,6 +4,41 @@ All notable changes to gita are recorded here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Entries are grouped by workstream (WS-*) as defined in [docs/SCOPE.md](docs/SCOPE.md).
 
+## [1.0.0] - 2026-08-22
+
+First release intended for use rather than for evaluation. Three of these were
+found by building the wheel and running it, not by the test suite.
+
+### Fixed - the budget was not a budget
+
+- **`--budget N` was exceeded whenever an addition was unreferenced.** The
+  "unreferenced (name appears nowhere else)" line is up to 133 tokens and was
+  appended *after* the budget had been spent, so `--budget 120` emitted 211. It
+  is now trimmed to whatever room is left, and dropping it counts as truncation.
+- **The answer could exceed the raw `git diff` by one token.** Cost was summed
+  per part, which missed the blank line joining the summary to the hunks. The
+  assembled text is now what gets measured. Swept across every budget from 1 to
+  400: no violations.
+- **`tiktoken` was an optional extra**, so a plain `pip install gita` produced a
+  build that counted tokens as `chars // 4` -- an estimate that undercounted 61%
+  of corpus files, making the documented hard cap a suggestion. It is now a
+  dependency. The fallback survives for exotic environments but errs high on
+  purpose: an estimate used as a cap must never guess low.
+
+### Changed
+
+- The token encoder is built on first use rather than at import, taking ~280ms
+  off every invocation that prints usage or an error and never counts a token.
+  Commands that do count are unaffected, as expected.
+
+### Added - packaging
+
+- MIT licence, `py.typed`, project URLs, classifiers, keywords and a readme
+  reference. The version is now read from the package, so it cannot drift.
+- CI covers Python 3.11, 3.12 and 3.13.
+
+- 445 tests, plus 20 corpus invariants.
+
 ## [Unreleased]
 
 ### Added — WS-4 · Context layers

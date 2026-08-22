@@ -4,23 +4,55 @@ build-backend = "hatchling.build"
 
 [project]
 name = "gita"
-version = "0.1.0"
+dynamic = ["version"]
 description = "git reimagined for a world of agent coders — context diffs, not line diffs"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
+authors = [{ name = "Pranjal Gulati" }]
+keywords = ["git", "diff", "agents", "llm", "context", "tree-sitter", "mcp"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Version Control :: Git",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
 dependencies = [
     "tree-sitter>=0.25",
     "tree-sitter-language-pack>=0.9",
+    # Budgets are a documented hard cap. Without exact counting the cap is only
+    # an estimate, so this is a dependency and not an extra.
+    "tiktoken>=0.7",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "tiktoken>=0.7", "mcp>=1.2"]
+dev = ["pytest>=8.0", "mcp>=1.2"]
 mcp = ["mcp>=1.2"]
 
 [project.scripts]
 gita = "gita.cli:main"
 
+[project.urls]
+Homepage = "https://devpranjal.github.io/gita/"
+Source = "https://github.com/DevPranjal/gita"
+Issues = "https://github.com/DevPranjal/gita/issues"
+Changelog = "https://github.com/DevPranjal/gita/blob/main/CHANGELOG.md"
+
+[tool.hatch.version]
+path = "src/gita/__init__.py"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/gita"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/gita", "tests", "README.md", "LICENSE", "CHANGELOG.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

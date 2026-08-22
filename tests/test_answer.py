@@ -169,3 +169,75 @@ class TestSmallChangesStillNameWhatChanged:
         answer = compose(repo, "HEAD^", "HEAD", changeset)
         raw = count_tokens(repo.raw_diff("HEAD^", "HEAD", changeset.paths()))
         assert answer.tokens <= raw
+
+
+class TestEveryLineIsBudgeted:
+    """The unreferenced line was appended after the budget was spent.
+
+    It is up to 133 tokens, so `gita diff --budget 120` emitted 211 -- the one
+    guarantee the design rests on, broken by a line added as an afterthought.
+    Found by installing the wheel and running it, not by the unit tests.
+    """
+
+    def repo_with_orphans(self, tmp_path):
+        def git(*args):
+            subprocess.run(["git", "-C", str(tmp_path), *args], check=True,
+                           capture_output=True)
+        (tmp_path / "m.py").write_bytes(b"def kept():\n    return 1\n")
+        git("init", "-q", "-b", "main")
+        git("config", "user.email", "t@t")
+        git("config", "user.name", "t")
+        git("add", "-A")
+        git("commit", "-q", "-m", "first")
+        body = b"def kept():\n    return 1\n"
+        for i in range(6):
+            body += (f"\n\ndef unreferenced_helper_with_a_long_name_{i}(argument):\n"
+                     f"    return argument + {i}\n").encode()
+        (tmp_path / "m.py").write_bytes(body)
+        git("add", "-A")
+        git("commit", "-q", "-m", "second")
+        return Repo(tmp_path)
+
+    @pytest.mark.parametrize("budget", [40, 60, 120, 240])
+    def test_the_budget_survives_unreferenced_additions(self, tmp_path, budget):
+        repo = self.repo_with_orphans(tmp_path)
+        changeset = diff_revisions(repo, "HEAD^", "HEAD")
+        answer = compose(repo, "HEAD^", "HEAD", changeset, budget=budget)
+        assert answer.tokens <= answer.budget
+
+    def test_the_finding_is_still_reported_when_it_fits(self, tmp_path):
+        repo = self.repo_with_orphans(tmp_path)
+        changeset = diff_revisions(repo, "HEAD^", "HEAD")
+        answer = compose(repo, "HEAD^", "HEAD", changeset, budget=DEFAULT_BUDGET)
+        assert "unreferenced" in answer.text
+
+    def test_dropping_it_is_declared_as_truncation(self, tmp_path):
+        repo = self.repo_with_orphans(tmp_path)
+        changeset = diff_revisions(repo, "HEAD^", "HEAD")
+        answer = compose(repo, "HEAD^", "HEAD", changeset, budget=40)
+        assert answer.truncated
+
+
+class TestNeverLargerThanGitAnywhere:
+    """The invariant is measured against the text actually emitted.
+
+    Summing the parts missed the blank line joining summary to sections, so one
+    answer came out a single token over the raw diff it promises never to
+    exceed. One token is still a broken promise.
+    """
+
+    def test_holds_on_this_repository(self):
+        repo = Repo(".")
+        changeset = diff_revisions(repo, "HEAD^", "HEAD")
+        raw = count_tokens(repo.raw_diff("HEAD^", "HEAD", changeset.paths()))
+        for budget in (40, 120, 400, 1200, DEFAULT_BUDGET):
+            answer = compose(repo, "HEAD^", "HEAD", changeset, budget=budget)
+            assert answer.tokens <= raw, f"budget {budget} exceeded the raw diff"
+            assert answer.tokens <= answer.budget
+
+    @pytest.mark.parametrize("budget", [1, 7, 33, 91, 512])
+    def test_awkward_budgets_are_still_respected(self, budget):
+        repo = Repo(".")
+        changeset = diff_revisions(repo, "HEAD^", "HEAD")
+        answer = compose(repo, "HEAD^", "HEAD", changeset, budget=budget)
+        assert answer.tokens <= answer.budget

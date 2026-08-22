@@ -7,7 +7,7 @@ from .entities.languages import for_path, is_supported
 from .entities.model import Entity, EntityKind, EntityTree
 from .revisions import diff_revisions
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 __all__ = [
     "ChangeKind",
