@@ -134,7 +134,12 @@ def _tokens(node, spec: LanguageSpec, skip: frozenset[int] = frozenset()) -> lis
 
 
 def _own_tokens(node, spec: LanguageSpec) -> list[str]:
-    """Leaf tokens belonging to ``node`` itself, excluding nested entities.
+    return _own_and_body(node, spec, frozenset())[0]
+
+
+def _own_and_body(node, spec: LanguageSpec,
+                  body_ids: frozenset[int]) -> tuple[list[str], list[str]]:
+    """Leaf tokens belonging to ``node`` itself, and the subset inside its body.
 
     Without this a class reports a change whenever any of its methods does, and
     the same change is counted at every level of the tree. An entity owns only
@@ -143,19 +148,27 @@ def _own_tokens(node, spec: LanguageSpec) -> list[str]:
     Children do not always tile their parent: tree-sitter gives a TOML string two
     quote children with the value in the gap between them. Taking only leaves
     dropped that gap, so a dependency version bump hashed as unchanged.
+
+    Both results come from one walk because the body is a subtree of the whole,
+    and traversing it twice was the single most expensive operation in a diff.
     """
-    out: list[str] = []
-    stack: list = [node]
+    own: list[str] = []
+    body: list[str] = []
+    stack: list = [(node, False)]
 
     while stack:
-        current = stack.pop()
+        current, in_body = stack.pop()
         if isinstance(current, str):
-            out.append(current)
+            own.append(current)
+            if in_body:
+                body.append(current)
             continue
         if current.child_count == 0:
             text = current.text.decode("utf8", "replace").strip()
             if text:
-                out.append(text)
+                own.append(text)
+                if in_body:
+                    body.append(text)
             continue
 
         raw = current.text
@@ -167,18 +180,18 @@ def _own_tokens(node, spec: LanguageSpec) -> list[str]:
             if start > cursor:
                 gap = raw[cursor:start].decode("utf8", "replace").strip()
                 if gap:
-                    items.append(gap)
+                    items.append((gap, in_body))
             if (child.type not in spec.comment_nodes
                     and child.type not in spec.entity_nodes):
-                items.append(child)
+                items.append((child, in_body or child.id in body_ids))
             cursor = child.end_byte - base
         if cursor < len(raw):
             tail = raw[cursor:].decode("utf8", "replace").strip()
             if tail:
-                items.append(tail)
+                items.append((tail, in_body))
         stack.extend(reversed(items))
 
-    return out
+    return own, body
 
 
 def _body_nodes(node, spec: LanguageSpec) -> frozenset[int]:
@@ -192,14 +205,8 @@ def _body_nodes(node, spec: LanguageSpec) -> frozenset[int]:
 
 def _make_entity(node, spec, path, name, parent_id, entity_id, kind) -> Entity:
     body = _body_nodes(node, spec)
-    own = _own_tokens(node, spec)
+    own, body_tokens = _own_and_body(node, spec, body)
     signature_tokens = _tokens(node, spec, skip=body) if body else own
-
-    body_tokens: list[str] = []
-    for field_name in spec.body_fields:
-        child = node.child_by_field_name(field_name)
-        if child is not None:
-            body_tokens += _own_tokens(child, spec)
     if not body:
         body_tokens = own
 

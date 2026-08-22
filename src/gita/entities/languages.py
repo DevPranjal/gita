@@ -25,10 +25,13 @@ class LanguageSpec:
     body_fields: tuple[str, ...] = ("body",)
     #: Child node types to read a name from, when no name field exists.
     name_children: tuple[str, ...] = ()
+    #: Derived from ``kinds``; a field rather than a property because it was
+    #: rebuilt 600,000 times per diff when the traversal asked for it per node.
+    entity_nodes: frozenset[str] = field(default=frozenset(), init=False,
+                                         compare=False, repr=False)
 
-    @property
-    def entity_nodes(self) -> frozenset[str]:
-        return frozenset(self.kinds)
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "entity_nodes", frozenset(self.kinds))
 
 
 _JS_ANON = frozenset({

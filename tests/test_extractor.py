@@ -1,5 +1,10 @@
 import pytest
 
+from tree_sitter_language_pack import get_parser
+
+from gita.entities.extractor import _body_nodes, _own_and_body, _own_tokens
+from gita.entities.languages import for_path
+
 from gita import EntityKind, extract
 
 PY = b'''
@@ -152,3 +157,63 @@ class TestEnclosing:
     def test_top_level_line_falls_back_to_module(self):
         tree = extract(PY, "store.py")
         assert tree.enclosing(2).id == "store.py"
+
+
+class TestOwnAndBodyAgree:
+    """The body tokens are a subset of the entity's own tokens.
+
+    They used to be computed by a second walk of the same subtree, which was the
+    most expensive operation in a diff. One walk yields both -- and this pins the
+    relationship so a future change cannot quietly break it.
+    """
+
+    SOURCES = [
+        ("m.py", b"class A:\n    def f(self, x):\n        y = x + 1\n        return y\n"),
+        ("m.go", b"package main\n\nfunc F(a int) int {\n\tb := a + 1\n\treturn b\n}\n"),
+        ("m.ts", b"export function f(a: number) {\n  const b = a + 1;\n  return b;\n}\n"),
+        ("m.toml", b"[tool]\nname = \"x\"\nversion = \"1.0\"\n"),
+    ]
+
+    @pytest.mark.parametrize("path,source", SOURCES)
+    def test_body_tokens_are_a_subset_of_own(self, path, source):
+        spec = for_path(path)
+        parser = get_parser(spec.name)
+        root = parser.parse(source).root_node
+
+        def walk(node):
+            yield node
+            for child in node.children:
+                yield from walk(child)
+
+        for node in walk(root):
+            if node.type not in spec.entity_nodes:
+                continue
+            body = _body_nodes(node, spec)
+            own, body_tokens = _own_and_body(node, spec, body)
+            assert set(body_tokens) <= set(own)
+
+    @pytest.mark.parametrize("path,source", SOURCES)
+    def test_one_walk_matches_two(self, path, source):
+        """What the second walk used to produce, the single walk still produces."""
+        spec = for_path(path)
+        parser = get_parser(spec.name)
+        root = parser.parse(source).root_node
+
+        def walk(node):
+            yield node
+            for child in node.children:
+                yield from walk(child)
+
+        for node in walk(root):
+            if node.type not in spec.entity_nodes:
+                continue
+            body = _body_nodes(node, spec)
+            if not body:
+                continue
+            _, single = _own_and_body(node, spec, body)
+            separate = []
+            for field_name in spec.body_fields:
+                child = node.child_by_field_name(field_name)
+                if child is not None:
+                    separate += _own_tokens(child, spec)
+            assert single == separate
