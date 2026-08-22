@@ -10,7 +10,15 @@ import difflib
 
 from ..entities.extractor import extract_path
 from ..entities.model import Entity, EntityTree
+from ..entities.store import TREES
 from ..vcs.git import Repo
+
+
+def _parse(blob: bytes, path: str) -> EntityTree | None:
+    try:
+        return extract_path(blob, path)
+    except (ValueError, RecursionError):
+        return None
 
 
 def _load(repo: Repo, rev: str | None, path: str,
@@ -28,10 +36,7 @@ def _load(repo: Repo, rev: str | None, path: str,
     result: tuple[EntityTree | None, list[str]] = (None, [])
     blob = repo.blob(rev, path)
     if blob is not None and b"\x00" not in blob[:8000]:
-        try:
-            tree = extract_path(blob, path)
-        except (ValueError, RecursionError):
-            tree = None
+        tree = TREES.get(blob, path, _parse)
         if tree is not None:
             result = (tree, blob.decode("utf8", "replace").splitlines(keepends=True))
 

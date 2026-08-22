@@ -2,7 +2,16 @@ import subprocess
 
 import pytest
 
+from gita.entities.store import TREES
 from gita.vcs.git import Repo
+
+
+@pytest.fixture(autouse=True)
+def _isolated_tree_store():
+    """A process-wide cache must not leak results between tests."""
+    TREES.clear()
+    yield
+    TREES.clear()
 
 
 @pytest.fixture

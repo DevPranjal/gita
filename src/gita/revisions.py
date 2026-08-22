@@ -8,19 +8,24 @@ from .diff.changes import ChangeSet
 from .diff.differ import RENAME_THRESHOLD, diff_trees, reconcile_moves
 from .entities.extractor import extract_path
 from .entities.model import EntityTree
+from .entities.store import TREES
 from .vcs.git import STAGED, WORKTREE, ChangedFile, Repo
 
 _BINARY_SNIFF = 8000
+
+
+def _parse(blob: bytes, path: str) -> EntityTree | None:
+    try:
+        return extract_path(blob, path)
+    except (ValueError, RecursionError):
+        return None
 
 
 def _tree_at(repo: Repo, rev: str | None, path: str) -> EntityTree | None:
     blob = repo.blob(rev, path)
     if blob is None or b"\x00" in blob[:_BINARY_SNIFF]:
         return None
-    try:
-        return extract_path(blob, path)
-    except (ValueError, RecursionError):
-        return None
+    return TREES.get(blob, path, _parse)
 
 
 def diff_revisions(repo: str | Path | Repo, base: str = "HEAD",
