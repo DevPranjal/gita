@@ -18,7 +18,8 @@ import pytest
 
 from gita import diff_revisions
 from gita.context import count_tokens
-from gita.context.answer import DEFAULT_BUDGET, compose, material_patch
+from gita.context.answer import (DEFAULT_BUDGET, MAX_DETAILED, compose,
+                                 material_patch)
 from gita.vcs.git import Repo
 
 
@@ -216,6 +217,82 @@ class TestEveryLineIsBudgeted:
         changeset = diff_revisions(repo, "HEAD^", "HEAD")
         answer = compose(repo, "HEAD^", "HEAD", changeset, budget=40)
         assert answer.truncated
+
+
+class TestAnIncompleteAnswerSaysSo:
+    """Silent truncation is what sends the agent back to raw git.
+
+    On a Flask dependency bump gita spent 2,111 of its 6,000-token budget,
+    withheld fourteen of thirty-four changes because of MAX_DETAILED, and
+    reported `truncated: False`. The agent could tell the answer had stopped
+    early, did not believe gita's claim to be complete, and recovered the only
+    way it was sure of: `git diff -- uv.lock`, 214,918 tokens. Every unit test
+    passed throughout -- none of them asked whether a cap that is not the budget
+    admits to binding.
+    """
+
+    def repo_with_many_entities(self, tmp_path, count, body_lines=1):
+        def git(*args):
+            subprocess.run(["git", "-C", str(tmp_path), *args], check=True,
+                           capture_output=True)
+        pad = "".join(f"    step_{j} = x + {j}\n" for j in range(body_lines))
+        before = "".join(f"def fn_{i}(x):\n{pad}    return x + {i}\n\n"
+                         for i in range(count))
+        (tmp_path / "m.py").write_text(before)
+        git("init", "-q", "-b", "main")
+        git("config", "user.email", "t@t")
+        git("config", "user.name", "t")
+        git("add", "-A")
+        git("commit", "-q", "-m", "first")
+        after = "".join(f"def fn_{i}(x):\n{pad}    return x * {i}\n\n"
+                        for i in range(count))
+        (tmp_path / "m.py").write_text(after)
+        git("add", "-A")
+        git("commit", "-q", "-m", "second")
+        return Repo(tmp_path)
+
+    def test_the_detail_cap_admits_to_binding(self, tmp_path):
+        """MAX_DETAILED is not the budget, so it has to declare itself."""
+        repo = self.repo_with_many_entities(tmp_path, MAX_DETAILED + 12)
+        changeset = diff_revisions(repo, "HEAD^", "HEAD")
+        answer = compose(repo, "HEAD^", "HEAD", changeset, budget=DEFAULT_BUDGET)
+        assert len(answer.detailed) <= MAX_DETAILED
+        assert answer.truncated, "withheld entities while claiming completeness"
+
+    def test_it_names_a_cheaper_next_call_than_raw_git(self, tmp_path):
+        """Naming the recovery is the point: the agent's own guess cost 214,918."""
+        repo = self.repo_with_many_entities(tmp_path, MAX_DETAILED + 12)
+        changeset = diff_revisions(repo, "HEAD^", "HEAD")
+        text = compose(repo, "HEAD^", "HEAD", changeset,
+                       budget=DEFAULT_BUDGET).text
+        assert "gita show" in text
+        assert "--filter" in text
+
+    def test_a_complete_answer_stays_quiet(self, tmp_path):
+        """A notice on every answer is noise, and would train the agent past it."""
+        repo = self.repo_with_many_entities(tmp_path, 2, body_lines=6)
+        changeset = diff_revisions(repo, "HEAD^", "HEAD")
+        answer = compose(repo, "HEAD^", "HEAD", changeset, budget=DEFAULT_BUDGET)
+        assert not answer.truncated
+        assert "gita show" not in answer.text
+
+    def test_it_does_not_offer_a_budget_that_cannot_help(self, tmp_path):
+        """The raw diff caps the budget, so raising it buys a turn and nothing else."""
+        repo = self.repo_with_many_entities(tmp_path, MAX_DETAILED + 12)
+        changeset = diff_revisions(repo, "HEAD^", "HEAD")
+        answer = compose(repo, "HEAD^", "HEAD", changeset, budget=DEFAULT_BUDGET)
+        assert answer.tokens < DEFAULT_BUDGET, "raw diff should be the cap here"
+        assert "--budget" not in answer.text
+        assert "gita show" in answer.text
+
+    @pytest.mark.parametrize("budget", [40, 80, 150, 400, 1200, 6000])
+    def test_the_notice_is_bought_with_detail_not_with_overrun(self, tmp_path,
+                                                               budget):
+        """The v1.0.0 bug was a line appended after the budget was spent."""
+        repo = self.repo_with_many_entities(tmp_path, MAX_DETAILED + 12)
+        changeset = diff_revisions(repo, "HEAD^", "HEAD")
+        answer = compose(repo, "HEAD^", "HEAD", changeset, budget=budget)
+        assert answer.tokens <= answer.budget
 
 
 class TestNeverLargerThanGitAnywhere:

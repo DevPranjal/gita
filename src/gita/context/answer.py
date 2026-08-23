@@ -122,6 +122,38 @@ def _ranked(material: list[EntityChange]) -> list[EntityChange]:
 MIN_USEFUL_DETAIL = 80
 
 
+def _notice(names_hidden: int, hunks_hidden: int = 0,
+            can_raise_budget: bool = True) -> str:
+    """Name what is missing and the cheap way to reach it.
+
+    An answer that stops early without saying so is worse than a short one: the
+    agent cannot tell a small changeset from a cut one, so it recovers with the
+    only tool it is certain of. Measured, that recovery was
+    `git diff -- <biggest file>` -- 214,918 tokens against a 6,000-token budget.
+    Saying what is missing, and which gita call reaches it, costs about twenty.
+
+    When the raw diff is what caps the answer, raising --budget cannot help, so
+    offering it would spend a turn to learn nothing.
+    """
+    parts = []
+    if names_hidden > 0:
+        parts.append(f"{names_hidden} more changed entities not listed")
+    if hunks_hidden > 0:
+        parts.append(f"code not shown for {hunks_hidden}")
+    if not parts:
+        parts.append("output cut to fit")
+    routes = "`gita show ID` for one entity, `gita diff --filter PATH` to narrow"
+    if can_raise_budget:
+        routes += ", or raise --budget"
+    return f"[{'; '.join(parts)}. {routes}]"
+
+
+def _assemble(summary: str, sections: list[str], notice: str = "") -> str:
+    """The text exactly as it will be emitted -- what the budget is measured on."""
+    text = summary if not sections else summary + "\n\n" + "\n".join(sections)
+    return text + "\n\n" + notice if notice else text
+
+
 def _summary_budget(budget: int, headline: int) -> int:
     """Naming what changed outranks showing it.
 
@@ -159,11 +191,13 @@ def compose(repo: Repo, base: str, head: str | None, changeset: ChangeSet,
     """A complete answer in one call, within budget and never costlier than git."""
     material = changeset.material()
     worktree = head is None or head == ""
+    capped_by_raw = False
 
     if respect_raw_diff and material:
         raw = repo.raw_diff(base, head, changeset.paths())
         raw_tokens = count_tokens(raw)
         if raw_tokens:
+            capped_by_raw = raw_tokens < budget
             budget = min(budget, raw_tokens)
 
     headline = fit_text(_headline(changeset, material, worktree), budget)
@@ -192,8 +226,16 @@ def compose(repo: Repo, base: str, head: str | None, changeset: ChangeSet,
 
     if not detail:
         full_lines = rollup_lines(material, MAX_DEPTH)
-        return Answer(text=summary, unreferenced=orphans, budget=budget,
-                      truncated=lines != full_lines or lost_orphans)
+        cut = lines != full_lines or lost_orphans
+        text = summary
+        if cut:
+            candidate = _assemble(summary, [],
+                                  _notice(max(0, len(full_lines) - len(lines)),
+                                          can_raise_budget=not capped_by_raw))
+            if count_tokens(candidate) <= budget:
+                text = candidate
+        return Answer(text=text, unreferenced=orphans, budget=budget,
+                      truncated=cut)
 
     sections: list[str] = []
     detailed: list[str] = []
@@ -216,11 +258,31 @@ def compose(repo: Repo, base: str, head: str | None, changeset: ChangeSet,
         sections.append(section)
         detailed.append(change.entity.id)
 
-    text = summary if not sections else summary + "\n\n" + "\n".join(sections)
     full_lines = rollup_lines(material, MAX_DEPTH)
+    names_hidden = max(0, len(full_lines) - len(lines))
+    # A cap that is not the budget must still report itself. MAX_DETAILED used
+    # to drop entities silently, so an answer could spend a third of its budget,
+    # withhold fourteen of thirty-four changes, and still claim to be complete.
+    truncated = (skipped or lost_orphans or lines != full_lines
+                 or len(_ranked(material)) > MAX_DETAILED)
+    text = _assemble(summary, sections)
+
+    if truncated:
+        # Buy the notice with detail, never by exceeding the cap: appending an
+        # unmeasured line is what made `--budget 120` emit 211 tokens in v1.0.0.
+        while True:
+            notice = _notice(names_hidden, len(material) - len(detailed),
+                             can_raise_budget=not capped_by_raw)
+            if (not sections
+                    or count_tokens(_assemble(summary, sections, notice)) <= budget):
+                break
+            sections.pop()
+            detailed.pop()
+        if count_tokens(_assemble(summary, sections, notice)) <= budget:
+            text = _assemble(summary, sections, notice)
+
     return Answer(text=text, detailed=detailed, unreferenced=orphans,
-                  budget=budget,
-                  truncated=skipped or lines != full_lines or lost_orphans)
+                  budget=budget, truncated=truncated)
 
 
 def material_patch(repo: Repo, base: str, head: str | None,

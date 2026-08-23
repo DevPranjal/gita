@@ -4,6 +4,40 @@ All notable changes to gita are recorded here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Entries are grouped by workstream (WS-*) as defined in [docs/SCOPE.md](docs/SCOPE.md).
 
+## [Unreleased]
+
+### Fixed - a cap that is not the budget must declare itself
+
+Found by reading the tool telemetry of an 18-task evaluation, not by the test
+suite, which passed 476 times throughout.
+
+- **A truncated answer did not say it was truncated.** On a Flask dependency
+  bump, gita spent 2,111 of its 6,000-token budget, withheld fourteen of
+  thirty-four changes because of `MAX_DETAILED`, and reported
+  `truncated: False`. Only the budget was treated as a reason to set the flag;
+  the detail cap dropped entities silently. The agent could tell the answer had
+  stopped early, did not believe the claim of completeness, and recovered the
+  only way it was sure of -- `git diff -- uv.lock`, **214,918 tokens** against a
+  6,000-token budget. It did this on both arms, twice.
+- **An incomplete answer now names a cheaper next call**: which entities were
+  withheld, and that `gita show ID` or `gita diff --filter PATH` will reach
+  them. The notice costs about 30 tokens. Across the gita arm of the last
+  evaluation, 87% of tool output came from falling back to raw git, so the
+  thing worth fixing was never gita's own output.
+- **The notice is bought with detail, never with overrun.** It is measured on
+  the assembled text and paid for by dropping hunks, because v1.0.0 shipped the
+  opposite mistake -- a line appended after the budget was spent.
+- **`raise --budget` is no longer offered when the raw diff is the cap.** Where
+  `budget = min(budget, raw_tokens)` binds, raising it cannot help, and the
+  advice would have cost a turn to learn nothing.
+
+### Measured, and therefore not changed
+
+- Raising `MAX_DETAILED` from 20 to 60 adds ~14% more tokens per answer and
+  moves the truncation rate not at all (49% either way), because truncation is
+  dominated by roll-up, not by the cap. It buys tokens rather than
+  completeness, so the cap stays at 20.
+
 ## [1.0.0] - 2026-08-22
 
 First release intended for use rather than for evaluation. Three of these were
