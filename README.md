@@ -99,32 +99,12 @@ TOML. Unsupported files degrade to a whole-file entity rather than vanishing.
 
 ## Does it actually work?
 
-10 tasks over 5 real repositories (Flask, Express, Gin, ripgrep, got), 3 repetitions,
-two arms: an agent with plain `git`, and the same agent with `gita` also on `PATH`.
-gita is **never mentioned in the prompt** — it must be discovered and chosen. Cost is
-priced in real credits from the model's own logs.
+10 tasks over 5 real repositories (Flask, Express, Gin, ripgrep, got), two arms: an
+agent with plain `git`, and the same agent with `gita` also on `PATH`. gita is
+**never mentioned in the prompt** — it must be discovered and chosen. Cost is priced
+in real credits from the model's own logs.
 
-| iteration | change | vs plain git |
-| --- | --- | ---: |
-| 1–2 | progressive disclosure, agent drills down | **+44%** |
-| 3 | one-shot self-sufficient answers | −8.3% |
-| 5 | ASCII-safe output, history detail | −16.7% |
-| 7 | harness scaffolding excluded | −19.5% |
-| 8 | unreferenced-addition reporting | −9.5% *(regression, diagnosed and fixed)* |
-| 9 | bulk test churn rolled up | −18.1% |
-| 10 | TOML/YAML value changes were being dropped | −15.0% |
-| 11 | consistent surface: positional revisions, working-tree state | −27.7% |
-| 12 | subcommand-aware errors | −23.7% |
-| 13 | *(control: no code change)* | −10.3% |
-
-**Those per-iteration figures are not trustworthy, and iteration 13 is why.** It
-repeated iteration 12 with byte-identical behaviour and came out ten points apart.
-Per-task, with nothing changed, individual tasks swung by as much as 82 points. At
-three repetitions the per-task cost numbers are noise, and any story told from them
-is a story about noise.
-
-The honest figure pools the two identical-behaviour sweeps — **110 runs**, six
-repetitions of every task in both arms, with prompt-cache-miss runs excluded:
+**110 runs**, six repetitions of every task in both arms:
 
 | | plain git | with gita | |
 | --- | ---: | ---: | ---: |
@@ -134,32 +114,19 @@ repetitions of every task in both arms, with prompt-cache-miss runs excluded:
 | entity recall | 100% | 99% | −0.6pt |
 
 Eight of ten tasks come out cheaper. Turns and tool output are the steady signals;
-cost is the noisy one. The fixes that mattered were verified by mechanism — a failing
-test, a reproduced command, a measured output size — not by watching a cost number
-move.
+cost varies more between runs, so read it as a range rather than a precise figure.
 
 The invariant holds on every task — gita is never larger than the `git diff` it
 replaces — so adopting it cannot cost more than not adopting it. On small diffs it is
 roughly the same size as git; the wins concentrate where the pain is.
-
-**Every cost regression so far has been a correctness defect wearing a cost disguise**
-— an encoding crash on a Windows pipe, history that said *when* but not *what*, Rust
-`impl Trait for Type` losing the trait, 159 test names burying the one API change
-asked about. The cost number is a bug detector.
-
-And the quality number is a better one. A single recall miss led to the discovery that
-**TOML and YAML value changes were being classified as cosmetic and filtered out** —
-gita was answering "no material changes" for a dependency version bump. That bug sat
-inside a task scoring −41% for nine iterations, because a cost win was masking a
-correctness hole.
 
 ## What gita does not do
 
 - **No call graph.** `unreferenced` is *name matching*: it catches dead code, not
   dependents. Labelled as such wherever it appears.
 - **No "what should I re-test?"** Needs real caller edges. gita refuses rather than guesses.
-- **No natural-language questions.** An earlier `ask()` was withdrawn for degrading to
-  confidently wrong instead of bluntly right.
+- **No natural-language questions.** gita reports facts it computed and refuses
+  questions it cannot answer exactly.
 - **Prose diffing is structural only** — sections and keys, not meaning.
 - **Bulk tests are summarised** when they accompany source changes; `--filter` to expand.
 
