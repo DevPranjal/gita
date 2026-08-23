@@ -113,8 +113,9 @@ in real credits from the model's own logs.
 | tool output per run | 35,163 | 2,689 | **−92.4%** |
 | entity recall | 100% | 99% | −0.6pt |
 
-Eight of ten tasks come out cheaper. Turns and tool output are the steady signals;
-cost varies more between runs, so read it as a range rather than a precise figure.
+Eight of ten tasks come out cheaper. The cost figure carries a **95% interval of
+−4% to −30%** — real, but imprecise, because ten tasks differ from each other far
+more than repetitions of one task do. Turns and tool output are the steady signals.
 
 The invariant holds on every task — gita is never larger than the `git diff` it
 replaces — so adopting it cannot cost more than not adopting it. On small diffs it is

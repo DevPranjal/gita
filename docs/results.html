@@ -75,11 +75,14 @@
 
   <div class="card">
     <p>
-      <strong>Turn count and tool output are the steady signals; cost varies more
-      between runs.</strong> Turns matter most, because a turn re-sends the entire
-      context. Treat the cost figure as a range rather than a precise number, and
-      read it next to recall — reported here at 99% against git's 100%, which is
-      not rounded away.
+      <strong>Turn count and tool output are the steady signals; the cost figure is
+      the imprecise one.</strong> It carries a 95% interval of −4% to −30%: real,
+      but ten tasks differ from each other far more than repetitions of one task
+      do, so the aggregate can only be resolved so far. Turns matter most anyway,
+      because a turn re-sends the entire context.
+    </p>
+    <p class="small muted">
+      Recall is reported at 99% against git's 100%, which is not rounded away.
     </p>
   </div>
 
