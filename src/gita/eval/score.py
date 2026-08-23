@@ -7,6 +7,7 @@ headline metric divides one by the other.
 
 from __future__ import annotations
 
+import random
 import statistics
 from collections import defaultdict
 
@@ -68,6 +69,66 @@ def _credit_delta(runs: list[dict]) -> float | None:
     git = totals["git"] / counts["git"]
     gita = totals["gita"] / counts["gita"]
     return (1 - gita / git) if git else None
+
+
+#: Resampling is over tasks, not runs. Tasks differ from each other far more
+#: than repetitions of the same task do, so the task is the unit of uncertainty.
+BOOTSTRAP_SAMPLES = 2000
+
+
+def _task_credits(runs: list[dict]) -> dict[str, dict[str, float]]:
+    totals: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
+    for run in runs:
+        if run.get("credits") is not None:
+            totals[run["task"]][run["arm"]].append(float(run["credits"]))
+    paired = {}
+    for task, arms in totals.items():
+        if arms.get("git") and arms.get("gita"):
+            paired[task] = {"git": _mean(arms["git"]), "gita": _mean(arms["gita"])}
+    return paired
+
+
+def _delta_of(paired: dict[str, dict[str, float]], tasks: list[str]) -> float | None:
+    """Reduction, in the same direction as everything else in `reduction`:
+    positive means gita was cheaper."""
+    git = sum(paired[t]["git"] for t in tasks)
+    gita = sum(paired[t]["gita"] for t in tasks)
+    return (1 - gita / git) if git else None
+
+
+def credit_interval(runs: list[dict],
+                    samples: int = BOOTSTRAP_SAMPLES,
+                    seed: int = 12345) -> tuple[float, float] | None:
+    """A 95% interval on the aggregate credit reduction, resampling tasks.
+
+    Ten tasks is a small sample and they are not alike, so a point estimate on
+    its own says nothing about what the harness can resolve. An interval that
+    straddles zero means the sweep did not measure an effect, however tidy the
+    headline looks.
+    """
+    paired = _task_credits(runs)
+    names = sorted(paired)
+    if len(names) < 2:
+        return None
+
+    rng = random.Random(seed)
+    deltas = []
+    for _ in range(samples):
+        drawn = [names[rng.randrange(len(names))] for _ in names]
+        delta = _delta_of(paired, drawn)
+        if delta is not None:
+            deltas.append(delta)
+    if not deltas:
+        return None
+    deltas.sort()
+    high = deltas[min(len(deltas) - 1, int(0.975 * len(deltas)))]
+    return (deltas[int(0.025 * len(deltas))], high)
+
+
+def resolution(runs: list[dict]) -> float:
+    """Half the interval width: the smallest effect worth believing."""
+    interval = credit_interval(runs)
+    return abs(interval[1] - interval[0]) / 2 if interval else 0.0
 
 
 def _cache_missed(runs: list[dict]) -> list[bool]:
@@ -176,7 +237,9 @@ def summarise_runs(runs: list[dict]) -> dict:
             if by_arm.get("git", {}).get("total_credits") and "gita" in by_arm
             else None,
             "credits_cache_clean": _credit_delta(clean),
+            "credits_interval": credit_interval(runs),
         },
+        "resolution": resolution(runs),
         "adoption_rate": adoption,
         "quality_delta": quality_delta,
         "tasks": tasks,

@@ -279,3 +279,62 @@ class TestPromptCacheMissesAreNotResults:
         summary = summarise_runs(self.runs())
         assert summary["cache_misses"] == 0
         assert summary["reduction"]["credits"] == summary["reduction"]["credits_cache_clean"]
+
+
+class TestUncertaintyIsReported:
+    """A point estimate from ten tasks is not a result, it is an anecdote.
+
+    A control sweep with byte-identical behaviour once moved the headline ten
+    points. The harness must say how much of what it reports it can actually
+    resolve, so an interval that straddles zero is visible rather than inferred.
+    """
+
+    def runs(self, per_task_delta, tasks=10, reps=3, jitter=0.0):
+        import random
+        rng = random.Random(7)
+        out = []
+        for t in range(tasks):
+            for rep in range(reps):
+                base = 40 + rng.uniform(-jitter, jitter)
+                out.append({"task": f"t{t}", "arm": "git", "recall": 1.0,
+                            "credits": base, "turns": 4, "tool_tokens": 100,
+                            "prompt_tokens": 1000, "cached_tokens": 0,
+                            "cache_creation_tokens": 10, "used_gita": False})
+                out.append({"task": f"t{t}", "arm": "gita", "recall": 1.0,
+                            "credits": base * (1 + per_task_delta), "turns": 3,
+                            "tool_tokens": 10, "prompt_tokens": 900,
+                            "cached_tokens": 0, "cache_creation_tokens": 10,
+                            "used_gita": True})
+        return out
+
+    def test_a_clear_effect_has_an_interval_that_excludes_zero(self):
+        """Reported as a reduction, so a saving is positive."""
+        summary = summarise_runs(self.runs(-0.20, jitter=4.0))
+        low, high = summary["reduction"]["credits_interval"]
+        assert low > 0, "a consistent 20% saving should not straddle zero"
+
+    def test_no_effect_produces_an_interval_containing_zero(self):
+        summary = summarise_runs(self.runs(0.0, jitter=4.0))
+        low, high = summary["reduction"]["credits_interval"]
+        assert low <= 0 <= high
+
+    def test_the_interval_brackets_the_point_estimate(self):
+        summary = summarise_runs(self.runs(-0.15, jitter=4.0))
+        low, high = summary["reduction"]["credits_interval"]
+        point = summary["reduction"]["credits"]
+        assert low <= point <= high
+
+    def test_noisy_tasks_widen_the_interval(self):
+        tight = summarise_runs(self.runs(-0.15, jitter=0.0))["reduction"]["credits_interval"]
+        loose = summarise_runs(self.runs(-0.15, jitter=25.0))["reduction"]["credits_interval"]
+        assert (loose[1] - loose[0]) >= (tight[1] - tight[0])
+
+    def test_it_reports_how_much_it_can_resolve(self):
+        """Identical tasks leave nothing to resample, so variety is the point."""
+        assert summarise_runs(self.runs(-0.15, jitter=8.0))["resolution"] > 0
+        assert summarise_runs(self.runs(-0.15, jitter=0.0))["resolution"] == 0
+
+    def test_a_single_task_is_not_given_an_interval(self):
+        """Nothing to resample across."""
+        summary = summarise_runs(self.runs(-0.15, tasks=1, jitter=4.0))
+        assert summary["reduction"]["credits_interval"] is None
