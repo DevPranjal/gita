@@ -290,3 +290,88 @@ Data decisions pending:
 - `history` now walks 20 commits *that touched the entity*, which is git's
   meaning of `-n`, not the old "look at the last 20 commits". Better answers,
   more work per query. Worth confirming against agent behaviour, not intuition.
+
+---
+
+## Iteration 14 -- a declared correction to the corpus, and where the tokens really went
+
+Two findings, one of which changes what I thought the tool's problem was.
+
+### The benchmark was penalising correct answers
+
+`flask-context-copy` scored 50% recall on *both* arms, all three repetitions.
+A task that neither arm can pass is either very hard or wrongly specified, and
+a symmetric failure is the signature of the second.
+
+The prompt asks "which test covers it?". The required strings are
+`ctx.py` and `test_greenlet_context_copying`. But that commit *deletes*
+`TestGreenletContextCopying` along with its two methods and *adds*
+`test_copy_context_thread`. The test that covers the new behaviour is the added
+one; the required string names the removed one.
+
+Both arms answered `test_copy_context_thread`, in `tests/test_reqctx.py`, and
+both went further and noted that it replaces the removed greenlet class. The
+answers were right and the answer key was wrong.
+
+Correction, to be applied after iteration 15 so the running sweep is scored
+against the file it started with:
+
+    must_mention: [copy_current_request_context, test_copy_context_thread]
+
+`ctx.py` is dropped because the prompt asks for the function, not the file.
+Both replacement strings appear in the raw `git diff` (4 and 1 occurrences) and
+in gita's answer (12 and 5), so neither arm is advantaged.
+
+Changing an answer key after seeing results is goalpost-moving, and the only
+reason it is not here is that the failure is exactly symmetric: the two arms
+produced the same identification, so no correction to this task can favour
+either one. It raises both absolute recall figures and cannot move the paired
+comparison. I am recording the reasoning rather than the edit, so the claim can
+be checked later.
+
+### 87% of the gita arm's tool output was not gita
+
+The headline said 23.5% fewer credits. The telemetry said something more useful.
+Across the 54 gita runs, gita's own calls cost 76,067 tokens and falling back to
+raw git cost 492,105 -- so the saving was won *despite* the fallbacks, and the
+thing worth optimising was never the size of gita's answers.
+
+The largest single fallback: `git diff -- uv.lock`, 214,918 tokens, on both
+arms, twice. gita had answered that changeset well. It had also used 2,111 of
+its 6,000-token budget, withheld fourteen of thirty-four changes because of
+`MAX_DETAILED`, and reported `truncated: False`.
+
+That last part is the defect. Only the budget set the truncation flag; a cap
+that was not the budget dropped entities in silence. The agent could see the
+answer had stopped early, did not believe the claim of completeness, and
+recovered with the tool it trusts. An agent that cannot trust the boundary of an
+answer will go and re-read the file, and then the careful summary above it was
+spent for nothing.
+
+So the lesson generalises past this bug: **a tool that summarises must be
+trusted about what it left out, or the summary is worthless.** Every limit that
+is not the budget has to declare itself.
+
+Fixed, with the notice bought out of detail rather than appended -- v1.0.0
+shipped the appended version and `--budget 120` emitted 211 tokens. The notice
+also stops offering `--budget` where the raw diff is the cap, since raising it
+there cannot help.
+
+Measured and rejected in the same sitting: raising `MAX_DETAILED` from 20 to 60
+adds about 14% more tokens per answer and moves the truncation rate not at all
+(49% either way), because roll-up dominates the cap. It buys tokens rather than
+completeness, so it stays at 20.
+
+### Pre-registered for iteration 15
+
+Written before the run, so the result can falsify it:
+
+1. Fallback tokens in the gita arm fall well below 492,105; the `uv.lock` and
+   `context.go` whole-file reads disappear.
+2. `flask-dependency-update` (-36%) and `gin-copy-fix` (-27%) move toward zero
+   or positive.
+3. The headline improves on 23.5% and the interval stays clear of zero.
+4. Recall does not fall: this adds information and withholds none.
+
+If fallback tokens do not move, the notice is not being read, and the change
+should be reverted rather than explained.
