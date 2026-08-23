@@ -123,3 +123,99 @@
           """Added by the evaluation harness; intentionally unused."""
           return value * 2
   note: ground truth exact by construction; the function is deliberately unwired
+
+# --- second cohort -------------------------------------------------------
+# Added to narrow the confidence interval on the cost figure. Ten tasks could
+# only resolve effects larger than roughly twenty points, because the interval
+# is set by how much tasks differ from each other rather than by repetition
+# count. More tasks is the lever; more repetitions is not.
+#
+# Every `must_mention` string below is verified to appear literally in the raw
+# `git diff` for its commit, so neither arm has an advantage in finding it.
+
+- id: flask-context-copy
+  repo: flask
+  base: 06ea505^
+  head: 06ea505
+  category: review
+  prompt: |
+    What behaviour changed here, and which test covers it? Name the function
+    and the test.
+  must_mention: [ctx.py, test_greenlet_context_copying]
+  note: small behavioural change with a matching test
+
+- id: express-accepts-charsets
+  repo: express
+  base: 6cd404e^
+  head: 6cd404e
+  category: interface
+  prompt: |
+    Which request method changed, and does the change affect callers? Name the
+    method.
+  must_mention: [acceptsCharsets, request.js]
+  note: two-file change; the method name is the whole answer
+
+- id: express-query-revalidation
+  repo: express
+  base: ae6dd37^
+  head: ae6dd37
+  category: review
+  prompt: |
+    What does this commit change about request freshness, and for which HTTP
+    method? Name the file that implements it.
+  must_mention: [request.js, fresh]
+  note: implementation plus a changelog entry; the changelog alone is not an answer
+
+- id: gin-recovery-errors
+  repo: gin
+  base: 4a3eb31^
+  head: 4a3eb31
+  category: review
+  prompt: |
+    What changed in panic recovery, and what is now recorded that was not
+    before? Name the function.
+  must_mention: [defaultHandleRecovery, Errors]
+  note: behavioural change in an error path
+
+- id: gin-pdf-renderer
+  repo: gin
+  base: 052d1a7^
+  head: 052d1a7
+  category: interface
+  prompt: |
+    What new capability does this commit add, and what is the public surface of
+    it? Name the new type and the file.
+  must_mention: [PDF, pdf.go]
+  note: new renderer across five files
+
+- id: ripgrep-index-flags
+  repo: ripgrep
+  base: 2ed0c00^
+  head: 2ed0c00
+  category: interface
+  prompt: |
+    What is being disabled, under what condition, and where is that decision
+    made? Name the struct or file involved.
+  must_mention: [LowArgs, hiargs.rs]
+  note: Rust; the condition matters as much as the list
+
+- id: got-searchparams-fix
+  repo: got
+  base: 5772bf2^
+  head: 5772bf2
+  category: review
+  prompt: |
+    What bug does this fix, and which setter is involved? Name it.
+  must_mention: [searchParams, options.ts]
+  note: TypeScript accessor pair; a getter/setter with the same name
+
+- id: got-abort-signals
+  repo: got
+  base: 74e3167^
+  head: 74e3167
+  category: locate
+  prompt: |
+    Where are abort signals handled, and what changed about that handling?
+    Name the method.
+  must_mention: [_attachAbortListener, abort]
+  note: locating a private method inside a large class
