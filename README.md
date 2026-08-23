@@ -99,23 +99,37 @@ TOML. Unsupported files degrade to a whole-file entity rather than vanishing.
 
 ## Does it actually work?
 
-10 tasks over 5 real repositories (Flask, Express, Gin, ripgrep, got), two arms: an
+18 tasks over 5 real repositories (Flask, Express, Gin, ripgrep, got), two arms: an
 agent with plain `git`, and the same agent with `gita` also on `PATH`. gita is
 **never mentioned in the prompt** — it must be discovered and chosen. Cost is priced
 in real credits from the model's own logs.
 
-**110 runs**, six repetitions of every task in both arms:
+**108 runs**, three repetitions of every task in both arms:
 
 | | plain git | with gita | |
 | --- | ---: | ---: | ---: |
-| credits per task | 36.2 | 30.6 | **−15.4%** |
-| turns per task | 3.62 | 2.78 | **−23.1%** |
-| tool output per run | 35,163 | 2,689 | **−92.4%** |
-| entity recall | 100% | 99% | −0.6pt |
+| credits per task | 46.5 | 35.5 | **−23.5%** |
+| turns per task | 3.56 | 2.70 | **−24.0%** |
+| entity recall | 96% | 97% | +0.9pt |
+| tool output per run | 10,478 | 10,522 | **+0.4%** |
 
-Eight of ten tasks come out cheaper. The cost figure carries a **95% interval of
-−4% to −30%** — real, but imprecise, because ten tasks differ from each other far
-more than repetitions of one task do. Turns and tool output are the steady signals.
+The cost figure carries a **95% interval of −6% to −39%**, bootstrapped over tasks.
+Discarding the 16 runs that lost the prompt cache — noise priced at 12.5×, unrelated
+to either tool — gives **−16.7% on a tighter interval of −6% to −27%**. Treat −16.7%
+as the number, and −23.5% as the same result before the noisiest runs are removed.
+
+Two earlier claims did not survive the corpus growing from 10 tasks to 18. They are
+corrected here rather than quietly dropped:
+
+- **Tool output was published as −92.4%. On 18 tasks it is +0.4% — no difference at
+  all.** That figure had been carried by one lockfile task, and it collapsed once the
+  corpus was large enough to dilute it. gita's own output is small; the agent then
+  spends the savings falling back to raw `git`, which is the real problem and is
+  being worked on.
+- **The headline was published as −15.4%.** The point estimate compared arm totals
+  while the interval beside it paired by task. On a balanced sweep those agree
+  exactly, which is how the discrepancy survived fourteen sweeps. Paired, those same
+  runs read −17.9%.
 
 The invariant holds on every task — gita is never larger than the `git diff` it
 replaces — so adopting it cannot cost more than not adopting it. On small diffs it is

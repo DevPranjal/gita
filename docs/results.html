@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>gita — evaluation results</title>
-<meta name="description" content="gita measured against a live coding agent across ten tasks and five real repositories, including what the numbers cannot support." />
+  <meta name="description" content="gita measured against a live coding agent across eighteen tasks and five real repositories, including the claims the numbers stopped supporting." />
 <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
@@ -21,9 +21,9 @@
 
   <h1>Does it actually work?</h1>
   <p class="lede" style="margin-top:14px">
-    Ten tasks across Flask, Express, Gin, ripgrep and got. Two arms: a coding agent
-    with plain <code>git</code>, and the same agent with <code>gita</code> also on
-    <code>PATH</code>. <strong>gita is never mentioned in the prompt</strong> — it
+    Eighteen tasks across Flask, Express, Gin, ripgrep and got. Two arms: a coding
+    agent with plain <code>git</code>, and the same agent with <code>gita</code> also
+    on <code>PATH</code>. <strong>gita is never mentioned in the prompt</strong> — it
     has to be discovered and chosen, or it does not count.
   </p>
 
@@ -31,17 +31,42 @@
 
   <table>
     <tr><th>measure</th><th style="text-align:right">plain git</th><th style="text-align:right">with gita</th></tr>
-    <tr><td>credits per task</td><td class="num">36.2</td><td class="num win">30.6 &nbsp; −15%</td></tr>
-    <tr><td>turns per task</td><td class="num">3.62</td><td class="num win">2.78 &nbsp; −23%</td></tr>
-    <tr><td>tool output per run</td><td class="num">35,163</td><td class="num win">2,689 &nbsp; −92%</td></tr>
-    <tr><td>entity recall</td><td class="num">100%</td><td class="num">99%</td></tr>
-    <tr><td>adoption, unprompted</td><td class="num dim">—</td><td class="num">98%</td></tr>
+    <tr><td>credits per task</td><td class="num">46.5</td><td class="num win">35.5 &nbsp; −23%</td></tr>
+    <tr><td>turns per task</td><td class="num">3.56</td><td class="num win">2.70 &nbsp; −24%</td></tr>
+    <tr><td>entity recall</td><td class="num">96%</td><td class="num">97%</td></tr>
+    <tr><td>tool output per run</td><td class="num">10,478</td><td class="num dim">10,522 &nbsp; +0.4%</td></tr>
+    <tr><td>adoption, unprompted</td><td class="num dim">—</td><td class="num">100%</td></tr>
   </table>
 
   <p class="small muted" style="margin-top:12px">
-    110 runs — six repetitions of every task in both arms. Eight of ten tasks come
-    out cheaper.
+    108 runs — three repetitions of every task in both arms. The cost figure carries a
+    95% interval of −6% to −39%, bootstrapped over tasks. Dropping the 16 runs that
+    lost the prompt cache — noise priced at 12.5×, unrelated to either tool — gives
+    −16.7% on a tighter interval of −6% to −27%. Treat −16.7% as the number.
   </p>
+
+  <p class="section-h">two claims that did not survive more data</p>
+
+  <div class="card">
+    <p style="margin-top:0">
+      This page previously reported <strong>tool output −92%</strong>, from ten tasks.
+      On eighteen it is <strong>+0.4% — no difference at all</strong>. That figure had
+      been carried by a single lockfile task and it collapsed once the corpus was large
+      enough to dilute it. gita's own output is small; the agent then spends the saving
+      falling back to raw <code>git</code>, which is the real problem and is being
+      worked on.
+    </p>
+    <p>
+      It also reported <strong>−15.4%</strong> as the headline. That point estimate
+      compared arm totals while the interval printed beside it paired by task. On a
+      balanced sweep the two agree exactly, which is how the discrepancy survived
+      fourteen sweeps. Paired, those same runs read −17.9%.
+    </p>
+    <p class="small muted" style="margin-bottom:0">
+      Both corrections are recorded rather than quietly dropped, because a benchmark
+      that only ever revises upward is not a benchmark.
+    </p>
+  </div>
 
   <p class="section-h">how it is measured</p>
 
@@ -75,14 +100,21 @@
 
   <div class="card">
     <p>
-      <strong>Turn count and tool output are the steady signals; the cost figure is
-      the imprecise one.</strong> It carries a 95% interval of −4% to −30%: real,
-      but ten tasks differ from each other far more than repetitions of one task
-      do, so the aggregate can only be resolved so far. Turns matter most anyway,
-      because a turn re-sends the entire context.
+      <strong>Turn count is the steady signal; the cost figure is the imprecise
+      one.</strong> Cost carries a 95% interval of −6% to −27% after cache-noise is
+      removed — real, but eighteen tasks differ from each other far more than
+      repetitions of one task do, so the aggregate can only be resolved so far.
+      Turns matter most anyway, because a turn re-sends the entire context.
+    </p>
+    <p>
+      <strong>Tool output is no longer a signal at all.</strong> It was, on ten
+      tasks; on eighteen the two arms are level. Reporting it as a win would mean
+      keeping a number that stopped being true when the sample grew.
     </p>
     <p class="small muted">
-      Recall is reported at 99% against git's 100%, which is not rounded away.
+      Recall is 96% for git and 97% for gita. Both are held down by one task whose
+      answer key demands the name of a test the commit deletes; both arms answer it
+      the same way, so the comparison is unaffected and the key is being corrected.
     </p>
   </div>
 

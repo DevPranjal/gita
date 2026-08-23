@@ -56,19 +56,18 @@ def _mean(values: list[float]) -> float:
 
 
 def _credit_delta(runs: list[dict]) -> float | None:
-    """Paired credit difference over whichever runs are given."""
-    totals: dict[str, float] = {"git": 0.0, "gita": 0.0}
-    counts: dict[str, int] = {"git": 0, "gita": 0}
-    for run in runs:
-        arm = run["arm"]
-        if arm in totals:
-            totals[arm] += run.get("credits", 0.0)
-            counts[arm] += 1
-    if not counts["git"] or not counts["gita"]:
-        return None
-    git = totals["git"] / counts["git"]
-    gita = totals["gita"] / counts["gita"]
-    return (1 - gita / git) if git else None
+    """Paired credit reduction: per-task means first, then aggregate.
+
+    A ratio of arm totals is only the same quantity when both arms ran every
+    task the same number of times. Dropping cache misses breaks that -- 44 git
+    runs against 48 gita ones -- and the totals ratio then reported 9.1% where
+    the paired figure was 16.8%. The interval is bootstrapped over tasks, so the
+    point estimate has to be paired over tasks too, or the headline and its
+    uncertainty describe different things.
+    """
+    paired = _task_credits(runs)
+    names = sorted(paired)
+    return _delta_of(paired, names) if names else None
 
 
 #: Resampling is over tasks, not runs. Tasks differ from each other far more
@@ -232,10 +231,7 @@ def summarise_runs(runs: list[dict]) -> dict:
                               / by_arm["git"]["total_billed_tokens"])
             if by_arm.get("git", {}).get("total_billed_tokens") and "gita" in by_arm
             else None,
-            "credits": (1 - by_arm["gita"]["total_credits"]
-                        / by_arm["git"]["total_credits"])
-            if by_arm.get("git", {}).get("total_credits") and "gita" in by_arm
-            else None,
+            "credits": _credit_delta(runs),
             "credits_cache_clean": _credit_delta(clean),
             "credits_interval": credit_interval(runs),
         },

@@ -338,3 +338,54 @@ class TestUncertaintyIsReported:
         """Nothing to resample across."""
         summary = summarise_runs(self.runs(-0.15, tasks=1, jitter=4.0))
         assert summary["reduction"]["credits_interval"] is None
+
+
+class TestTheHeadlineAndItsIntervalAreTheSameQuantity:
+    """The point estimate was a ratio of arm totals; the interval pairs by task.
+
+    On a balanced sweep the two agree exactly, which is why fourteen of them went
+    by without the difference showing. Dropping cache misses unbalances the arms
+    -- 44 git runs against 48 gita ones -- and there the totals ratio read 9.1%
+    where the paired figure read 16.8%. A headline and an interval that describe
+    different quantities cannot both be reported as one result.
+    """
+
+    def runs(self, drop: int = 0) -> list[dict]:
+        """Two tasks of very different cost, so unbalancing them shifts a total."""
+        out = []
+        for task, cost in (("cheap", 10.0), ("expensive", 200.0)):
+            for arm in ("git", "gita"):
+                for rep in range(3):
+                    out.append({
+                        "task": task, "arm": arm, "recall": 1.0,
+                        "used_gita": arm == "gita",
+                        "credits": cost * (0.8 if arm == "gita" else 1.0),
+                        "turns": 3, "tool_tokens": 10, "prompt_tokens": 1000,
+                        "cached_tokens": 0, "cache_creation_tokens": 10,
+                    })
+        # Remove git runs of the expensive task: totals now compare unlike sets.
+        for _ in range(drop):
+            out.remove(next(r for r in out
+                            if r["arm"] == "git" and r["task"] == "expensive"))
+        return out
+
+    def test_balanced_arms_agree(self):
+        assert summarise_runs(self.runs())["reduction"]["credits"] == pytest.approx(0.2)
+
+    @pytest.mark.parametrize("drop", [1, 2])
+    def test_the_estimate_survives_unbalanced_arms(self, drop):
+        """Every task saved 20%, so the aggregate is 20% however runs are lost."""
+        reduction = summarise_runs(self.runs(drop))["reduction"]["credits"]
+        assert reduction == pytest.approx(0.2), "arm totals compared unlike sets"
+
+    @pytest.mark.parametrize("drop", [0, 1, 2])
+    def test_the_interval_still_brackets_the_point_estimate(self, drop):
+        summary = summarise_runs(self.runs(drop))
+        low, high = summary["reduction"]["credits_interval"]
+        assert low <= summary["reduction"]["credits"] <= high
+
+    def test_the_cache_clean_figure_uses_the_same_estimator(self):
+        """It is computed on a filtered subset, which is exactly when arms unbalance."""
+        summary = summarise_runs(self.runs())
+        assert (summary["reduction"]["credits"]
+                == pytest.approx(summary["reduction"]["credits_cache_clean"]))

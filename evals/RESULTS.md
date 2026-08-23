@@ -446,4 +446,94 @@ repetitions per task per arm:
 | recall | 100% | 99% | -0.6pt |
 
 Eight of ten tasks cheaper. **Turns and tool output are the stable results; cost
-is the noisy one.** Published figures now use the pooled number.
+is the noisy one.**
+
+> **Superseded by iteration 14.** Two of these figures did not survive the corpus
+> growing to 18 tasks: `-92.4%` tool output is withdrawn (it reads `+0.4%`), and
+> `-15.4%` was computed with an estimator that did not match its own interval
+> (paired, it reads `-17.9%`). See the iteration 14 section at the end of this
+> file. The sentence above is left as written, because a record that edits its
+> own past claims cannot be used to check them.
+
+---
+
+## Iteration 14 -- 18 tasks, and two published claims withdrawn
+
+`evals/runs/20260823-141818` -- 108 runs, 18 tasks, 3 repetitions per arm,
+balanced 54/54. Measures v1.0.0: the only commit between this sweep and the tag
+touched `evals/tasks.yaml`.
+
+The corpus was doubled because the interval, not the point estimate, is what
+ten tasks could not deliver. Resampling is over tasks, so repetitions cannot
+narrow it; only more tasks can.
+
+| | git | gita | |
+| --- | ---: | ---: | ---: |
+| credits / task | 46.5 | **35.5** | **-23.5%** |
+| turns / task | 3.56 | **2.70** | **-24.0%** |
+| recall | 96.3% | **97.2%** | +0.9pt |
+| tool output / run | 10,478 | 10,522 | **+0.4%** |
+
+95% interval **[6.0%, 38.9%]**. Dropping the 16 runs that lost the prompt cache
+gives **16.7%** on **[6.2%, 26.5%]** -- half-width 10.2 points against 12.9 on
+the ten-task basis. The interval excludes zero on both readings, which is the
+first time that has happened at this scale. Adoption 100%.
+
+### Withdrawn: tool output -92.4%
+
+On ten tasks the arms read 35,163 against 2,689. On eighteen they read 10,478
+against 10,522 -- **no difference at all.**
+
+The old figure was carried by one task. `flask-dependency-update` contains a
+214,918-token `uv.lock` diff, and at one task in ten that single number set the
+mean. At one in eighteen it is diluted, and by iteration 14 the gita arm was
+reading that lockfile too.
+
+That is the more useful half of the finding. Across the 54 gita runs, gita's own
+calls cost 76,067 tokens and falling back to raw git cost 492,105: **87% of the
+gita arm's tool output was not gita.** The saving was won despite the fallbacks.
+
+A claim that holds on ten samples and vanishes on eighteen was never a property
+of the tool; it was a property of the sample. It is withdrawn rather than
+restated on the corpus where it still looks good.
+
+### Corrected: the headline was not the quantity its interval described
+
+`reduction.credits` compared arm totals. `credit_interval` pairs by task. On a
+balanced sweep the two agree to four decimal places, which is how the difference
+survived fourteen sweeps unnoticed.
+
+It shows up as soon as the arms are unbalanced -- which is exactly what dropping
+cache misses does. On the 92 cache-clean runs of this sweep, 44 git against 48
+gita, the totals ratio read **9.1%** where the paired figure read **16.8%**. On
+a synthetic case with two tasks of unequal cost it reads **-119%** where the
+truth is **+20%**.
+
+Both now use the paired estimator. Re-scoring all fourteen previous sweeps
+reproduces every historical figure exactly -- it9 18.10%, it11 27.69%, it12
+23.74%, it13 control 5.40% -- because all of them were balanced. The only figure
+that moves is the published one, which was computed on a cache-filtered subset:
+
+| | published | corrected |
+| --- | ---: | ---: |
+| it12+it13 pooled, cache-clean | -15.4% | **-17.9%** |
+
+The interval [4.3%, 30.1%], the turn counts and the tool-output figures all
+reproduce exactly; only the point estimate moves, because only it used the wrong
+estimator. The correction is in gita's favour, which is why it is stated with
+its mechanism and a test that fails without it rather than simply applied.
+
+### Standing corrections
+
+| claim | status |
+| --- | --- |
+| credits -15.4% | superseded: **-16.7%**, [6.2%, 26.5%], 18 tasks |
+| turns -23.1% | holds: **-24.0%** on 18 tasks |
+| tool output -92.4% | **withdrawn**: +0.4% on 18 tasks |
+| recall 100% / 99% | now 96% / 97%, both depressed by one miscalibrated key |
+
+`flask-context-copy` scores 50% on both arms because its answer key demands
+`test_greenlet_context_copying`, a test that commit *deletes*; the test that
+covers the new behaviour is `test_copy_context_thread`, which it adds. Both arms
+name the right one. The key is corrected after the sweep now running, so that
+run is scored against the file it started with.
