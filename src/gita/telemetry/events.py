@@ -22,6 +22,7 @@ ENV_SINK = "GITA_TELEMETRY"
 ENV_SESSION = "GITA_SESSION"
 ENV_TASK = "GITA_TASK"
 ENV_ARM = "GITA_ARM"
+ENV_VIA = "GITA_VIA"
 
 #: Which layer each tool exposes, for the drill-depth metric.
 TOOL_LAYER = {
@@ -43,8 +44,35 @@ def sink_path(path: str | Path | None = None) -> Path | None:
     return Path(target) if target else None
 
 
+def _cwd() -> str:
+    try:
+        return os.getcwd()
+    except OSError:  # pragma: no cover - a deleted working directory
+        return ""
+
+
 def session_id() -> str:
     return os.environ.get(ENV_SESSION) or _PROCESS_SESSION
+
+
+def caller() -> str:
+    """Who is driving this call.
+
+    Usage is only interesting once you can separate what an agent did from what
+    you did by hand. A launcher that knows the answer sets ``GITA_VIA``;
+    otherwise it is inferred from the markers the host leaves in the environment.
+    """
+    explicit = os.environ.get(ENV_VIA)
+    if explicit:
+        return explicit
+    if any(key.startswith(("COPILOT_", "GH_COPILOT", "GITHUB_COPILOT"))
+           for key in os.environ):
+        return "copilot-cli"
+    if (os.environ.get("TERM_PROGRAM") == "vscode"
+            or "VSCODE_GIT_IPC_HANDLE" in os.environ
+            or "VSCODE_INJECTION" in os.environ):
+        return "vscode"
+    return "shell"
 
 
 def record(event: dict, path: str | Path | None = None) -> bool:
@@ -62,6 +90,8 @@ def record(event: dict, path: str | Path | None = None) -> bool:
         payload.setdefault("task", os.environ[ENV_TASK])
     if ENV_ARM in os.environ:
         payload.setdefault("arm", os.environ[ENV_ARM])
+    payload.setdefault("via", caller())
+    payload.setdefault("cwd", _cwd())
     payload.setdefault("layer", TOOL_LAYER.get(str(payload.get("tool", ""))))
 
     try:

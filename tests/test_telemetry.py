@@ -7,8 +7,11 @@ is allowed to claim.
 from __future__ import annotations
 
 import json
+import os
 
 import pytest
+
+from gita.telemetry import events
 
 from gita.telemetry import load_events, record, summarise
 
@@ -236,3 +239,40 @@ class TestCliEmitsTelemetry:
 
         monkeypatch.delenv("GITA_TELEMETRY", raising=False)
         assert main(["-C", str(repo.root), "diff"], out=io.StringIO()) == 0
+
+
+class TestCallerAttribution:
+    """Usage is only interesting once agent calls can be told from manual ones."""
+
+    def test_an_explicit_marker_wins(self, monkeypatch):
+        monkeypatch.setenv("GITA_VIA", "vscode-mcp")
+        assert events.caller() == "vscode-mcp"
+
+    def test_copilot_cli_is_recognised(self, monkeypatch):
+        monkeypatch.delenv("GITA_VIA", raising=False)
+        monkeypatch.setenv("COPILOT_AGENT_ID", "x")
+        assert events.caller() == "copilot-cli"
+
+    def test_vscode_is_recognised(self, monkeypatch):
+        monkeypatch.delenv("GITA_VIA", raising=False)
+        for key in list(os.environ):
+            if key.startswith(("COPILOT_", "GH_COPILOT", "GITHUB_COPILOT")):
+                monkeypatch.delenv(key, raising=False)
+        monkeypatch.setenv("TERM_PROGRAM", "vscode")
+        assert events.caller() == "vscode"
+
+    def test_a_plain_shell_is_the_default(self, monkeypatch):
+        for key in list(os.environ):
+            if key.startswith(("COPILOT_", "GH_COPILOT", "GITHUB_COPILOT", "VSCODE_")):
+                monkeypatch.delenv(key, raising=False)
+        monkeypatch.delenv("GITA_VIA", raising=False)
+        monkeypatch.delenv("TERM_PROGRAM", raising=False)
+        assert events.caller() == "shell"
+
+    def test_every_event_carries_who_and_where(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("GITA_VIA", "test-harness")
+        sink = tmp_path / "usage.jsonl"
+        events.record({"arm": "gita", "tool": "diff", "output_tokens": 10}, path=sink)
+        written = json.loads(sink.read_text(encoding="utf8").strip())
+        assert written["via"] == "test-harness"
+        assert written["cwd"]
