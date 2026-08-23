@@ -141,7 +141,11 @@
   prompt: |
     What behaviour changed here, and which test covers it? Name the function
     and the test.
-  must_mention: [ctx.py, test_greenlet_context_copying]
+  must_mention: [copy_current_request_context, test_copy_context_thread]
+  # Corrected after iteration 14. The key demanded test_greenlet_context_copying,
+  # a test this commit deletes; the test that covers the new behaviour is the one
+  # it adds. Both arms named the added test and both were marked down, so the
+  # failure was symmetric and no correction to it can favour either arm.
   note: small behavioural change with a matching test
 
 - id: express-accepts-charsets

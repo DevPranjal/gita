@@ -31,18 +31,18 @@
 
   <table>
     <tr><th>measure</th><th style="text-align:right">plain git</th><th style="text-align:right">with gita</th></tr>
-    <tr><td>credits per task</td><td class="num">46.5</td><td class="num win">35.5 &nbsp; −23%</td></tr>
-    <tr><td>turns per task</td><td class="num">3.56</td><td class="num win">2.70 &nbsp; −24%</td></tr>
-    <tr><td>entity recall</td><td class="num">96%</td><td class="num">97%</td></tr>
-    <tr><td>tool output per run</td><td class="num">10,478</td><td class="num dim">10,522 &nbsp; +0.4%</td></tr>
+    <tr><td>credits per task</td><td class="num">43.7</td><td class="num win">35.3 &nbsp; −14%</td></tr>
+    <tr><td>turns per task</td><td class="num">3.51</td><td class="num win">2.76 &nbsp; −21%</td></tr>
+    <tr><td>entity recall</td><td class="num">99.5%</td><td class="num">99.7%</td></tr>
     <tr><td>adoption, unprompted</td><td class="num dim">—</td><td class="num">100%</td></tr>
   </table>
 
   <p class="small muted" style="margin-top:12px">
-    108 runs — three repetitions of every task in both arms. The cost figure carries a
-    95% interval of −6% to −39%, bootstrapped over tasks. Dropping the 16 runs that
-    lost the prompt cache — noise priced at 12.5×, unrelated to either tool — gives
-    −16.7% on a tighter interval of −6% to −27%. Treat −16.7% as the number.
+    216 runs across two sweeps. The cost figure is quoted after discarding runs that
+    lost the prompt cache — noise priced at 12.5×, unrelated to either tool — and
+    carries a 95% interval of −3% to −25%, bootstrapped over tasks. The two sweeps
+    read −16.7% and −11.2% on their own and cannot be told apart by this harness, so
+    they are pooled and both are shown rather than the better one being picked.
   </p>
 
   <p class="section-h">two claims that did not survive more data</p>
@@ -50,11 +50,10 @@
   <div class="card">
     <p style="margin-top:0">
       This page previously reported <strong>tool output −92%</strong>, from ten tasks.
-      On eighteen it is <strong>+0.4% — no difference at all</strong>. That figure had
-      been carried by a single lockfile task and it collapsed once the corpus was large
-      enough to dilute it. gita's own output is small; the agent then spends the saving
-      falling back to raw <code>git</code>, which is the real problem and is being
-      worked on.
+      On eighteen it read <strong>+0.4%</strong>, and pooled across two sweeps it reads
+      −46%. A number that swings that far with the sample is not measuring the tool,
+      so it is no longer a headline claim. The original figure had been carried by a
+      single lockfile task.
     </p>
     <p>
       It also reported <strong>−15.4%</strong> as the headline. That point estimate
@@ -62,9 +61,14 @@
       balanced sweep the two agree exactly, which is how the discrepancy survived
       fourteen sweeps. Paired, those same runs read −17.9%.
     </p>
+    <p>
+      One benchmark task was corrected too: its answer key demanded the name of a test
+      that the commit <em>deletes</em>. Both arms named the added test and both were
+      marked down, so the fix moves both from 50% to 100% and cannot favour either.
+    </p>
     <p class="small muted" style="margin-bottom:0">
-      Both corrections are recorded rather than quietly dropped, because a benchmark
-      that only ever revises upward is not a benchmark.
+      All three are recorded rather than quietly dropped, because a benchmark that only
+      ever revises upward is not a benchmark.
     </p>
   </div>
 
@@ -101,20 +105,21 @@
   <div class="card">
     <p>
       <strong>Turn count is the steady signal; the cost figure is the imprecise
-      one.</strong> Cost carries a 95% interval of −6% to −27% after cache-noise is
+      one.</strong> Cost carries a 95% interval of −3% to −25% after cache-noise is
       removed — real, but eighteen tasks differ from each other far more than
       repetitions of one task do, so the aggregate can only be resolved so far.
       Turns matter most anyway, because a turn re-sends the entire context.
     </p>
     <p>
-      <strong>Tool output is no longer a signal at all.</strong> It was, on ten
-      tasks; on eighteen the two arms are level. Reporting it as a win would mean
-      keeping a number that stopped being true when the sample grew.
+      <strong>Tool output is not reported as a headline.</strong> It read −92% on
+      ten tasks, +0.4% on eighteen, and −46% pooled across two sweeps. A number
+      that swings that far with the sample is measuring the sample, not the tool.
     </p>
     <p class="small muted">
-      Recall is 96% for git and 97% for gita. Both are held down by one task whose
-      answer key demands the name of a test the commit deletes; both arms answer it
-      the same way, so the comparison is unaffected and the key is being corrected.
+      Recall is 99.5% for git and 99.7% for gita, after correcting one task whose
+      answer key demanded the name of a test its commit deletes. Both arms had
+      named the added test and both were marked down, so the fix moves both from
+      50% to 100% and leaves the comparison unchanged.
     </p>
   </div>
 

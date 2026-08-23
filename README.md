@@ -104,32 +104,39 @@ agent with plain `git`, and the same agent with `gita` also on `PATH`. gita is
 **never mentioned in the prompt** — it must be discovered and chosen. Cost is priced
 in real credits from the model's own logs.
 
-**108 runs**, three repetitions of every task in both arms:
+**216 runs** across two sweeps, three repetitions of every task in each:
 
 | | plain git | with gita | |
 | --- | ---: | ---: | ---: |
-| credits per task | 46.5 | 35.5 | **−23.5%** |
-| turns per task | 3.56 | 2.70 | **−24.0%** |
-| entity recall | 96% | 97% | +0.9pt |
-| tool output per run | 10,478 | 10,522 | **+0.4%** |
+| credits per task | 43.7 | 35.3 | **−14.3%** |
+| turns per task | 3.51 | 2.76 | **−21.4%** |
+| entity recall | 99.5% | 99.7% | +0.2pt |
 
-The cost figure carries a **95% interval of −6% to −39%**, bootstrapped over tasks.
-Discarding the 16 runs that lost the prompt cache — noise priced at 12.5×, unrelated
-to either tool — gives **−16.7% on a tighter interval of −6% to −27%**. Treat −16.7%
-as the number, and −23.5% as the same result before the noisiest runs are removed.
+The cost figure is quoted after discarding the runs that lost the prompt cache —
+noise priced at 12.5×, unrelated to either tool — and carries a **95% interval of
+−3% to −25%**, bootstrapped over tasks. The two sweeps read −16.7% and −11.2%
+individually and **cannot be told apart** by this harness (the interval on their
+difference is −9 to +26 points), so they are pooled and both are shown rather
+than the better one being picked.
 
-Two earlier claims did not survive the corpus growing from 10 tasks to 18. They are
-corrected here rather than quietly dropped:
+Tool output is **not** reported as a headline. It reads −46% pooled, but it read
+−92% on ten tasks and **+0.4%** on eighteen — a number that swings that far with
+the sample is not measuring the tool.
 
-- **Tool output was published as −92.4%. On 18 tasks it is +0.4% — no difference at
-  all.** That figure had been carried by one lockfile task, and it collapsed once the
-  corpus was large enough to dilute it. gita's own output is small; the agent then
-  spends the savings falling back to raw `git`, which is the real problem and is
-  being worked on.
-- **The headline was published as −15.4%.** The point estimate compared arm totals
-  while the interval beside it paired by task. On a balanced sweep those agree
-  exactly, which is how the discrepancy survived fourteen sweeps. Paired, those same
+Two earlier claims did not survive more data, and are corrected here rather than
+quietly dropped:
+
+- **Tool output was published as −92.4%.** It was carried by one lockfile task
+  and collapsed once the corpus was large enough to dilute it. Withdrawn as a
+  headline claim.
+- **The headline was published as −15.4%.** The point estimate compared arm
+  totals while the interval beside it paired by task. On a balanced sweep those
+  agree exactly, which is how it survived fourteen sweeps. Paired, those same
   runs read −17.9%.
+
+One benchmark task was also corrected: its answer key demanded the name of a test
+that the commit *deletes*. Both arms named the added test and both were marked
+down, so the fix moves both from 50% to 100% and cannot favour either.
 
 The invariant holds on every task — gita is never larger than the `git diff` it
 replaces — so adopting it cannot cost more than not adopting it. On small diffs it is

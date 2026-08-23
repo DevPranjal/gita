@@ -537,3 +537,96 @@ its mechanism and a test that fails without it rather than simply applied.
 covers the new behaviour is `test_copy_context_thread`, which it adds. Both arms
 name the right one. The key is corrected after the sweep now running, so that
 run is scored against the file it started with.
+
+---
+
+## Iteration 15 -- the predictions failed, and two of them should never have been made
+
+`evals/runs/20260823-164125` -- 108 runs, same 18 tasks, measuring v1.0.0 plus
+the truncation notice.
+
+| prediction, written before the run | outcome |
+| --- | --- |
+| 1. fallback tokens fall well below 492,105 | **met** -- 334,505, down 32% |
+| 2. the two regressing tasks move toward positive | **failed** -- both worse |
+| 3. headline improves on 23.5%, interval clear of zero | **failed** -- 14.1%, [-3.2%, 28.8%] |
+| 4. recall does not fall | **failed**, narrowly -- 97.2% to 96.6% |
+
+One of four. The pre-registered revert condition was "if fallback tokens do not
+move, revert rather than explain" -- they moved, so the change stands. But three
+failures deserve better than a shrug.
+
+### Which arm moved
+
+| | it14 | it15 |
+| --- | ---: | ---: |
+| git arm, credits/task | 46.5 | 40.9 (-12.1%) |
+| gita arm, credits/task | 35.5 | 35.1 (-1.3%) |
+
+The change cannot touch the git arm: gita is not on `PATH` there. The baseline
+moved twelve points and the arm I actually modified moved one. Bootstrapping the
+difference between the two sweeps over tasks gives **[-9.1, +26.3] points** --
+they are indistinguishable.
+
+So the headline did not fall because the notice hurt. It fell because the
+baseline wandered, which is what a control sweep already said it does.
+
+### The design error
+
+Predictions 2 and 3 were unmeasurable when I wrote them.
+
+After iteration 13 I recorded: *"this fix took the task from +41% to -17%" is
+not a claim three repetitions can support.* Then I pre-registered a per-task
+prediction and a cross-sweep headline prediction -- exactly that claim, twice.
+
+Pre-registration does not make a quantity measurable. It only stops you moving
+the goalposts afterwards. A prediction the harness cannot resolve fails or
+succeeds by coin-flip and teaches nothing either way, and dressing it up as a
+falsifiable hypothesis makes noise look like evidence in whichever direction it
+lands. Prediction 1 was the only honest one, because tool telemetry is counted
+directly rather than inferred through a noisy price.
+
+**What the harness needs to answer "did this change help?":** both versions of
+gita inside a single sweep, interleaved and sharing the baseline arm. Comparing
+one sweep's headline to another's is measuring the weather.
+
+### Verdict
+
+The change stays. Not because the numbers endorsed it -- they cannot resolve it
+-- but because it fixes a defect that was established without the eval: a cap
+that was not the budget dropped fourteen of thirty-four changes while reporting
+`truncated: False`. Silent truncation is wrong at any price. The eval's job was
+to catch a cost regression, and it found none: the gita arm is flat.
+
+### The corpus correction, applied
+
+`flask-context-copy` now requires `copy_current_request_context` and
+`test_copy_context_thread`. Re-scoring the stored answers:
+
+| | old key | corrected |
+| --- | ---: | ---: |
+| git, both sweeps | 50% | 100% |
+| gita, both sweeps | 50% | 100% |
+
+Identical on both arms in both sweeps, which is the evidence that the correction
+cannot favour either. Overall recall becomes 99.5% git, 99.7% gita.
+
+### Published basis: pooled, 216 runs
+
+The two sweeps are indistinguishable and differ by a thirty-token notice, so
+they are pooled rather than choosing between them -- and both components are
+published so the choice can be checked.
+
+| | git | gita | |
+| --- | ---: | ---: | ---: |
+| credits / task | 43.7 | **35.3** | **-14.3%** |
+| turns / task | 3.51 | **2.76** | **-21.4%** |
+| recall | 99.5% | **99.7%** | +0.2pt |
+
+Cache-clean, 190 of 216 runs, 95% interval **[3.0%, 24.7%]**. Individually the
+sweeps read -16.7% and -11.2%. The published figure moves **down** from -16.7%,
+which is the direction that requires no defence.
+
+Tool output is dropped as a headline: -92% on ten tasks, +0.4% on eighteen,
+-45.6% pooled. A number that swings that far with the sample is measuring the
+sample.
