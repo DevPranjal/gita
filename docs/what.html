@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>gita — what we are building</title>
+<meta name="description" content="Context diffs: the answer shape, the entity model, and how gita removes noise as a fact rather than a guess." />
+<link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <a class="brand" href="./">gita<span class="dot">.</span></a>
+    <a href="./">why</a>
+    <a class="on" href="./what.html">what</a>
+    <a href="./results.html">results</a>
+    <a href="./usage.html">usage</a>
+    <a class="right" href="https://github.com/DevPranjal/gita">github</a>
+  </nav>
+
+  <h1>What we are building</h1>
+  <p class="lede" style="margin-top:14px">
+    One command that answers <strong>what changed, which functions and files it
+    touched, whether the public interface broke, and only the code that matters</strong>
+    — with formatting noise removed, inside a token budget, and never larger than
+    the <code>git diff</code> it replaces.
+  </p>
+
+  <p class="section-h">the same commit, both ways</p>
+
+  <div class="pair">
+    <div class="term">
+      <div class="term-bar">
+        <span class="d"></span><span class="d"></span><span class="d"></span>
+        <span class="title">git diff</span><span class="tag git">git</span>
+      </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">git diff 66ca4e0 1c88e88</span>
+<span class="kw">diff --git a/source/core/options.ts b/source/core/options.ts</span>
+<span class="kw">index 3f2a1b9..8c4d0e2 100644</span>
+<span class="kw">@@ -1204,6 +1204,31 @@</span>
+   const options = this._internals.options;
+<span class="add">+  allowAbsoluteUrls?: boolean;</span>
+<span class="add">+</span>
+<span class="add">+  function isAbsoluteUrl(url: string) {</span>
+<span class="add">+    ...</span>
+   return options;
+<span class="kw">diff --git a/test/hooks.ts b/test/hooks.ts</span>
+<span class="add">+ test('allowAbsoluteUrls false rejects ...')</span>
+<span class="dim">... 13 files, 1,413 insertions, 159 test cases ...</span>
+
+<span class="bad">16,713 tokens</span></div>
+    </div>
+
+    <div class="term">
+      <div class="term-bar">
+        <span class="d"></span><span class="d"></span><span class="d"></span>
+        <span class="title">gita diff</span><span class="tag gita">gita</span>
+      </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">gita diff 66ca4e0 1c88e88</span>
+<span class="dim">13 files | 192 changes | 172 interface | 1900 noise filtered</span>
+
+<span class="acc">source/core/options.ts::Options::allowAbsoluteUrls</span>  <span class="ok">[added]</span>
+<span class="acc">source/core/options.ts::applyUrlOverride</span>  <span class="bad">[signature_changed]</span>
+<span class="acc">source/core/options.ts::isAbsoluteUrl</span>  <span class="ok">[added]</span>
+<span class="out">test/hooks.ts</span>       <span class="dim">(58 tests: 57 added, 1 body_changed)</span>
+<span class="out">test/pagination.ts</span>  <span class="dim">(47 tests: 46 added, 1 body_changed)</span>
+
+<span class="dim">--- source/core/options.ts::Options::allowAbsoluteUrls [added]</span>
+<span class="add">+  allowAbsoluteUrls?: boolean;</span>
+
+<span class="ok">3,969 tokens</span></div>
+    </div>
+  </div>
+
+  <p class="small muted" style="margin-top:14px">
+    The question was <em>“what new option was added?”</em> The answer is on line
+    three, because 159 test cases whose titles all restate the option are
+    summarised rather than listed.
+  </p>
+
+  <p class="section-h">how a change is held</p>
+
+  <p>
+    A file is parsed into <strong>entities</strong> — named things with a stable
+    id like <code>src/app.py::Store::get</code> — and each entity carries four
+    hashes. Comparing hashes is what makes noise filtering a fact instead of a
+    guess.
+  </p>
+
+  <table>
+    <tr><th>hash</th><th>covers</th><th>a difference means</th></tr>
+    <tr><td><code>raw_hash</code></td><td>exact bytes</td><td>any edit at all</td></tr>
+    <tr><td><code>content_hash</code></td><td>comments stripped, whitespace normalised</td>
+        <td>raw differs but this matches ⇒ <span class="dim">cosmetic only</span></td></tr>
+    <tr><td><code>signature_hash</code></td><td>as above, body excluded</td>
+        <td>differs ⇒ <span class="loss">a caller can break</span></td></tr>
+    <tr><td><code>body_hash</code></td><td>as above, body only</td>
+        <td>identity survives a rename or a move</td></tr>
+  </table>
+
+  <p style="margin-top:22px">
+    So <code>signature_changed</code> is not an inference about what probably
+    matters — it is a statement that the declaration hashes differently. An entity
+    owns only the tokens no nested entity claimed, so a class does not report a
+    change every time one of its methods does.
+  </p>
+
+  <h2>Change kinds</h2>
+  <table>
+    <tr><th>kind</th><th>meaning</th><th>breaks a caller?</th></tr>
+    <tr><td><code>signature_changed</code></td><td>parameters or return type moved</td><td class="loss">yes</td></tr>
+    <tr><td><code>removed</code></td><td>the entity is gone</td><td class="loss">yes</td></tr>
+    <tr><td><code>renamed</code></td><td>same code, new name</td><td class="loss">yes</td></tr>
+    <tr><td><code>added</code> · <code>moved</code> · <code>body_changed</code></td>
+        <td>new, relocated, or behaviour-only</td><td>no</td></tr>
+    <tr><td><code>cosmetic</code></td><td>formatting, comments, import order</td>
+        <td class="dim">filtered before you see it</td></tr>
+  </table>
+
+  <p class="section-h">two promises</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:0">Never larger than git</h3>
+      <p>
+        The answer is capped by the raw <code>git diff</code> it replaces, so
+        adopting gita cannot cost more than not adopting it. On small diffs it
+        comes out about the same size; the wins concentrate where the pain is.
+      </p>
+      <p class="small muted">
+        Enforced against the text as assembled, not the sum of its parts. Swept
+        across every budget from 1 to 400: no violations.
+      </p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Exact, or it says so</h3>
+      <p>
+        <code>--budget N</code> is a hard cap. If something was dropped to fit,
+        the output says so and names what is missing, so a follow-up is a choice
+        rather than a surprise.
+      </p>
+      <p class="small muted">
+        Ambiguity is reported, never guessed: a bare name that matches two
+        entities returns both rather than picking one.
+      </p>
+    </div>
+  </div>
+
+  <p class="section-h">what it runs on</p>
+  <p>
+    Python, JavaScript, TypeScript, TSX, Go and Rust, plus structural handling of
+    Markdown, YAML, JSON and TOML. Unsupported files degrade to a whole-file
+    entity rather than vanishing — a silent omission reads as “unchanged”, which
+    would be a wrong fact.
+  </p>
+  <p class="small muted">
+    Parsing is tree-sitter; token counting is tiktoken, so a budget matches what
+    an agent actually pays. Three ways in: a CLI, an MCP server, and a typed
+    Python API.
+  </p>
+
+  <p class="section-h">what gita does not do</p>
+  <div class="card">
+    <ul>
+      <li><strong>No call graph.</strong> The unreferenced check is name matching:
+        it catches dead code, not dependents. Labelled as such wherever it appears.</li>
+      <li><strong>No “what should I re-test?”</strong> That needs real caller
+        edges. gita refuses rather than guesses.</li>
+      <li><strong>No natural-language questions.</strong> An earlier
+        <code>ask()</code> was withdrawn for degrading to confidently wrong
+        instead of bluntly right.</li>
+      <li><strong>Prose diffing is structural only</strong> — sections and keys,
+        not meaning.</li>
+      <li><strong>Bulk tests are summarised</strong> when they accompany source
+        changes; <code>--filter</code> expands them.</li>
+    </ul>
+  </div>
+
+  <div class="next">
+    <a href="./results.html">
+      <div class="k">next</div>
+      <div class="t">Does it actually work?</div>
+      <div class="d">Ten tasks, five real repositories, and an agent that was
+        never told gita existed.</div>
+    </a>
+    <a href="./usage.html">
+      <div class="k">practical</div>
+      <div class="t">How to use it</div>
+      <div class="d">Install, the commands worth knowing, and wiring it into an
+        agent.</div>
+    </a>
+  </div>
+
+  <footer>
+    <span>v1.0.0 · 465 tests · MIT</span>
+    <span><a href="https://github.com/DevPranjal/gita">github</a></span>
+  </footer>
+</div>
+</body>
+</html>

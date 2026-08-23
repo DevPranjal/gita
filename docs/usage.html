@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>gita — how to use</title>
+<meta name="description" content="Install gita, the commands worth knowing, and how to wire it into a coding agent." />
+<link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <a class="brand" href="./">gita<span class="dot">.</span></a>
+    <a href="./">why</a>
+    <a href="./what.html">what</a>
+    <a href="./results.html">results</a>
+    <a class="on" href="./usage.html">usage</a>
+    <a class="right" href="https://github.com/DevPranjal/gita">github</a>
+  </nav>
+
+  <h1>How to use it</h1>
+  <p class="lede" style="margin-top:14px">
+    gita is a drop-in replacement for reading a diff. If you know
+    <code>git diff</code>, you already know it.
+  </p>
+
+  <p class="section-h">install</p>
+  <div class="term">
+    <div class="term-bar">
+      <span class="d"></span><span class="d"></span><span class="d"></span>
+      <span class="title">requires Python 3.11+</span><span class="tag gita">pip</span>
+    </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">pip install gita</span>
+<span class="prompt">$</span> <span class="out">gita diff HEAD^ HEAD</span></div>
+  </div>
+  <p class="small muted" style="margin-top:12px">
+    For the MCP server: <code>pip install "gita[mcp]"</code>.
+  </p>
+
+  <p class="section-h">the commands</p>
+
+  <div class="term">
+    <div class="term-bar">
+      <span class="d"></span><span class="d"></span><span class="d"></span>
+      <span class="title">the whole surface</span><span class="tag gita">cli</span>
+    </div>
+<div class="term-body"><span class="prompt">$</span> <span class="out">gita diff</span>                      <span class="dim">uncommitted work, untracked files included</span>
+<span class="prompt">$</span> <span class="out">gita diff HEAD^ HEAD</span>          <span class="dim">one commit</span>
+<span class="prompt">$</span> <span class="out">gita diff main HEAD</span>           <span class="dim">a branch or a pull request range</span>
+
+<span class="prompt">$</span> <span class="out">gita show &lt;name&gt;</span>              <span class="dim">exact hunks for one entity</span>
+<span class="prompt">$</span> <span class="out">gita history &lt;name&gt;</span>           <span class="dim">how one function changed, with the code</span>
+<span class="prompt">$</span> <span class="out">gita expand &lt;id&gt;</span>              <span class="dim">open a rolled-up line</span>
+<span class="prompt">$</span> <span class="out">gita serve</span>                    <span class="dim">run the MCP server</span></div>
+  </div>
+
+  <table>
+    <tr><th>flag</th><th>what it does</th><th>when</th></tr>
+    <tr><td><code>--interface-only</code></td>
+        <td>only changes that can break a caller</td>
+        <td>reviewing for breakage, or deciding whether a bump is safe</td></tr>
+    <tr><td><code>--patch</code></td>
+        <td>a plain unified diff with noise removed</td>
+        <td>you want hunks, just fewer of them</td></tr>
+    <tr><td><code>--filter TERM</code></td>
+        <td>narrow to names or paths containing TERM</td>
+        <td>large change, one area of interest</td></tr>
+    <tr><td><code>--budget N</code></td>
+        <td>hard cap on output tokens</td>
+        <td>a tight context window</td></tr>
+    <tr><td><code>--brief</code></td>
+        <td>summary only, no code</td>
+        <td>orienting before drilling in</td></tr>
+    <tr><td><code>--json</code></td>
+        <td>machine-readable payload</td>
+        <td>scripting, or feeding another tool</td></tr>
+  </table>
+
+  <p class="small muted" style="margin-top:12px">
+    <code>-C &lt;path&gt;</code> selects the repository. git's spellings work where
+    they mean the same thing: <code>--stat</code>, <code>--oneline</code>,
+    <code>--base</code>/<code>--head</code>, <code>--no-pager</code>. Bare names
+    work too — <code>gita history fetch</code>, not just
+    <code>gita history svc.py::fetch</code>.
+  </p>
+
+  <p class="section-h">reading the output</p>
+
+  <div class="term">
+    <div class="term-bar">
+      <span class="d"></span><span class="d"></span><span class="d"></span>
+      <span class="title">gita diff</span><span class="tag gita">gita</span>
+    </div>
+<div class="term-body"><span class="dim">3 files | 12 changes | 2 interface | 638 noise filtered</span>
+<span class="dim">files: src/flask/app.py (modified), src/flask/ctx.py (modified)</span>
+
+<span class="acc">src/flask/app.py::Flask::do_teardown_request</span>  <span class="bad">[signature_changed]</span>
+<span class="acc">src/flask/helpers.py::_CollectErrors</span>  <span class="dim">(+4 nested)</span>
+<span class="out">tests/test_ctx.py</span>  <span class="dim">(9 tests: 7 added, 2 body_changed)</span></div>
+  </div>
+
+  <div class="card">
+    <ul>
+      <li><strong>The headline</strong> counts what changed and how much noise was
+        removed. You never need to see the noise.</li>
+      <li><strong><code>path::Parent::child</code></strong> is an entity id. Pass
+        it verbatim to <code>show</code> or <code>expand</code>.</li>
+      <li><strong><code>(+4 nested)</code></strong> means changed children were
+        rolled up. <code>gita expand &lt;id&gt;</code> opens them.</li>
+      <li><strong>A test file on one line</strong> means bulk test churn was
+        summarised. <code>--filter</code> that path to see each one.</li>
+      <li><strong>On the working tree</strong>, files are marked
+        <code>(modified)</code>, <code>(untracked)</code> or <code>(new)</code> —
+        so you do not need <code>git status</code> as well.</li>
+    </ul>
+  </div>
+
+  <p class="section-h">common jobs</p>
+
+  <table>
+    <tr><th>you want to</th><th>run</th></tr>
+    <tr><td>review the last commit</td><td><code>gita diff HEAD^ HEAD</code></td></tr>
+    <tr><td>review a pull request</td><td><code>gita diff origin/main HEAD</code></td></tr>
+    <tr><td>see what you have not committed</td><td><code>gita diff</code></td></tr>
+    <tr><td>check whether an API broke</td><td><code>gita diff main HEAD --interface-only</code></td></tr>
+    <tr><td>follow one function over time</td><td><code>gita history parse_config</code></td></tr>
+    <tr><td>read one function's change closely</td><td><code>gita show parse_config</code></td></tr>
+    <tr><td>look at just the auth code</td><td><code>gita diff main HEAD --filter auth</code></td></tr>
+  </table>
+
+  <p class="section-h">for an agent</p>
+
+  <p>
+    The point of gita is that an agent picks it up without being told. Put it on
+    <code>PATH</code> and describe it where your agent reads about the repository —
+    an <code>AGENTS.md</code>, a system prompt, a skill file:
+  </p>
+
+  <div class="term">
+    <div class="term-bar">
+      <span class="d"></span><span class="d"></span><span class="d"></span>
+      <span class="title">AGENTS.md</span><span class="tag git">md</span>
+    </div>
+<div class="term-body"><span class="out">Use `gita` instead of `git diff` to read changes. One command gives you</span>
+<span class="out">the summary, the changed functions and the relevant code.</span>
+
+<span class="out">  gita diff                     uncommitted work, like plain `git diff`</span>
+<span class="out">  gita diff &lt;base&gt; &lt;head&gt;       a commit or a range</span>
+<span class="out">  gita show &lt;name&gt;              exact hunks for one entity</span>
+<span class="out">  gita history &lt;name&gt;           how one function changed over time</span></div>
+  </div>
+
+  <h3>Over MCP</h3>
+  <p>
+    <code>gita serve</code> exposes <code>gita_diff</code>, <code>gita_show</code>
+    and <code>gita_expand</code>. Each layer is a separate tool rather than a depth
+    parameter, so an agent sees the cost of a step in the name it chooses.
+  </p>
+
+  <h3>As a library</h3>
+  <div class="term">
+    <div class="term-bar">
+      <span class="d"></span><span class="d"></span><span class="d"></span>
+      <span class="title">typed, 14 exports</span><span class="tag gita">python</span>
+    </div>
+<div class="term-body"><span class="kw">from</span> <span class="out">gita</span> <span class="kw">import</span> <span class="out">diff_revisions</span>
+
+<span class="out">changeset = diff_revisions(</span><span class="ok">"."</span><span class="out">, </span><span class="ok">"HEAD^"</span><span class="out">, </span><span class="ok">"HEAD"</span><span class="out">)</span>
+<span class="kw">for</span> <span class="out">change </span><span class="kw">in</span><span class="out"> changeset.material():</span>
+    <span class="out">print(change.entity.id, change.kind.value)</span></div>
+  </div>
+
+  <div class="next">
+    <a href="./results.html">
+      <div class="k">evidence</div>
+      <div class="t">Does it actually work?</div>
+      <div class="d">Measured against a live agent, including what the numbers
+        cannot support.</div>
+    </a>
+    <a href="https://github.com/DevPranjal/gita">
+      <div class="k">source</div>
+      <div class="t">github.com/DevPranjal/gita</div>
+      <div class="d">MIT. 465 tests. Issues and pull requests welcome.</div>
+    </a>
+  </div>
+
+  <footer>
+    <span>v1.0.0 · 465 tests · MIT</span>
+    <span><a href="https://github.com/DevPranjal/gita">github</a></span>
+  </footer>
+</div>
+</body>
+</html>

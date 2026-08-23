@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>gita — evaluation results</title>
+<meta name="description" content="gita measured against a live coding agent across ten tasks and five real repositories, including what the numbers cannot support." />
+<link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <a class="brand" href="./">gita<span class="dot">.</span></a>
+    <a href="./">why</a>
+    <a href="./what.html">what</a>
+    <a class="on" href="./results.html">results</a>
+    <a href="./usage.html">usage</a>
+    <a class="right" href="https://github.com/DevPranjal/gita">github</a>
+  </nav>
+
+  <h1>Does it actually work?</h1>
+  <p class="lede" style="margin-top:14px">
+    Ten tasks across Flask, Express, Gin, ripgrep and got. Two arms: a coding agent
+    with plain <code>git</code>, and the same agent with <code>gita</code> also on
+    <code>PATH</code>. <strong>gita is never mentioned in the prompt</strong> — it
+    has to be discovered and chosen, or it does not count.
+  </p>
+
+  <p class="section-h">headline</p>
+
+  <table>
+    <tr><th>measure</th><th style="text-align:right">plain git</th><th style="text-align:right">with gita</th></tr>
+    <tr><td>credits per task</td><td class="num">36.2</td><td class="num win">30.6 &nbsp; −15%</td></tr>
+    <tr><td>turns per task</td><td class="num">3.62</td><td class="num win">2.78 &nbsp; −23%</td></tr>
+    <tr><td>tool output per run</td><td class="num">35,163</td><td class="num win">2,689 &nbsp; −92%</td></tr>
+    <tr><td>entity recall</td><td class="num">100%</td><td class="num">99%</td></tr>
+    <tr><td>adoption, unprompted</td><td class="num dim">—</td><td class="num">98%</td></tr>
+  </table>
+
+  <p class="small muted" style="margin-top:12px">
+    110 runs — six repetitions of every task in both arms, pooled across two
+    sweeps, with runs that lost the model's prompt cache excluded. Eight of ten
+    tasks come out cheaper.
+  </p>
+
+  <p class="section-h">how it is measured</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:0">The agent is not told</h3>
+      <p>
+        gita is put on <code>PATH</code> and described in the repository's
+        <code>AGENTS.md</code> exactly as any other repo tool would be. The task
+        prompt never names it. If the agent does not find it useful, it does not
+        use it, and that counts against gita.
+      </p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Cost is real, not a proxy</h3>
+      <p>
+        Priced in credits from the model's own logs, across four token classes
+        that differ in price by 50x. Token totals mislead in both directions:
+        fresh output is billed at up to 12.5x the rate of cached context.
+      </p>
+    </div>
+  </div>
+
+  <p style="margin-top:22px">
+    Quality is scored as <strong>entity recall</strong> — whether the agent's final
+    answer names the things the change actually touched. A cheaper answer that
+    misses the point is not a win, so cost is only ever read next to recall.
+  </p>
+
+  <p class="section-h">what the numbers cannot support</p>
+
+  <div class="card">
+    <h3 style="margin-top:0">A control sweep moved ten points on its own</h3>
+    <p>
+      One sweep was repeated with <strong>byte-identical behaviour</strong> — the
+      only change was in the scoring code. The headline moved ten points, and one
+      individual task moved 82.
+    </p>
+    <p>
+      So at three repetitions, per-task cost numbers are noise, and any story told
+      from them is a story about noise. Published figures pool six repetitions per
+      task per arm for that reason.
+    </p>
+    <p class="small muted">
+      A second effect: roughly one run in fifteen loses the model's prompt cache,
+      which costs two to three times a normal task and says nothing about either
+      tool. Worse, it lands unevenly — the first task of a sweep always starts
+      cold. Those runs are excluded and counted.
+    </p>
+  </div>
+
+  <div class="card">
+    <p>
+      <strong>Turn count and tool output are the steady signals; cost is the noisy
+      one.</strong> Turns matter most, because a turn re-sends the entire context.
+      Recall is reported at 99% against git's 100% — gita is very slightly behind
+      on quality, and that is not rounded away here.
+    </p>
+  </div>
+
+  <p class="section-h">the loop that produced this</p>
+
+  <p>
+    Thirteen evaluation sweeps, each one diagnosed from the run artifacts rather
+    than from intuition. The most useful finding was not a win:
+  </p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:0">The cost number is a bug detector</h3>
+      <p>
+        Every cost regression turned out to be a correctness or robustness defect
+        wearing a cost disguise — an encoding crash on a piped Windows shell,
+        history that said <em>when</em> but not <em>what</em>, Rust
+        <code>impl Trait for Type</code> quietly losing the trait, and 159 test
+        names burying the one API change that was asked about.
+      </p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">The quality number is a better one</h3>
+      <p>
+        A single recall miss led to finding that TOML and YAML value changes were
+        being classified as cosmetic and filtered out — gita was answering
+        <em>“no material changes”</em> for a dependency version bump. That sat
+        inside a task scoring −41% for nine iterations, because a cost win was
+        masking a correctness hole.
+      </p>
+    </div>
+  </div>
+
+  <p class="section-h">speed</p>
+  <p>
+    Separate from the agent evaluation, and measured directly. Answering “how did
+    this function change over twenty commits” once took 12s, of which 6.5s was 98
+    git subprocesses at roughly 67ms of process spawn each. Parsing was never the
+    bottleneck; asking was.
+  </p>
+  <table>
+    <tr><th>operation</th><th style="text-align:right">before</th><th style="text-align:right">now</th></tr>
+    <tr><td><code>gita diff</code> — 13 files, 1,413 insertions</td><td class="num">11.20s</td><td class="num win">1.99s</td></tr>
+    <tr><td><code>gita history</code> — 20 commits</td><td class="num">12.08s</td><td class="num win">2.92s</td></tr>
+    <tr><td>git subprocesses per history query</td><td class="num">98</td><td class="num win">2</td></tr>
+  </table>
+  <p class="small muted" style="margin-top:12px">
+    Every fast path keeps its slow path behind a flag so the tests can prove the
+    two agree.
+  </p>
+
+  <div class="next">
+    <a href="./usage.html">
+      <div class="k">next</div>
+      <div class="t">How to use it</div>
+      <div class="d">Install, the commands worth knowing, and wiring it into an
+        agent.</div>
+    </a>
+    <a href="https://github.com/DevPranjal/gita/blob/main/evals/RESULTS.md">
+      <div class="k">detail</div>
+      <div class="t">Every sweep, written up</div>
+      <div class="d">Including the invalid one, the regressions, and the
+        corrections.</div>
+    </a>
+  </div>
+
+  <footer>
+    <span>v1.0.0 · 465 tests · MIT</span>
+    <span><a href="https://github.com/DevPranjal/gita">github</a></span>
+  </footer>
+</div>
+</body>
+</html>
