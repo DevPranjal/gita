@@ -431,3 +431,40 @@ answers moves git 50% to 100% and gita 50% to 100%, so it cannot favour either.
 ### Next
 
 Ten more capability tasks. Five resolves +/-18 points on recall; the gap is 17.
+
+### Correction, same day: the cost reversal was not a finding
+
+The entry above states that gita "cost more credits" on the capability cohort as
+though it were established. It is not, and the claim should not have been written
+that way.
+
+Bootstrapped over tasks, the capability cohort's credit difference is **-24.2%
+with a 95% interval of [-77.5%, +3.4%]** -- not separated from zero. Worse, it is
+carried by a single task: `got-range-triage` alone reads -162%. Drop that one
+task and the cohort reads -8.3% across the other four.
+
+A claim carried by one task is a property of the sample, not of the tool. That
+sentence is already in this journal, about the -92.4% tool-output figure that was
+withdrawn for exactly this reason. It was written twenty minutes before the same
+mistake was made again, in the other direction.
+
+**What stands, unchanged:** the published **-14.3% on [3.0%, 24.7%]**, from 216
+runs over 18 ordinary tasks. Nothing measured today touches it. The capability
+cohort is a different and deliberately extreme population -- five ranges chosen
+because they do not fit in a context window -- and ten runs there cannot overturn
+216 runs elsewhere.
+
+**What is genuinely interesting** is the mechanism, as a hypothesis rather than a
+result. On `got-range-triage` the baseline read one enormous diff early; it was
+written to cache once (20,411 tokens) and re-read from cache for the rest of the
+task (684,612 cached). The gita arm made several smaller calls returning novel
+text, so it paid 201,975 tokens of cache *writes* at 12.5x the read price --
+while using nine times less tool output and fewer turns.
+
+If that holds up it is a real and non-obvious law of agent tooling: **on a large
+enough task, repetitive bulk caches better than dense novelty, and the pricing
+model rewards the former.** It would also name gita's fix -- fewer, larger calls.
+
+But it is one task. It needs its own cohort and its own sweep before it is
+anything more than a mechanism that would explain a number we cannot yet
+distinguish from noise.
