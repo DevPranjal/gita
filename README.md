@@ -95,7 +95,10 @@ decides what changed. A model may later improve summary *prose*; it may never su
 fact. gita degrades to worse prose, never to wrong facts.
 
 Python, JavaScript, TypeScript, TSX, Go, Rust, plus structural Markdown, YAML, JSON and
-TOML. Unsupported files degrade to a whole-file entity rather than vanishing.
+TOML. SQL is scanned rather than parsed — the available grammar is written for
+PostgreSQL and named 23% of a real T-SQL corpus after a parameter type, and a wrong
+name is worse than a coarse one. Unsupported files degrade to a whole-file entity
+rather than vanishing.
 
 ## Does it actually work?
 

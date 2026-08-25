@@ -38,6 +38,50 @@ suite, which passed 476 times throughout.
   dominated by roll-up, not by the cap. It buys tokens rather than
   completeness, so the cap stays at 20.
 
+### Added - SQL, scanned rather than parsed
+
+Found in daily use: `gita diff` on a T-SQL repository reported changes against
+`<module>`, which is no more useful than the raw diff and, on a single-procedure
+file, less -- the whole-file hunk plus a header exceeds the raw diff it promises
+never to exceed, so no code was shown at all.
+
+- **The tree-sitter `sql` grammar was rejected on evidence.** Over 459 files from
+  a real T-SQL project it parsed 98% with errors and produced *confident wrong
+  names*: `CreateApprovalPlan.sql` came back as `NVARCHAR` and
+  `CreateUserBookmark.sql` as `@IsDefault`, because the bracketed identifier
+  `[dbo].[Name]` landed inside an ERROR node and the next `object_reference` was
+  a parameter type. It also ended a procedure at the first inner `END;`. gita
+  degrades to coarser answers, never to false ones, so a 23% wrong-name rate
+  disqualifies it. The pack's `tsql` grammar is not downloadable.
+- **A deterministic scanner replaces it**, matching the `CREATE <kind> <name>`
+  shape that every dialect shares, with bracket, quote and backtick identifiers,
+  nested block comments, escaped string literals and `GO` batch separators
+  handled. Measured on the same corpus against the filename as answer key:
+
+  | | tree-sitter `sql` | scanner |
+  | --- | ---: | ---: |
+  | name matches the file | 63% | **87%** |
+  | name contradicts the file | 23% | **5%** |
+  | no definition found | 14% | **9%** |
+
+  Of 495 extracted entities, **none** is a bare type keyword or a variable. The
+  remaining 5% are files that genuinely define something other than their name,
+  such as migrations altering a table.
+- **Definitions inside a routine body are locals.** A `CREATE TABLE #Filtered`
+  at line 113 of a 917-line procedure was being reported as a sibling, which cut
+  the procedure's body off at that line -- the same class of wrong boundary that
+  disqualified the grammar.
+- **The file entity owns only what no definition claims.** It hashed the whole
+  file at first, so one edit was reported twice: once against the procedure and
+  once against the file.
+- **Comments are noise; string literals are not.** Hashes are taken over
+  comment-blanked text, so a reworded header does not register, while a reworded
+  `RAISERROR` message does. Blanking literals as well would have hidden it.
+
+28 tests, each one a defect found by running the scanner over the real corpus.
+Both invariants verified across every SQL-touching commit in that repository at
+four budgets: never over `--budget`, never larger than the raw `git diff`.
+
 ## [1.0.0] - 2026-08-22
 
 First release intended for use rather than for evaluation. Three of these were

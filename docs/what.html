@@ -149,7 +149,9 @@
   <p class="section-h">what it runs on</p>
   <p>
     Python, JavaScript, TypeScript, TSX, Go and Rust, plus structural handling of
-    Markdown, YAML, JSON and TOML. Unsupported files degrade to a whole-file
+    Markdown, YAML, JSON and TOML. SQL is scanned rather than parsed, because the
+    available grammar is written for PostgreSQL and named 23% of a real T-SQL
+    corpus after a parameter type. Unsupported files degrade to a whole-file
     entity rather than vanishing — a silent omission reads as “unchanged”, which
     would be a wrong fact.
   </p>

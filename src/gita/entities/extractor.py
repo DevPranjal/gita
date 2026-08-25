@@ -10,6 +10,7 @@ from __future__ import annotations
 from tree_sitter_language_pack import get_parser
 
 from .languages import LanguageSpec, for_path
+from .sql import SQL_EXTENSIONS, extract_sql
 from .model import Entity, EntityKind, EntityTree, digest
 
 #: Wrappers to climb through when hunting for the binding site of a function value.
@@ -321,4 +322,6 @@ def extract_path(source: bytes, path: str) -> EntityTree | None:
     spec = for_path(path)
     if spec is not None:
         return extract(source, path, spec)
+    if path.lower().endswith(SQL_EXTENSIONS):
+        return extract_sql(source, path)
     return extract_plain(source, path)

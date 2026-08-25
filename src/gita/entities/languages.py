@@ -171,4 +171,10 @@ def for_path(path: str) -> LanguageSpec | None:
 
 
 def is_supported(path: str) -> bool:
-    return for_path(path) is not None
+    """Whether gita can break this file into named entities.
+
+    SQL has no LanguageSpec because it has no usable grammar -- it is scanned
+    directly -- but it is still parsed into entities, so it belongs here.
+    """
+    from .sql import SQL_EXTENSIONS
+    return for_path(path) is not None or path.lower().endswith(SQL_EXTENSIONS)
