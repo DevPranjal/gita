@@ -58,6 +58,10 @@ Ordinary `git` commands are available as well.
 class ArmConfig:
     name: str
     has_gita: bool
+    #: Where this arm's `gita` lives. None means "the one the harness built".
+    #: Two arms with different binaries can then share a sweep, which is the
+    #: only way to tell a code change apart from a noisy baseline.
+    bin_dir: Path | None = None
 
     @staticmethod
     def git() -> "ArmConfig":
@@ -66,6 +70,10 @@ class ArmConfig:
     @staticmethod
     def gita() -> "ArmConfig":
         return ArmConfig("gita", True)
+
+    @staticmethod
+    def variant(name: str, bin_dir: Path) -> "ArmConfig":
+        return ArmConfig(name, True, bin_dir)
 
 
 def copilot_executable() -> str:
@@ -140,7 +148,7 @@ def build_env(arm: ArmConfig, task_id: str, run_id: str, run_dir: Path,
 
     path_parts = [str(shim_dir)]
     if arm.has_gita:
-        path_parts.append(str(gita_bin))
+        path_parts.append(str(arm.bin_dir or gita_bin))
     env["PATH"] = os.pathsep.join([*path_parts, env.get("PATH", "")])
 
     env["GITA_TELEMETRY"] = str(run_dir / "telemetry.jsonl")
@@ -152,28 +160,34 @@ def build_env(arm: ArmConfig, task_id: str, run_id: str, run_dir: Path,
     return env
 
 
-def install_gita_launcher(directory: Path) -> Path:
+def install_gita_launcher(directory: Path, scripts: Path | None = None) -> Path:
     """Put the real `gita` executable on PATH.
 
     A .cmd wrapper is not neutral: cmd.exe eats `^` from arguments, which turned
     every `gita diff <sha>^ <sha>` into a no-op. Copying the console script keeps
     argument handling out of cmd entirely.
+
+    ``scripts`` selects which installation to publish, so a sweep can carry more
+    than one build of gita at once.
     """
     directory.mkdir(parents=True, exist_ok=True)
-    console_script = Path(sys.executable).parent / (
-        "gita.exe" if os.name == "nt" else "gita")
+    scripts = scripts or Path(sys.executable).parent
+    interpreter = scripts / ("python.exe" if os.name == "nt" else "python")
+    if not interpreter.exists():
+        interpreter = Path(sys.executable)
+    console_script = scripts / ("gita.exe" if os.name == "nt" else "gita")
 
     if console_script.exists():
         shutil.copy2(console_script, directory / console_script.name)
     else:  # pragma: no cover - only when the package is not installed
         fallback = directory / ("gita.cmd" if os.name == "nt" else "gita")
         fallback.write_text(
-            f'@echo off\r\n"{sys.executable}" -m gita %*\r\n', encoding="utf8")
+            f'@echo off\r\n"{interpreter}" -m gita %*\r\n', encoding="utf8")
 
     posix = directory / "gita"
     if not posix.exists():
         posix.write_text(
-            f'#!/bin/sh\nexec "{sys.executable}" -m gita "$@"\n',
+            f'#!/bin/sh\nexec "{interpreter}" -m gita "$@"\n',
             encoding="utf8", newline="\n")
         posix.chmod(0o755)
     return directory
@@ -277,3 +291,42 @@ def prepare(workspace: Path) -> tuple[Path, Path]:
     shim_dir = install_shim(workspace / "shims")
     gita_bin = install_gita_launcher(workspace / "bin")
     return shim_dir, gita_bin
+
+
+def build_revision(revision: str, workspace: Path,
+                   source: Path | None = None) -> Path:
+    """Install gita as of ``revision`` into its own venv; return its bin dir.
+
+    Comparing a change to the code by running one sweep before it and another
+    after it does not work: the baseline arm drifts between sweeps by more than
+    the change is worth. Iteration 15 read 12% lower on the git arm, which no
+    edit to gita can touch, and the two sweeps were indistinguishable. Building
+    both versions lets them share a sweep, the same tasks and the same baseline.
+    """
+    source = source or Path(__file__).resolve().parents[3]
+    workspace.mkdir(parents=True, exist_ok=True)
+    tree = workspace / "src"
+    venv = workspace / "venv"
+
+    if not tree.exists():
+        subprocess.run(["git", "-C", str(source), "worktree", "add",
+                        "--detach", str(tree), revision],
+                       check=True, capture_output=True)
+    if not venv.exists():
+        subprocess.run([sys.executable, "-m", "venv", str(venv)],
+                       check=True, capture_output=True)
+    python = venv / ("Scripts" if os.name == "nt" else "bin") / "python"
+    subprocess.run([str(python), "-m", "pip", "install", "-q", str(tree)],
+                   check=True, capture_output=True)
+
+    return install_gita_launcher(workspace / "bin",
+                                 scripts=python.parent)
+
+
+def release_revision(workspace: Path, source: Path | None = None) -> None:
+    """Drop the worktree so the source repository is left as it was found."""
+    source = source or Path(__file__).resolve().parents[3]
+    tree = workspace / "src"
+    if tree.exists():
+        subprocess.run(["git", "-C", str(source), "worktree", "remove",
+                        "--force", str(tree)], check=False, capture_output=True)

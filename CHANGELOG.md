@@ -6,6 +6,40 @@ Entries are grouped by workstream (WS-*) as defined in [docs/SCOPE.md](docs/SCOP
 
 ## [Unreleased]
 
+### Changed - the evaluation can now attribute a change to the code
+
+Iteration 15 tested a fix by running a sweep before it and a sweep after it. The
+headline fell from 23.5% to 14.1%, which read as a regression until the arms were
+separated: the **baseline** arm moved 12.1% and the gita arm moved 1.3%. No edit
+to gita can touch the baseline arm, because gita is not on its `PATH`.
+Bootstrapping the difference between the two sweeps gave [-9.1, +26.3] points --
+they were indistinguishable, and the comparison had measured the weather.
+
+- **A sweep can now carry several builds of gita at once.** `--variant
+  NAME=REVISION` builds that revision into its own worktree and venv and runs it
+  as an extra arm, interleaved task by task with the others. Arms that share a
+  sweep share its conditions, so the difference between them is attributable.
+- **`compare_arms` reports every pair** -- each build against the baseline, and
+  each build against the others -- with a bootstrap interval and an explicit
+  `separated` flag, so "indistinguishable" is stated rather than inferred from a
+  number that happens to look different.
+- Scoring is no longer hardcoded to `git` and `gita`; any two arms can be
+  compared. Verified against real sweep data: an arm identical to gita reports
+  0.0% and indistinguishable, an arm 25% cheaper reports as measured.
+
+### Added - tasks that ask whether gita can do what git cannot
+
+Every published figure so far is a cost figure. Nothing tested whether gita lets
+an agent finish work that plain git fails at, which is the claim that would
+matter far more if it were true.
+
+Five `capability` tasks over ranges whose raw diff does not fit in a context
+window: 80k to 340k tokens, 52 to 98 files. Each asks a question whose answer is
+verified to appear in the raw `git diff` -- between 2 and 16 times -- so the
+baseline arm is limited by volume rather than by missing information. Revisions
+are pinned to full SHAs so the corpus moving cannot silently change the
+benchmark.
+
 ### Fixed - a cap that is not the budget must declare itself
 
 Found by reading the tool telemetry of an 18-task evaluation, not by the test

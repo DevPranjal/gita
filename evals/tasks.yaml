@@ -96,8 +96,8 @@
 
 - id: gin-history
   repo: gin
-  base: HEAD~40
-  head: HEAD
+  base: 5260de6a83283abb87e827130accd495ad543cf3
+  head: 34dac209ffb6ef85cc78c5d217bbb7ad001d68fd
   category: history
   prompt: |
     When was the SaveUploadedFile function last changed in this range, and what
@@ -223,3 +223,59 @@
     Name the method.
   must_mention: [_attachAbortListener, abort]
   note: locating a private method inside a large class
+- id: flask-range-triage
+  repo: flask
+  base: 284273e3c5d8005bbb4b43c4d934409a5215886e
+  head: 6a2f545bfd8ed31e19066a299296917e034aca58
+  category: capability
+  prompt: |
+    I am reviewing forty commits at once before a release. Which functions in
+    the request-dispatch path were modified in this range, and what changed
+    about error handling? Name the functions.
+  must_mention: [full_dispatch_request, handle_exception, log_exception]
+  note: 326k-token raw diff, 80 files -- larger than the context window
+
+- id: got-range-triage
+  repo: got
+  base: 3891b46d2182413b7b3d3d114f0b6e7ec1e6a863
+  head: e3924aa1e53a6ca3eb93a43618ce532442a89b40
+  category: capability
+  prompt: |
+    Across this range of commits, which function that validates search
+    parameters was modified, and what changed about it? Name the function.
+  must_mention: [validateSearchParameters]
+  note: 340k-token raw diff, 98 files -- a needle in the largest haystack
+
+- id: gin-range-interface
+  repo: gin
+  base: 93ff771e6dbf10e432864b30f3719ac5c84a4d4a
+  head: 34dac209ffb6ef85cc78c5d217bbb7ad001d68fd
+  category: capability
+  prompt: |
+    I depend on this library and I am upgrading across this range. Which
+    functions changed in ways that could break a caller? Name them.
+  must_mention: [UnmarshalParam, setWithProperType, defaultHandleRecovery]
+  note: 105k-token raw diff, 52 files -- interface question at range scale
+
+- id: ripgrep-range-triage
+  repo: ripgrep
+  base: 9b84e154c8e404f4c40f6f4e4c674ea02e77324a
+  head: 3fce3b5bb0236da2df6d99672afb8a719642eca7
+  category: capability
+  prompt: |
+    Across this range of commits, which function that collects matches was
+    modified? Name the function and the file.
+  must_mention: [matches_into]
+  note: 80k-token raw diff, 67 files -- a single needle
+
+- id: flask-range-tests
+  repo: flask
+  base: 663198d7b453ffdbe86d0e0238b1feafde6ce569
+  head: 6a2f545bfd8ed31e19066a299296917e034aca58
+  category: capability
+  prompt: |
+    Across this range, which test helper for operating-system environment
+    variables was modified, and which test about static file caching changed?
+    Name both.
+  must_mention: [_standard_os_environ, test_default_static_max_age]
+  note: 255k-token raw diff -- two needles, both in test files

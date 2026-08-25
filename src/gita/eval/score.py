@@ -51,11 +51,16 @@ def score_run(answer: str, must_mention: list[str], usage: dict,
     }
 
 
+BASELINE = "git"
+TREATMENT = "gita"
+
+
 def _mean(values: list[float]) -> float:
     return sum(values) / len(values) if values else 0.0
 
 
-def _credit_delta(runs: list[dict]) -> float | None:
+def _credit_delta(runs: list[dict], baseline: str = BASELINE,
+                  treatment: str = TREATMENT) -> float | None:
     """Paired credit reduction: per-task means first, then aggregate.
 
     A ratio of arm totals is only the same quantity when both arms ran every
@@ -65,9 +70,9 @@ def _credit_delta(runs: list[dict]) -> float | None:
     point estimate has to be paired over tasks too, or the headline and its
     uncertainty describe different things.
     """
-    paired = _task_credits(runs)
+    paired = _task_credits(runs, baseline, treatment)
     names = sorted(paired)
-    return _delta_of(paired, names) if names else None
+    return _delta_of(paired, names, baseline, treatment) if names else None
 
 
 #: Resampling is over tasks, not runs. Tasks differ from each other far more
@@ -75,29 +80,35 @@ def _credit_delta(runs: list[dict]) -> float | None:
 BOOTSTRAP_SAMPLES = 2000
 
 
-def _task_credits(runs: list[dict]) -> dict[str, dict[str, float]]:
+def _task_credits(runs: list[dict], baseline: str = BASELINE,
+                  treatment: str = TREATMENT) -> dict[str, dict[str, float]]:
     totals: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
     for run in runs:
         if run.get("credits") is not None:
             totals[run["task"]][run["arm"]].append(float(run["credits"]))
     paired = {}
     for task, arms in totals.items():
-        if arms.get("git") and arms.get("gita"):
-            paired[task] = {"git": _mean(arms["git"]), "gita": _mean(arms["gita"])}
+        if arms.get(baseline) and arms.get(treatment):
+            paired[task] = {baseline: _mean(arms[baseline]),
+                            treatment: _mean(arms[treatment])}
     return paired
 
 
-def _delta_of(paired: dict[str, dict[str, float]], tasks: list[str]) -> float | None:
+def _delta_of(paired: dict[str, dict[str, float]], tasks: list[str],
+              baseline: str = BASELINE,
+              treatment: str = TREATMENT) -> float | None:
     """Reduction, in the same direction as everything else in `reduction`:
-    positive means gita was cheaper."""
-    git = sum(paired[t]["git"] for t in tasks)
-    gita = sum(paired[t]["gita"] for t in tasks)
-    return (1 - gita / git) if git else None
+    positive means the treatment arm was cheaper."""
+    before = sum(paired[t][baseline] for t in tasks)
+    after = sum(paired[t][treatment] for t in tasks)
+    return (1 - after / before) if before else None
 
 
 def credit_interval(runs: list[dict],
                     samples: int = BOOTSTRAP_SAMPLES,
-                    seed: int = 12345) -> tuple[float, float] | None:
+                    seed: int = 12345,
+                    baseline: str = BASELINE,
+                    treatment: str = TREATMENT) -> tuple[float, float] | None:
     """A 95% interval on the aggregate credit reduction, resampling tasks.
 
     Ten tasks is a small sample and they are not alike, so a point estimate on
@@ -105,7 +116,7 @@ def credit_interval(runs: list[dict],
     straddles zero means the sweep did not measure an effect, however tidy the
     headline looks.
     """
-    paired = _task_credits(runs)
+    paired = _task_credits(runs, baseline, treatment)
     names = sorted(paired)
     if len(names) < 2:
         return None
@@ -114,7 +125,7 @@ def credit_interval(runs: list[dict],
     deltas = []
     for _ in range(samples):
         drawn = [names[rng.randrange(len(names))] for _ in names]
-        delta = _delta_of(paired, drawn)
+        delta = _delta_of(paired, drawn, baseline, treatment)
         if delta is not None:
             deltas.append(delta)
     if not deltas:
@@ -122,6 +133,44 @@ def credit_interval(runs: list[dict],
     deltas.sort()
     high = deltas[min(len(deltas) - 1, int(0.975 * len(deltas)))]
     return (deltas[int(0.025 * len(deltas))], high)
+
+
+def compare_arms(runs: list[dict]) -> list[dict]:
+    """Every gita build in the sweep, against the baseline and each other.
+
+    Two sweeps cannot answer "did this change help": iteration 15 read 9 points
+    lower than iteration 14, but the movement was almost all in the baseline
+    arm, which no edit to gita can reach, and bootstrapping the difference gave
+    [-9, +26] points. Arms that shared a sweep shared its weather, so the
+    comparison between them is the one worth reading.
+    """
+    # Order of first appearance, not alphabetical: arms run in the order the
+    # sweep configured them, so `gita -> after` reads as "did the change help"
+    # while the sorted pairing would state it backwards.
+    arms: list[str] = []
+    for run in runs:
+        if run["arm"] not in arms:
+            arms.append(run["arm"])
+    treatments = [a for a in arms if a != BASELINE]
+    out: list[dict] = []
+
+    pairs = [(BASELINE, t) for t in treatments]
+    pairs += [(a, b) for i, a in enumerate(treatments) for b in treatments[i + 1:]]
+
+    for baseline, treatment in pairs:
+        paired = _task_credits(runs, baseline, treatment)
+        if not paired:
+            continue
+        interval = credit_interval(runs, baseline=baseline, treatment=treatment)
+        out.append({
+            "baseline": baseline,
+            "treatment": treatment,
+            "tasks": len(paired),
+            "reduction": _credit_delta(runs, baseline, treatment),
+            "interval": interval,
+            "separated": bool(interval and (interval[0] > 0 or interval[1] < 0)),
+        })
+    return out
 
 
 def resolution(runs: list[dict]) -> float:
@@ -236,6 +285,7 @@ def summarise_runs(runs: list[dict]) -> dict:
             "credits_interval": credit_interval(runs),
         },
         "resolution": resolution(runs),
+        "arm_comparisons": compare_arms(runs),
         "adoption_rate": adoption,
         "quality_delta": quality_delta,
         "tasks": tasks,

@@ -7,11 +7,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
 
-from .runner import ArmConfig, prepare, run_once
+from .runner import ArmConfig, build_revision, prepare, release_revision, run_once
 from .score import summarise_runs
 from .spec import load_tasks
 
@@ -27,6 +28,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--model", default="claude-opus-5")
     parser.add_argument("--timeout", type=int, default=600)
     parser.add_argument("--only", default="", help="comma-separated task ids")
+    parser.add_argument(
+        "--variant", action="append", default=[], metavar="NAME=REVISION",
+        help="an extra gita build to run in the same sweep, e.g. before=HEAD~1. "
+             "Comparing sweeps cannot separate a code change from a drifting "
+             "baseline; comparing arms within one sweep can.")
     args = parser.parse_args(argv)
 
     tasks = load_tasks(args.tasks)
@@ -44,9 +50,25 @@ def main(argv: list[str] | None = None) -> int:
     root.mkdir(parents=True, exist_ok=True)
     shim_dir, gita_bin = prepare(root / "_env")
 
+    arms = list(ARMS)
+    built: list[Path] = []
+    for spec in args.variant:
+        if "=" not in spec:
+            print(f"--variant expects NAME=REVISION, got {spec!r}", file=sys.stderr)
+            return 1
+        name, revision = spec.split("=", 1)
+        workspace = root / "_env" / f"variant-{name}"
+        print(f"building gita@{revision} as arm {name!r} ...", flush=True)
+        try:
+            arms.append(ArmConfig.variant(name, build_revision(revision, workspace)))
+        except subprocess.CalledProcessError as error:
+            print(f"could not build {revision}: {error}", file=sys.stderr)
+            return 1
+        built.append(workspace)
+
     corpus = Path(args.corpus).expanduser().resolve()
     results: list[dict] = []
-    total = len(tasks) * len(ARMS) * args.reps
+    total = len(tasks) * len(arms) * args.reps
     index = 0
 
     for rep in range(1, args.reps + 1):
@@ -55,7 +77,7 @@ def main(argv: list[str] | None = None) -> int:
             if not (repo_root / ".git").exists():
                 print(f"  skip {task.id}: {repo_root} is not a repository")
                 continue
-            for arm in ARMS:
+            for arm in arms:
                 index += 1
                 run_id = f"{task.id}__{arm.name}__r{rep}"
                 print(f"[{index}/{total}] {run_id} ...", flush=True)
@@ -78,6 +100,9 @@ def main(argv: list[str] | None = None) -> int:
     report = summarise_runs(results)
     (root / "summary.json").write_text(json.dumps(report, indent=2), encoding="utf8")
 
+    for workspace in built:
+        release_revision(workspace)
+
     print()
     print("=" * 66)
     for arm, stats in report["by_arm"].items():
@@ -91,6 +116,19 @@ def main(argv: list[str] | None = None) -> int:
           f"{'n/a' if reduction is None else f'{reduction:.1%}'}")
     print(f"quality delta (gita - git recall)    : {report['quality_delta']:+.1%}")
     print(f"gita adoption rate                   : {report['adoption_rate']:.0%}")
+
+    comparisons = report.get("arm_comparisons") or []
+    if len(comparisons) > 1:
+        print("-" * 66)
+        print("within this sweep, so both arms met the same weather:")
+        for row in comparisons:
+            interval = row["interval"]
+            span = ("n/a" if not interval
+                    else f"[{interval[0]:+.1%}, {interval[1]:+.1%}]")
+            verdict = "measured" if row["separated"] else "indistinguishable"
+            print(f"  {row['baseline']:>10} -> {row['treatment']:<10}"
+                  f" {row['reduction']:+7.1%}  {span:<20} {verdict}")
+
     print(f"\nartifacts: {root}")
     return 0
 

@@ -12,7 +12,7 @@ import pytest
 
 from gita.eval.logs import parse_usage
 from gita.eval.runner import ArmConfig, build_command, build_env
-from gita.eval.score import recall, score_run, summarise_runs
+from gita.eval.score import compare_arms, recall, score_run, summarise_runs
 from gita.eval.spec import Task, load_tasks
 
 MANIFEST = """
@@ -389,3 +389,89 @@ class TestTheHeadlineAndItsIntervalAreTheSameQuantity:
         summary = summarise_runs(self.runs())
         assert (summary["reduction"]["credits"]
                 == pytest.approx(summary["reduction"]["credits_cache_clean"]))
+
+class TestArmsThatSharedASweepCanBeCompared:
+    """Two sweeps cannot answer "did this change help".
+
+    Iteration 15 read 9 points below iteration 14, but almost all of the
+    movement was in the baseline arm, which no edit to gita can reach, and
+    bootstrapping the difference between the sweeps gave [-9, +26] points.
+    Arms that ran inside one sweep shared its weather, so the comparison
+    between them is the one worth reading.
+    """
+
+    def runs(self, arms: dict[str, float], tasks=8, reps=3):
+        import random
+        rng = random.Random(11)
+        out = []
+        for t in range(tasks):
+            base = 40 + rng.uniform(-15, 15)   # tasks differ a lot
+            for rep in range(reps):
+                for arm, factor in arms.items():
+                    out.append({
+                        "task": f"t{t}", "arm": arm, "recall": 1.0,
+                        "used_gita": arm != "git",
+                        "credits": base * factor, "turns": 3,
+                        "tool_tokens": 10, "prompt_tokens": 1000,
+                        "cached_tokens": 0, "cache_creation_tokens": 10,
+                    })
+        return out
+
+    def pair(self, rows, baseline, treatment):
+        for row in compare_arms(rows):
+            if row["baseline"] == baseline and row["treatment"] == treatment:
+                return row
+        raise AssertionError(f"no comparison for {baseline} -> {treatment}")
+
+    def test_a_third_arm_is_compared_against_the_baseline(self):
+        rows = self.runs({"git": 1.0, "gita": 0.8, "after": 0.6})
+        assert self.pair(rows, "git", "after")["reduction"] == pytest.approx(0.4)
+
+    def test_two_gita_builds_are_compared_with_each_other(self):
+        """The question is 'did the change help', not 'is gita cheaper'."""
+        rows = self.runs({"git": 1.0, "gita": 0.8, "after": 0.6})
+        assert self.pair(rows, "gita", "after")["reduction"] == pytest.approx(0.25)
+
+    def test_an_unchanged_build_is_reported_as_indistinguishable(self):
+        rows = self.runs({"git": 1.0, "gita": 0.8, "after": 0.8})
+        comparison = self.pair(rows, "gita", "after")
+        assert comparison["reduction"] == pytest.approx(0.0)
+        assert comparison["separated"] is False
+
+    def test_a_real_improvement_is_reported_as_measured(self):
+        rows = self.runs({"git": 1.0, "gita": 0.8, "after": 0.5})
+        assert self.pair(rows, "gita", "after")["separated"] is True
+
+    def test_a_two_arm_sweep_still_reports_one_comparison(self):
+        rows = self.runs({"git": 1.0, "gita": 0.8})
+        assert len(compare_arms(rows)) == 1
+
+    def test_the_summary_carries_the_comparisons(self):
+        rows = self.runs({"git": 1.0, "gita": 0.8, "after": 0.6})
+        assert len(summarise_runs(rows)["arm_comparisons"]) == 3
+
+
+class TestAnArmCarriesItsOwnBuild:
+    def test_a_variant_puts_its_own_gita_on_path(self, tmp_path):
+        from gita.eval.runner import ArmConfig, build_env
+
+        mine = tmp_path / "mine"
+        mine.mkdir()
+        env = build_env(ArmConfig.variant("after", mine), "t", "r", tmp_path,
+                        tmp_path / "shims", tmp_path / "default-bin")
+        assert str(mine) in env["PATH"]
+        assert str(tmp_path / "default-bin") not in env["PATH"]
+
+    def test_the_default_arm_uses_the_harness_build(self, tmp_path):
+        from gita.eval.runner import ArmConfig, build_env
+
+        env = build_env(ArmConfig.gita(), "t", "r", tmp_path,
+                        tmp_path / "shims", tmp_path / "default-bin")
+        assert str(tmp_path / "default-bin") in env["PATH"]
+
+    def test_the_baseline_arm_never_sees_gita(self, tmp_path):
+        from gita.eval.runner import ArmConfig, build_env
+
+        env = build_env(ArmConfig.git(), "t", "r", tmp_path,
+                        tmp_path / "shims", tmp_path / "default-bin")
+        assert str(tmp_path / "default-bin") not in env["PATH"]
