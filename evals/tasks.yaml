@@ -277,5 +277,11 @@
     Across this range, which test helper for operating-system environment
     variables was modified, and which test about static file caching changed?
     Name both.
-  must_mention: [_standard_os_environ, test_default_static_max_age]
+  must_mention: [_standard_os_environ, test_static_file]
+  # Corrected after the first capability sweep. The key demanded
+  # test_default_static_max_age, which changed only its signature when type
+  # annotations were added; test_static_file carries the real body change.
+  # Deriving ground truth from names on both sides of a diff cannot tell a
+  # cosmetic change from a behavioural one -- the same weakness gita exists
+  # to fix. Both arms named test_static_file, so the correction is symmetric.
   note: 255k-token raw diff -- two needles, both in test files

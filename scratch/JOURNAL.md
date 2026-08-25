@@ -375,3 +375,59 @@ Written before the run, so the result can falsify it:
 
 If fallback tokens do not move, the notice is not being read, and the change
 should be reverted rather than explained.
+
+---
+
+## The capability cohort -- first result (2026-08-25)
+
+Five tasks over ranges whose raw diff does not fit in a context window (80k to
+340k tokens, 52 to 98 files), asking questions whose answers are verified present
+in the raw diff. Two repetitions, twenty runs.
+
+| | normal cohort (18 tasks) | capability cohort (5 tasks) |
+| --- | ---: | ---: |
+| git recall | 99.5% | **77%** |
+| gita recall | 99.7% | **93%** |
+| gap | +0.2pt | **+16.7pt** |
+
+**The instrument does what it was built to do.** On ordinary commits the two arms
+are indistinguishable on quality and the only question is price. On changes too
+large to read, a gap opens. git returned nothing usable twice -- `gin-range-
+interface` and `ripgrep-range-triage`, recall 0 -- and gita never did.
+
+Bootstrapped over tasks the gap is **[+0.0%, +36.7%]**: not separated from zero
+at five tasks, but in no resample did git come out ahead. Directional, not yet
+measured. The remedy is more tasks, not more repetitions, for the usual reason.
+
+### The finding that complicates the story
+
+gita used **fewer turns** (6.7 against 8.0) and **fewer prompt tokens** (827k
+against 1,036k) and still cost **more credits**: 114.9 against 92.6.
+
+The mechanism is cache writes. Median cache creation was 128,424 tokens for gita
+against 43,407 for git, and a cache write is priced 12.5x a read. The baseline
+arm reads one enormous diff, pays for it once, and re-reads it from cache on
+every later turn. The gita arm makes several different calls, each returning
+novel text that has to be written to cache before it can be read back.
+
+So on large changes gita currently buys better answers in fewer turns with more
+money. That is a real trade and it should be stated as one rather than hidden
+behind the recall number. It also names its own fix: fewer, larger gita calls
+would cache like the baseline does.
+
+### A correction, declared
+
+`flask-range-tests` scored 50% on both arms. The key demanded
+`test_default_static_max_age`; the range changes only its *signature*, when type
+annotations were added. `test_static_file` carries the real body change, and both
+arms named it.
+
+The ground truth had been derived by taking identifiers that appear on both the
+`+` and `-` sides of the raw diff -- which cannot tell a cosmetic change from a
+behavioural one. That is precisely the weakness gita exists to fix, reproduced by
+hand in the answer key. Corrected to `test_static_file`; re-scoring the stored
+answers moves git 50% to 100% and gita 50% to 100%, so it cannot favour either.
+
+### Next
+
+Ten more capability tasks. Five resolves +/-18 points on recall; the gap is 17.
