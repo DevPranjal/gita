@@ -3,7 +3,26 @@ import subprocess
 import pytest
 
 from gita.entities.store import TREES
+from gita.telemetry.events import ENV_SINK
 from gita.vcs.git import Repo
+
+
+@pytest.fixture(autouse=True, scope="session")
+def _telemetry_goes_nowhere_real(tmp_path_factory):
+    """Tests must not write into whatever log the developer is collecting.
+
+    They had been: a usage report over a real week counted 20 failed calls, all
+    of them tests deliberately exercising error paths against pytest fixtures.
+    Measurement that its own test suite contaminates cannot be trusted.
+    """
+    import os
+    previous = os.environ.get(ENV_SINK)
+    os.environ[ENV_SINK] = str(tmp_path_factory.mktemp("telemetry") / "usage.jsonl")
+    yield
+    if previous is None:
+        os.environ.pop(ENV_SINK, None)
+    else:
+        os.environ[ENV_SINK] = previous
 
 
 @pytest.fixture(autouse=True)
