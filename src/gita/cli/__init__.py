@@ -23,7 +23,7 @@ from ..context.answer import DEFAULT_BUDGET, compose, material_patch
 from ..context.layers import fit_text
 from ..context.resolve import Ambiguous, resolve_entity
 from ..revisions import diff_revisions
-from ..telemetry import record, timed
+from ..telemetry import annotate, record, timed
 from ..vcs.git import GitError, Repo
 from . import render
 
@@ -226,9 +226,38 @@ def main(argv: list[str] | None = None, out: TextIO | None = None) -> int:
         "output_tokens": count_tokens(tee.text),
         "latency_ms": elapsed.ms,
         "ok": code == 0,
+        "exit_code": code,
+        "error": None if code == 0 else EXIT_REASON.get(code, "failed"),
         "budget": getattr(args, "budget", None),
+        "options": _options_used(args),
     })
     return code
+
+
+#: Which optional behaviour a call actually asked for. `savings` was removed
+#: after the logs showed 0 uses in 1,209 invocations; nothing else can be
+#: retired on evidence without recording this.
+_OPTIONS = ("filter", "interface_only", "patch", "brief", "as_json", "depth")
+
+
+def _options_used(args) -> list[str]:
+    used = []
+    for name in _OPTIONS:
+        value = getattr(args, name, None)
+        if value not in (None, False, ""):
+            used.append(name)
+    return used
+
+
+#: A failure is only actionable once the log says which kind it was. `ok: false`
+#: on its own turned twenty recorded failures into a mystery.
+EXIT_REASON = {
+    2: "usage",
+    3: "bad-revision-or-repo",
+    5: "ambiguous-entity",
+    6: "budget-too-small",
+    130: "interrupted",
+}
 
 
 def _dispatch(command, out, repo, args, colour, parser) -> int:
@@ -309,6 +338,13 @@ def _cmd_diff(out, repo, args, colour) -> int:
         "noise_filtered": len(changeset) - len(changeset.material()),
         "changes": [render.change_payload(c) for c in selected.material()],
     }
+    # An incomplete answer is the moment an agent decides whether to trust gita
+    # or go and read the file itself. The log has to be able to tell them apart.
+    annotate(truncated=result.truncated,
+             files=selected.files_changed,
+             changes=len(selected.material()),
+             detailed=len(result.detailed),
+             noise_filtered=len(changeset) - len(changeset.material()))
     _emit(out, payload, render.render_answer(result.text, colour), args.as_json)
     return 0
 

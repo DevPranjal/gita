@@ -276,3 +276,112 @@ class TestCallerAttribution:
         written = json.loads(sink.read_text(encoding="utf8").strip())
         assert written["via"] == "test-harness"
         assert written["cwd"]
+
+class TestAnAnswerDescribesItself:
+    """A report could not tell "gita was concise" from "gita gave up".
+
+    In the evaluation, 87% of the treatment arm's tool output came from falling
+    back to raw git after an answer stopped early. Nothing in the log said an
+    answer had stopped early, so the same question could not be asked of real
+    usage.
+    """
+
+    def run(self, repo, path, monkeypatch, *argv):
+        import io
+
+        from gita.cli import main
+        monkeypatch.setenv("GITA_TELEMETRY", str(path))
+        main(["-C", str(repo.root), *argv], out=io.StringIO())
+        return load_events(path)[-1]
+
+    def test_a_diff_records_whether_it_was_complete(self, repo, tmp_path, monkeypatch):
+        """A clean tree has nothing to leave out."""
+        written = self.run(repo, tmp_path / "t.jsonl", monkeypatch, "diff")
+        assert written["truncated"] is False
+
+    def test_a_starved_diff_records_that_it_was_not(self, repo, tmp_path, monkeypatch):
+        written = self.run(repo, tmp_path / "t.jsonl", monkeypatch,
+                           "diff", "HEAD^", "HEAD", "--budget", "60")
+        assert written["truncated"] is True
+
+    def test_a_diff_records_its_shape(self, repo, tmp_path, monkeypatch):
+        written = self.run(repo, tmp_path / "t.jsonl", monkeypatch,
+                           "diff", "HEAD^", "HEAD")
+        assert written["files"] >= 1
+        assert written["changes"] >= 1
+        assert "noise_filtered" in written
+
+    def test_annotations_do_not_leak_into_the_next_event(self, repo, tmp_path,
+                                                        monkeypatch):
+        """A stale `truncated` would silently misattribute the following call."""
+        path = tmp_path / "t.jsonl"
+        self.run(repo, path, monkeypatch, "diff", "--budget", "60")
+        written = self.run(repo, path, monkeypatch, "show", "app.py::Store::get")
+        assert written["tool"] == "show"
+        assert "truncated" not in written or written["truncated"] is None
+
+
+class TestFailuresSayWhy:
+    """`ok: false` alone turned twenty recorded failures into a mystery."""
+
+    def run(self, path, monkeypatch, *argv):
+        import io
+
+        from gita.cli import main
+        monkeypatch.setenv("GITA_TELEMETRY", str(path))
+        code = main(list(argv), out=io.StringIO())
+        return code, load_events(path)[-1]
+
+    def test_a_bad_revision_is_named(self, repo, tmp_path, monkeypatch):
+        _code, written = self.run(tmp_path / "t.jsonl", monkeypatch,
+                                  "-C", str(repo.root), "diff", "nope123")
+        assert written["ok"] is False
+        assert written["error"] == "bad-revision-or-repo"
+
+    def test_a_starved_budget_is_named(self, repo, tmp_path, monkeypatch):
+        """`show` has no raw-diff cap to fall back on, so the budget really binds."""
+        _code, written = self.run(tmp_path / "t.jsonl", monkeypatch,
+                                  "-C", str(repo.root), "show", "nosuchentity")
+        assert written["ok"] is False
+        assert written["error"]
+
+    def test_success_carries_no_error(self, repo, tmp_path, monkeypatch):
+        _code, written = self.run(tmp_path / "t.jsonl", monkeypatch,
+                                  "-C", str(repo.root), "diff")
+        assert written["ok"] is True
+        assert written["error"] is None
+
+
+class TestWhoConsumedTheOutput:
+    """`via` is inferred from environment markers, which are process-wide, so a
+    hand-typed command in an agent's terminal was logged as agent traffic."""
+
+    def test_a_redirected_stream_is_not_interactive(self, tmp_path, monkeypatch):
+        sink = tmp_path / "t.jsonl"
+        events.record({"arm": "gita", "tool": "diff"}, path=sink)
+        assert json.loads(sink.read_text(encoding="utf8").strip())["interactive"] is False
+
+    def test_options_used_are_recorded(self, repo, tmp_path, monkeypatch):
+        """`savings` was retired on 0 uses in 1,209 calls; nothing else can be."""
+        import io
+
+        from gita.cli import main
+        path = tmp_path / "t.jsonl"
+        monkeypatch.setenv("GITA_TELEMETRY", str(path))
+        main(["-C", str(repo.root), "diff", "--interface-only"], out=io.StringIO())
+        assert "interface_only" in load_events(path)[-1]["options"]
+
+
+class TestTheLogCanBeReadLater:
+    def test_every_event_declares_its_schema(self, tmp_path):
+        sink = tmp_path / "t.jsonl"
+        events.record({"arm": "gita", "tool": "diff"}, path=sink)
+        assert json.loads(sink.read_text(encoding="utf8").strip())["v"] == events.SCHEMA
+
+    def test_events_are_ordered_within_a_session(self, tmp_path):
+        """Timestamps collide at millisecond resolution on fast calls."""
+        sink = tmp_path / "t.jsonl"
+        for _ in range(3):
+            events.record({"arm": "gita", "tool": "diff"}, path=sink)
+        seqs = [e["seq"] for e in load_events(sink)]
+        assert seqs == sorted(seqs) and len(set(seqs)) == 3

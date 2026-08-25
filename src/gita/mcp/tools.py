@@ -44,12 +44,19 @@ def _guard(fn: Callable[..., dict]) -> Callable[..., dict]:
             except (OSError, ValueError) as error:
                 result = {"error": f"{type(error).__name__}: {error}"}
 
+        error = result.get("error")
         record({
             "arm": "gita",
             "tool": f"gita_{fn.__name__.removesuffix('_tool')}",
+            # MCP calls were logging no repo at all, so nothing in a report
+            # could be grouped by repository.
+            "repo": kwargs.get("repo_path") or (args[0] if args else None),
             "output_tokens": count_tokens(json.dumps(result, default=str)),
             "latency_ms": elapsed.ms,
-            "ok": "error" not in result,
+            "ok": error is None,
+            "error": str(error).split(":")[0] if error else None,
+            "truncated": result.get("truncated"),
+            "files": result.get("files_changed"),
         })
         return result
 

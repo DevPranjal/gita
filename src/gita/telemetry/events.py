@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import json
 import os
+import sys
+import threading
 import time
 import uuid
 from datetime import datetime, timezone
@@ -23,6 +25,10 @@ ENV_SESSION = "GITA_SESSION"
 ENV_TASK = "GITA_TASK"
 ENV_ARM = "GITA_ARM"
 ENV_VIA = "GITA_VIA"
+
+#: Bumped when the shape of a record changes, so a report can read an old log
+#: without guessing which fields were simply not collected yet.
+SCHEMA = 2
 
 #: Which layer each tool exposes, for the drill-depth metric.
 TOOL_LAYER = {
@@ -37,6 +43,36 @@ TOOL_LAYER = {
 }
 
 _PROCESS_SESSION = f"proc-{uuid.uuid4().hex[:12]}"
+
+_LOCK = threading.Lock()
+_SEQ = 0
+#: Facts a command knows about its own answer but `record` cannot see, since it
+#: runs after dispatch with nothing but the exit code and the emitted text.
+#: Merged into the next record and then cleared.
+_PENDING: dict = {}
+
+
+def annotate(**facts) -> None:
+    """Attach facts to the event this process is about to record.
+
+    Whether an answer was truncated is the difference between "gita was concise"
+    and "gita gave up and the agent went to read the file" -- and only the
+    command that composed it knows.
+    """
+    _PENDING.update({k: v for k, v in facts.items() if v is not None})
+
+
+def interactive() -> bool:
+    """Whether a person is reading this, rather than a program consuming it.
+
+    `via` is inferred from environment markers, which are set process-wide and
+    so mark a hand-typed command in an agent's terminal as agent traffic. A
+    redirected stream is a fact about this call.
+    """
+    try:
+        return sys.stdout.isatty()
+    except (AttributeError, ValueError):  # a closed or replaced stream
+        return False
 
 
 def sink_path(path: str | Path | None = None) -> Path | None:
@@ -77,22 +113,33 @@ def caller() -> str:
 
 def record(event: dict, path: str | Path | None = None) -> bool:
     """Append one event. Returns False when telemetry is off or unwritable."""
+    global _SEQ
     target = sink_path(path)
     if target is None:
+        _PENDING.clear()
         return False
+
+    with _LOCK:
+        _SEQ += 1
+        seq = _SEQ
 
     payload = {
         "ts": datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
         "session": session_id(),
+        "seq": seq,
+        **_PENDING,
         **event,
     }
+    _PENDING.clear()
     if ENV_TASK in os.environ:
         payload.setdefault("task", os.environ[ENV_TASK])
     if ENV_ARM in os.environ:
         payload.setdefault("arm", os.environ[ENV_ARM])
     payload.setdefault("via", caller())
     payload.setdefault("cwd", _cwd())
+    payload.setdefault("interactive", interactive())
     payload.setdefault("layer", TOOL_LAYER.get(str(payload.get("tool", ""))))
+    payload.setdefault("v", SCHEMA)
 
     try:
         target.parent.mkdir(parents=True, exist_ok=True)
