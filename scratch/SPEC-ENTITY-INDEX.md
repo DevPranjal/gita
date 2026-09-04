@@ -193,6 +193,11 @@ Inside the git directory the index is untracked by construction, invisible to
 ```sql
 PRAGMA journal_mode = WAL;      -- readers never block on the builder
 PRAGMA synchronous  = NORMAL;   -- a derived cache does not need O_SYNC per commit
+PRAGMA foreign_keys = ON;       -- off by default; the constraints below are
+                                -- otherwise parsed and ignored. Per-connection,
+                                -- and silently ignored if issued inside a
+                                -- transaction, so it must be set immediately
+                                -- after connect, on every open. See WS-2 §3.
 PRAGMA user_version = 1;        -- schema version; a mismatch forces rebuild
 
 -- Interning. Paths and names repeat across millions of events.
