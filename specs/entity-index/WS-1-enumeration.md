@@ -1,7 +1,8 @@
 # WS-1 — Enumeration
 
-**Delivers:** one bulk `git log` per history walk instead of a `git diff` per
-commit. ~4x on every command that walks history, with no index involved.
+**Delivers:** one bulk `git log` per history walk instead of one `git diff` per
+merge commit. Measured 2.1x on `series`, 2.8x on `entity_history`, over
+merge-heavy history. No index involved.
 
 **Depends on:** nothing. Ships first.
 
@@ -47,6 +48,32 @@ Separately, `history.commits()` does not use `Repo.walk` at all — it runs its 
 `git log` for `(sha, subject, date)` and leaves `diff_revisions` to call
 `changed_files` per pair. That is the 79.5 ms.
 
+> **Correction, made during implementation.** The paragraph above is wrong, and
+> so is the attribution of 79.5 ms/commit to the history path. `series()` has
+> always routed through `repo.walk()`; `commits()` is used only by
+> `series(batched=False)`, the unbatched reference path. The 79.5 ms came from
+> `probe_live_cost.py`, a loop calling `diff_revisions` directly — the
+> single-diff path.
+>
+> The real defect is only the merge fallback, measured directly on flask with
+> `scratch/probe_ws1_baseline.py`:
+>
+> | path | git processes | time |
+> | --- | ---: | ---: |
+> | `series(limit=100)` | **42** — 41 of them the fallback | 5.81 s |
+> | `entity_history` | 16 — 14 fallback | 1.84 s |
+
+## 2a. Result
+
+| path | before | after | |
+| --- | ---: | ---: | --- |
+| `series(limit=100)` | 42 processes, 5.81 s | **1 process, 2.72 s** | 2.1x |
+| `entity_history` | 16 processes, 1.84 s | **3 processes, 0.65 s** | 2.8x |
+
+Below the ~4x in **Delivers** above, which was extrapolated from the wrong
+measurement. The honest number is 2–3x on merge-heavy history, and nothing on
+linear history, where there was never a fallback to remove.
+
 ## 3. Interface
 
 ```python
@@ -58,17 +85,14 @@ class Repo:
 
     @property
     def supports_diff_merges(self) -> bool:
-        """git >= 2.31. Cached per Repo."""
+        """git >= 2.31. Probed once per process, cached per Repo."""
 ```
 
-```python
-# history.py
-def commits(repo, since=None, until="HEAD", limit=20, paths=None) -> list[CommitRecord]
-```
-
-`commits()` returns `CommitRecord` — with `files` — instead of
-`(sha, subject, date)` triples, so callers can hand `changed=record.files` to
-`diff_revisions`, which already accepts it.
+`history.commits()` is **not** changed. The original plan had it return
+`CommitRecord`, on the mistaken premise that the history path went through it.
+It is used only by `series(batched=False)`, the unbatched reference path that
+exists so tests can prove the two agree. Widening its return type would be churn
+with no caller to benefit.
 
 **No output changes anywhere.** That is what makes the tests in §4 necessarily
 mechanical.
@@ -278,10 +302,13 @@ Written after the tests, and only as much as the tests demand.
 
 ## 7. Definition of done
 
-- [ ] Cycles 0–8 green
-- [ ] `git_calls.of("diff") == 0` for any pure history walk
-- [ ] existing suite green, no output diffs
-- [ ] `probe_live_cost.py` re-run and recorded: expect ~106 ms → ~27 ms per commit
+- [x] Cycles 0–8 green — 28 tests in `tests/test_enumeration.py`
+- [x] `git_calls.of("diff") == 0` for any pure history walk
+- [x] existing suite green, no output diffs — 563 passed
+- [x] equivalence holds on all five corpus repositories
+- [x] `probe_ws1_baseline.py` re-run and recorded (§2a)
+- [x] hardened beyond the original cycles: octopus merges, repositories with no
+      commits, a missing git binary, and `first_parent=True`
 
 ## 8. Risks
 

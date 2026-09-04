@@ -34,6 +34,73 @@ def _isolated_tree_store():
 
 
 @pytest.fixture
+def git_calls(monkeypatch):
+    """Record every git subprocess issued through ``Repo._run``.
+
+    WS-1 changes cost, not output, so its tests have to assert on the mechanism.
+    Elapsed time is too noisy to assert on; the number of processes is exact.
+    """
+    recorded: list[tuple[str, ...]] = []
+    original = Repo._run
+
+    def recording(self, *args, check=True):
+        recorded.append(args)
+        return original(self, *args, check=check)
+
+    monkeypatch.setattr(Repo, "_run", recording)
+
+    class Calls:
+        argv = recorded
+
+        def of(self, subcommand: str) -> int:
+            return sum(1 for args in recorded if args and args[0] == subcommand)
+
+        def clear(self) -> None:
+            recorded.clear()
+
+    return Calls()
+
+
+@pytest.fixture
+def merge_repo(tmp_path):
+    """A history that is mostly merges, as real projects are.
+
+    Flask is 110 merges in 150 commits, and git prints no file list for a merge,
+    so a linear fixture would never exercise the path that dominates.
+    """
+
+    def run(*args):
+        subprocess.run(["git", "-C", str(tmp_path), *args], check=True,
+                       capture_output=True)
+
+    def write(name, body):
+        (tmp_path / name).write_text(body)
+
+    write("app.py", "def handle(request):\n    return 1\n")
+    write("util.py", "def helper():\n    return 0\n")
+    run("init", "-q", "-b", "main")
+    run("config", "user.email", "t@example.com")
+    run("config", "user.name", "t")
+    run("add", "-A")
+    run("commit", "-q", "-m", "first")
+
+    for n in range(1, 4):
+        run("checkout", "-q", "-b", f"feature-{n}")
+        write("app.py", f"def handle(request):\n    return {n + 1}\n")
+        write(f"mod{n}.py", f"def added_{n}():\n    return {n}\n")
+        run("add", "-A")
+        run("commit", "-q", "-m", f"work on feature {n}")
+        run("checkout", "-q", "main")
+        # --no-ff guarantees a merge commit even when the branch fast-forwards.
+        run("merge", "-q", "--no-ff", "-m", f"merge feature {n}", f"feature-{n}")
+
+    write("util.py", "def helper():\n    return 99\n")
+    run("add", "-A")
+    run("commit", "-q", "-m", "direct commit on main")
+    return Repo(tmp_path)
+
+
+@pytest.fixture
 def repo(tmp_path):
     """A small git repo with two commits and a variety of change kinds."""
 

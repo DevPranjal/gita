@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import re
 import subprocess
 from dataclasses import dataclass, field
+from functools import lru_cache
 from pathlib import Path
 
 from ..entities.languages import is_supported
@@ -42,6 +44,29 @@ class ChangedFile:
 
 class GitError(RuntimeError):
     pass
+
+
+#: `--diff-merges` arrived in git 2.31. Below it, merges need an explicit diff.
+_DIFF_MERGES_SINCE = (2, 31)
+_VERSION = re.compile(r"git version (\d+)\.(\d+)")
+
+
+def _supports_diff_merges(version_output: str) -> bool:
+    found = _VERSION.search(version_output)
+    if found is None:
+        return False
+    return (int(found.group(1)), int(found.group(2))) >= _DIFF_MERGES_SINCE
+
+
+@lru_cache(maxsize=1)
+def _git_version() -> str:
+    """Probed once per process: the binary cannot change under us mid-run."""
+    try:
+        result = subprocess.run(["git", "--version"], capture_output=True,
+                                check=False)
+    except OSError:
+        return ""
+    return result.stdout.decode("utf8", "replace")
 
 
 #: Record separator. Note it is *not* safe to find these with `splitlines()`:
@@ -165,6 +190,18 @@ class Repo:
     def __init__(self, root: str | Path):
         self.root = Path(root)
         self._objects = _ObjectReader(self.root)
+        self._diff_merges: bool | None = None
+
+    @property
+    def supports_diff_merges(self) -> bool:
+        """Whether `git log` can list a merge's files against its first parent.
+
+        Without it every merge costs an extra process, and merges are the common
+        case -- flask is 110 of 150 commits.
+        """
+        if self._diff_merges is None:
+            self._diff_merges = _supports_diff_merges(_git_version())
+        return self._diff_merges
 
     def _run(self, *args: str, check: bool = True) -> bytes:
         result = subprocess.run(
@@ -195,16 +232,22 @@ class Repo:
             return self._run("show", f"{rev}:{path}", check=False) or None
 
     def walk(self, since: str | None = None, until: str = "HEAD",
-             limit: int = 20, paths: list[str] | None = None) -> list["CommitRecord"]:
+             limit: int = 20, paths: list[str] | None = None,
+             first_parent: bool = False) -> list["CommitRecord"]:
         """Commits with their first parent and changed files, in one git call.
 
         Asking per commit cost two processes each. `git log --name-status` gives
-        the same information in one pass. Merges are the exception: git prints no
-        file list for them, so those fall back to an explicit diff.
+        the same information in one pass -- except for merges, which git omits
+        unless asked. `--diff-merges=first-parent` asks, which matters because
+        merges are the common case: flask is 110 of 150 commits, and each one
+        used to cost a process.
         """
         span = [f"{since}..{until}"] if since else [until]
         limit_args = ["--", *paths] if paths else []
+        merge_args = ["--diff-merges=first-parent"] if self.supports_diff_merges else []
+        walk_args = ["--first-parent"] if first_parent else []
         raw = self.text("log", f"--format={_WALK_FORMAT}", "--name-status",
+                        *merge_args, *walk_args,
                         f"-n{limit}", *span, *limit_args, check=False)
 
         records: list[CommitRecord] = []
@@ -227,10 +270,12 @@ class Repo:
                     record.files.append(entry)
             records.append(record)
 
-        for record in records:
-            if record.is_merge:
-                record.files = self.changed_files(record.parent, record.sha,
-                                                  supported_only=False, paths=paths)
+        if not self.supports_diff_merges:
+            for record in records:
+                if record.is_merge:
+                    record.files = self.changed_files(record.parent, record.sha,
+                                                      supported_only=False,
+                                                      paths=paths)
         return records
 
     def resolve(self, rev: str | None) -> str:

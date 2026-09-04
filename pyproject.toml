@@ -57,3 +57,6 @@ include = ["src/gita", "tests", "README.md", "LICENSE", "CHANGELOG.md"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+    "slow: runs against the checked-out corpus; excluded with -m 'not slow'",
+]
