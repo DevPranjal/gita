@@ -1,7 +1,10 @@
 # gita — first principles
 
-What this product is for the next five years, and why. Written 2026-09-04 on
-`main`, with the measurements that justify it.
+**gita is the layer that lets software agents understand changes and their history, without repeatedly reconstructing that understanding from files. Git remains the source of truth.**
+
+What this product is for, and why. Written 2026-09-04; revised 2026-09-11.
+Measurements, design goals and commercial hypotheses are distinct: evidence for
+one is not proof of the others.
 
 The tactical list of "features to reach parity with git" lives in
 [ROADMAP.md](ROADMAP.md). This document is the layer underneath it: the model
@@ -16,24 +19,28 @@ commit. Content-addressed, deterministic, cheap to verify. Everything valuable
 that followed (GitHub, CI, code review, bisect) was built on that model, not on
 the porcelain. The porcelain is famously bad and it did not matter.
 
-For two years gita has been building *commands on git's object model*. That is
-why it is a utility and not infrastructure, and it is why it does not sell.
+gita began with commands on git's object model. A narrow tool can be valuable;
+more Git coverage or more commands do not, by themselves, make a product
+sellable. Breadth matters only when it completes a workflow customers care
+about. Our opportunity is to reduce repeated investigation and mistakes when
+changing software, not to match Git command for command.
 
-**The transformational move is to ship gita's own object model.**
+**The proposed foundation is an entity-level model built on top of Git.**
 
 | git | gita |
 | --- | --- |
 | blob — bytes | **entity** — a named thing with durable identity |
 | tree — a directory | **version** — an entity at one point in history, four hashes |
 | commit — a snapshot | **event** — a typed transition between two versions |
-| *(none)* | **edge** — a proven relation between entities |
+| *(none)* | **edge** — a relation between entities, with supporting evidence |
 | *(none)* | **note** — a durable fact anchored to an entity |
 
 Every feature in this document is one of five operations over that model. That
 is the test for whether something belongs in gita at all.
 
-> Git stores files and reconstructs meaning on demand, by guessing.
-> gita computes meaning once and stores it.
+> Git preserves repository content and history as the source of truth.
+> gita derives reusable structural context, with traceable evidence and explicit
+> uncertainty.
 
 ---
 
@@ -73,7 +80,7 @@ question re-parses every file from scratch.
 
 - 150 commits — 28 seconds
 - 1,000 commits — ~3 minutes
-- a year of a busy repo — unusable
+- a long history in a busy repo — impractical to scan for every question
 
 No product can be built on a substrate where every question costs a full walk.
 This is not a performance nit; it is the reason the query layer does not exist.
@@ -117,22 +124,27 @@ merge — all of which are *joins on the identity*.
 with a rename.
 **Status:** computed per-commit today, then thrown away (§1.1).
 
-### P2 — Computed, never inferred
+### P2: Evidence before assertion
 
-*Every fact gita states must be derivable by parsing and hashing.*
+*Our promise is traceable evidence and explicit uncertainty, not infallibility.*
 
-This is the commercial differentiator, and it becomes more valuable, not less, as
-everything around it becomes probabilistic. In a world where every other tool
-might be confidently wrong, being the one component that cannot be is a position
-worth defending.
+Determinism means a computation is repeatable, not that its conclusion is
+correct. A repeatable matcher can repeatedly connect the wrong functions.
+Parsing and hashing provide structural evidence; they do not prove logical
+identity, behavioral equivalence or program correctness.
 
-The discipline is already in the codebase: `signature_changed` is not a guess, it
-is `signature_hash` inequality. Extend that everywhere.
+Every answer should expose its source, scope and limitations. Distinguish direct
+observations from inferred relationships, preserve the matching evidence, and
+report ambiguity rather than silently selecting an identity. For example,
+`signature_hash` inequality establishes that the normalized signature
+representation differs; it does not by itself establish that a caller breaks.
 
-**Generates:** provable conflict classification, verifiable review, safety gates
-you can put in CI without a human double-checking them.
-**Forbids:** embedding search, model-written merge resolutions, natural-language
-query, "probably related" anything. Discussed further in §5.
+**Generates:** inspectable change classification, evidence-backed review,
+conflict triage, and checks with explicitly bounded guarantees.
+**Forbids:** presenting heuristic matches as verified identity, hiding missing
+evidence, or treating a structural comparison as proof that a change is safe.
+The boundary between suggestions and verified facts matters more than the
+technology used to produce them; product scope choices are discussed in §5.
 
 ### P3 — History is a database, not a log
 
@@ -142,8 +154,7 @@ The entity index is not an optimisation. It is the thing that makes the other
 principles expressible. A fact you cannot look up in constant time is a fact you
 do not really have.
 
-**Generates:** the index, the query layer, ownership, API timelines, everything
-in Year 2.
+**Generates:** the index, the query layer, ownership and API timelines.
 **Forbids:** features whose only implementation is "walk all of history at
 runtime".
 
@@ -177,12 +188,14 @@ with use, and the only part a competitor cannot ship by writing better code.
 
 ---
 
-## 3. The five-year arc
+## 3. The core capabilities
 
-Each year is a layer, and each layer is only buildable on the one beneath. The
-ordering is not a preference; it is a dependency graph.
+These are capabilities, not a calendar-based roadmap. Shared foundations make
+them easier to build, but each capability must earn its place through a useful
+workflow and measurable evidence. Validate actual dependencies rather than
+assuming every earlier capability must be complete before exploring the next.
 
-### Year 1 — The substrate: identity and the index
+### Identity and the index
 
 **Ship:** a persistent, incremental, content-addressed entity index in
 `.git/gita/`, holding every entity, every version, and every event, with
@@ -198,43 +211,50 @@ instant". The data model is the product; the speed is the packaging.
 **Kill criterion:** warm queries under 100 ms on a 10,000-commit repository, and
 identity that survives a rename-plus-move on a corpus of 100 real refactors with
 recall above 0.9. Below that, the identity is not durable enough to build on and
-the whole arc needs rethinking.
+the foundation needs rethinking.
 
-### Year 2 — The query layer and provable merge
+### Structured queries and merge analysis
 
 **`gita query`** — structured, not natural language. "Signature changes to
 exported entities since v2.0." "Every entity this branch touches that `main` also
-touched." Deterministic, exact, fast because of Year 1.
+touched." Queries should return the indexed evidence quickly and state the
+history, language support and identity assumptions they cover.
 
-**`gita merge`** — the provable-conflict work from ROADMAP §5.4, now cheap
-because identity is precomputed. Classify every contested entity as *cosmetic*
-(content hash equal), *disjoint* (different entities, same file), *renamed*
-(matched by identity), or *contested* (present three ways, resolve nothing).
-Auto-resolve only what is proven, refuse the rest, and never write code.
+**`gita merge`** — structural merge analysis, building on ROADMAP §5.4 and the
+identity model. Present the base and both branches, distinguish same-entity from
+different-entity edits, expose matching evidence for renames, and flag equal
+normalized content as a candidate for cosmetic review. These observations help
+triage a conflict; they are not verdicts that the result is safe.
 
-Git flags conflicts when context lines shift. We can prove that class away by
-hash. That is a checkable advantage, not a claim — and it is the single most
-painful unsolved problem in the workflow.
+**Hash equality does not prove a merge is safe.** It compares the representation
+being hashed, not program behavior. Different functions can interact even when
+their edits do not overlap, and normalization may omit information relevant to
+tools or execution. Structural evidence must not authorize an automatic
+resolution on its own. Start with read-only analysis; any future resolution
+mechanism needs its own bounded correctness contract, validation and approval.
 
 **Kill criterion:** if fewer than 30% of git's conflicts across 100 real merges
-are provably cosmetic-or-disjoint, the classification is not earning its
-complexity.
+can be usefully classified with independently checked evidence, the
+classification is not earning its complexity. Report false classifications
+separately; classification coverage is not a merge-safety success rate.
 
-### Year 3 — The graph: edges and impact
+### The graph: edges and impact
 
 Caller and test edges, with **honest resolution kinds**: `exact`, `imported`,
 `heuristic`, `unresolvable` — and `unresolvable` stays a first-class answer, per
 P2. A graph that lies is worse than no graph.
 
 **`gita impact <entity>`** — what breaks and what to re-test. This is the
-question agents most want answered and the one gita refuses today. It is also the
-first feature where correctness genuinely matters more than coverage: a confident
-wrong blast radius is a production incident.
+question agents most want answered and the one gita refuses today. The output
+must distinguish observed dependencies from possible impact and unresolved
+edges. A confidently wrong blast radius can contribute to a production incident;
+correctness and uncertainty matter here just as they do for identity and merge
+analysis.
 
 **Kill criterion:** spike against coverage-per-test as a mechanical answer key
 *before* building. Recall below 0.8 or precision below 0.5 and we stop.
 
-### Year 4 — Memory: the compounding layer
+### Memory: the compounding layer
 
 **`gita note`** — durable facts anchored to entity identity, surviving the
 refactor. Constraints, rationale, review decisions, incident links. Surfaced
@@ -247,10 +267,10 @@ position in the document: switching cost rises every week it is used, and no
 competitor can ship it retroactively.
 
 **Kill criterion:** if fewer than 20% of notes are still attached to a living
-entity after six months of real use, identity is not durable enough and Year 1
-failed quietly.
+entity after six months of real use, identity is not durable enough and the
+foundation failed quietly.
 
-### Year 5 — Coordination: many agents, one repository
+### Coordination: many agents, one repository
 
 The bottleneck when N agents work in parallel is not writing code, it is
 integration. Line-based merge fails on formatting; human review does not scale to
@@ -258,33 +278,36 @@ machine output volume.
 
 Entity-level **claims** (this agent is working on these entities), collision
 prediction *before* the work is done rather than at merge time, and structural
-review that a machine can check. This is the only layer that is genuinely
-speculative, and it is deliberately last — it is worthless without Years 1–4, and
-by then we will know whether the premise holds.
+review that a machine can inspect. This is especially speculative: it depends on
+reliable entity addressing and evidence that coordination helps real parallel
+workflows. It does not require treating every other capability as a prerequisite.
 
 ---
 
-## 4. Why this is sellable when the current thing is not
+## 4. What could make this valuable
 
 The current product is a better `git diff`. It saves roughly 15% of round trips
-on changes it is good at — real, measured, and modest. Nobody buys 15% of one
-command.
+on changes it is good at — real, measured, and modest. That may be valuable in a
+frequent or expensive workflow. The result does not establish willingness to
+pay, and neither does adding more commands or broader Git coverage.
 
-The arc above changes the unit of sale three times:
+The capabilities above suggest three possible sources of customer value, not
+three guaranteed commercial outcomes:
 
-1. **Year 1–2 — a faster answer.** Competes on quality. Weak moat, necessary
-   foundation, drives adoption. Free and open, because the substrate has to be
-   everywhere for anything above it to matter.
-2. **Year 3 — an answer nobody else has.** Impact analysis is a team-level
-   purchase and a genuine capability gap.
-3. **Year 4–5 — an asset the customer accumulates.** Memory is not a feature they
-   rent, it is data they build. That is the difference between a tool with churn
-   and infrastructure with retention.
+1. **A faster, inspectable answer.** Identity and indexed history can reduce
+   repeated investigation. Measure the complete workflow, not command count or
+   isolated query speed.
+2. **Better-informed changes.** Merge and impact analysis can surface evidence
+   that helps developers and agents make decisions. Test whether this reduces
+   review effort or mistakes, without claiming to guarantee safety.
+3. **Reusable context.** Memory and coordination can carry decisions between
+   people and agents. Value depends on that context remaining relevant,
+   trustworthy and used.
 
-The honest read: **only Year 4 is a real moat.** Years 1–3 are good engineering
-that a well-funded competitor could replicate. They exist to earn the right to
-build Year 4, and to make sure that when we do, the identity underneath it is
-durable enough to hold.
+Choose features by the workflow they complete and the evidence that customers
+benefit. A valuable narrow tool is preferable to broad coverage without a
+compelling use. An entity-level model is a means to deliver that value, not
+proof of a business by itself.
 
 ---
 
@@ -292,19 +315,22 @@ durable enough to hold.
 
 Recorded so the arguments do not have to be had again.
 
-**Embedding-backed commits and semantic search — rejected.** Directly violates
-P2. The moment gita ships a feature that can be confidently wrong, every other
-output becomes something a reviewer must verify, and the reason to prefer it over
-grep disappears. This is the single most tempting suggestion and the most
-damaging.
+**Embedding-backed commits and semantic search — outside the current scope.**
+Git remains the source of truth; embeddings must not define identity or silently
+establish factual relationships. A future search layer could suggest candidates
+if it labels them as suggestions and links to inspectable evidence. This is a
+scope decision, not a claim that deterministic alternatives cannot be wrong.
 
-**Model-written merge resolutions — rejected.** Conflict *classification* is
-provable and is in. Conflict *resolution* means writing code into a merge on a
-guess. Preview yes, resolve never.
+**Model-written merge resolutions — rejected.** Structural conflict analysis
+is in; automatic resolution is outside the current scope. Neither a model's
+suggestion nor a hash comparison establishes that merged code is correct.
+Preview and evidence first, with unresolved questions made explicit.
 
-**Natural-language query — rejected.** `gita query` is structured. The agent
-calling it can already translate English; making gita do it adds a guess to a
-deterministic system and buys nothing.
+**Natural-language query — outside the current scope.** `gita query` is
+structured so agents can issue inspectable requests. A future natural-language
+interface would need to expose the translated query and keep suggestions
+separate from the evidence returned. It is not forbidden by P2, but it must
+justify its additional complexity.
 
 **Shadow branches and speculative concurrency — declined.** Running fifty
 branches and promoting a winner is an orchestration product. It reuses none of
@@ -315,7 +341,7 @@ costume. The hook surface gets the useful half far more cheaply.
 
 **Rollback as inverted migration — deferred.** Requires understanding what a
 schema change *means*, which is past what a syntax tree can support. Revisit only
-if Year 3 edges prove solid.
+if the graph's edges prove solid.
 
 **Churn-based risk scoring — deprioritised on evidence.** Measured at 3x
 concentration (§1.3), not the 10x the idea implies. Too thin to headline.
@@ -326,14 +352,15 @@ concentration (§1.3), not the 10x the idea implies. Too thin to headline.
 
 The next thing to build is not on the ROADMAP list.
 
-It is **durable identity, persisted** — Year 1, and specifically the part proven
-missing in §1.1. Everything in this document is a join on an identifier that gita
-computes correctly, four times per five commits, and then throws on the floor.
+It is **durable identity, persisted**, specifically the continuity missing in
+§1.1. That controlled example shows the value of preserving detected rename and
+move links; it does not establish that every inferred link is correct.
 
-Until that identifier exists and survives, every feature above is unbuildable and
-every feature below it is a command rather than a capability.
+Validate identity accuracy and ambiguity handling before relying on those links
+for downstream decisions. Build the smallest capability that improves a real
+workflow; a new object model or a longer command list is not the outcome itself.
 
-Two things stay true regardless of how far up this arc we get. Every layer gets
+Two things stay true regardless of how far these capabilities develop. Each gets
 measured against the naive version of itself, the same way the diff engine was —
 that habit found four defective answer keys and a confound in our own control
 arm, and it is worth more than any single feature. And every claim shrinks when
