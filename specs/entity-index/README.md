@@ -26,17 +26,36 @@ and another branch's edits must not contaminate the answer.
 
 | Work | Status |
 | --- | --- |
-| [WS-1 enumeration](WS-1-enumeration.md) | Implemented previously. Remains a reusable Git plumbing improvement, not entity identity. No new test run during this spec draft. |
+| [WS-1 enumeration](WS-1-enumeration.md) | Implemented previously; existing behavior remains covered by the full regression suite. This is Git plumbing, not entity identity. |
 | [Foundation contract](FOUNDATION.md) | F0 contracts implemented and tested. Persistent-index behavior and measured release gates are not complete. |
 | F0 | Complete as a contract checkpoint: 208 pure-contract checks and 13 fixture/assertion checks pass; five-event CLI acceptance is deliberately red. |
-| F1 | Partial: persistent evidence cache, transaction guards, byte-accurate adapter, isolated deadline worker and scoped manual checkpoints implemented. Full schema, generation publication and byte-safe Git enumeration remain pending. |
-| F2-F4 below | Not started. `gita index`, `gita id` and indexed history are still proposed commands. |
+| F1 | Complete as the storage/evidence prerequisite checkpoint: schema-v2 relations, generation publication and GC, bounded offline Git access, byte-accurate parsing, isolated worker and parse-policy separation implemented and tested. Full-builder and release gates remain later work. |
+| F2 | Started: independent event classification implemented. Scope traversal, strict lineage matching and automatic state construction are not implemented. |
+| F3-F4 below | Not started. `gita index`, `gita id` and indexed history are still proposed commands. |
 
-Latest full regression: **968 passed, 1 deliberately failed**, no skips, through
-Unit Test MCP in 316.6s. The failure is the five-event CLI acceptance, separately
+Latest full regression: **1,122 passed, 1 deliberately failed**, no skips, through
+Unit Test MCP in 385.6s. The failure is the five-event CLI acceptance, separately
 confirmed by exact test selection. This is not a release-ready persistent index.
 
-Run the partial F1 evidence checkpoint from the repository root:
+Run the integrated checkpoints from the repository root:
+
+```powershell
+.venv\Scripts\python.exe verify\check.py --stage f1
+.venv\Scripts\python.exe verify\check.py --stage f2-events
+```
+
+The F1 command passed five checks using a disposable real Git repository:
+committed bytes despite a dirty worktree, publication/reopen, successor rollback,
+published-generation GC refusal and explicit staging GC. The F2 command passed
+four flag checks using explicitly supplied accepted endpoints; it does not infer
+lineage. See [the verification guide](../../verify/README.md) and the
+[delivery checkpoint](FOUNDATION.md#f1-completion-and-f2-start-2026-09-14).
+
+**Compatibility:** schema-v1 evidence caches are refused and preserved, not
+migrated or deleted. New stores use schema v2. The corrected parse fingerprint
+also invalidates prior parse evidence. There is no public rebuild CLI yet.
+
+The earlier focused evidence and worker checkpoints remain available:
 
 ```powershell
 .venv\Scripts\python.exe verify\check.py --stage f1-evidence
@@ -49,7 +68,7 @@ does not index or modify this repository. See [the verification guide](../../ver
 for limitations and [the F1 checkpoint](FOUNDATION.md#f1-evidence-checkpoint-2026-09-14)
 for implementation boundaries.
 
-The next F1 checkpoint adds one reused spawn worker with a five-second default
+The worker checkpoint uses one reused spawn worker with a five-second default
 deadline, crash/cancellation cleanup and no timeout-dependent evidence IDs:
 
 ```powershell

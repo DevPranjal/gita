@@ -755,10 +755,13 @@ def writable_index(tmp_path, store_api):
 
 def test_f1_create_initializes_minimum_schema_and_connection_pragmas(writable_index, store_api):
     connection = writable_index.connection
-    assert store_api.SCHEMA_VERSION == 1
+    assert store_api.SCHEMA_VERSION == 2
     assert connection.isolation_level is None
     assert not connection.in_transaction
-    assert connection.execute("PRAGMA user_version").fetchone()[0] == 1
+    assert connection.execute("PRAGMA user_version").fetchone()[0] == store_api.SCHEMA_VERSION
+    metadata = dict(connection.execute("SELECT key, value FROM metadata"))
+    assert metadata["schema_version"] == str(store_api.SCHEMA_VERSION)
+    assert metadata["cache_format"] == "generation-cache-v2"
     assert connection.execute("PRAGMA application_id").fetchone()[0] == 0x47495441
     assert connection.execute("PRAGMA foreign_keys").fetchone()[0] == 1
     assert connection.execute("PRAGMA journal_mode").fetchone()[0].lower() == "wal"
@@ -1867,6 +1870,1307 @@ def test_manual_f1_evidence_missing_parse_is_a_reported_failure(
     assert any(result.verdict == manual_check.FAIL for result in results)
 
 
+class TestGenerationStore:
+    @pytest.fixture
+    def graph(self, writable_index):
+        from gita.index.evidence import parse_evidence
+
+        path = b"src/\xff\t'name.py"
+        sources = (
+            b"\xef\xbb\xbf# caf\xc3\xa9\r\ndef run():\r\n    return 1\r\n",
+            b"\xef\xbb\xbf# caf\xc3\xa9\r\ndef run():\r\n    return 2\r\n",
+        )
+        bundles = tuple(parse_evidence(source, path) for source in sources)
+        commits = (GitOid("sha1", b"a" * 20), GitOid("sha1", b"b" * 20))
+        trees = (GitOid("sha1", b"t" * 20), GitOid("sha1", b"u" * 20))
+        context = IdentityContext(
+            commits[0], "root", (), bundles[0].result.parse_fingerprint,
+            MATCH_FINGERPRINT, LIMITS,
+        )
+        definitions = tuple(tuple(sorted(
+            bundle.result.definitions, key=lambda definition: not definition.synthetic_root,
+        )) for bundle in bundles)
+        assert all(bundle.result.complete for bundle in bundles)
+        assert all(len(population) == 2 for population in definitions)
+        assert all(population[0].synthetic_root and population[1].kind == "function"
+                   for population in definitions)
+        occurrences = tuple(tuple(EntityOccurrence(
+            commit, path, bundle.result.blob, "blob", 0o100644, definition.id,
+        ) for definition in population) for commit, bundle, population in zip(
+            commits, bundles, definitions, strict=True,
+        ))
+        seeds = tuple(LineageSeed(context.id, commits[0], occurrence.id, "root")
+                      for occurrence in occurrences[0])
+        pairs = tuple(tuple((definition.id, seed.id) for definition, seed in zip(
+            population, seeds, strict=True,
+        )) for population in definitions)
+        links = tuple(LineageLink(
+            context.id, commits[0], commits[1], source.id, destination.id,
+            LinkStatus.ACCEPTED, "structural_locator", "unique_locator", EVIDENCE,
+        ) for source, destination in zip(*occurrences, strict=True))
+        births = tuple(ChangeEvent(
+            context.id, seed.id, None, commits[0], None, occurrence.id, ("added",), None,
+        ) for seed, occurrence in zip(seeds, occurrences[0], strict=True))
+        changes = tuple(ChangeEvent(
+            context.id, seed.id, commits[0], commits[1], source.id, destination.id,
+            ("descendant_changed",) if source_index == 0 else ("body_changed",), link.id,
+        ) for source_index, (seed, source, destination, link) in enumerate(zip(
+            seeds, *occurrences, links, strict=True,
+        )))
+        store = writable_index
+        with store.transaction():
+            store.put_interpretation("parse", context.parse_fingerprint, (("version", 1),))
+            store.put_interpretation("match", context.match_fingerprint, (("version", 1),))
+            for sequence, (commit, tree) in enumerate(zip(commits, trees, strict=True)):
+                assert store.put_commit(
+                    commit, tree, () if sequence == 0 else (commits[0],),
+                    message=b"subject\n\x00old-record-marker\xff\n",
+                ) is None
+            assert store.put_context(context) == context.id
+            for source, bundle in zip(sources, bundles, strict=True):
+                assert store.put_parse(bundle.result, bundle.versions) == bundle.result.id
+                versions = {version.id: version for version in bundle.versions}
+                for definition in bundle.result.definitions:
+                    span = definition.span
+                    assert versions[definition.version_id].source_digest == blake2b(
+                        source[span.start_byte:span.end_byte], digest_size=32,
+                    ).digest()
+            for population in occurrences:
+                for occurrence in population:
+                    assert store.put_occurrence(occurrence) == occurrence.id
+            for seed in seeds:
+                assert store.put_lineage(seed) == seed.id
+            binding_sets = tuple(store.put_binding_set(bundle.result.id, members)
+                                 for bundle, members in zip(bundles, pairs, strict=True))
+            for link in links:
+                assert store.put_link(link) == link.id
+            for event in births + changes:
+                assert store.put_event(event) == event.id
+        return {
+            "store": store, "path": path, "sources": sources, "bundles": bundles,
+            "commits": commits, "trees": trees, "context": context,
+            "definitions": definitions, "occurrences": occurrences, "seeds": seeds,
+            "pairs": pairs, "bindings": binding_sets, "links": links,
+            "births": births, "changes": changes,
+        }
+
+    def _stage(self, graph, scope="main", tip_index=1):
+        store = graph["store"]
+        generation = store.begin_generation(scope, graph["context"], graph["commits"][tip_index])
+        for sequence in range(tip_index + 1):
+            store.add_member(generation, sequence, graph["commits"][sequence])
+        for sequence in range(tip_index + 1):
+            result = graph["bundles"][sequence].result
+            state = store.put_file_state(
+                generation, graph["path"], sequence,
+                sequence + 1 if sequence < tip_index else None,
+                "present", result.blob, "blob", 0o100644, result.id, graph["bindings"][sequence],
+            )
+            assert type(state) is int
+            if sequence == tip_index:
+                store.set_frontier(generation, graph["path"], state)
+            for event in graph["births"] if sequence == 0 else graph["changes"]:
+                store.attach_event(generation, sequence, event.id)
+            store.put_coverage(generation, sequence, graph["path"], "extraction", "complete", 0)
+        if tip_index:
+            for link in graph["links"]:
+                store.attach_link(generation, link.id)
+        return generation
+
+    def _continue(self, graph, predecessor, scope="main"):
+        store = graph["store"]
+        generation = store.begin_generation(
+            scope, graph["context"], graph["commits"][1], predecessor=predecessor,
+        )
+        assert store.members(generation) == (graph["commits"][0],)
+        inherited = store.file_states(generation, 0)[0]
+        store.add_member(generation, 1, graph["commits"][1])
+        store.close_file_state(generation, inherited["id"], 1)
+        result = graph["bundles"][1].result
+        state = store.put_file_state(
+            generation, graph["path"], 1, None, "present", result.blob,
+            "blob", 0o100644, result.id, graph["bindings"][1],
+        )
+        store.set_frontier(generation, graph["path"], state)
+        for link in graph["links"]:
+            store.attach_link(generation, link.id)
+        for event in graph["changes"]:
+            store.attach_event(generation, 1, event.id)
+        store.put_coverage(generation, 1, graph["path"], "extraction", "complete", 0)
+        return generation
+
+    def _depart(self, graph, status="removed", scope="departure", tip=None):
+        store, result = graph["store"], graph["bundles"][0].result
+        generation = store.begin_generation(scope, graph["context"], tip or graph["commits"][1])
+        for sequence, commit in enumerate(graph["commits"]):
+            store.add_member(generation, sequence, commit)
+        store.put_file_state(generation, graph["path"], 0, 1, "present", result.blob,
+                             "blob", 0o100644, result.id, graph["bindings"][0])
+        state = store.put_file_state(
+            generation, graph["path"], 1, None, status, None, None, None, None, None,
+        )
+        store.set_frontier(generation, graph["path"], state)
+        reason = "tree_deleted" if status == "removed" else "missing_object"
+        for seed, occurrence, birth in zip(
+            graph["seeds"], graph["occurrences"][0], graph["births"], strict=True,
+        ):
+            store.attach_event(generation, 0, birth.id)
+            store.put_departure(generation, 1, seed.id, occurrence.id, status, reason)
+            event = ChangeEvent(
+                graph["context"].id, seed.id, *graph["commits"], occurrence.id, None,
+                ("removed",) if status == "removed" else ("lineage_gap",), None,
+            )
+            store.attach_event(generation, 1, store.put_event(event))
+        store.put_coverage(generation, 0, graph["path"], "extraction", "complete", 0)
+        store.put_coverage(generation, 1, graph["path"], "extraction", reason,
+                           0 if status == "removed" else None)
+        return generation
+
+    def test_schema_has_all_relations_foreign_keys_and_principal_indexes(
+        self, writable_index, store_api,
+    ):
+        connection = writable_index.connection
+        relations = {
+            "metadata", "interpretation", "commit_object", "scope", "generation", "membership",
+            "parse_result", "version", "definition", "lineage", "binding_set", "binding",
+            "file_state", "frontier", "occurrence", "lineage_link", "generation_link", "event",
+            "generation_event", "departure", "coverage",
+        }
+        tables = {row[0] for row in connection.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'table'",
+        )}
+        assert len(relations) == 21
+        assert relations <= tables
+        assert connection.execute("PRAGMA user_version").fetchone()[0] == store_api.SCHEMA_VERSION
+        assert dict(connection.execute("SELECT key, value FROM metadata"))["schema_version"] == str(
+            store_api.SCHEMA_VERSION,
+        )
+        assert connection.execute("PRAGMA foreign_keys").fetchone()[0] == 1
+        references = {
+            "scope": {"generation"}, "generation": {"scope", "generation", "commit_object"},
+            "membership": {"generation", "commit_object"},
+            "definition": {"parse_result", "version", "definition"},
+            "lineage": {"occurrence"}, "binding_set": {"parse_result"},
+            "binding": {"binding_set", "definition", "lineage"},
+            "file_state": {"generation", "parse_result", "binding_set"},
+            "frontier": {"generation", "file_state"},
+            "occurrence": {"commit_object", "definition"},
+            "lineage_link": {"commit_object", "occurrence"},
+            "generation_link": {"generation", "lineage_link"},
+            "event": {"lineage", "commit_object", "occurrence", "lineage_link"},
+            "generation_event": {"membership", "event"},
+            "departure": {"membership", "lineage", "occurrence"},
+            "coverage": {"membership"},
+        }
+        for table, targets in references.items():
+            actual = {row[2] for row in connection.execute(f'PRAGMA foreign_key_list("{table}")')}
+            assert targets <= actual, (table, targets - actual)
+        assert any(row[2] == "interpretation" for table in tables for row in connection.execute(
+            f'PRAGMA foreign_key_list("{table}")',
+        ))
+        indexes = {
+            "definition": (("parse_id", "names_json"), ("terminal_name",)),
+            "binding": (("eid", "binding_set_id"),),
+            "file_state": (("generation_id", "path", "from_seq"), ("binding_set_id",)),
+            "frontier": (("generation_id", "path"),),
+            "event": (("eid", "commit_format", "commit_digest"),),
+            "generation_event": (("generation_id", "sequence", "event_id"),),
+            "departure": (("generation_id", "eid", "sequence"),),
+            "coverage": (("generation_id", "sequence", "path"),),
+        }
+        for table, prefixes in indexes.items():
+            columns = [tuple(row[2] for row in connection.execute(
+                f'PRAGMA index_info("{index[1]}")',
+            )) for index in connection.execute(f'PRAGMA index_list("{table}")')]
+            for prefix in prefixes:
+                assert any(actual[:len(prefix)] == prefix for actual in columns), (table, prefix)
+        accepted_indexes = [index for index in connection.execute("PRAGMA index_list(lineage_link)")
+                            if index[2] and index[4]]
+        assert len(accepted_indexes) >= 2
+        accepted_sql = [connection.execute(
+            "SELECT sql FROM sqlite_master WHERE type = 'index' AND name = ?", (index[1],),
+        ).fetchone()[0].lower() for index in accepted_indexes]
+        for endpoint in ("source", "destination"):
+            assert any(endpoint in statement and "context_id" in statement
+                       and "status" in statement and "'accepted'" in statement
+                       for statement in accepted_sql), endpoint
+        assert "alias_of" not in {row[1] for row in connection.execute("PRAGMA table_info(lineage)")}
+        assert writable_index.check_integrity() == ()
+
+    def test_all_relations_round_trip_real_evidence_after_reopen(self, graph, store_api):
+        store = graph["store"]
+        with store.transaction():
+            generation = self._stage(graph)
+            assert store.published_generation("main") is None
+            assert store.generation(generation)["state"] == "staging"
+            assert store.publish_generation(generation) is None
+            removed = self._depart(graph, scope="removed")
+            store.publish_generation(removed)
+        with store_api.IndexStore.open(store.path) as reader:
+            with reader.snapshot():
+                record = reader.generation(generation)
+                assert type(record) is dict
+                assert {key: record[key] for key in (
+                    "id", "scope", "context_id", "tip", "state", "predecessor",
+                )} == {
+                    "id": generation, "scope": "main", "context_id": graph["context"].id,
+                    "tip": graph["commits"][1], "state": "published", "predecessor": None,
+                }
+                assert reader.published_generation("main") == generation
+                assert reader.published_generation("removed") == removed
+                assert reader.file_states(removed, 1)[0]["status"] == "removed"
+                assert reader.members(generation) == graph["commits"]
+                for sequence, bundle in enumerate(graph["bundles"]):
+                    assert reader.get_parse(bundle.result.id) == bundle.result
+                    states = reader.file_states(generation, sequence)
+                    assert type(states) is tuple and len(states) == 1
+                    assert type(states[0]) is dict
+                    assert {key: states[0][key] for key in (
+                        "path", "from_seq", "to_seq", "status", "blob", "object_type", "mode",
+                        "parse_id", "binding_set",
+                    )} == {
+                        "path": graph["path"], "from_seq": sequence,
+                        "to_seq": 1 if sequence == 0 else None, "status": "present",
+                        "blob": bundle.result.blob, "object_type": "blob", "mode": 0o100644,
+                        "parse_id": bundle.result.id, "binding_set": graph["bindings"][sequence],
+                    }
+                for table in (
+                    "metadata", "interpretation", "commit_object", "scope", "generation",
+                    "membership", "parse_result", "version", "definition", "lineage",
+                    "binding_set", "binding", "file_state", "frontier", "occurrence",
+                    "lineage_link", "generation_link", "event", "generation_event", "departure",
+                    "coverage",
+                ):
+                    assert reader.connection.execute(f'SELECT count(*) FROM "{table}"').fetchone()[0] > 0
+                for table, records_to_check in (
+                    ("occurrence", sum(graph["occurrences"], ())), ("lineage", graph["seeds"]),
+                    ("lineage_link", graph["links"]), ("event", graph["births"] + graph["changes"]),
+                ):
+                    for item in records_to_check:
+                        payload = reader.connection.execute(
+                            f'SELECT canonical_payload FROM "{table}" WHERE id = ?', (item.id,),
+                        ).fetchone()[0]
+                        assert payload == canonical_encode(item.id.split("_")[0], item.fields())
+                assert reader.check_integrity() == ()
+
+    def test_interpretations_and_contexts_are_registered_and_collision_checked(
+        self, graph, monkeypatch,
+    ):
+        store, context = graph["store"], graph["context"]
+        with store.transaction():
+            parse_key = store.put_interpretation("parse", context.parse_fingerprint, (("version", 1),))
+            assert type(parse_key) is str and context.parse_fingerprint.hex() in parse_key
+            assert store.put_interpretation(
+                "parse", context.parse_fingerprint, (("version", 1),),
+            ) == parse_key
+            assert store.put_interpretation(
+                "match", context.parse_fingerprint, (("version", 1),),
+            ) != parse_key
+            with pytest.raises(IndexContractError) as caught:
+                store.put_interpretation("parse", context.parse_fingerprint, (("version", 2),))
+            assert caught.value.code == "digest_collision"
+            for category, fingerprint, manifest in (
+                ("unknown", FINGERPRINT, (("version", 1),)),
+                ("parse", b"short", (("version", 1),)),
+                ("parse", FINGERPRINT, [("version", 1)]),
+            ):
+                with pytest.raises(IndexContractError):
+                    store.put_interpretation(category, fingerprint, manifest)
+            with pytest.raises(IndexContractError):
+                store.put_context(replace(context, match_fingerprint=b"x" * 32))
+            with pytest.raises(IndexContractError):
+                store.put_context(replace(context, parents=(graph["commits"][1],)))
+            assert store.put_context(context) == context.id
+            identifier = context.id
+            changed = replace(context, limits=(("max_bytes", 8192), ("max_definitions", 100)))
+            with monkeypatch.context() as patch:
+                patch.setattr(IdentityContext, "id", property(lambda self: identifier))
+                with pytest.raises(IndexContractError) as caught:
+                    store.put_context(changed)
+            assert caught.value.code == "digest_collision"
+
+    @pytest.mark.parametrize("object_format,size", (("sha1", 20), ("sha256", 32)))
+    def test_commits_preserve_ordered_boundary_parents_and_reject_payload_changes(
+        self, writable_index, object_format, size,
+    ):
+        store = writable_index
+        commit, tree = GitOid(object_format, b"c" * size), GitOid(object_format, b"t" * size)
+        parents = tuple(GitOid(object_format, bytes([value]) * size) for value in (1, 2, 3))
+        message = b"subject\nparent fake\x00\xff\n"
+        with store.transaction():
+            assert store.put_commit(commit, tree, parents, message) is None
+            assert store.put_commit(commit, tree, parents, message) is None
+            assert store.connection.execute("SELECT count(*) FROM commit_object").fetchone()[0] == 1
+            for changed_tree, changed_parents, changed_message in (
+                (parents[0], parents, message), (tree, tuple(reversed(parents)), message),
+                (tree, parents, b"different"),
+            ):
+                with pytest.raises(IndexContractError) as caught:
+                    store.put_commit(commit, changed_tree, changed_parents, changed_message)
+                assert caught.value.code == "digest_collision"
+            other_format = "sha256" if object_format == "sha1" else "sha1"
+            other_size = 32 if other_format == "sha256" else 20
+            with pytest.raises(IndexContractError):
+                store.put_commit(commit, tree, (GitOid(other_format, b"p" * other_size),))
+            assert store.check_integrity() == ()
+
+    def test_occurrences_require_stored_commit_parse_and_exact_regular_blob_entry(self, graph):
+        store = graph["store"]
+        occurrence = graph["occurrences"][0][1]
+        with store.transaction():
+            before = store.connection.execute("SELECT count(*) FROM occurrence").fetchone()[0]
+            for changes in (
+                {"commit": GitOid("sha1", b"z" * 20)}, {"definition_id": DEFINITION_ID},
+                {"path": b"src/other.py"}, {"blob": graph["bundles"][1].result.blob},
+                {"object_type": "tree"}, {"mode": 0o120000}, {"mode": 0o160000},
+            ):
+                with pytest.raises(IndexContractError):
+                    store.put_occurrence(replace(occurrence, **changes))
+            assert store.connection.execute("SELECT count(*) FROM occurrence").fetchone()[0] == before
+            executable = replace(occurrence, mode=0o100755)
+            assert store.put_occurrence(executable) == executable.id
+            assert store.put_occurrence(executable) == executable.id
+
+    def test_lineages_validate_context_seed_commit_and_immutable_full_payload(self, graph, monkeypatch):
+        store, seed = graph["store"], graph["seeds"][1]
+        with store.transaction():
+            for changed in (
+                replace(seed, context_id=CONTEXT_ID), replace(seed, occurrence_id=SOURCE_ID),
+                replace(seed, commit=graph["commits"][1]),
+            ):
+                with pytest.raises(IndexContractError):
+                    store.put_lineage(changed)
+            assert store.put_lineage(seed) == seed.id
+            identifier = seed.id
+            changed = replace(seed, reason="observed_addition_with_complete_predecessor")
+            with monkeypatch.context() as patch:
+                patch.setattr(LineageSeed, "id", property(lambda self: identifier))
+                with pytest.raises(IndexContractError) as caught:
+                    store.put_lineage(changed)
+            assert caught.value.code == "digest_collision"
+
+    def test_binding_sets_use_canonical_sorted_complete_one_to_one_membership(self, graph):
+        store = graph["store"]
+        parse_id, pairs = graph["bundles"][0].result.id, graph["pairs"][0]
+        with store.transaction():
+            expected = content_id("bnd1", (parse_id, tuple(sorted(pairs))))
+            assert store.put_binding_set(parse_id, pairs) == expected
+            assert store.put_binding_set(parse_id, tuple(reversed(pairs))) == expected
+            payload = store.connection.execute(
+                "SELECT canonical_payload FROM binding_set WHERE id = ?", (expected,),
+            ).fetchone()[0]
+            assert payload == canonical_encode("bnd1", (parse_id, tuple(sorted(pairs))))
+            for invalid in (
+                (), pairs[:1], pairs + pairs[:1],
+                ((pairs[0][0], pairs[0][1]), (pairs[1][0], pairs[0][1])),
+                ((DEFINITION_ID, pairs[0][1]), pairs[1]),
+                ((pairs[0][0], EID), pairs[1]), graph["pairs"][1],
+            ):
+                with pytest.raises(IndexContractError):
+                    store.put_binding_set(parse_id, invalid)
+            with pytest.raises(IndexContractError):
+                store.put_binding_set(PARSE_ID, pairs)
+            assert store.connection.execute("SELECT count(*) FROM binding_set").fetchone()[0] == 2
+
+    @pytest.mark.parametrize("fault", ("anchor", "gap", "duplicate", "second_parent"))
+    def test_membership_requires_anchor_contiguous_ordinals_and_actual_first_parent(self, graph, fault):
+        store = graph["store"]
+        root, tip = graph["commits"]
+        with store.transaction():
+            generation = store.begin_generation("bad-members", graph["context"], tip)
+            if fault == "anchor":
+                with pytest.raises(IndexContractError):
+                    store.add_member(generation, 0, tip)
+                assert store.members(generation) == ()
+                return
+            store.add_member(generation, 0, root)
+            if fault == "second_parent":
+                side = GitOid("sha1", b"s" * 20)
+                merge = GitOid("sha1", b"v" * 20)
+                store.put_commit(side, graph["trees"][0], ())
+                store.put_commit(merge, graph["trees"][1], (side, root))
+                sequence, commit = 1, merge
+            else:
+                sequence, commit = (2, tip) if fault == "gap" else (1, root)
+            with pytest.raises(IndexContractError):
+                store.add_member(generation, sequence, commit)
+            assert store.members(generation) == (root,)
+
+    @pytest.mark.parametrize("limit", (0, 1001, -1, True))
+    def test_generation_pages_are_bounded_and_offsets_are_strict_uints(self, graph, limit):
+        store = graph["store"]
+        with store.transaction():
+            generation = self._stage(graph)
+            store.publish_generation(generation)
+        assert store.members(generation, offset=1, limit=1) == (graph["commits"][1],)
+        assert store.members(generation, offset=2, limit=1000) == ()
+        assert store.file_states(generation, 1, offset=1, limit=1000) == ()
+        for method, args in ((store.members, (generation,)), (store.file_states, (generation, 1))):
+            with pytest.raises(IndexContractError):
+                method(*args, limit=limit)
+            for offset in (-1, True, 1.5):
+                with pytest.raises(IndexContractError):
+                    method(*args, offset=offset)
+
+    def test_file_intervals_are_half_open_disjoint_and_keep_unknown_distinct_from_removed(self, graph):
+        store, path = graph["store"], graph["path"]
+        with store.transaction():
+            generation = self._stage(graph)
+            old, current = store.file_states(generation, 0)[0], store.file_states(generation, 1)[0]
+            assert old["id"] != current["id"]
+            assert old["to_seq"] == current["from_seq"] == 1
+            for start, end in ((0, None), (0, 1), (1, 1), (1, 0), (2, None)):
+                with pytest.raises(IndexContractError):
+                    store.put_file_state(generation, path, start, end, "removed", None, None, None, None, None)
+            for unknown_path in (b"unknown\xff.py", b"Unknown\xff.py"):
+                state = store.put_file_state(
+                    generation, unknown_path, 1, None, "unknown",
+                    graph["bundles"][1].result.blob, "blob", 0o100644, None, None,
+                )
+                store.set_frontier(generation, unknown_path, state)
+                store.put_coverage(generation, 1, unknown_path, "extraction", "missing_object", None)
+            state = store.put_file_state(
+                generation, b"deleted.py", 1, None, "removed", None, None, None, None, None,
+            )
+            store.set_frontier(generation, b"deleted.py", state)
+            store.put_coverage(generation, 1, b"deleted.py", "extraction", "tree_deleted", 0)
+            store.publish_generation(generation)
+        states = {state["path"]: state for state in store.file_states(generation, 1)}
+        assert set(states) == {path, b"unknown\xff.py", b"Unknown\xff.py", b"deleted.py"}
+        assert states[b"deleted.py"]["status"] == "removed"
+        assert states[b"unknown\xff.py"]["status"] == "unknown"
+        assert states[b"Unknown\xff.py"]["status"] == "unknown"
+
+    def test_file_state_rejects_foreign_bindings_incomplete_present_and_removed_objects(self, graph):
+        from gita.index.evidence import parse_evidence
+
+        store, context = graph["store"], graph["context"]
+        result = graph["bundles"][0].result
+        with store.transaction():
+            generation = store.begin_generation("states", context, graph["commits"][0])
+            store.add_member(generation, 0, graph["commits"][0])
+            other_context = replace(context, match_fingerprint=b"n" * 32)
+            store.put_interpretation("match", other_context.match_fingerprint, (("version", 1),))
+            store.put_context(other_context)
+            other_seeds = tuple(replace(seed, context_id=other_context.id) for seed in graph["seeds"])
+            for seed in other_seeds:
+                store.put_lineage(seed)
+            foreign = store.put_binding_set(result.id, tuple(
+                (definition.id, seed.id) for definition, seed in zip(
+                    graph["definitions"][0], other_seeds, strict=True,
+                )
+            ))
+            for status, blob, object_type, mode, parse_id, bindings in (
+                ("present", result.blob, "blob", 0o100644, result.id, foreign),
+                ("present", result.blob, "blob", 0o100644, result.id, graph["bindings"][1]),
+                ("present", result.blob, "blob", 0o100644, result.id, None),
+                ("unknown", result.blob, "blob", 0o100644, result.id, graph["bindings"][0]),
+                ("present", graph["bundles"][1].result.blob, "blob", 0o100644, result.id, graph["bindings"][0]),
+                ("removed", result.blob, "blob", 0o100644, None, None),
+                ("present", result.blob, "blob", 0o120000, result.id, graph["bindings"][0]),
+            ):
+                with pytest.raises(IndexContractError):
+                    store.put_file_state(generation, graph["path"], 0, None, status, blob,
+                                         object_type, mode, parse_id, bindings)
+            unsupported = parse_evidence(b"\xff", b"unsupported.py")
+            assert unsupported.result.status is ParseStatus.UNSUPPORTED_ENCODING
+            store.put_parse(unsupported.result, unsupported.versions)
+            with pytest.raises(IndexContractError):
+                store.put_binding_set(unsupported.result.id, ())
+            state = store.put_file_state(
+                generation, unsupported.result.path, 0, None, "unknown", unsupported.result.blob,
+                "blob", 0o100644, unsupported.result.id, None,
+            )
+            assert store.file_states(generation, 0)[0]["id"] == state
+            with pytest.raises(IndexContractError):
+                store.put_file_state(generation, b"different.py", 0, None, "unknown",
+                                     unsupported.result.blob, "blob", 0o100644, unsupported.result.id, None)
+
+    def test_frontier_only_accepts_own_matching_open_state(self, graph):
+        store = graph["store"]
+        with store.transaction():
+            generation = self._stage(graph)
+            other = self._stage(graph, scope="other")
+            closed = store.file_states(generation, 0)[0]
+            active = store.file_states(generation, 1)[0]
+            foreign = store.file_states(other, 1)[0]
+            for path, state in ((graph["path"], closed["id"]), (graph["path"], foreign["id"]),
+                                (b"wrong.py", active["id"]), (graph["path"], 999999)):
+                with pytest.raises(IndexContractError):
+                    store.set_frontier(generation, path, state)
+            store.set_frontier(generation, graph["path"], active["id"])
+            assert store.connection.execute(
+                "SELECT count(*) FROM frontier WHERE generation_id = ?", (generation,),
+            ).fetchone()[0] == 1
+
+    def test_links_require_exact_parent_endpoints_context_and_kind(self, graph, monkeypatch):
+        store, link = graph["store"], graph["links"][1]
+        with store.transaction():
+            for changed in (
+                replace(link, context_id=CONTEXT_ID), replace(link, source=SOURCE_ID),
+                replace(link, source=graph["occurrences"][1][1].id),
+                replace(link, destination=graph["occurrences"][0][1].id),
+                replace(link, destination=graph["occurrences"][1][0].id),
+                replace(link, parent=graph["commits"][1]),
+            ):
+                with pytest.raises(IndexContractError):
+                    store.put_link(changed)
+            identifier = link.id
+            changed = replace(link, evidence=(("population", 2),))
+            with monkeypatch.context() as patch:
+                patch.setattr(LineageLink, "id", property(lambda self: identifier))
+                with pytest.raises(IndexContractError) as caught:
+                    store.put_link(changed)
+            assert caught.value.code == "digest_collision"
+
+    def test_accepted_link_uniqueness_is_enforced_in_sql_not_only_python(self, graph):
+        import sqlite3
+
+        store, link = graph["store"], graph["links"][1]
+        with store.transaction():
+            for endpoint in ("source", "destination"):
+                occurrence = graph["occurrences"][0 if endpoint == "source" else 1][1]
+                alternate = replace(occurrence, mode=0o100755)
+                store.put_occurrence(alternate)
+                competing = replace(link, **{endpoint: alternate.id})
+                with pytest.raises(IndexContractError):
+                    store.put_link(competing)
+                candidate = replace(competing, status=LinkStatus.CANDIDATE)
+                rejected = replace(competing, status=LinkStatus.REJECTED)
+                ambiguous = replace(competing, status=LinkStatus.AMBIGUOUS)
+                for decision in (candidate, rejected, ambiguous):
+                    assert store.put_link(decision) == decision.id
+                with pytest.raises(sqlite3.IntegrityError):
+                    store.connection.execute(
+                        "UPDATE lineage_link SET status = 'accepted' WHERE id = ?", (candidate.id,),
+                    )
+
+    def test_events_validate_lineage_edge_accepted_decision_and_derived_materiality(self, graph, monkeypatch):
+        store, event = graph["store"], graph["changes"][1]
+        with store.transaction():
+            candidate = replace(graph["links"][1], status=LinkStatus.CANDIDATE)
+            store.put_link(candidate)
+            for changed in (
+                replace(event, eid=EID), replace(event, context_id=CONTEXT_ID),
+                replace(event, source=graph["occurrences"][1][1].id),
+                replace(event, destination=graph["occurrences"][0][1].id),
+                replace(event, parent=graph["commits"][1]),
+                replace(event, decision_id=candidate.id),
+                replace(event, decision_id=graph["links"][0].id),
+            ):
+                with pytest.raises(IndexContractError):
+                    store.put_event(changed)
+            for saved in graph["births"] + graph["changes"]:
+                assert store.put_event(saved) == saved.id
+                assert store.connection.execute(
+                    "SELECT material FROM event WHERE id = ?", (saved.id,),
+                ).fetchone()[0] == int(saved.material)
+            assert graph["changes"][0].material is False
+            assert event.material is True
+            identifier = event.id
+            changed = replace(event, flags=("renamed",))
+            with monkeypatch.context() as patch:
+                patch.setattr(ChangeEvent, "id", property(lambda self: identifier))
+                with pytest.raises(IndexContractError) as caught:
+                    store.put_event(changed)
+            assert caught.value.code == "digest_collision"
+
+    def test_attachments_require_exact_generation_edge_sequence_and_context(self, graph):
+        store, context = graph["store"], graph["context"]
+        with store.transaction():
+            short = self._stage(graph, scope="short", tip_index=0)
+            with pytest.raises(IndexContractError):
+                store.attach_link(short, graph["links"][1].id)
+            with pytest.raises(IndexContractError):
+                store.attach_event(short, 0, graph["changes"][1].id)
+            with pytest.raises(IndexContractError):
+                store.attach_event(short, 1, graph["changes"][1].id)
+            other_context = replace(context, match_fingerprint=b"n" * 32)
+            store.put_interpretation("match", other_context.match_fingerprint, (("version", 1),))
+            store.put_context(other_context)
+            foreign = store.begin_generation("foreign", other_context, graph["commits"][1])
+            for sequence, commit in enumerate(graph["commits"]):
+                store.add_member(foreign, sequence, commit)
+            with pytest.raises(IndexContractError):
+                store.attach_link(foreign, graph["links"][1].id)
+            with pytest.raises(IndexContractError):
+                store.attach_event(foreign, 1, graph["changes"][1].id)
+
+    def test_successor_copies_checkpoint_and_publishes_atomically_to_pinned_readers(self, graph, store_api):
+        store = graph["store"]
+        with store.transaction():
+            predecessor = self._stage(graph, tip_index=0)
+            store.publish_generation(predecessor)
+        original = store.file_states(predecessor, 0)
+        with store_api.IndexStore.open(store.path) as reader:
+            with reader.snapshot():
+                assert reader.published_generation("main") == predecessor
+                with store.transaction():
+                    successor = self._continue(graph, predecessor)
+                    assert successor != predecessor
+                    assert store.generation(successor)["predecessor"] == predecessor
+                    inherited = store.file_states(successor, 0)[0]
+                    assert inherited["id"] != original[0]["id"]
+                    assert inherited["to_seq"] == 1
+                    assert store.file_states(predecessor, 0) == original
+                    assert store.published_generation("main") == predecessor
+                    assert reader.published_generation("main") == predecessor
+                    store.publish_generation(successor)
+                    assert reader.published_generation("main") == predecessor
+                assert reader.published_generation("main") == predecessor
+                assert reader.file_states(predecessor, 0) == original
+                assert reader.members(predecessor) == (graph["commits"][0],)
+            with reader.snapshot():
+                assert reader.published_generation("main") == successor
+                assert reader.members(successor) == graph["commits"]
+                assert reader.file_states(predecessor, 0) == original
+                assert reader.connection.execute(
+                    "SELECT count(*) FROM generation_event WHERE generation_id = ?", (successor,),
+                ).fetchone()[0] == 4
+        with store.transaction():
+            changed_context = replace(graph["context"], limits=(("max_bytes", 8192),))
+            store.put_context(changed_context)
+            for scope, context, previous in (
+                ("other", graph["context"], successor),
+                ("main", changed_context, successor),
+                ("main", graph["context"], predecessor),
+            ):
+                with pytest.raises(IndexContractError):
+                    store.begin_generation(scope, context, graph["commits"][1], predecessor=previous)
+            staging = store.begin_generation("foreign-state", graph["context"], graph["commits"][1])
+            for sequence, commit in enumerate(graph["commits"]):
+                store.add_member(staging, sequence, commit)
+            with pytest.raises(IndexContractError):
+                store.close_file_state(staging, original[0]["id"], 1)
+        assert store.published_generation("main") == successor
+
+    def test_successor_checkpoint_copy_uses_bounded_insert_select_for_over_one_page(self, graph):
+        import re
+
+        store = graph["store"]
+        commits = graph["commits"] + tuple(GitOid("sha1", sequence.to_bytes(20, "big"))
+                                          for sequence in range(2, 1002))
+        with store.transaction():
+            for sequence in range(2, len(commits)):
+                store.put_commit(commits[sequence], graph["trees"][1], (commits[sequence - 1],))
+            generation = store.begin_generation("wide", graph["context"], commits[1000])
+            for sequence, commit in enumerate(commits[:1001]):
+                store.add_member(generation, sequence, commit)
+            for ordinal in range(1001):
+                path = f"missing/{ordinal:04}.py".encode("ascii")
+                state = store.put_file_state(
+                    generation, path, 0, None, "unknown", None, None, None, None, None,
+                )
+                store.set_frontier(generation, path, state)
+                store.put_coverage(generation, 0, path, "extraction", "missing_object", None)
+            store.publish_generation(generation)
+        statements = []
+
+        def trace(statement):
+            if not statements or statements[-1][0] != statement:
+                statements.append((statement, store.connection.total_changes))
+
+        with store.transaction():
+            store.connection.set_trace_callback(trace)
+            try:
+                successor = store.begin_generation(
+                    "wide", graph["context"], commits[1001], predecessor=generation,
+                )
+            finally:
+                store.connection.set_trace_callback(None)
+                statements.append(("finished", store.connection.total_changes))
+            copied = set()
+            for (statement, before), (_, after) in zip(statements, statements[1:]):
+                match = re.search(r'\binsert\s+(?:or\s+\w+\s+)?into\s+["\[]?(membership|file_state|frontier)\b',
+                                  statement, re.IGNORECASE)
+                if match is not None:
+                    assert re.search(r"\bselect\b", statement, re.IGNORECASE), statement
+                    assert 0 <= after - before <= 1000, (statement, after - before)
+                    copied.add(match.group(1).lower())
+            assert copied == {"membership", "file_state", "frontier"}
+            assert store.members(successor, limit=1000) == commits[:1000]
+            assert store.members(successor, offset=1000, limit=1000) == (commits[1000],)
+            assert len(store.file_states(successor, 1000, limit=1000)) == 1000
+            assert len(store.file_states(successor, 1000, offset=1000, limit=1000)) == 1
+            store.add_member(successor, 1001, commits[1001])
+            store.publish_generation(successor)
+        assert store.members(generation, offset=1000) == (commits[1000],)
+        assert store.check_integrity() == ()
+
+    @pytest.mark.parametrize("status", ("removed", "unknown"))
+    def test_departure_is_exact_parent_qualified_and_terminal_for_its_generation(self, graph, status):
+        store = graph["store"]
+        with store.transaction():
+            generation = self._depart(graph, status)
+            for sequence, eid, occurrence_id in (
+                (0, graph["seeds"][1].id, graph["occurrences"][1][1].id),
+                (1, EID, graph["occurrences"][0][1].id),
+                (1, graph["seeds"][1].id, graph["occurrences"][1][1].id),
+            ):
+                with pytest.raises(IndexContractError):
+                    store.put_departure(generation, sequence, eid, occurrence_id, status, "invalid_source")
+            store.publish_generation(generation)
+        assert store.file_states(generation, 1)[0]["status"] == status
+        assert store.connection.execute(
+            "SELECT status FROM departure WHERE generation_id = ? AND eid = ?",
+            (generation, graph["seeds"][1].id),
+        ).fetchone()[0] == status
+        with pytest.raises(IndexContractError):
+            with store.transaction():
+                returned = GitOid("sha1", b"r" * 20)
+                store.put_commit(returned, graph["trees"][0], (graph["commits"][1],))
+                invalid = self._depart(graph, status, scope="resurrection", tip=returned)
+                store.add_member(invalid, 2, returned)
+                previous = store.file_states(invalid, 1)[0]
+                store.close_file_state(invalid, previous["id"], 2)
+                result = graph["bundles"][0].result
+                state = store.put_file_state(
+                    invalid, graph["path"], 2, None, "present", result.blob,
+                    "blob", 0o100644, result.id, graph["bindings"][0],
+                )
+                store.set_frontier(invalid, graph["path"], state)
+                store.put_coverage(invalid, 2, graph["path"], "extraction", "complete", 0)
+                store.publish_generation(invalid)
+        assert store.published_generation("resurrection") is None
+
+    def test_coverage_preserves_known_zero_unknown_counts_and_member_path_selectors(self, graph):
+        store = graph["store"]
+        with store.transaction():
+            generation = self._stage(graph)
+            store.put_coverage(generation, 1, None, "matching", "candidate_limit", 3)
+            store.put_coverage(generation, 1, b"unavailable\xff.py", "extraction", "missing_object", None)
+            for sequence, omitted in ((2, 0), (-1, 0), (1, -1), (1, True), (1, 1.5)):
+                with pytest.raises(IndexContractError):
+                    store.put_coverage(generation, sequence, None, "matching", "candidate_limit", omitted)
+            rows = store.connection.execute(
+                "SELECT path, omitted, count_known FROM coverage WHERE generation_id = ? AND sequence = 1",
+                (generation,),
+            ).fetchall()
+            assert {tuple(row) for row in rows} == {
+                (graph["path"], 0, 1), (None, 3, 1), (b"unavailable\xff.py", None, 0),
+            }
+
+    @pytest.mark.parametrize("fault", ("empty", "tip"))
+    def test_publication_rejects_empty_or_tip_incomplete_membership(self, graph, fault):
+        store = graph["store"]
+        with store.transaction():
+            generation = store.begin_generation("incomplete", graph["context"], graph["commits"][1])
+            if fault == "tip":
+                store.add_member(generation, 0, graph["commits"][0])
+                result = graph["bundles"][0].result
+                state = store.put_file_state(
+                    generation, graph["path"], 0, None, "present", result.blob,
+                    "blob", 0o100644, result.id, graph["bindings"][0],
+                )
+                store.set_frontier(generation, graph["path"], state)
+                for birth in graph["births"]:
+                    store.attach_event(generation, 0, birth.id)
+                store.put_coverage(generation, 0, graph["path"], "extraction", "complete", 0)
+            with pytest.raises(IndexContractError):
+                store.publish_generation(generation)
+            assert store.published_generation("incomplete") is None
+            assert store.generation(generation)["state"] == "staging"
+
+    @pytest.mark.parametrize("missing", ("frontier", "coverage"))
+    def test_publication_checks_checkpoint_and_coverage_before_pointer_switch(self, graph, missing):
+        store = graph["store"]
+        with store.transaction():
+            predecessor = self._stage(graph, tip_index=0)
+            store.publish_generation(predecessor)
+        with store.transaction():
+            generation = self._continue(graph, predecessor)
+            store.connection.execute(f'DELETE FROM "{missing}" WHERE generation_id = ?', (generation,))
+            with pytest.raises(IndexContractError):
+                store.publish_generation(generation)
+            assert store.generation(generation)["state"] == "staging"
+            assert store.published_generation("main") == predecessor
+
+    def test_sql_rejects_dangling_references_invalid_rows_and_wrong_scope_pointers(self, graph):
+        import sqlite3
+
+        store = graph["store"]
+        with store.transaction():
+            published = self._stage(graph)
+            store.publish_generation(published)
+            other = self._stage(graph, scope="other")
+            store.publish_generation(other)
+            staging = self._stage(graph)
+            for target in (staging, other, "gen1_" + "f" * 32):
+                with pytest.raises(sqlite3.IntegrityError):
+                    store.connection.execute(
+                        "UPDATE scope SET published_generation_id = ? WHERE name = 'main'", (target,),
+                    )
+                assert store.published_generation("main") == published
+            for statement, parameters in (
+                ("INSERT INTO membership SELECT * FROM membership WHERE generation_id = ?", (staging,)),
+                ("UPDATE generation_event SET event_id = ? WHERE generation_id = ?", ("evt1_" + "f" * 64, staging)),
+                ("UPDATE generation_link SET link_id = ? WHERE generation_id = ?", ("lnk1_" + "f" * 64, staging)),
+                ("UPDATE coverage SET sequence = 2 WHERE generation_id = ?", (staging,)),
+                ("UPDATE coverage SET omitted = -1 WHERE generation_id = ?", (staging,)),
+                ("UPDATE file_state SET parse_id = ? WHERE generation_id = ?", (PARSE_ID, staging)),
+                ("UPDATE file_state SET path = 'decoded text' WHERE generation_id = ?", (staging,)),
+                ("UPDATE file_state SET status = 'invented' WHERE generation_id = ?", (staging,)),
+            ):
+                with pytest.raises(sqlite3.IntegrityError):
+                    store.connection.execute(statement, parameters)
+            assert store.check_integrity() == ()
+
+    def test_published_rows_and_shared_evidence_are_immutable_even_through_raw_sql(self, graph):
+        import sqlite3
+
+        store = graph["store"]
+        with store.transaction():
+            generation = self._stage(graph)
+            store.publish_generation(generation)
+            departed = self._depart(graph)
+            store.publish_generation(departed)
+        context_table = next(row[2] for row in store.connection.execute(
+            "PRAGMA foreign_key_list(lineage)",
+        ) if row[3] == "context_id")
+        with store.transaction():
+            for table in (
+                "interpretation", "commit_object", context_table, "generation", "membership",
+                "parse_result", "version", "definition", "lineage", "binding_set", "binding",
+                "file_state", "frontier", "occurrence", "lineage_link", "generation_link",
+                "event", "generation_event", "departure", "coverage",
+            ):
+                column = store.connection.execute(f'PRAGMA table_info("{table}")').fetchone()[1]
+                value = store.connection.execute(f'SELECT "{column}" FROM "{table}" LIMIT 1').fetchone()[0]
+                before = store.connection.execute(f'SELECT count(*) FROM "{table}"').fetchone()[0]
+                for statement in (
+                    f'UPDATE "{table}" SET "{column}" = "{column}" WHERE "{column}" = ?',
+                    f'DELETE FROM "{table}" WHERE "{column}" = ?',
+                ):
+                    with pytest.raises(sqlite3.IntegrityError):
+                        store.connection.execute(statement, (value,))
+                assert store.connection.execute(f'SELECT count(*) FROM "{table}"').fetchone()[0] == before
+            with pytest.raises(sqlite3.IntegrityError):
+                store.connection.execute(
+                    "INSERT INTO coverage (generation_id, sequence, path, category, reason, omitted, count_known) "
+                    "VALUES (?, 1, NULL, 'matching', 'late_append', 0, 1)", (generation,),
+                )
+            assert store.published_generation("main") == generation
+            assert store.published_generation("departure") == departed
+        assert store.check_integrity() == ()
+
+    def test_every_mutating_api_requires_an_owned_writer_and_rejects_read_only_handles(self, graph, store_api):
+        store, result = graph["store"], graph["bundles"][0].result
+        with store.transaction():
+            generation = self._stage(graph)
+        state = store.file_states(generation, 1)[0]["id"]
+        operations = (
+            ("put_interpretation", ("parse", result.parse_fingerprint, (("version", 1),))),
+            ("put_context", (graph["context"],)),
+            ("put_commit", (graph["commits"][0], graph["trees"][0], ())),
+            ("begin_generation", ("writer", graph["context"], graph["commits"][1])),
+            ("add_member", (generation, 0, graph["commits"][0])),
+            ("put_occurrence", (graph["occurrences"][0][1],)),
+            ("put_lineage", (graph["seeds"][1],)),
+            ("put_binding_set", (result.id, graph["pairs"][0])),
+            ("put_file_state", (generation, graph["path"], 0, None, "present", result.blob,
+                                "blob", 0o100644, result.id, graph["bindings"][0])),
+            ("close_file_state", (generation, state, 1)),
+            ("set_frontier", (generation, graph["path"], state)),
+            ("put_link", (graph["links"][1],)),
+            ("attach_link", (generation, graph["links"][1].id)),
+            ("put_event", (graph["changes"][1],)),
+            ("attach_event", (generation, 1, graph["changes"][1].id)),
+            ("put_departure", (generation, 1, graph["seeds"][1].id,
+                               graph["occurrences"][0][1].id, "removed", "tree_deleted")),
+            ("put_coverage", (generation, 1, None, "matching", "complete", 0)),
+            ("publish_generation", (generation,)), ("collect_generation", (generation,)),
+        )
+        for method, arguments in operations:
+            with pytest.raises(store_api.IndexStoreError) as caught:
+                getattr(store, method)(*arguments)
+            assert caught.value.code == "transaction_required", method
+        with store.snapshot():
+            for method, arguments in operations:
+                with pytest.raises(store_api.IndexStoreError) as caught:
+                    getattr(store, method)(*arguments)
+                assert caught.value.code == "transaction_required", method
+        with store_api.IndexStore.open(store.path) as reader:
+            for method, arguments in operations:
+                with pytest.raises(store_api.IndexStoreError) as caught:
+                    getattr(reader, method)(*arguments)
+                assert caught.value.code == "read_only", method
+            assert reader.published_generation("writer") is None
+        assert store.published_generation("main") is None
+
+    @pytest.mark.parametrize("exception_type", (RuntimeError, KeyboardInterrupt))
+    def test_base_exception_after_publication_rolls_back_pointer_and_all_staged_rows(
+        self, graph, store_api, exception_type,
+    ):
+        store = graph["store"]
+        with store.transaction():
+            predecessor = self._stage(graph, tip_index=0)
+            store.publish_generation(predecessor)
+        original = store.file_states(predecessor, 0)
+        failure = exception_type("publication cancelled")
+        with pytest.raises(exception_type) as caught:
+            with store.transaction():
+                generation = self._continue(graph, predecessor)
+                store.publish_generation(generation)
+                raise failure
+        assert caught.value is failure
+        assert not store.connection.in_transaction
+        assert store.published_generation("main") == predecessor
+        assert store.file_states(predecessor, 0) == original
+        with pytest.raises(store_api.IndexStoreError) as gone:
+            store.generation(generation)
+        assert gone.value.code == "generation_gone"
+        for table in ("membership", "file_state", "frontier", "generation_link",
+                      "generation_event", "departure", "coverage"):
+            assert store.connection.execute(
+                f'SELECT count(*) FROM "{table}" WHERE generation_id = ?', (generation,),
+            ).fetchone()[0] == 0
+        with store_api.IndexStore.open(store.path, read_only=False, busy_timeout_ms=0) as next_writer:
+            with next_writer.transaction():
+                assert next_writer.published_generation("main") == predecessor
+        assert store.check_integrity() == ()
+
+    @pytest.mark.parametrize("fault", ("quick_check", "foreign_key_check", "authorization"))
+    def test_failed_publication_preserves_previous_generation_and_typed_storage_errors(
+        self, graph, store_api, monkeypatch, fault,
+    ):
+        import sqlite3
+
+        store = graph["store"]
+        with store.transaction():
+            predecessor = self._stage(graph, tip_index=0)
+            store.publish_generation(predecessor)
+        observations = []
+
+        def broken_integrity():
+            observations.append(store.published_generation("main"))
+            return (f"{fault}: injected damage",)
+
+        def authorize(action, first, second, database, trigger):
+            if action == sqlite3.SQLITE_UPDATE and first == "scope":
+                observations.append(store.connection.in_transaction)
+                return sqlite3.SQLITE_DENY
+            return sqlite3.SQLITE_OK
+
+        with monkeypatch.context() as patch:
+            if fault != "authorization":
+                patch.setattr(store, "check_integrity", broken_integrity)
+            try:
+                with pytest.raises(store_api.IndexStoreError) as caught:
+                    with store.transaction():
+                        generation = self._continue(graph, predecessor)
+                        if fault == "authorization":
+                            store.connection.set_authorizer(authorize)
+                        store.publish_generation(generation)
+            finally:
+                store.connection.set_authorizer(None)
+        if fault == "authorization":
+            assert observations and all(observation is True for observation in observations)
+            assert caught.value.code == "permission_denied"
+            assert isinstance(caught.value.__cause__, sqlite3.DatabaseError)
+        else:
+            assert observations == [predecessor]
+            assert caught.value.code == "corrupt"
+        assert store.published_generation("main") == predecessor
+        assert store.members(predecessor) == (graph["commits"][0],)
+        assert store.path.is_file()
+        with pytest.raises(store_api.IndexStoreError) as gone:
+            store.generation(generation)
+        assert gone.value.code == "generation_gone"
+        assert store.check_integrity() == ()
+
+    def test_gc_collects_only_selected_superseded_generation_without_breaking_snapshots(self, graph, store_api):
+        store = graph["store"]
+        with store.transaction():
+            old = self._stage(graph)
+            store.publish_generation(old)
+            retained = self._stage(graph, scope="retained")
+        with store.transaction():
+            current = self._stage(graph)
+            store.publish_generation(current)
+        with store_api.IndexStore.open(store.path) as reader:
+            with reader.snapshot():
+                before = reader.file_states(old, 1)
+                assert reader.generation(old)["id"] == old
+                with store.transaction():
+                    assert store.collect_generation(old) is None
+                assert reader.members(old) == graph["commits"]
+                assert reader.file_states(old, 1) == before
+            with reader.snapshot():
+                for method, args in ((reader.generation, (old,)), (reader.members, (old,)),
+                                     (reader.file_states, (old, 1))):
+                    with pytest.raises(store_api.IndexStoreError) as caught:
+                        method(*args)
+                    assert caught.value.code == "generation_gone"
+                assert reader.published_generation("main") == current
+                assert reader.members(current) == graph["commits"]
+                assert reader.generation(retained)["state"] == "staging"
+                for bundle in graph["bundles"]:
+                    assert reader.get_parse(bundle.result.id) == bundle.result
+                assert reader.check_integrity() == ()
+        assert store.path.is_file()
+
+    def test_gc_refuses_published_generations_in_any_scope_and_retained_predecessors(self, graph, store_api):
+        store = graph["store"]
+        with store.transaction():
+            predecessor = self._stage(graph, tip_index=0)
+            store.publish_generation(predecessor)
+        with store.transaction():
+            successor = self._continue(graph, predecessor)
+            store.publish_generation(successor)
+            other = self._stage(graph, scope="other")
+            store.publish_generation(other)
+        with store.transaction():
+            for generation in (predecessor, successor, other):
+                with pytest.raises(store_api.IndexStoreError) as caught:
+                    store.collect_generation(generation)
+                assert caught.value.code == "generation_in_use"
+                assert store.generation(generation)["id"] == generation
+            assert store.generation(successor)["predecessor"] == predecessor
+            assert store.published_generation("main") == successor
+            assert store.published_generation("other") == other
+
+    def test_gc_sweeps_unreachable_evidence_but_keeps_shared_published_records(self, graph):
+        from gita.index.evidence import parse_evidence
+
+        store = graph["store"]
+        orphan = parse_evidence(b"def abandoned():\n    return 97\n", b"orphan.py")
+        with store.transaction():
+            published = self._stage(graph)
+            store.publish_generation(published)
+            store.put_parse(orphan.result, orphan.versions)
+            pairs, seeds, occurrences = [], [], []
+            for definition in orphan.result.definitions:
+                occurrence = EntityOccurrence(graph["commits"][0], orphan.result.path,
+                                              orphan.result.blob, "blob", 0o100644, definition.id)
+                store.put_occurrence(occurrence)
+                seed = LineageSeed(graph["context"].id, graph["commits"][0], occurrence.id, "root")
+                store.put_lineage(seed)
+                occurrences.append(occurrence)
+                seeds.append(seed)
+                pairs.append((definition.id, seed.id))
+            binding_set = store.put_binding_set(orphan.result.id, tuple(pairs))
+            staging = store.begin_generation("abandoned", graph["context"], graph["commits"][0])
+            store.add_member(staging, 0, graph["commits"][0])
+            state = store.put_file_state(staging, orphan.result.path, 0, None, "present",
+                                         orphan.result.blob, "blob", 0o100644, orphan.result.id, binding_set)
+            store.set_frontier(staging, orphan.result.path, state)
+            store.put_coverage(staging, 0, orphan.result.path, "extraction", "complete", 0)
+        with store.transaction():
+            store.collect_generation(staging)
+        assert store.get_parse(orphan.result.id) is None
+        for version in orphan.versions:
+            assert store.get_version(version.id) is None
+        for table, identifiers in (
+            ("occurrence", tuple(occurrence.id for occurrence in occurrences)),
+            ("lineage", tuple(seed.id for seed in seeds)), ("binding_set", (binding_set,)),
+        ):
+            for identifier in identifiers:
+                assert store.connection.execute(
+                    f'SELECT count(*) FROM "{table}" WHERE id = ?', (identifier,),
+                ).fetchone()[0] == 0
+        assert store.published_generation("main") == published
+        assert store.members(published) == graph["commits"]
+        for bundle in graph["bundles"]:
+            assert store.get_parse(bundle.result.id) == bundle.result
+            assert tuple(store.get_version(version.id) for version in bundle.versions) == bundle.versions
+        assert store.check_integrity() == ()
+
+    def test_storage_limit_counts_database_plus_wal_and_aborts_without_unlinking(self, graph, store_api):
+        import inspect
+
+        store = graph["store"]
+        assert inspect.signature(store.check_storage_limit).parameters["max_bytes"].default == 10 * 1024 ** 3
+        with store.transaction():
+            predecessor = self._stage(graph, tip_index=0)
+            store.publish_generation(predecessor)
+        wal = store.path.with_name(store.path.name + "-wal")
+        assert wal.is_file() and wal.stat().st_size > 0
+        retained_files = set(store.path.parent.iterdir())
+        with pytest.raises(store_api.IndexStoreError) as caught:
+            with store.transaction():
+                generation = self._continue(graph, predecessor)
+                assert store.check_storage_limit() is None
+                observed_size = store.path.stat().st_size + wal.stat().st_size
+                assert store.check_storage_limit(max_bytes=observed_size) is None
+                store.check_storage_limit(max_bytes=store.path.stat().st_size)
+        assert caught.value.code == "resource_limit"
+        assert str(observed_size) in str(caught.value)
+        assert "gc" in str(caught.value).lower()
+        assert retained_files <= set(store.path.parent.iterdir())
+        assert store.path.is_file() and wal.is_file()
+        assert store.published_generation("main") == predecessor
+        with pytest.raises(store_api.IndexStoreError) as gone:
+            store.generation(generation)
+        assert gone.value.code == "generation_gone"
+        assert store.check_integrity() == ()
+
+
+    def test_raw_sql_cannot_authorize_gc_or_damage_published_frontier(self, graph):
+        import sqlite3
+
+        store = graph["store"]
+        with store.transaction():
+            generation = self._stage(graph)
+            store.publish_generation(generation)
+        original = tuple(tuple(row) for row in store.connection.execute(
+            "SELECT * FROM frontier WHERE generation_id = ?", (generation,),
+        ))
+        assert original
+        with store.transaction():
+            with pytest.raises(sqlite3.DatabaseError):
+                store.connection.execute("INSERT INTO gc_guard VALUES (1)")
+            with pytest.raises(sqlite3.DatabaseError):
+                store.connection.execute(
+                    "DELETE FROM frontier WHERE generation_id = ?", (generation,),
+                )
+            assert store.connection.execute("SELECT count(*) FROM gc_guard").fetchone()[0] == 0
+        assert tuple(tuple(row) for row in store.connection.execute(
+            "SELECT * FROM frontier WHERE generation_id = ?", (generation,),
+        )) == original
+        assert store.published_generation("main") == generation
+        assert store.check_integrity() == ()
+
+    @pytest.mark.parametrize("seed_location", ("B", "side"))
+    def test_publication_rejects_eid_before_seed_or_without_seed_membership(self, graph, seed_location):
+        store = graph["store"]
+        occurrence = graph["occurrences"][1][1]
+        with store.transaction():
+            if seed_location == "side":
+                side = GitOid("sha1", b"s" * 20)
+                store.put_commit(side, graph["trees"][1], (graph["commits"][0],))
+                occurrence = replace(occurrence, commit=side)
+                store.put_occurrence(occurrence)
+            seed = LineageSeed(
+                graph["context"].id, occurrence.commit, occurrence.id,
+                "observed_addition_with_complete_predecessor",
+            )
+            store.put_lineage(seed)
+            bindings = tuple(store.put_binding_set(bundle.result.id, (
+                pairs[0], (pairs[1][0], seed.id),
+            )) for bundle, pairs in zip(graph["bundles"], graph["pairs"], strict=True))
+        changed = {
+            **graph, "bindings": bindings, "births": graph["births"][:1],
+            "changes": graph["changes"][:1], "links": graph["links"][:1],
+        }
+        with pytest.raises(IndexContractError):
+            with store.transaction():
+                generation = self._stage(changed)
+                assert store.members(generation) == graph["commits"]
+                if seed_location == "side":
+                    assert seed.commit not in store.members(generation)
+                store.publish_generation(generation)
+        assert store.published_generation("main") is None
+
+    def test_publication_rejects_resurrection_without_departures_and_preserves_pointer(self, graph):
+        store = graph["store"]
+        result = graph["bundles"][0].result
+        returned = GitOid("sha1", b"r" * 20)
+        with store.transaction():
+            predecessor = self._stage(graph, tip_index=0)
+            store.publish_generation(predecessor)
+            store.put_commit(returned, graph["trees"][0], (graph["commits"][1],))
+        original = store.file_states(predecessor, 0)
+        with pytest.raises(IndexContractError):
+            with store.transaction():
+                generation = store.begin_generation("main", graph["context"], returned)
+                for sequence, commit in enumerate((*graph["commits"], returned)):
+                    store.add_member(generation, sequence, commit)
+                store.put_file_state(
+                    generation, graph["path"], 0, 1, "present", result.blob,
+                    "blob", 0o100644, result.id, graph["bindings"][0],
+                )
+                store.put_file_state(
+                    generation, graph["path"], 1, 2, "removed", None, None, None, None, None,
+                )
+                state = store.put_file_state(
+                    generation, graph["path"], 2, None, "present", result.blob,
+                    "blob", 0o100644, result.id, graph["bindings"][0],
+                )
+                store.set_frontier(generation, graph["path"], state)
+                for birth in graph["births"]:
+                    store.attach_event(generation, 0, birth.id)
+                for sequence, reason in enumerate(("complete", "tree_deleted", "complete")):
+                    store.put_coverage(generation, sequence, graph["path"], "extraction", reason, 0)
+                assert store.connection.execute(
+                    "SELECT count(*) FROM departure WHERE generation_id = ?", (generation,),
+                ).fetchone()[0] == 0
+                store.publish_generation(generation)
+        assert not store.connection.in_transaction
+        assert store.published_generation("main") == predecessor
+        assert store.file_states(predecessor, 0) == original
+        assert store.connection.execute(
+            "SELECT count(*) FROM generation WHERE id = ?", (generation,),
+        ).fetchone()[0] == 0
+
+    @pytest.mark.parametrize("kind,name", (
+        ("INDEX", "accepted_destination"), ("TRIGGER", "generation_update"),
+    ))
+    def test_reopen_rejects_missing_schema_guards_without_repairing_bytes(
+        self, tmp_path, store_api, kind, name,
+    ):
+        import sqlite3
+
+        path = tmp_path / "missing-guard.sqlite"
+        with store_api.IndexStore.create(path) as store:
+            assert store.connection.execute("PRAGMA user_version").fetchone()[0] == store_api.SCHEMA_VERSION
+        connection = sqlite3.connect(path)
+        try:
+            assert connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = ? AND name = ?", (kind.lower(), name),
+            ).fetchone() == (name,)
+            with connection:
+                connection.execute(f'DROP {kind} "{name}"')
+        finally:
+            connection.close()
+        damaged_digest = blake2b(path.read_bytes()).digest()
+        with pytest.raises(store_api.IndexStoreError) as caught:
+            with store_api.IndexStore.open(path, read_only=False):
+                pass
+        assert caught.value.code in ("schema_mismatch", "corrupt")
+        assert blake2b(path.read_bytes()).digest() == damaged_digest
+
+    def test_fresh_parse_insert_vm_cost_does_not_scale_with_published_generations(self, graph):
+        from gita.index.evidence import parse_evidence
+
+        store = graph["store"]
+        fresh = parse_evidence(b"def fresh():\n    return 7\n", b"fresh.py")
+        assert fresh.result.complete and len(fresh.result.definitions) == 2
+        costs = []
+        published_count = 0
+        for generation_count in (1, 16):
+            with store.transaction():
+                for ordinal in range(published_count, generation_count):
+                    generation = self._stage(graph, scope=f"parse-cost-{ordinal}")
+                    store.publish_generation(generation)
+            published_count = generation_count
+            assert store.connection.execute(
+                "SELECT count(*) FROM generation WHERE state = 'published'",
+            ).fetchone()[0] == generation_count
+            assert store.get_parse(fresh.result.id) is None
+            assert all(store.get_version(version.id) is None for version in fresh.versions)
+            steps = 0
+
+            def count_steps():
+                nonlocal steps
+                steps += 1
+                return 0
+
+            with store.transaction():
+                store.connection.execute("SAVEPOINT measure_parse")
+                store.connection.set_progress_handler(count_steps, 1)
+                try:
+                    assert store.put_parse(fresh.result, fresh.versions) == fresh.result.id
+                finally:
+                    store.connection.set_progress_handler(None, 0)
+                    store.connection.execute("ROLLBACK TO measure_parse")
+                    store.connection.execute("RELEASE measure_parse")
+            assert store.get_parse(fresh.result.id) is None
+            costs.append(steps)
+        baseline, larger = costs
+        assert baseline > 0
+        assert larger <= baseline * 3 + 2000, (baseline, larger)
+
+
 class TestWorkerCheckpointHarness:
     def test_actual_worker_checkpoint_returns_four_passes(self, manual_check):
         results = manual_check.check_f1_worker()
@@ -1981,5 +3285,215 @@ class TestWorkerCheckpointHarness:
         assert any(result.verdict == manual_check.FAIL for result in results)
         monkeypatch.setattr(sys, "argv", ["verify/check.py", "--stage", "f1-worker"])
         assert manual_check.main() == 1
+        captured = capsys.readouterr()
+        assert "FAIL" in captured.out + captured.err
+
+
+class TestFoundationCheckpointHarness:
+    def test_actual_foundation_checkpoint_returns_at_least_five_passes(self, manual_check):
+        results = manual_check.check_f1_foundation()
+
+        assert isinstance(results, list)
+        assert len(results) >= 5
+        assert all(isinstance(result, manual_check.Result) for result in results)
+        assert all(result.verdict == manual_check.PASS for result in results)
+
+    def test_foundation_checkpoint_retains_unique_fixtures_without_touching_sentinels(
+        self, manual_check, tmp_path, monkeypatch,
+    ):
+        from pathlib import Path
+
+        preserved = {manual_check.ROOT / "user.md": b"user-owned data\n"}
+        for name in ("gita-verify-foundation", "gita-verify-foundation-existing"):
+            directory = tmp_path / name
+            directory.mkdir()
+            sentinel = directory / "user.md"
+            sentinel.write_bytes(b"keep this temporary directory\n")
+            preserved[sentinel] = sentinel.read_bytes()
+        original_repo = {
+            path.relative_to(manual_check.ROOT): path.read_bytes()
+            for path in manual_check.ROOT.rglob("*") if path.is_file()
+        }
+        directories = []
+        mkdtemp = manual_check.tempfile.mkdtemp
+
+        def observed_mkdtemp(*args, **kwargs):
+            directory = Path(mkdtemp(*args, **kwargs)).resolve()
+            assert directory.parent == tmp_path.resolve()
+            assert directory.name.startswith("gita-verify-foundation-")
+            assert directory not in directories
+            directories.append(directory)
+            return str(directory)
+
+        def legacy_scratch(*args, **kwargs):
+            pytest.fail("foundation checkpoint must not use destructive _scratch")
+
+        monkeypatch.setattr(manual_check.tempfile, "mkdtemp", observed_mkdtemp)
+        monkeypatch.setattr(manual_check, "_scratch", legacy_scratch)
+        for invocation in range(2):
+            before = len(directories)
+            results = manual_check.check_f1_foundation()
+
+            assert len(results) >= 5
+            assert all(result.verdict == manual_check.PASS for result in results)
+            assert len(directories) > before
+            notes = "\n".join(result.note for result in results).replace("\\", "/")
+            for directory in directories[before:]:
+                assert directory.is_dir()
+                assert directory.as_posix() in notes
+                databases = [path for path in directory.rglob("*.sqlite") if path.is_file()]
+                assert databases
+                assert all(path.read_bytes().startswith(b"SQLite format 3\x00")
+                           for path in databases)
+                assert any(path.is_dir() for path in directory.rglob(".git"))
+                sentinel = directory / "user.md"
+                sentinel.write_bytes(f"retained invocation {invocation}\n".encode("ascii"))
+                preserved[sentinel] = sentinel.read_bytes()
+            assert all(path.read_bytes() == content for path, content in preserved.items())
+            assert {
+                path.relative_to(manual_check.ROOT): path.read_bytes()
+                for path in manual_check.ROOT.rglob("*") if path.is_file()
+            } == original_repo
+
+    def test_actual_cli_runs_registered_foundation_checkpoint(
+        self, manual_check, monkeypatch, capsys,
+    ):
+        import sys
+
+        runner = manual_check.check_f1_foundation
+        stage = next(stage for stage in manual_check.STAGES if stage.key == "f1")
+        assert stage.title == "Store and committed evidence checkpoint"
+        assert stage.module == "gita.index.store"
+        assert manual_check.RUNNERS[stage.key] is runner
+        assert stage.shipped is True
+
+        def outside_checkpoint():
+            pytest.fail("foundation checkpoint must not run another stage or Year 1 acceptance")
+
+        monkeypatch.setattr(manual_check, "check_year1_target", outside_checkpoint)
+        for key in tuple(manual_check.RUNNERS):
+            if key != "f1":
+                monkeypatch.setitem(manual_check.RUNNERS, key, outside_checkpoint)
+        monkeypatch.setattr(sys, "argv", ["verify/check.py", "--stage", "f1"])
+
+        assert manual_check.main() == 0
+        output = capsys.readouterr().out
+        assert "F1" in output
+        assert "Store and committed evidence checkpoint" in output
+        assert "checkpoint" in output.lower()
+        assert "f2 complete" not in output.lower()
+        assert "index ready" not in output.lower()
+        assert "Year 1 acceptance" not in output
+
+    @pytest.mark.parametrize("fault", ["publish_error", "missing_object"])
+    def test_primitive_fault_is_reported_as_failure_and_cli_returns_one(
+        self, manual_check, store_api, monkeypatch, capsys, fault,
+    ):
+        import sys
+
+        from gita.vcs import git as gitapi
+
+        calls = []
+
+        def broken_publish(self, *args, **kwargs):
+            calls.append("publish")
+            raise store_api.IndexStoreError("corrupt", "injected")
+
+        def missing_object(self, *args, **kwargs):
+            calls.append("read_object")
+            return None
+
+        if fault == "publish_error":
+            monkeypatch.setattr(store_api.IndexStore, "publish_generation", broken_publish)
+        else:
+            monkeypatch.setattr(gitapi.CommittedRepo, "read_object", missing_object)
+        results = manual_check.check_f1_foundation()
+
+        assert calls
+        assert isinstance(results, list) and results
+        assert all(isinstance(result, manual_check.Result) for result in results)
+        assert any(result.verdict == manual_check.FAIL for result in results)
+        calls.clear()
+        monkeypatch.setattr(sys, "argv", ["verify/check.py", "--stage", "f1"])
+        assert manual_check.main() == 1
+        assert calls
+        captured = capsys.readouterr()
+        assert "FAIL" in captured.out + captured.err
+
+
+class TestEventCheckpointHarness:
+    def test_actual_event_checkpoint_returns_exactly_four_passes(
+        self, manual_check, monkeypatch,
+    ):
+        from gita.index import matching
+
+        classify = matching.classify_transition
+        calls = []
+
+        def observed_classify(*args, **kwargs):
+            calls.append((args, kwargs))
+            return classify(*args, **kwargs)
+
+        monkeypatch.setattr(matching, "classify_transition", observed_classify)
+        results = manual_check.check_f2_events()
+
+        assert len(calls) >= 4
+        assert isinstance(results, list)
+        assert len(results) == 4
+        assert all(isinstance(result, manual_check.Result) for result in results)
+        assert all(result.verdict == manual_check.PASS for result in results)
+
+    def test_actual_cli_runs_registered_event_checkpoint(
+        self, manual_check, monkeypatch, capsys,
+    ):
+        import sys
+
+        runner = manual_check.check_f2_events
+        stage = next(stage for stage in manual_check.STAGES if stage.key == "f2-events")
+        assert stage.module == "gita.index.matching"
+        assert manual_check.RUNNERS[stage.key] is runner
+        assert stage.shipped is True
+
+        def outside_checkpoint():
+            pytest.fail("event checkpoint must not run another stage or Year 1 acceptance")
+
+        monkeypatch.setattr(manual_check, "check_year1_target", outside_checkpoint)
+        for key in tuple(manual_check.RUNNERS):
+            if key != "f2-events":
+                monkeypatch.setitem(manual_check.RUNNERS, key, outside_checkpoint)
+        monkeypatch.setattr(sys, "argv", ["verify/check.py", "--stage", "f2-events"])
+
+        assert manual_check.main() == 0
+        output = capsys.readouterr().out
+        assert "F2-EVENTS" in output
+        assert "checkpoint" in output.lower()
+        assert "lineage complete" not in output.lower()
+        assert "Year 1 acceptance" not in output
+
+    def test_empty_classifier_is_reported_as_failure_and_cli_returns_one(
+        self, manual_check, monkeypatch, capsys,
+    ):
+        import sys
+
+        from gita.index import matching
+
+        calls = []
+
+        def empty_classify(*args, **kwargs):
+            calls.append((args, kwargs))
+            return ()
+
+        monkeypatch.setattr(matching, "classify_transition", empty_classify)
+        results = manual_check.check_f2_events()
+
+        assert len(calls) >= 4
+        assert isinstance(results, list)
+        assert len(results) == 4
+        assert all(isinstance(result, manual_check.Result) for result in results)
+        assert any(result.verdict == manual_check.FAIL for result in results)
+        calls.clear()
+        monkeypatch.setattr(sys, "argv", ["verify/check.py", "--stage", "f2-events"])
+        assert manual_check.main() == 1
+        assert len(calls) >= 4
         captured = capsys.readouterr()
         assert "FAIL" in captured.out + captured.err

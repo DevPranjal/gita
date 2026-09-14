@@ -1062,10 +1062,10 @@ paths marked proposed do not yet exist.
 | ID | Existing or proposed path | Owner and bounded responsibility |
 | --- | --- | --- |
 | FILE-001 | [Contract model](../../src/gita/index/model.py) | Contract owner: immutable records, statuses, canonical IDs/fingerprints and pure codecs; no Git or SQL orchestration. |
-| FILE-002 | [Store](../../src/gita/index/store.py) | Store owner: DDL, lookup/write primitives, transactions, generation publication and GC; currently evidence-cache subset only. |
+| FILE-002 | [Store](../../src/gita/index/store.py), [schema](../../src/gita/index/schema.py) | Store owner: executable DDL, lookup/write primitives, transactions, generation publication and GC; no matching policy. |
 | FILE-003 | [Evidence](../../src/gita/index/evidence.py), [worker](../../src/gita/index/worker.py); [extractor](../../src/gita/entities/extractor.py) | Evidence owner: exact byte/full-representation adapter and isolated operational deadlines; legacy output unchanged. |
 | FILE-004 | [Git plumbing](../../src/gita/vcs/git.py) | Evidence owner: additive commit-only, byte-safe paths/object enumeration and correct common-dir handling. |
-| FILE-005 | Proposed `src/gita/index/matching.py` | Lineage owner: strict tiers, guard evidence, candidate limits, multi-flag classification. |
+| FILE-005 | [Matching primitives](../../src/gita/index/matching.py) | Lineage owner: currently independent event classification; strict tiers, guard evidence and candidate limits remain to implement. |
 | FILE-006 | Proposed `src/gita/index/builder.py` | Lineage owner: scope walk, complete checkpoint, persisted frontier, transitions, coverage and bounded staging. |
 | FILE-007 | Proposed `src/gita/index/query.py`; [history](../../src/gita/history.py) | Query owner: pinned resolution/state/ranges/history; additive routing only in existing history surface. |
 | FILE-008 | [CLI](../../src/gita/cli/__init__.py); [renderer](../../src/gita/cli/render.py) | Query owner: proposed commands, envelopes/exits/cursors and bounded rendering; retain legacy behavior. |
@@ -1112,8 +1112,9 @@ and uncertainty requirements.
 
 ## 14. Implementation Plan
 
-F0 is implemented and F1 has a partial evidence-cache checkpoint as recorded
-below. F2-F4 remain Not Started, irrespective of WS-1's implemented status.
+F0 and the F1 storage/evidence prerequisite checkpoint are implemented. F2 has
+started with independent event classification; its lineage builder is pending.
+F3-F4 remain Not Started. Earlier checkpoints below are historical snapshots.
 Phase labels F0-F4 are delivery checkpoints, not time estimates.
 Each item is test-first and bounded by ownership; an epic may contain sequential
 subitems but does not authorize simultaneous editing of the same path.
@@ -1233,6 +1234,79 @@ worker below is now implemented, while the other F1 boundaries remain open.
   offline Git retrieval, and complete parse/match fingerprint separation are still
   pending before F1 completion. F2 lineage and F3 indexed commands are not started.
 
+### F1 Completion and F2 Start (2026-09-14)
+
+F1 is complete as the prerequisite layer for a builder, not as an end-to-end
+index or release verdict. This supersedes the pending-F1 lists in earlier
+checkpoints. The full F2 builder, F3 query surface and F4 release gates are open.
+
+- Schema v2 implements all 21 declared relations, with supporting context and
+  GC-authorization storage. Qualified OIDs, raw path BLOBs, complete bindings,
+  disjoint file intervals, exact parent-edge membership, endpoint references,
+  accepted-link uniqueness and published-record immutability are enforced.
+- Publication validates the stored timeline, frontier, seed membership, exact
+  seed state, EID presence continuity and departures before switching the scope
+  pointer. It cannot prove that a caller inventoried every Git tree entry; the
+  F2 builder must supply that inventory and the F4 verifier must check it.
+- Successors copy the persisted checkpoint with bounded SQL operations. Writer
+  failures roll back without changing the old publication; WAL readers retain
+  their snapshot. Explicit GC refuses active publications and generations still
+  referenced by retained successors. It collects only authorized unreachable
+  records, never Git objects or database/WAL/SHM files. Database-plus-WAL storage
+  limits are checked; this is not a native-RSS or throughput claim.
+- GC authorization is connection-owned; raw SQL cannot enable the guard.
+  Reopening validates the required schema objects, including triggers and partial
+  indexes. Review regressions reject premature/side-branch seeds and resurrection
+  without departures. Fresh-parse insert guards use indexed lookups; a VM-step
+  regression checks that they do not scan all retained generations.
+- Additive `CommittedRepo` plumbing preserves NUL-framed raw paths, length-framed
+  objects, ordered raw commit parents and shallow boundaries, including the
+  effective shallow-file override. SHA-1 and SHA-256, nested/linked/bare repos,
+  mode changes, symlinks/gitlinks and unusual paths are tested. Empty blobs differ
+  from missing objects; replacements are disabled, active grafts are rejected,
+  and lazy fetch/protocol access is disabled without mutating the parent environment.
+- Object reads default to a 5 MiB operational ceiling with size-only metadata
+  lookup, so oversized objects need not be allocated to discover their size.
+  At most two streamed enumerations are active by default, with pages capped at
+  1,000 entries. Truncated/late-failing streams refuse success, and failed process
+  cleanup retains ownership for retry. Source reads verify commit/path/blob/mode
+  and bounds, never current worktree text. Legacy Git APIs are unchanged.
+- Parse fingerprints now digest the parsing records and their transitive model
+  dependencies instead of all lineage/event code. Matching-only vocabulary or
+  validator edits preserve parse IDs; parse-contract edits invalidate them and
+  malformed model source fails closed. The eventual strict matching policy still
+  needs its own manifest and fingerprint when that F2 policy is implemented.
+- Compatibility is explicit: v1 stores return `schema_mismatch` and remain intact;
+  v2 requires an explicitly created store. There is no automatic migration,
+  replacement or public rebuild CLI. Changed parse fingerprints invalidate the
+  old interpretation even when source bytes are unchanged.
+- RED/GREEN evidence: 34 committed-object cases first failed on the missing API;
+  23 further bounds/cleanup cases failed before repair (two existing truncation
+  guards already passed). All **73 object tests** pass, including legacy cases.
+  Generation tests went from 44 missing-contract failures to green; seven review
+  regressions then failed and were repaired, giving **51 generation cases**.
+  Parse-policy separation had three RED/two existing GREEN controls, then all
+  five passed. Five integrated F1 harness cases were observed RED then GREEN.
+- Manual `.venv\Scripts\python.exe verify\check.py --stage f1`: **five PASS**.
+  It uses committed bytes in a unique retained temporary repo, an isolated parser,
+  explicit fixture seeds, publication/reopen, rollback and protected GC. The
+  fixture seeds and manifests are not output from a lineage matching algorithm.
+- F2 now has `classify_transition`: separate sorted flags for rename, move,
+  signature/body, uncovered own content, descendants, cosmetic changes, modes and
+  unavailable evidence. Coordinates alone produce no event. It requires coherent
+  records and known accepted parent identities, and never decides continuity.
+  Unresolved-parent relocation, strict tiers, ambiguity, candidate scoring,
+  scope traversal and state construction remain unimplemented.
+- Classifier RED/GREEN: 29 missing-function cases, then two review regressions for
+  residual placement and repeated punctuation, repaired to **31 passing cases**.
+  Three F2 harness cases passed after RED. Manual `--stage f2-events` reports
+  **four PASS** for combined changes, coordinates, descendants and unknowns.
+- Latest full Unit Test MCP run: **1,122 passed, 1 failed**, no skips, in 385.6s.
+  The sole known failure remains `test_foundation_tracks_five_events_after_restart`:
+  `gita index` is not implemented. Exact selection confirmed that failure during
+  this delivery. No coverage percentage, identity-accuracy score or native-memory
+  performance gate is claimed.
+
 ### EPIC-001: F0 Contracts and Failing Acceptance
 
 Dependencies: none beyond existing fixtures. Traces: FR-002, FR-003, FR-004,
@@ -1254,10 +1328,10 @@ complete coverage outcomes; no accepted lineage policy required yet.
 
 | Task | Description | Status | Relevant Files |
 | --- | --- | --- | --- |
-| ITEM-004 | Write failing store/schema/FK tests TEST-003/004, implement read-only open and declared relations/indexes, enforce immutable records, interval checks and generation references. | Partial: four-table evidence cache and immutable record checks; remaining relations, intervals and generations pending | FILE-002, FILE-011 store tests |
-| ITEM-005 | Write TEST-020/021/024/034 failure-boundary cases, implement one-writer transactions, rollback/publish, typed errors and non-destructive generation GC. | Partial: cache transactions, rollback, read snapshots and typed errors; publication, generation GC and remaining failure gates pending | FILE-002, FILE-011 store tests |
-| ITEM-006 | Write TEST-005/006/023 for byte/full-token evidence and parse fingerprints, implement the additive evidence adapter plus bounded parse worker; legacy extractor regression stays green. | Partial: byte adapter, deterministic limits and isolated deadline worker tested; complete parse/match invalidation separation pending | FILE-003, FILE-011 builder tests, FILE-012 extractor tests |
-| ITEM-007 | Write TEST-025/026, extend Git object/commit/path access with safe framing, empty/missing distinction and common-dir resolution; preserve WS-1 behavior. | Partial: tested common-dir location only; byte-safe offline Git access pending | FILE-004, FILE-012 Git tests |
+| ITEM-004 | Write failing store/schema/FK tests TEST-003/004, implement read-only open and declared relations/indexes, enforce immutable records, interval checks and generation references. | Done: schema-v2 relations, indexes and publication invariants tested | FILE-002, FILE-011 store tests |
+| ITEM-005 | Write TEST-020/021/024/034 failure-boundary cases, implement one-writer transactions, rollback/publish, typed errors and non-destructive generation GC. | Done as storage primitives: transaction, rollback, publication, snapshots, GC and storage-limit controls tested; full-builder failure gates remain F2-F4 | FILE-002, FILE-011 store tests |
+| ITEM-006 | Write TEST-005/006/023 for byte/full-token evidence and parse fingerprints, implement the additive evidence adapter plus bounded parse worker; legacy extractor regression stays green. | Done: byte adapter, deterministic limits, isolated worker and parsing-contract fingerprint separation tested | FILE-003, FILE-011 builder tests, FILE-012 extractor tests |
+| ITEM-007 | Write TEST-025/026, extend Git object/commit/path access with safe framing, empty/missing distinction and common-dir resolution; preserve WS-1 behavior. | Done: bounded committed-only offline access, qualified OIDs, raw paths, source validation and lifecycle controls tested | FILE-004, FILE-012 Git tests |
 
 Store/evidence development MAY run in parallel only after ITEM-002 records are
 agreed. The contract owner serializes shared fixture edits. Neither owner changes
@@ -1272,7 +1346,7 @@ the builder/read primitives, negative identity cases green, bounded initial buil
 | Task | Description | Status | Relevant Files |
 | --- | --- | --- | --- |
 | ITEM-008 | Write TEST-015/016/017 boundary/merge/branch tests, implement scope-local membership and full anchor checkpoint with rooted versus observed seeds and all-parent provenance. | Not Started | FILE-006, FILE-011 builder tests |
-| ITEM-009 | Write TEST-007/008/009/010/011/012, implement strict frozen-tier matching, retained-population guards and independent event flags. Close TEST-001 without changing the legacy differ. | Not Started | FILE-005, FILE-006, FILE-011 builder tests |
+| ITEM-009 | Write TEST-007/008/009/010/011/012, implement strict frozen-tier matching, retained-population guards and independent event flags. Close TEST-001 without changing the legacy differ. | Started: event classification has 31 passing cases; strict matching, retained-population guards and end-to-end acceptance remain pending | FILE-005, FILE-006, FILE-011 builder tests |
 | ITEM-010 | Write TEST-013/014 coverage/departure tests, persist changed-file intervals, bindings, exact endpoint occurrences, tombstones and unknown gaps; resource-limited evidence stays partial. | Not Started | FILE-006, FILE-011 builder/query tests |
 
 ### EPIC-004: F3 Queries and Incremental Publication
@@ -1324,3 +1398,7 @@ red CLI acceptance, five manual passes and the remaining F1 boundaries.
 2026-09-14: F1 isolated worker implemented and independently reviewed. Section 14
 records 42 worker cases, five new harness cases, four manual passes and the latest
 full regression of 968 passed / one deliberately failed CLI acceptance.
+
+2026-09-14: F1 storage/evidence prerequisites completed and F2 event classification
+started. Section 14 records schema-v2 compatibility, independent review repairs,
+manual checks, 1,122 passing tests and the still-red indexed CLI acceptance.

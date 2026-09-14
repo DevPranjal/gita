@@ -7,6 +7,7 @@ for indentation). SQL has no byte adapter here; no grammar downloads are allowed
 
 from __future__ import annotations
 
+import ast
 from collections.abc import Iterator
 from dataclasses import dataclass
 from functools import lru_cache
@@ -76,6 +77,39 @@ def _artifact_digest(path: Path) -> bytes:
     return _cached_digest(path, stat.st_size, stat.st_mtime_ns)
 
 
+def _parse_contract_digest() -> bytes:
+    syntax = ast.parse(Path(model.__file__).read_bytes())
+    definitions: dict[str, ast.stmt] = {}
+    imports = []
+    for statement in syntax.body:
+        if isinstance(statement, (ast.FunctionDef, ast.ClassDef)):
+            definitions[statement.name] = statement
+        elif isinstance(statement, (ast.Assign, ast.AnnAssign)):
+            targets = statement.targets if isinstance(statement, ast.Assign) else [statement.target]
+            for target in targets:
+                if isinstance(target, ast.Name):
+                    definitions[target.id] = statement
+        elif isinstance(statement, (ast.Import, ast.ImportFrom)):
+            imports.append(statement)
+    pending = ["ParseResult", "EntityDefinition", "EntityVersion", "GitOid", "SourceSpan",
+               "CanonicalValue"]
+    selected: dict[str, ast.stmt] = {}
+    while pending:
+        name = pending.pop()
+        if name in selected:
+            continue
+        statement = definitions[name]
+        selected[name] = statement
+        pending.extend(
+            node.id for node in ast.walk(statement)
+            if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load)
+            and node.id in definitions and node.id not in selected
+        )
+    manifest = tuple(ast.dump(statement, include_attributes=False)
+                     for statement in (*imports, *(selected[name] for name in sorted(selected))))
+    return blake2b(canonical_encode("parse-contract", manifest), digest_size=32).digest()
+
+
 def _artifacts() -> tuple:
     """Hash installed binding code and cached grammars, never their absolute paths."""
     artifacts = []
@@ -103,8 +137,9 @@ def _artifacts() -> tuple:
             )
             artifacts.append(("grammar-cache", cached))
         for name, filename in (("adapter", __file__), ("extractor", extractor.__file__),
-                               ("languages", languages.__file__), ("model", model.__file__)):
+                       ("languages", languages.__file__)):
             artifacts.append((name, _artifact_digest(Path(filename))))
+        artifacts.append(("parse-contract", _parse_contract_digest()))
     except IndexContractError:
         raise
     except Exception as error:

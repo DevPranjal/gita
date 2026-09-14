@@ -5,6 +5,48 @@ work. The current contract is [FOUNDATION.md](../specs/entity-index/FOUNDATION.m
 the older WS-2 through WS-5 plans are superseded. A passing checkpoint does not
 mean the entity index is complete or that identity decisions are correct.
 
+## Integrated F1 Checkpoint
+
+```powershell
+.venv\Scripts\python.exe verify\check.py --stage f1
+```
+
+This is the completed F1 storage/evidence prerequisite check. All five checks
+passed on 2026-09-14: committed bytes ignore a dirty worktree; a root generation
+publishes and reopens read-only; a copied successor rolls back without changing
+the publication; GC refuses that publication; explicit staging GC preserves the
+remaining evidence and integrity. Fixtures stay in a unique
+`gita-verify-foundation-*` directory whose path is printed.
+
+The manual fixture supplies explicit seeds and interpretation manifests. It is
+not an automatic lineage builder. The storage tests separately exercise all 21
+relations, exact membership/endpoints, immutable publication, seed and departure
+guards, concurrent snapshots, bounded checkpoint copying, schema tampering and
+GC authorization. Git access tests cover raw paths, SHA formats, missing/empty
+objects, offline behavior, size/stream bounds and retryable cleanup.
+
+**Compatibility:** stores now use schema v2. Schema-v1 caches are refused with
+`schema_mismatch` and preserved, not automatically migrated or deleted. The
+corrected parse fingerprint also changes the interpretation of prior evidence.
+An explicit new store is required; no public rebuild CLI exists yet. Do not
+replace or delete an active database, WAL or SHM file.
+
+## F2 Event Checkpoint
+
+```powershell
+.venv\Scripts\python.exe verify\check.py --stage f2-events
+```
+
+All four checks passed: combined rename/move/signature/body flags, no event for
+coordinate-only shifts, nonmaterial descendant changes, and unknown evidence
+instead of a cosmetic claim when representations are unavailable. These checks
+run in memory against real parse records and explicit accepted endpoint fixtures.
+
+The classifier has 31 passing cases; three harness cases verify invocation and
+failure propagation. It does not infer identity, traverse history or choose an
+ambiguous match. Known enclosing identities are required by this initial helper;
+unresolved-parent relocation belongs to the pending strict matching policy.
+
 ## F1 Evidence Checkpoint
 
 Run from the repository root with the project dependencies installed:
@@ -32,8 +74,9 @@ The AST/span checks are independent of tree-sitter; serialization round trips
 share production code and are not an independent proof of the whole database.
 No lineage, generation publication, indexed CLI, performance or accuracy gate is
 established here. The adapter is synchronous; the separate worker checkpoint below
-adds deadline isolation. Byte-safe Git enumeration is still pending. SQL is explicitly unsupported by this new
-adapter, without changing the existing SQL differ.
+adds deadline isolation. Committed Git access is covered by the integrated F1
+checkpoint above. SQL is explicitly unsupported by this new adapter, without
+changing the existing SQL differ.
 
 ## F1 Worker Checkpoint
 
@@ -62,8 +105,9 @@ The worker defaults to five seconds per request, uses one persistent spawn child
 and does not change deterministic evidence fingerprints. Deadline, transport and
 cancellation failures close the worker; a fresh instance is needed to retry.
 OS startup and reaping are not hard real-time guarantees. If cleanup itself fails,
-unfinished resources remain owned for another `close()` attempt. Native RSS limits,
-generation publication and the full indexed workflow remain unverified. Library
+unfinished resources remain owned for another `close()` attempt. Native RSS and
+the full indexed workflow remain unverified; publication primitives are covered
+by the integrated F1 checkpoint. Library
 callers on Windows need the usual `if __name__ == "__main__":` guard for spawning.
 
 ## Reading Results
@@ -72,9 +116,10 @@ callers on Windows need the usual `if __name__ == "__main__":` guard for spawnin
 .venv\Scripts\python.exe verify\check.py --stage ws2
 ```
 
-This currently reports `NOT VERIFIED` and returns `2`, even though the partial
-store module exists. A checkpoint requires a registered runner and its required
-module. File presence alone is not a passing result.
+This legacy stage key still reports `NOT VERIFIED` and returns `2`; its old plan
+is superseded. Use `--stage f1` for the current foundation contract. A checkpoint
+requires a registered runner and its required module. File presence alone is
+not a passing result.
 
 - `0`: selected registered checks completed without `FAIL`. Inspect any `SKIP`,
   `EXPECTED FAIL` and unverified-stage lines; this is not a release verdict.
@@ -97,7 +142,8 @@ previous instructions that edited and reverted tracked production source.
 **Scratch-directory warning:** these legacy paths and the default command reuse
 and clear fixed directories under the system temp folder:
 `gita-verify-merges` and/or `gita-verify-refactor`. Do not keep work there. The new
-`f1-evidence` and `f1-worker` commands do not clear either directory.
+`f1`, `f1-evidence` and `f1-worker` commands do not clear either directory;
+`f2-events` uses in-memory fixtures.
 
 WS-1 compares changed-file lists with Git and forces the old enumeration path as
 a negative control. Its process count concerns the measured Git wrapper calls,
@@ -113,7 +159,7 @@ does not change legacy history's behavior or promise transparent fallback.
 
 ## Regression And Remaining Gates
 
-Latest full Unit Test MCP run: **968 passed, 1 failed**, no skips, in 316.6s.
+Latest full Unit Test MCP run: **1,122 passed, 1 failed**, no skips, in 385.6s.
 The failure was separately confirmed as
 `test_foundation_tracks_five_events_after_restart`: the proposed `gita index`
 command is not implemented. The full suite is deliberately not green; no test
@@ -128,9 +174,9 @@ For a manual rerun:
 .venv\Scripts\python.exe -m pytest tests/test_index_builder.py::test_foundation_tracks_five_events_after_restart -q
 ```
 
-The store file currently has 279 passing tests. The exact acceptance command
+The store file currently has 338 passing tests. The exact acceptance command
 above must still fail. [Foundation section 14](../specs/entity-index/FOUNDATION.md#14-implementation-plan)
-records implemented subsets and pending work. Full relational constraints,
-generation publication, offline Git access, lineage, indexed queries and the
-independent release gates remain unverified or unimplemented. Corrupt databases
+records implemented primitives and pending work. F2 lineage/state construction,
+F3 indexed queries and F4 independent release gates remain unimplemented or
+unverified. Corrupt databases
 are rejected and preserved, never automatically deleted as recovery.

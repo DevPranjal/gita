@@ -1573,3 +1573,435 @@ class TestEvidenceWorker:
         finally:
             release_response.set()
             worker.close()
+
+
+class TestParsePolicySeparation:
+    @pytest.mark.parametrize("old, new", (
+        pytest.param(
+            '    "own_content_changed",\n})',
+            '    "own_content_changed", "test_flag",\n})',
+            id="matching-vocabulary",
+        ),
+        pytest.param(
+            '"unknown link method"', '"unrecognized link method"',
+            id="lineage-link-validator",
+        ),
+    ))
+    def test_matching_only_model_changes_preserve_parse_identity(
+        self, tmp_path, monkeypatch, old, new,
+    ):
+        from gita.index import evidence, model
+
+        source, path = b"def validate_token(raw):\n    return raw\n", b"auth.py"
+        model_path = Path(model.__file__)
+        model_source = model_path.read_text(encoding="utf-8")
+        newline = "\r\n" if b"\r\n" in model_path.read_bytes() else "\n"
+        assert model_source.count(old) == 1
+        baseline = evidence.parse_fingerprint()
+        before = evidence.parse_evidence(source, path)
+        assert before.result.complete
+        assert before.result.parse_fingerprint == baseline
+
+        copied_model = tmp_path / "model.py"
+        copied_model.write_text(model_source, encoding="utf-8", newline=newline)
+        assert copied_model.read_bytes() == model_path.read_bytes()
+        monkeypatch.setattr(model, "__file__", str(copied_model))
+        assert evidence.parse_fingerprint() == baseline
+        assert evidence.parse_evidence(source, path) == before
+
+        copied_model.write_text(model_source.replace(old, new), encoding="utf-8", newline=newline)
+        after = evidence.parse_evidence(source, path)
+        assert after.result.complete
+        assert evidence.parse_fingerprint() == baseline
+        assert after.result.parse_fingerprint == baseline
+        assert after.result.id == before.result.id
+        assert tuple(definition.id for definition in after.result.definitions) == tuple(
+            definition.id for definition in before.result.definitions
+        )
+        assert tuple(version.id for version in after.versions) == tuple(
+            version.id for version in before.versions
+        )
+
+    @pytest.mark.parametrize("old, new", (
+        pytest.param(
+            '"expected uint64, excluding bool"',
+            '"expected unsigned 64-bit integer, excluding bool"',
+            id="transitive-parsing-helper",
+        ),
+        pytest.param(
+            '_text(self.kind)\n        _digest(self.source_digest)',
+            '_text(self.kind, nonempty=False)\n        _digest(self.source_digest)',
+            id="entity-version-validator",
+        ),
+    ))
+    def test_parsing_model_changes_invalidate_parse_fingerprint(
+        self, tmp_path, monkeypatch, old, new,
+    ):
+        from gita.index import evidence, model
+
+        model_path = Path(model.__file__)
+        model_source = model_path.read_text(encoding="utf-8")
+        newline = "\r\n" if b"\r\n" in model_path.read_bytes() else "\n"
+        assert model_source.count(old) == 1
+        baseline = evidence.parse_fingerprint()
+
+        copied_model = tmp_path / "model.py"
+        copied_model.write_text(model_source, encoding="utf-8", newline=newline)
+        assert copied_model.read_bytes() == model_path.read_bytes()
+        monkeypatch.setattr(model, "__file__", str(copied_model))
+        assert evidence.parse_fingerprint() == baseline
+
+        copied_model.write_text(model_source.replace(old, new), encoding="utf-8", newline=newline)
+        changed = evidence.parse_fingerprint()
+        assert type(changed) is bytes and len(changed) == 32
+        assert changed != baseline
+        assert evidence.parse_fingerprint() == changed
+
+    def test_malformed_model_source_fails_closed(self, tmp_path, monkeypatch):
+        from gita.index import evidence, model
+        from gita.index.model import IndexContractError
+
+        model_path = Path(model.__file__)
+        model_source = model_path.read_text(encoding="utf-8")
+        newline = "\r\n" if b"\r\n" in model_path.read_bytes() else "\n"
+        baseline = evidence.parse_fingerprint()
+
+        copied_model = tmp_path / "model.py"
+        copied_model.write_text(model_source, encoding="utf-8", newline=newline)
+        assert copied_model.read_bytes() == model_path.read_bytes()
+        monkeypatch.setattr(model, "__file__", str(copied_model))
+        assert evidence.parse_fingerprint() == baseline
+
+        copied_model.write_text(
+            model_source + "\ndef malformed_model(:\n", encoding="utf-8", newline=newline,
+        )
+        with pytest.raises(IndexContractError) as unavailable:
+            evidence.parse_fingerprint()
+        assert unavailable.value.code == "parser_unavailable"
+
+
+class TestTransitionClassification:
+    def test_uncovered_token_movement_remains_material(self):
+        arguments = self._arguments()
+        for endpoint, own in (
+            ("source", ("sig", "extra", "body")),
+            ("destination", ("sig", "body", "extra")),
+        ):
+            self._replace_version(
+                arguments, endpoint, own=own, signature=("sig",),
+                body=("body",), subtree=own,
+            )
+        assert self._classify(arguments) == ("own_content_changed",)
+
+    def test_conditional_body_change_does_not_invent_uncovered_content(self):
+        before = b"def validate_token(raw):\n    if raw:\n        return raw\n"
+        arguments = self._arguments(before, before.replace(b"return raw", b"return raw + 1"))
+        assert self._classify(arguments) == ("body_changed",)
+
+    """F2 ITEM-009, TEST-007/008 and section 3.8: accepted transitions only.
+
+    Parent identities stand for accepted bindings, not parse-local parent IDs.
+    This initial primitive requires known identities for non-roots; unresolved
+    parent relocation needs a later matcher contract, not inferred continuity.
+    Synthetic modules have no parent. The caller owns Git edge adjacency.
+    """
+
+    @staticmethod
+    def _identity(label):
+        from gita.index.model import GitOid, LineageSeed, content_id
+
+        return LineageSeed(
+            content_id("ctx1", ("transition-fixture",)),
+            GitOid("sha1", b"\x11" * 20), content_id("occ1", (label,)), "root",
+        ).id
+
+    def _arguments(
+        self, before=b"def validate_token(raw):\n    return raw\n", after=None, *,
+        source_name="validate_token", destination_name=None,
+        source_path=b"auth.py", destination_path=None,
+    ):
+        from gita.index.evidence import parse_evidence
+        from gita.index.model import EntityOccurrence, GitOid
+
+        arguments = {}
+        for endpoint, source, path, name, commit_digest in (
+            ("source", before, source_path, source_name, b"\x11" * 20),
+            ("destination", before if after is None else after,
+             source_path if destination_path is None else destination_path,
+             source_name if destination_name is None else destination_name, b"\x22" * 20),
+        ):
+            bundle = parse_evidence(source, path)
+            assert bundle.result.complete
+            if name == "<module>":
+                definition, = (item for item in bundle.result.definitions if item.synthetic_root)
+            else:
+                definition = _f1_definition(bundle, name)
+            arguments[endpoint] = EntityOccurrence(
+                GitOid("sha1", commit_digest), path, bundle.result.blob,
+                "blob", 0o100644, definition.id,
+            )
+            arguments[endpoint + "_definition"] = definition
+            arguments[endpoint + "_version"] = _f1_version(bundle, definition)
+            arguments[endpoint + "_parent_identity"] = (
+                None if definition.synthetic_root else self._identity("accepted-parent")
+            )
+        return arguments
+
+    @staticmethod
+    def _replace_version(arguments, endpoint, **changes):
+        from dataclasses import replace
+
+        version = replace(arguments[endpoint + "_version"], **changes)
+        definition = replace(arguments[endpoint + "_definition"],
+                             version_id=version.id, kind=version.kind)
+        arguments[endpoint + "_version"] = version
+        arguments[endpoint + "_definition"] = definition
+        arguments[endpoint] = replace(arguments[endpoint], definition_id=definition.id)
+
+    @staticmethod
+    def _classify(arguments):
+        from gita.index.matching import classify_transition
+
+        return classify_transition(
+            arguments["source"], arguments["destination"],
+            arguments["source_definition"], arguments["destination_definition"],
+            arguments["source_version"], arguments["destination_version"],
+            source_parent_identity=arguments["source_parent_identity"],
+            destination_parent_identity=arguments["destination_parent_identity"],
+        )
+
+    def _assert_flags(self, arguments, expected, *, material=None):
+        from gita.index.model import ChangeEvent, content_id
+
+        original = dict(arguments)
+        flags = self._classify(arguments)
+        assert type(flags) is tuple
+        assert flags == expected
+        assert arguments == original
+        if expected:
+            event = ChangeEvent(
+                content_id("ctx1", ("transition-fixture",)), self._identity("entity"),
+                arguments["source"].commit, arguments["destination"].commit,
+                arguments["source"].id, arguments["destination"].id, flags, None,
+            )
+            assert event.flags == expected
+            assert event.material is material
+
+    @pytest.mark.parametrize("name", ("validate_token", "<module>"))
+    def test_unchanged_bytes_at_distinct_commits_have_no_flags(self, name):
+        arguments = self._arguments(source_name=name)
+        assert arguments["source"].commit != arguments["destination"].commit
+        assert arguments["source"].id != arguments["destination"].id
+        assert arguments["source"].blob == arguments["destination"].blob
+        assert arguments["source_definition"].id == arguments["destination_definition"].id
+        assert arguments["source_version"] == arguments["destination_version"]
+        self._assert_flags(arguments, ())
+
+    def test_line_prefix_changes_occurrence_bounds_not_content(self):
+        source = b"def validate_token(raw):\n    return raw\n"
+        prefix = b"# preceding source\n\n"
+        arguments = self._arguments(source, prefix + source)
+        original = arguments["source_definition"].span
+        shifted = arguments["destination_definition"].span
+        assert shifted.start_byte == original.start_byte + len(prefix)
+        assert shifted.end_byte == original.end_byte + len(prefix)
+        assert shifted.start_line == original.start_line + 2
+        assert shifted.end_line == original.end_line + 2
+        assert source[original.start_byte:original.end_byte] == (
+            prefix + source
+        )[shifted.start_byte:shifted.end_byte]
+        assert arguments["source"].blob != arguments["destination"].blob
+        assert arguments["source"].id != arguments["destination"].id
+        assert arguments["source_version"].id == arguments["destination_version"].id
+        self._assert_flags(arguments, ())
+
+    @pytest.mark.parametrize("after", (
+        b"def validate_token( raw ):\n    return  raw\n",
+        b"def validate_token(raw):\n    # ignored comment\n    return raw\n",
+    ), ids=("whitespace", "comment"))
+    def test_equal_representations_with_changed_slice_are_cosmetic(self, after):
+        arguments = self._arguments(after=after)
+        original, changed = arguments["source_version"], arguments["destination_version"]
+        assert original.source_digest != changed.source_digest
+        for field_name in ("own", "signature", "body", "subtree"):
+            assert getattr(original, field_name) == getattr(changed, field_name)
+        self._assert_flags(arguments, ("cosmetic",), material=False)
+
+    @pytest.mark.parametrize("after, name, path, expected", (
+        (b"def validate_token(raw):\n    return raw + 1\n", "validate_token", b"auth.py",
+         ("body_changed",)),
+        (b"def validate_token(raw, strict=False):\n    return raw\n", "validate_token", b"auth.py",
+         ("signature_changed",)),
+        (b"def check_token(raw):\n    return raw\n", "check_token", b"auth.py",
+         ("renamed", "signature_changed")),
+        (b"def validate_token(raw):\n    return raw\n", "validate_token", b"bad\xff.py",
+         ("moved",)),
+        (b"def check_token(raw, strict=False):\n    return raw + 1\n", "check_token", b"security.py",
+         ("body_changed", "moved", "renamed", "signature_changed")),
+    ), ids=("body", "signature", "local-rename", "raw-path-move", "simultaneous"))
+    def test_flags_are_independent_sorted_and_do_not_duplicate_covered_own_changes(
+        self, after, name, path, expected,
+    ):
+        arguments = self._arguments(after=after, destination_name=name, destination_path=path)
+        self._assert_flags(arguments, expected, material=True)
+
+    def test_parent_rename_does_not_rename_or_move_unchanged_child(self):
+        source = b"class Validator:\n    def validate_token(self, raw):\n        return raw\n"
+        arguments = self._arguments(source, source.replace(b"Validator", b"Checker"))
+        original, changed = arguments["source_definition"], arguments["destination_definition"]
+        assert original.names == ("Validator", "validate_token")
+        assert changed.names == ("Checker", "validate_token")
+        assert original.parent_id != changed.parent_id
+        assert arguments["source_parent_identity"] == arguments["destination_parent_identity"]
+        assert arguments["source_version"] == arguments["destination_version"]
+        self._assert_flags(arguments, ())
+
+    def test_same_path_and_names_with_different_enclosing_identity_are_moved(self):
+        arguments = self._arguments()
+        arguments["destination_parent_identity"] = self._identity("replacement-parent")
+        assert arguments["source_parent_identity"] != arguments["destination_parent_identity"]
+        assert arguments["source"].path == arguments["destination"].path
+        assert arguments["source_definition"].names == arguments["destination_definition"].names
+        self._assert_flags(arguments, ("moved",), material=True)
+
+    def test_mode_only_change_is_nonmaterial(self):
+        from dataclasses import replace
+
+        arguments = self._arguments()
+        arguments["destination"] = replace(arguments["destination"], mode=0o100755)
+        assert arguments["source_version"] == arguments["destination_version"]
+        self._assert_flags(arguments, ("mode_changed",), material=False)
+
+    @pytest.mark.parametrize("name", ("Validator", "<module>"))
+    def test_descendant_only_class_and_module_changes_are_nonmaterial(self, name):
+        source = (b"class Validator:\n    enabled = True\n"
+                  b"    def validate_token(self, raw):\n        return raw.strip()\n")
+        arguments = self._arguments(source, source.replace(b"strip", b"lower"), source_name=name)
+        original, changed = arguments["source_version"], arguments["destination_version"]
+        assert original.own == changed.own
+        assert original.signature == changed.signature
+        assert original.body == changed.body
+        assert original.subtree != changed.subtree
+        assert original.source_digest != changed.source_digest
+        if name == "<module>":
+            assert original.signature is changed.signature is None
+        self._assert_flags(arguments, ("descendant_changed",), material=False)
+
+    @pytest.mark.parametrize("before_prefix, after_prefix, after_body, expected", (
+        (("prefix_old",), ("prefix_new",), ("return", "one"), ("own_content_changed",)),
+        (("prefix_old",), ("prefix_new",), ("return", "two"),
+         ("body_changed", "own_content_changed")),
+        (("first", "second"), ("second", "first"), ("return", "one"),
+         ("own_content_changed",)),
+    ), ids=("own-only", "residual-with-body", "residual-order"))
+    def test_uncovered_own_content_remains_material(
+        self, before_prefix, after_prefix, after_body, expected,
+    ):
+        arguments = self._arguments()
+        for endpoint, prefix, body, digest in (
+            ("source", before_prefix, ("return", "one"), b"\x33" * 32),
+            ("destination", after_prefix, after_body, b"\x44" * 32),
+        ):
+            self._replace_version(arguments, endpoint, own=prefix + body,
+                                  signature=(), body=body, subtree=prefix + body,
+                                  source_digest=digest)
+        self._assert_flags(arguments, expected, material=True)
+
+    @pytest.mark.parametrize("field_name", ("own", "signature", "body", "subtree"))
+    def test_missing_leaf_representations_are_unknown_never_cosmetic(self, field_name):
+        for endpoints in (("source",), ("destination",), ("source", "destination")):
+            arguments = self._arguments(
+                after=b"def validate_token( raw ):\n    # comment\n    return raw\n",
+            )
+            assert arguments["source_version"].source_digest != arguments["destination_version"].source_digest
+            for endpoint in endpoints:
+                self._replace_version(arguments, endpoint, **{field_name: None})
+            self._assert_flags(arguments, ("representation_unknown",), material=False)
+
+    @pytest.mark.parametrize("missing, expected", (
+        ("signature", ("body_changed", "representation_unknown")),
+        ("own", ("body_changed", "representation_unknown")),
+        ("body", ("own_content_changed", "representation_unknown")),
+    ))
+    def test_known_material_changes_survive_unavailable_narrower_evidence(self, missing, expected):
+        arguments = self._arguments(after=b"def validate_token(raw):\n    return raw + 1\n")
+        for endpoint in ("source", "destination"):
+            self._replace_version(arguments, endpoint, **{missing: None})
+        self._assert_flags(arguments, expected, material=True)
+
+    def test_equal_source_digests_do_not_hide_different_representation_payloads(self):
+        arguments = self._arguments(after=b"def validate_token(raw):\n    return raw + 1\n")
+        self._replace_version(arguments, "destination",
+                              source_digest=arguments["source_version"].source_digest)
+        original, changed = arguments["source_version"], arguments["destination_version"]
+        assert original.source_digest == changed.source_digest
+        assert original.body != changed.body
+        assert original.id != changed.id
+        self._assert_flags(arguments, ("body_changed",), material=True)
+
+    def test_inconsistent_record_links_and_producer_context_are_rejected(self):
+        from dataclasses import replace
+
+        from gita.index.model import IndexContractError, content_id
+
+        baseline = self._arguments()
+        for endpoint in ("source", "destination"):
+            for corruption in (
+                "definition_id", "version_id", "parse_id", "definition_kind",
+                "kind", "language", "parse_fingerprint",
+            ):
+                arguments = dict(baseline)
+                definition = arguments[endpoint + "_definition"]
+                if corruption == "definition_id":
+                    arguments[endpoint] = replace(arguments[endpoint],
+                                                  definition_id=content_id("def1", ("unrelated",)))
+                elif corruption in ("version_id", "parse_id", "definition_kind"):
+                    field_name, value = {
+                        "version_id": ("version_id", content_id("ver1", ("unrelated",))),
+                        "parse_id": ("parse_id", content_id("par1", ("unrelated",))),
+                        "definition_kind": ("kind", "class"),
+                    }[corruption]
+                    definition = replace(definition, **{field_name: value})
+                    arguments[endpoint + "_definition"] = definition
+                    arguments[endpoint] = replace(arguments[endpoint], definition_id=definition.id)
+                else:
+                    self._replace_version(arguments, endpoint, **{
+                        corruption: {"kind": "class", "language": "javascript",
+                                     "parse_fingerprint": b"\x55" * 32}[corruption],
+                    })
+                with pytest.raises(IndexContractError):
+                    self._classify(arguments)
+
+    def test_invalid_record_types_raise_contract_errors(self):
+        from gita.index.model import IndexContractError
+
+        baseline = self._arguments()
+        for field_name in (
+            "source", "destination", "source_definition", "destination_definition",
+            "source_version", "destination_version",
+        ):
+            for invalid in (None, {}, "not-a-record"):
+                arguments = dict(baseline)
+                arguments[field_name] = invalid
+                with pytest.raises(IndexContractError):
+                    self._classify(arguments)
+
+    def test_parent_inputs_require_known_typed_identities_except_for_modules(self):
+        from gita.index.model import IndexContractError, content_id
+
+        baseline = self._arguments()
+        for field_name in ("source_parent_identity", "destination_parent_identity"):
+            for invalid in (None, False, {}, b"not-text", "not-an-id",
+                            content_id("def1", ("parse-local-parent",))):
+                arguments = dict(baseline)
+                arguments[field_name] = invalid
+                with pytest.raises(IndexContractError):
+                    self._classify(arguments)
+            arguments = self._arguments(source_name="<module>")
+            arguments[field_name] = self._identity("not-a-module-parent")
+            with pytest.raises(IndexContractError):
+                self._classify(arguments)
+        arguments = dict(baseline)
+        arguments["source_parent_identity"] = arguments["destination_parent_identity"] = None
+        with pytest.raises(IndexContractError):
+            self._classify(arguments)

@@ -9,6 +9,8 @@ independent oracle.
     python verify/check.py --stage ws1  one workstream
     python verify/check.py --stage f1-evidence  evidence cache checkpoint only
     python verify/check.py --stage f1-worker  bounded parse worker checkpoint only
+    python verify/check.py --stage f1  store and committed evidence checkpoint only
+    python verify/check.py --stage f2-events  independent event classification checkpoint only
     python verify/check.py -v           show the commands being run
 
 Unverified stages are listed, never counted as successful checkpoints.
@@ -501,6 +503,379 @@ def check_f1_worker() -> list[Result]:
     return results
 
 
+def check_f1_foundation() -> list[Result]:
+    """Check F1 storage primitives against retained, committed byte evidence."""
+    import os
+    from hashlib import blake2b, sha256
+
+    results = []
+    root = None
+    label = "committed source ignores dirty worktree"
+    try:
+        root = Path(tempfile.mkdtemp(prefix="gita-verify-foundation-")).resolve()
+        repository = root / "repo"
+        repository.mkdir()
+        from gita.index.evidence import EvidenceBundle, EvidenceLimits
+        from gita.index.model import ChangeEvent, EntityOccurrence, IdentityContext, LineageSeed
+        from gita.index.store import IndexStore, IndexStoreError
+        from gita.index.worker import EvidenceWorker
+        from gita.vcs.git import CommittedRepo
+
+        environment = {key: value for key, value in os.environ.items()
+                       if not key.upper().startswith("GIT_")}
+        environment.update({
+            "GIT_AUTHOR_NAME": "verify", "GIT_AUTHOR_EMAIL": "verify@example.com",
+            "GIT_COMMITTER_NAME": "verify", "GIT_COMMITTER_EMAIL": "verify@example.com",
+            "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_SYSTEM": os.devnull,
+            "GIT_CONFIG_NOSYSTEM": "1", "GIT_TERMINAL_PROMPT": "0",
+            "GIT_ALLOW_PROTOCOL": "", "GIT_NO_LAZY_FETCH": "1",
+        })
+
+        def command(*args: str) -> None:
+            subprocess.run(
+                ("git", "-c", "core.autocrlf=false", "-c", "commit.gpgsign=false",
+                 "-c", f"core.hooksPath={os.devnull}", "-c", "protocol.allow=never", *args),
+                cwd=repository, env=environment, check=True, capture_output=True,
+            )
+
+        path = b"auth.py"
+        function_source = b"def validate_token(raw):\r\n    return bool(raw)"
+        source = b"\xef\xbb\xbf# caf\xc3\xa9\r\n" + function_source + b"\r\n"
+        dirty = b"def broken(:\n"
+        notes = b"Unrelated tracked note.\n"
+        command("init", "-q", "-b", "main", "--object-format=sha1")
+        command("config", "core.autocrlf", "false")
+        command("config", "protocol.allow", "never")
+        (repository / "auth.py").write_bytes(source)
+        command("add", "--", "auth.py")
+        command("commit", "-q", "-m", "root fixture")
+        limits = EvidenceLimits(4096, 10, 16384)
+        with CommittedRepo(repository, max_object_bytes=limits.max_blob_bytes) as committed:
+            root_oid = committed.resolve("HEAD")
+            first = committed.commit(root_oid)
+            (repository / "notes.txt").write_bytes(notes)
+            command("add", "--", "notes.txt")
+            command("commit", "-q", "-m", "unrelated note")
+            later_oid = committed.resolve("HEAD")
+            later = committed.commit(later_oid)
+            (repository / "auth.py").write_bytes(dirty)
+            pages = tuple(committed.iter_tree(root_oid, page_size=1))
+            if len(pages) != 1 or len(pages[0]) != 1:
+                raise ValueError("root inventory must contain exactly auth.py")
+            entry = pages[0][0]
+            blob = committed.read_object(entry.oid)
+            if (entry.path != path or entry.object_type != "blob" or entry.mode != 0o100644
+                    or blob is None or blob.oid != entry.oid or blob.object_type != "blob"
+                    or blob.data != source):
+                raise ValueError("committed blob must preserve the exact BOM/UTF-8/CRLF fixture")
+            pinned = (committed.common_dir == (repository / ".git").resolve()
+                      and committed.resolve("HEAD~1") == root_oid and root_oid != later_oid
+                      and first.oid == root_oid and not first.parents
+                      and later.oid == later_oid and later.parents == (root_oid,)
+                      and (repository / "auth.py").read_bytes() == dirty)
+            with EvidenceWorker() as worker:
+                bundle = worker.parse(blob.data, path, committed.object_format, limits)
+        if (type(bundle) is not EvidenceBundle or not bundle.result.complete
+                or bundle.result.blob != entry.oid or bundle.result.path != path
+                or len(bundle.result.definitions) != 2):
+            raise ValueError("worker must return complete evidence with root and function definitions")
+        definitions = tuple(sorted(bundle.result.definitions,
+                                   key=lambda definition: not definition.synthetic_root))
+        versions = {version.id: version for version in bundle.versions}
+        function = definitions[1]
+        exact_spans = (
+            definitions[0].synthetic_root and not function.synthetic_root
+            and function.kind == "function" and function.names == ("validate_token",)
+            and (function.span.start_byte, function.span.end_byte)
+            == (source.index(function_source), source.index(function_source) + len(function_source))
+            and all(versions[definition.version_id].source_digest == blake2b(
+                source[definition.span.start_byte:definition.span.end_byte], digest_size=32,
+            ).digest() for definition in definitions)
+        )
+        results.append(Result(
+            label, "1 pinned blob, 2 definitions", PASS if pinned and exact_spans else FAIL,
+            f"Exact bytes and independent function slice; fixtures retained at {root}. "
+            "F1 primitives only; no lineage traversal or indexed CLI.",
+        ))
+
+        label = "root publication and read-only reopen"
+        database = root / "evidence.sqlite"
+        context = IdentityContext(
+            root_oid, "root", (), bundle.result.parse_fingerprint,
+            sha256(b"manual-storage-policy-v1").digest(),
+            (("max_blob_bytes", limits.max_blob_bytes),
+             ("max_definitions", limits.max_definitions),
+             ("max_representation_bytes", limits.max_representation_bytes)),
+        )
+        occurrences = tuple(EntityOccurrence(
+            root_oid, path, entry.oid, entry.object_type, entry.mode, definition.id,
+        ) for definition in definitions)
+        seeds = tuple(LineageSeed(context.id, root_oid, occurrence.id, "root")
+                      for occurrence in occurrences)
+        births = tuple(ChangeEvent(
+            context.id, seed.id, None, root_oid, None, occurrence.id, ("added",), None,
+        ) for seed, occurrence in zip(seeds, occurrences, strict=True))
+
+        def stored_checkpoint(store: IndexStore) -> tuple:
+            return (
+                store.published_generation("manual"), store.generation(generation),
+                store.members(generation), store.file_states(generation, 0),
+                store.get_parse(bundle.result.id),
+                tuple(store.get_version(version.id) for version in bundle.versions),
+            )
+
+        with IndexStore.create(database) as writer:
+            if writer.connection.execute("PRAGMA user_version").fetchone()[0] != 2:
+                raise ValueError("foundation fixture requires schema 2")
+            with writer.transaction():
+                writer.put_interpretation("parse", context.parse_fingerprint, (("manual_fixture", 1),))
+                writer.put_interpretation("match", context.match_fingerprint, (("manual_fixture", 1),))
+                for commit in (first, later):
+                    writer.put_commit(commit.oid, commit.tree, commit.parents, message=commit.message)
+                writer.put_context(context)
+                writer.put_parse(bundle.result, bundle.versions)
+                for occurrence in occurrences:
+                    writer.put_occurrence(occurrence)
+                for seed in seeds:
+                    writer.put_lineage(seed)
+                bindings = writer.put_binding_set(bundle.result.id, tuple(
+                    (definition.id, seed.id) for definition, seed in zip(definitions, seeds, strict=True)
+                ))
+                generation = writer.begin_generation("manual", context, root_oid)
+                writer.add_member(generation, 0, root_oid)
+                state = writer.put_file_state(
+                    generation, path, 0, None, "present", entry.oid, entry.object_type,
+                    entry.mode, bundle.result.id, bindings,
+                )
+                writer.set_frontier(generation, path, state)
+                for birth in births:
+                    writer.attach_event(generation, 0, writer.put_event(birth))
+                writer.put_coverage(generation, 0, path, "extraction", "complete", 0)
+                writer.publish_generation(generation)
+            original = stored_checkpoint(writer)
+        database_hash = sha256(database.read_bytes()).digest()
+        state_fields = ("path", "from_seq", "to_seq", "status", "blob", "object_type",
+                        "mode", "parse_id", "binding_set")
+        with IndexStore.open(database) as reader:
+            with reader.snapshot():
+                restored = stored_checkpoint(reader)
+                record = reader.generation(generation)
+                states = reader.file_states(generation, 0)
+                reopened = (
+                    restored == original and reader.published_generation("manual") == generation
+                    and record["state"] == "published" and record["tip"] == root_oid
+                    and record["context_id"] == context.id and record["predecessor"] is None
+                    and reader.members(generation) == (root_oid,)
+                    and len(states) == 1 and tuple(states[0][key] for key in state_fields)
+                    == (path, 0, None, "present", entry.oid, "blob", entry.mode, bundle.result.id, bindings)
+                    and restored[4] == bundle.result and restored[5] == bundle.versions
+                    and reader.check_integrity() == ()
+                )
+            read_only_rejected = False
+            try:
+                with reader.transaction():
+                    reader.begin_generation("read-only", context, root_oid)
+            except IndexStoreError as error:
+                if error.code != "read_only":
+                    raise
+                read_only_rejected = True
+        results.append(Result(
+            label, f"reopened={reopened}, read-only={read_only_rejected}",
+            PASS if reopened and read_only_rejected
+            and sha256(database.read_bytes()).digest() == database_hash else FAIL,
+            "Full parse, versions, membership and state compared; manual fixture manifests "
+            "do not claim a complete matching policy.",
+        ))
+
+        label = "copied successor transaction rollback"
+        with IndexStore.open(database, read_only=False) as writer:
+            abort = RuntimeError("intentional foundation successor rollback")
+            try:
+                with writer.transaction():
+                    successor = writer.begin_generation("manual", context, later_oid,
+                                                        predecessor=generation)
+                    inherited = writer.file_states(successor, 0)
+                    copied = (writer.members(successor) == (root_oid,) and len(inherited) == 1
+                              and tuple(inherited[0][key] for key in state_fields)
+                              == tuple(states[0][key] for key in state_fields))
+                    writer.add_member(successor, 1, later_oid)
+                    staged = (writer.generation(successor)["state"] == "staging"
+                              and writer.members(successor) == (root_oid, later_oid))
+                    raise abort
+            except RuntimeError as error:
+                if error is not abort:
+                    raise
+            rolled_back = False
+            try:
+                writer.generation(successor)
+            except IndexStoreError as error:
+                if error.code != "generation_gone":
+                    raise
+                rolled_back = True
+            rollback_ok = (copied and staged and rolled_back and not writer.connection.in_transaction
+                           and stored_checkpoint(writer) == original)
+            results.append(Result(
+                label, f"copied={copied}, rolled-back={rolled_back}", PASS if rollback_ok else FAIL,
+                "Injected RuntimeError before successor publication; old pointer and evidence unchanged.",
+            ))
+
+            label = "published generation GC protection"
+            protected = False
+            try:
+                with writer.transaction():
+                    writer.collect_generation(generation)
+            except IndexStoreError as error:
+                if error.code != "generation_in_use":
+                    raise
+                protected = True
+            results.append(Result(
+                label, f"generation_in_use={protected}",
+                PASS if protected and stored_checkpoint(writer) == original else FAIL,
+                "Explicit collection must refuse the active publication without changing it.",
+            ))
+
+            label = "explicit staging GC and final integrity"
+            with writer.transaction():
+                disposable = writer.begin_generation("manual-disposable", context, root_oid)
+            with writer.transaction():
+                writer.collect_generation(disposable)
+            collected = False
+            try:
+                writer.generation(disposable)
+            except IndexStoreError as error:
+                if error.code != "generation_gone":
+                    raise
+                collected = True
+        database_hash = sha256(database.read_bytes()).digest()
+        with IndexStore.open(database) as reader:
+            with reader.snapshot():
+                publications = tuple(tuple(row) for row in reader.connection.execute(
+                    "SELECT name, published_generation_id FROM scope "
+                    "WHERE published_generation_id IS NOT NULL",
+                ))
+                intact = (stored_checkpoint(reader) == original and reader.check_integrity() == ()
+                          and publications == (("manual", generation),)
+                          and reader.connection.execute("SELECT count(*) FROM generation").fetchone()[0] == 1)
+        with CommittedRepo(repository) as committed:
+            final_blob = committed.read_object(entry.oid)
+            source_intact = (final_blob is not None and final_blob.data == source
+                             and committed.resolve("HEAD") == later_oid
+                             and (repository / "auth.py").read_bytes() == dirty
+                             and (repository / "notes.txt").read_bytes() == notes)
+        results.append(Result(
+            label, f"collected={collected}, intact={intact}",
+            PASS if collected and intact and source_intact
+            and sha256(database.read_bytes()).digest() == database_hash else FAIL,
+            f"Only an unused staging generation collected; files retained at {root}. "
+            "Original committed bytes and reopened evidence preserved; no F2 readiness claim.",
+        ))
+    except Exception as error:
+        note = f"{type(error).__name__}: {error}"
+        if root is not None:
+            note += f"; fixtures retained at {root}"
+        results.append(Result(label, "checkpoint could not finish", FAIL, note))
+    return results
+
+
+def check_f2_events() -> list[Result]:
+    """Check classification of caller-accepted endpoints using in-memory bytes."""
+    results = []
+    label = "event classification setup"
+    note = "Accepted endpoints are fixtures; no lineage inference or traversal."
+    try:
+        from dataclasses import replace
+
+        from gita.index import matching
+        from gita.index.evidence import parse_evidence
+        from gita.index.model import ChangeEvent, EntityOccurrence, GitOid, content_id
+
+        before_commit = GitOid("sha1", b"a" * 20)
+        after_commit = GitOid("sha1", b"b" * 20)
+        parent_identity = content_id("eid1", ("manual-parent",))
+
+        def records(source, path, names, commit):
+            bundle = parse_evidence(source, path)
+            if not bundle.result.complete:
+                raise ValueError(f"fixture parse incomplete: {bundle.result.status}")
+            definition, = (definition for definition in bundle.result.definitions
+                           if definition.names == names and not definition.synthetic_root)
+            version = next(version for version in bundle.versions
+                           if version.id == definition.version_id)
+            occurrence = EntityOccurrence(
+                commit, path, bundle.result.blob, "blob", 0o100644, definition.id,
+            )
+            return occurrence, definition, version
+
+        def compare(before, after):
+            return matching.classify_transition(
+                before[0], after[0], before[1], after[1], before[2], after[2],
+                source_parent_identity=parent_identity,
+                destination_parent_identity=parent_identity,
+            )
+
+        label = "combined rename, move and content edits"
+        before = records(b"def original(value):\n    return value\n",
+                         b"src/\xff\told.py", ("original",), before_commit)
+        after = records(b"def renamed(value, extra):\n    return value + extra\n",
+                        b"dst/\xfe\tnew.py", ("renamed",), after_commit)
+        flags = compare(before, after)
+        expected = ("body_changed", "moved", "renamed", "signature_changed")
+        results.append(Result(label, repr(flags), PASS if flags == expected else FAIL, note))
+
+        label = "coordinate-only prefix insertion"
+        source = b"def sample():\n    return 1\n"
+        before = records(source, b"sample.py", ("sample",), before_commit)
+        after = records(b"# inserted prefix\n" + source, b"sample.py", ("sample",), after_commit)
+        flags = compare(before, after)
+        shifted = (before[1].span != after[1].span
+                   and before[1].parse_id != after[1].parse_id
+                   and before[2].id == after[2].id)
+        results.append(Result(
+            label, f"shifted={shifted}, flags={flags!r}",
+            PASS if shifted and flags == () else FAIL, note,
+        ))
+
+        label = "descendant-only class edit is nonmaterial"
+        before = records(b"class Sample:\n    def method(self):\n        return 1\n",
+                         b"sample.py", ("Sample",), before_commit)
+        after = records(b"class Sample:\n    def method(self):\n        return 2\n",
+                        b"sample.py", ("Sample",), after_commit)
+        flags = compare(before, after)
+        event = ChangeEvent(
+            content_id("ctx1", ("manual-context",)),
+            content_id("eid1", ("manual-class",)),
+            before_commit, after_commit, before[0].id, after[0].id, flags, None,
+        ) if flags else None
+        nonmaterial = event is not None and event.material is False
+        results.append(Result(
+            label, f"flags={flags!r}, nonmaterial={nonmaterial}",
+            PASS if flags == ("descendant_changed",) and nonmaterial
+            and before[2].own is not None and before[2].own == after[2].own
+            and before[2].subtree != after[2].subtree else FAIL, note,
+        ))
+
+        label = "unavailable leaf representation is not cosmetic"
+        before = records(source, b"sample.py", ("sample",), before_commit)
+        after = records(b"def sample():\n    return  1\n",
+                        b"sample.py", ("sample",), after_commit)
+        version = replace(after[2], own=None, signature=None, body=None, subtree=None)
+        definition = replace(after[1], version_id=version.id)
+        occurrence = replace(after[0], definition_id=definition.id)
+        after = occurrence, definition, version
+        flags = compare(before, after)
+        results.append(Result(
+            label, repr(flags),
+            PASS if flags == ("representation_unknown",)
+            and before[2].source_digest != after[2].source_digest else FAIL, note,
+        ))
+    except Exception as error:
+        results.append(Result(
+            label, "checkpoint could not finish", FAIL,
+            f"{type(error).__name__}: {error}; {note}",
+        ))
+    return results
+
+
 # ------------------------------------------------------- Year 1 target ----
 
 def build_refactor_repo() -> Path:
@@ -562,13 +937,16 @@ STAGES = [
     Stage("ws1", "Enumeration", None),
     Stage("f1-evidence", "Evidence cache checkpoint", "gita.index.evidence"),
     Stage("f1-worker", "Bounded parse worker checkpoint", "gita.index.worker"),
+    Stage("f1", "Store and committed evidence checkpoint", "gita.index.store"),
+    Stage("f2-events", "Independent event classification checkpoint", "gita.index.matching"),
     Stage("ws2", "Store", "gita.index.store"),
     Stage("ws3", "Builder", "gita.index.builder"),
     Stage("ws4", "Query and CLI", "gita.index.query"),
     Stage("ws5", "Verification", "gita.index.verify"),
 ]
 
-RUNNERS = {"ws1": check_ws1, "f1-evidence": check_f1_evidence, "f1-worker": check_f1_worker}
+RUNNERS = {"ws1": check_ws1, "f1-evidence": check_f1_evidence, "f1-worker": check_f1_worker,
+           "f1": check_f1_foundation, "f2-events": check_f2_events}
 
 
 def demo() -> int:
