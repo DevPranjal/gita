@@ -1,5 +1,11 @@
 # WS-3 — Builder
 
+> **Historical plan, superseded 2026-09-14.** Follow
+> [FOUNDATION.md](FOUNDATION.md), especially F2/F3, for new implementation.
+> Persisting the existing diff matcher's decisions verbatim is no longer the
+> design. Strict evidence-backed lineage, exact occurrence state, isolated
+> scopes and atomic publication replace the contracts below.
+
 **Delivers:** the walk, identity assignment, event writing, incremental update,
 rewritten-history recovery, and the parallel parse pool.
 

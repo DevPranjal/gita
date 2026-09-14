@@ -2,13 +2,53 @@
 
 **gita is the layer that lets software agents understand changes and their history, without repeatedly reconstructing that understanding from files. Git remains the source of truth.**
 
-What this product is for, and why. Written 2026-09-04; revised 2026-09-11.
+What this product is for, and why. Written 2026-09-04; revised 2026-09-14.
 Measurements, design goals and commercial hypotheses are distinct: evidence for
 one is not proof of the others.
 
-The tactical list of "features to reach parity with git" lives in
-[ROADMAP.md](ROADMAP.md). This document is the layer underneath it: the model
-everything should be built on. Where the two disagree, this one wins.
+This is the canonical product vision: what gita is for and the end-to-end
+experience it should enable. Detailed specifications govern individual
+capabilities; they are not evidence that those capabilities are implemented.
+
+## The end-to-end experience
+
+An agent investigating a branch should be able to:
+
+1. **Orient:** establish the repository, exact revisions, scope and freshness of
+   the evidence. Working-tree state and missing coverage must be explicit.
+2. **Review:** see which entities changed, with bounded context and a way to
+   inspect the original code rather than an unexplained summary.
+3. **Trace:** follow supported implementation continuations across edits, names
+   and files. Show why a link was accepted, and preserve ambiguity and gaps.
+4. **Compare:** examine the branch and its target against a shared baseline.
+   Surface structural overlap without implying semantic conflict or merge safety.
+5. **Hand off:** produce an evidence-linked branch review brief another agent
+   or developer can inspect, with unresolved questions and revision pins intact.
+
+Understanding comes first; controlled Git actions are a later product decision.
+Git remains responsible for source content and history. The foundation supplies
+the addressing, state and lineage needed by this workflow, not the complete
+workflow by itself.
+
+The first hackathon target is the same branch investigation on an ordinary
+laptop with the same small local model, using Git versus gita. Preserve answer
+quality while testing total input tokens and end-to-end time, including indexing,
+context preparation and follow-up calls. Offline inference after setup and no
+paid cloud AI dependency are requirements, not results already demonstrated.
+
+## Document map
+
+| Document | Role and authority |
+| --- | --- |
+| This document | Canonical end-to-end product vision and principles. |
+| [Entity foundation](../specs/entity-index/FOUNDATION.md) | Current detailed draft for versions, exact occurrences, evidence-backed lineage, events, storage, queries and TDD delivery. Authoritative over conflicting older foundation specs. |
+| [Implementation entry point](../specs/entity-index/README.md) | Current build order and status; identifies historical workstream plans. |
+| [Earlier index design](SPEC-ENTITY-INDEX.md) and [roadmap](ROADMAP.md) | Historical reasoning and proposals, not the current foundation contract. |
+
+The north-star film illustrates the proposed experience; it is not a live
+recording or acceptance evidence. The previous hackathon backlog assumed a
+cloud-Copilot handoff and needs revision before use as the local-model execution
+plan. Neither overrides this vision or the current foundation specification.
 
 ---
 
@@ -29,14 +69,16 @@ changing software, not to match Git command for command.
 
 | git | gita |
 | --- | --- |
-| blob — bytes | **entity** — a named thing with durable identity |
-| tree — a directory | **version** — an entity at one point in history, four hashes |
-| commit — a snapshot | **event** — a typed transition between two versions |
-| *(none)* | **edge** — a relation between entities, with supporting evidence |
+| blob — bytes | **version** — an immutable extracted representation, backed by source evidence |
+| tree — a directory | **occurrence** — a version at an exact commit, path and byte span |
+| commit — a snapshot | **event** — an observed change on an exact commit-parent edge |
+| *(none)* | **entity lineage** — supported continuations between occurrences, with evidence and policy-qualified identity |
+| *(none)* | **dependency edge** — a future relation between entities, with supporting evidence |
 | *(none)* | **note** — a durable fact anchored to an entity |
 
-Every feature in this document is one of five operations over that model. That
-is the test for whether something belongs in gita at all.
+These are complementary concepts, not replacements for Git's object types.
+The immediate foundation separates versions, occurrences, lineage decisions and
+events. Dependency edges and notes are later capabilities, not prerequisites.
 
 > Git preserves repository content and history as the source of truth.
 > gita derives reusable structural context, with traceable evidence and explicit
@@ -120,8 +162,8 @@ split and merge.
 
 **Generates:** true history, entity blame, ownership, anchored memory, semantic
 merge — all of which are *joins on the identity*.
-**Forbids:** anything keyed on path or line, because it will break on contact
-with a rename.
+**Forbids:** treating path or line as durable identity. Revision-specific paths
+and source spans remain essential evidence, even when the code itself is unchanged.
 **Status:** computed per-commit today, then thrown away (§1.1).
 
 ### P2: Evidence before assertion

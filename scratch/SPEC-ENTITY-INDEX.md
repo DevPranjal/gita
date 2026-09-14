@@ -1,5 +1,12 @@
 # gita entity index — Year 1 specification
 
+> **Superseded on 2026-09-14:** use
+> [FOUNDATION.md](../specs/entity-index/FOUNDATION.md) for new implementation.
+> This document is retained as historical reasoning. Its events-as-state model,
+> global commit ordering, unconditional matcher reuse, and recovery/fallback
+> contracts are not the current design. Executing its sample SQL established
+> syntax validity, not correctness of the storage model.
+
 Status: draft for implementation. Branch `first-principles`, 2026-09-04.
 Implements Year 1 of [FIRST-PRINCIPLES.md](FIRST-PRINCIPLES.md): durable
 identity and the persistent index.

@@ -1,5 +1,11 @@
 # WS-2 — Store
 
+> **Historical plan, superseded 2026-09-14.** Follow
+> [FOUNDATION.md](FOUNDATION.md), especially F0/F1, for new implementation.
+> The old schema, relative-path resolution, PID lock, recovery and integrity
+> rules below MUST NOT override the current contract. Reuse test ideas only
+> after checking their revised acceptance criteria.
+
 **Delivers:** the persistent index file — schema, open/create, semantics
 fingerprint, integrity, locking primitives. No walking, no identity, no queries.
 

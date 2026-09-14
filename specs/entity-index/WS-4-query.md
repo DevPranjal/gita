@@ -1,5 +1,11 @@
 # WS-4 — Query and CLI
 
+> **Historical plan, superseded 2026-09-14.** Follow
+> [FOUNDATION.md](FOUNDATION.md), especially F3, for new implementation.
+> Indexed history is opt-in, errors retain distinct types, and reads never
+> silently fall back to legacy name-filtered history. Scope/generation pins
+> and exact occurrence state replace the query assumptions below.
+
 **Delivers:** `EntityIndex` — the read API — plus `gita id`, index-backed
 `gita history`, and `gita index --status`.
 

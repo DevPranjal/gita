@@ -1,5 +1,11 @@
 # WS-5 — Verification
 
+> **Historical plan, superseded 2026-09-14.** Follow
+> [FOUNDATION.md](FOUNDATION.md), especially F4 and its verification gates.
+> Compare canonical logical exports, not SQLite file bytes. Git file-rename
+> detection is a lead for independent entity labels, not an identity oracle.
+> Unmeasured performance and accuracy gates remain unverified.
+
 **Delivers:** `gita index --verify`, the two identity answer keys, the
 long-history benchmark fixture, and the kill-criteria report.
 
