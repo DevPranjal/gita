@@ -715,3 +715,1153 @@ def test_typed_references_and_seed_reasons_are_validated(records):
     ):
         with pytest.raises(IndexContractError):
             replace(records[prefix], **changes)
+
+
+@pytest.fixture
+def store_api():
+    from gita.index import store
+
+    return store
+
+
+@pytest.fixture
+def persistence_bundle(records, parse_values):
+    from gita.index.model import ParseResult
+
+    child_version = records["ver1"]
+    root_version = replace(child_version, kind="module", source_digest=b"r" * 32,
+                           own=(), signature=None, body=None)
+    parse_id = content_id("par1", (
+        parse_values["parse_fingerprint"], parse_values["blob"].fields(), parse_values["path"],
+    ))
+    root = EntityDefinition(
+        parse_id, root_version.id, SourceSpan(0, 40, 1, 5), "module",
+        ("m\u00f3dule::literal",), None, (0,), synthetic_root=True,
+    )
+    child = replace(parse_values["definitions"][0], version_id=child_version.id,
+                    parent_id=root.id, discriminator=(0, 2))
+    result = ParseResult(**{
+        **parse_values, "definitions": (child, root),
+        "diagnostics": ("notice: \u00e9", "second\nline"),
+    })
+    return result, (root_version, child_version)
+
+
+@pytest.fixture
+def writable_index(tmp_path, store_api):
+    with store_api.IndexStore.create(tmp_path / "index.sqlite") as store:
+        yield store
+
+
+def test_f1_create_initializes_minimum_schema_and_connection_pragmas(writable_index, store_api):
+    connection = writable_index.connection
+    assert store_api.SCHEMA_VERSION == 1
+    assert connection.isolation_level is None
+    assert not connection.in_transaction
+    assert connection.execute("PRAGMA user_version").fetchone()[0] == 1
+    assert connection.execute("PRAGMA application_id").fetchone()[0] == 0x47495441
+    assert connection.execute("PRAGMA foreign_keys").fetchone()[0] == 1
+    assert connection.execute("PRAGMA journal_mode").fetchone()[0].lower() == "wal"
+    assert connection.execute("PRAGMA synchronous").fetchone()[0] == 2
+    assert connection.execute("PRAGMA busy_timeout").fetchone()[0] == 2000
+    tables = {row[0] for row in connection.execute(
+        "SELECT name FROM sqlite_master WHERE type = 'table'",
+    )}
+    assert {"metadata", "version", "parse_result", "definition"} <= tables
+    assert writable_index.check_integrity() == ()
+
+
+def test_f1_bundle_round_trips_after_close_and_reopen(tmp_path, store_api, persistence_bundle):
+    result, versions = persistence_bundle
+    path = tmp_path / "index with spaces.sqlite"
+    with store_api.IndexStore.create(path) as store:
+        with store.transaction():
+            assert store.put_parse(result, versions) == result.id
+            assert store.get_parse(result.id) == result
+        assert not store.connection.in_transaction
+    with store_api.IndexStore.open(path) as reopened:
+        with reopened.snapshot():
+            assert reopened.get_parse(result.id) == result
+            assert tuple(reopened.get_version(version.id) for version in versions) == versions
+            assert reopened.check_integrity() == ()
+
+
+def test_f1_create_integrity_failure_preserves_file_and_closes_connection(
+    tmp_path, store_api, monkeypatch,
+):
+    import sqlite3
+
+    connections = []
+
+    def damaged_integrity(store):
+        connections.append(store.connection)
+        return ("bad",)
+
+    path = tmp_path / "index.sqlite"
+    with monkeypatch.context() as patch:
+        patch.setattr(store_api.IndexStore, "check_integrity", damaged_integrity)
+        with pytest.raises(store_api.IndexStoreError) as caught:
+            with store_api.IndexStore.create(path):
+                pass
+    assert caught.value.code == "corrupt"
+    assert path.is_file()
+    assert len(connections) == 1
+    for connection in connections:
+        with pytest.raises(sqlite3.ProgrammingError):
+            connection.execute("SELECT 1")
+    preserved = path.rename(tmp_path / "preserved.sqlite")
+    assert preserved.is_file()
+    assert not path.exists()
+    with store_api.IndexStore.open(preserved) as reopened:
+        assert reopened.connection.execute("PRAGMA user_version").fetchone()[0] == store_api.SCHEMA_VERSION
+        assert reopened.check_integrity() == ()
+
+
+@pytest.mark.parametrize("read_only", (True, False))
+def test_f1_open_absent_never_creates_file_or_parent(tmp_path, store_api, read_only):
+    path = tmp_path / "not built" / "index.sqlite"
+    with pytest.raises(store_api.IndexStoreError) as caught:
+        store_api.IndexStore.open(path, read_only=read_only)
+    assert caught.value.code == "not_built"
+    assert not path.exists()
+    assert not path.parent.exists()
+
+
+def test_f1_create_existing_is_nondestructive(tmp_path, store_api, persistence_bundle):
+    result, versions = persistence_bundle
+    path = tmp_path / "index.sqlite"
+    with store_api.IndexStore.create(path) as store:
+        with store.transaction():
+            store.put_parse(result, versions)
+    before = path.read_bytes()
+    with pytest.raises(store_api.IndexStoreError) as caught:
+        store_api.IndexStore.create(path)
+    assert caught.value.code == "exists"
+    assert path.read_bytes() == before
+    with store_api.IndexStore.open(path) as reopened:
+        assert reopened.get_parse(result.id) == result
+
+
+def test_f1_context_manager_and_close_release_connection(tmp_path, store_api):
+    import sqlite3
+
+    with store_api.IndexStore.create(tmp_path / "index.sqlite") as store:
+        connection = store.connection
+    with pytest.raises(sqlite3.ProgrammingError):
+        connection.execute("SELECT 1")
+    reopened = store_api.IndexStore.open(tmp_path / "index.sqlite")
+    connection = reopened.connection
+    reopened.close()
+    with pytest.raises(sqlite3.ProgrammingError):
+        connection.execute("SELECT 1")
+
+
+def test_f1_read_only_rejects_transaction_and_writes(tmp_path, store_api, persistence_bundle):
+    import sqlite3
+
+    result, versions = persistence_bundle
+    path = tmp_path / "index.sqlite"
+    with store_api.IndexStore.create(path):
+        pass
+    with store_api.IndexStore.open(path) as reader:
+        entered = False
+        with pytest.raises(store_api.IndexStoreError) as caught:
+            with reader.transaction():
+                entered = True
+        assert caught.value.code == "read_only"
+        assert not entered
+        assert not reader.connection.in_transaction
+        with pytest.raises(store_api.IndexStoreError) as caught:
+            reader.put_version(versions[0])
+        assert caught.value.code == "read_only"
+        with pytest.raises(store_api.IndexStoreError) as caught:
+            reader.put_parse(result, versions)
+        assert caught.value.code == "read_only"
+        with pytest.raises(sqlite3.OperationalError):
+            reader.connection.execute("CREATE TABLE forbidden (value TEXT)")
+
+
+def test_f1_read_only_open_does_not_attempt_ddl_or_data_writes(tmp_path, store_api, monkeypatch):
+    import sqlite3
+
+    path = tmp_path / "index.sqlite"
+    with store_api.IndexStore.create(path):
+        pass
+    before = path.read_bytes()
+    original_connect = sqlite3.connect
+    forbidden = {
+        sqlite3.SQLITE_CREATE_TABLE, sqlite3.SQLITE_CREATE_INDEX, sqlite3.SQLITE_ALTER_TABLE,
+        sqlite3.SQLITE_DROP_TABLE, sqlite3.SQLITE_INSERT, sqlite3.SQLITE_UPDATE, sqlite3.SQLITE_DELETE,
+    }
+    attempts = []
+
+    def authorize(action, first, second, database, trigger):
+        if action in forbidden or (
+            action == sqlite3.SQLITE_PRAGMA and first.lower() == "journal_mode" and second is not None
+        ):
+            attempts.append((action, first, second))
+            return sqlite3.SQLITE_DENY
+        return sqlite3.SQLITE_OK
+
+    def connect(*args, **kwargs):
+        connection = original_connect(*args, **kwargs)
+        connection.set_authorizer(authorize)
+        return connection
+
+    monkeypatch.setattr(sqlite3, "connect", connect)
+    with store_api.IndexStore.open(path) as reader:
+        with reader.snapshot():
+            assert reader.check_integrity() == ()
+    assert attempts == []
+    assert path.read_bytes() == before
+
+
+def test_f1_unknown_schema_is_preserved(tmp_path, store_api):
+    import sqlite3
+    from contextlib import closing
+
+    path = tmp_path / "index.sqlite"
+    with store_api.IndexStore.create(path):
+        pass
+    with closing(sqlite3.connect(path, isolation_level=None)) as connection:
+        connection.execute("PRAGMA user_version = 998")
+    before = path.read_bytes()
+    with pytest.raises(store_api.IndexStoreError) as caught:
+        store_api.IndexStore.open(path)
+    assert caught.value.code == "schema_mismatch"
+    assert path.read_bytes() == before
+
+
+def test_f1_foreign_sqlite_is_schema_mismatch_and_preserved(tmp_path, store_api):
+    import sqlite3
+    from contextlib import closing
+
+    path = tmp_path / "foreign.sqlite"
+    with closing(sqlite3.connect(path, isolation_level=None)) as connection:
+        connection.execute("PRAGMA user_version = 1")
+        connection.execute("CREATE TABLE unrelated (value TEXT)")
+        connection.execute("INSERT INTO unrelated VALUES (?)", ("keep me",))
+    before = path.read_bytes()
+    with pytest.raises(store_api.IndexStoreError) as caught:
+        store_api.IndexStore.open(path, read_only=False)
+    assert caught.value.code == "schema_mismatch"
+    assert path.read_bytes() == before
+
+
+def test_f1_non_database_bytes_report_corrupt_without_replacement(tmp_path, store_api):
+    path = tmp_path / "damaged.sqlite"
+    before = b"not a SQLite database\x00\xff" * 100
+    path.write_bytes(before)
+    with pytest.raises(store_api.IndexStoreError) as caught:
+        store_api.IndexStore.open(path)
+    assert caught.value.code == "corrupt"
+    assert path.read_bytes() == before
+
+
+def test_f1_busy_timeout_is_configurable_and_bounded(tmp_path, store_api):
+    path = tmp_path / "index.sqlite"
+    with store_api.IndexStore.create(path, busy_timeout_ms=10) as store:
+        assert store.connection.execute("PRAGMA busy_timeout").fetchone()[0] == 10
+    with store_api.IndexStore.open(path, read_only=False, busy_timeout_ms=10) as store:
+        assert store.connection.execute("PRAGMA busy_timeout").fetchone()[0] == 10
+        assert store.connection.execute("PRAGMA foreign_keys").fetchone()[0] == 1
+        assert store.connection.execute("PRAGMA journal_mode").fetchone()[0].lower() == "wal"
+        assert store.connection.execute("PRAGMA synchronous").fetchone()[0] == 2
+    for invalid in (-1, 2001, True):
+        with pytest.raises(IndexContractError) as caught:
+            store_api.IndexStore.open(path, busy_timeout_ms=invalid)
+        assert caught.value.code == "invalid_record"
+        absent = tmp_path / f"invalid-{invalid}.sqlite"
+        with pytest.raises(IndexContractError) as caught:
+            store_api.IndexStore.create(absent, busy_timeout_ms=invalid)
+        assert caught.value.code == "invalid_record"
+        assert not absent.exists()
+
+
+def test_f1_second_writer_is_busy_before_any_write_and_recovers(tmp_path, store_api, records):
+    path = tmp_path / "index.sqlite"
+    with store_api.IndexStore.create(path) as first:
+        with store_api.IndexStore.open(path, read_only=False, busy_timeout_ms=10) as second:
+            with first.transaction():
+                entered = False
+                with pytest.raises(store_api.IndexStoreError) as caught:
+                    with second.transaction():
+                        entered = True
+                assert caught.value.code == "busy"
+                assert not entered
+                assert not second.connection.in_transaction
+            with second.transaction():
+                second.put_version(records["ver1"])
+            assert first.get_version(records["ver1"].id) == records["ver1"]
+
+
+def test_f1_read_only_snapshot_stays_stable_across_writer_commit(tmp_path, store_api, records):
+    path = tmp_path / "index.sqlite"
+    version = records["ver1"]
+    with store_api.IndexStore.create(path) as writer:
+        with store_api.IndexStore.open(path) as reader:
+            with reader.snapshot():
+                assert reader.connection.in_transaction
+                assert reader.get_version(version.id) is None
+                with writer.transaction():
+                    writer.put_version(version)
+                assert reader.get_version(version.id) is None
+            assert not reader.connection.in_transaction
+            with reader.snapshot():
+                assert reader.get_version(version.id) == version
+
+
+@pytest.mark.parametrize("exception_type", (RuntimeError, KeyboardInterrupt))
+def test_f1_transaction_rolls_back_base_exception_and_releases_lock(
+    tmp_path, store_api, records, exception_type,
+):
+    path = tmp_path / "index.sqlite"
+    version = records["ver1"]
+    with store_api.IndexStore.create(path) as store:
+        with pytest.raises(exception_type):
+            with store.transaction():
+                store.put_version(version)
+                assert store.get_version(version.id) == version
+                raise exception_type("cancel build")
+        assert not store.connection.in_transaction
+        assert store.get_version(version.id) is None
+        with store_api.IndexStore.open(path, read_only=False, busy_timeout_ms=10) as other:
+            with other.transaction():
+                other.put_version(version)
+        assert store.get_version(version.id) == version
+
+
+def test_f1_puts_require_caller_transaction(writable_index, store_api, persistence_bundle):
+    result, versions = persistence_bundle
+    with pytest.raises(store_api.IndexStoreError) as caught:
+        writable_index.put_version(versions[0])
+    assert caught.value.code == "transaction_required"
+    with pytest.raises(store_api.IndexStoreError) as caught:
+        writable_index.put_parse(result, versions)
+    assert caught.value.code == "transaction_required"
+    assert writable_index.get_parse(result.id) is None
+    assert all(writable_index.get_version(version.id) is None for version in versions)
+
+
+def test_f1_put_parse_does_not_commit_callers_transaction(writable_index, persistence_bundle):
+    result, versions = persistence_bundle
+    with pytest.raises(RuntimeError, match="abort bundle"):
+        with writable_index.transaction():
+            writable_index.put_parse(result, versions)
+            assert writable_index.connection.in_transaction
+            assert writable_index.get_parse(result.id) == result
+            raise RuntimeError("abort bundle")
+    assert writable_index.get_parse(result.id) is None
+    assert all(writable_index.get_version(version.id) is None for version in versions)
+    assert writable_index.connection.execute("SELECT COUNT(*) FROM definition").fetchone()[0] == 0
+
+
+def test_f1_missing_version_rejects_bundle_atomically_inside_callers_transaction(
+    writable_index, persistence_bundle,
+):
+    result, versions = persistence_bundle
+    sentinel = replace(versions[0], source_digest=b"z" * 32)
+    with writable_index.transaction():
+        writable_index.put_version(sentinel)
+        with pytest.raises(IndexContractError) as caught:
+            writable_index.put_parse(result, (versions[0],))
+        assert caught.value.code == "invalid_record"
+        assert writable_index.connection.in_transaction
+        assert writable_index.get_version(sentinel.id) == sentinel
+        assert writable_index.get_parse(result.id) is None
+        assert all(writable_index.get_version(version.id) is None for version in versions)
+        assert writable_index.connection.execute("SELECT COUNT(*) FROM definition").fetchone()[0] == 0
+        writable_index.put_parse(result, versions)
+    assert writable_index.get_parse(result.id) == result
+
+
+def test_f1_put_parse_can_reference_cached_versions(writable_index, persistence_bundle):
+    result, versions = persistence_bundle
+    with writable_index.transaction():
+        for version in versions:
+            assert writable_index.put_version(version) == version.id
+    with writable_index.transaction():
+        assert writable_index.put_parse(result, ()) == result.id
+    assert writable_index.get_parse(result.id) == result
+
+
+def test_f1_duplicate_puts_are_idempotent_with_exact_row_counts(writable_index, persistence_bundle):
+    result, versions = persistence_bundle
+    for _ in range(2):
+        with writable_index.transaction():
+            for version in versions:
+                assert writable_index.put_version(version) == version.id
+            assert writable_index.put_parse(result, versions) == result.id
+            assert writable_index.put_parse(result, ()) == result.id
+    for table, expected in (("version", 2), ("parse_result", 1), ("definition", 2)):
+        assert writable_index.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] == expected
+    assert writable_index.get_parse(result.id) == result
+
+
+def test_f1_cached_parse_rejects_non_version_supplied_inside_callers_transaction(
+    writable_index, persistence_bundle,
+):
+    result, versions = persistence_bundle
+    sentinel = replace(versions[0], source_digest=b"z" * 32)
+    with writable_index.transaction():
+        writable_index.put_parse(result, versions)
+    with writable_index.transaction():
+        with pytest.raises(IndexContractError) as caught:
+            writable_index.put_parse(result, (object(),))
+        assert caught.value.code == "invalid_record"
+        assert writable_index.connection.in_transaction
+        assert writable_index.put_parse(result, ()) == result.id
+        writable_index.put_version(sentinel)
+    assert writable_index.get_parse(result.id) == result
+    assert tuple(writable_index.get_version(version.id) for version in versions) == versions
+    assert writable_index.get_version(sentinel.id) == sentinel
+    assert writable_index.check_integrity() == ()
+
+
+@pytest.mark.parametrize("changes, include_root", (
+    pytest.param({"body": ("return", "different")}, True, id="body-with-root"),
+    pytest.param({"own": ("def", "changed"), "source_digest": b"t" * 32}, False,
+                 id="own-and-digest"),
+))
+def test_f1_cached_parse_checks_supplied_version_collision_without_overwriting(
+    writable_index, persistence_bundle, monkeypatch, changes, include_root,
+):
+    result, versions = persistence_bundle
+    original = versions[1]
+    changed = replace(original, **changes)
+    existing_id = original.id
+    version_id = EntityVersion.id
+    sentinel = replace(versions[0], source_digest=b"z" * 32)
+    assert changed.id != existing_id
+    assert changed.kind == original.kind
+    with writable_index.transaction():
+        writable_index.put_parse(result, versions)
+    with writable_index.transaction():
+        with monkeypatch.context() as patch:
+            patch.setattr(EntityVersion, "id", property(
+                lambda version: existing_id if version is changed else version_id.__get__(version),
+            ))
+            with pytest.raises(IndexContractError) as caught:
+                writable_index.put_parse(result, (versions[0], changed) if include_root else (changed,))
+            assert caught.value.code == "digest_collision"
+        assert writable_index.connection.in_transaction
+        assert writable_index.get_version(existing_id) == original
+        assert writable_index.put_parse(result, ()) == result.id
+        writable_index.put_version(sentinel)
+    assert writable_index.get_parse(result.id) == result
+    assert tuple(writable_index.get_version(version.id) for version in versions) == versions
+    assert writable_index.get_version(sentinel.id) == sentinel
+    assert writable_index.get_version(changed.id) is None
+    assert writable_index.check_integrity() == ()
+    for table, expected in (("version", 3), ("parse_result", 1), ("definition", 2)):
+        assert writable_index.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] == expected
+
+
+def test_f1_version_digest_collision_never_overwrites_payload(writable_index, records, monkeypatch):
+    version = records["ver1"]
+    changed = replace(version, body=("return", "different"))
+    existing_id = version.id
+    assert changed.id != existing_id
+    with writable_index.transaction():
+        writable_index.put_version(version)
+    with monkeypatch.context() as patch:
+        patch.setattr(EntityVersion, "id", property(lambda record: existing_id))
+        with writable_index.transaction():
+            with pytest.raises(IndexContractError) as caught:
+                writable_index.put_version(changed)
+            assert caught.value.code == "digest_collision"
+    assert writable_index.get_version(existing_id) == version
+    assert writable_index.connection.execute("SELECT COUNT(*) FROM version").fetchone()[0] == 1
+
+
+def test_f1_parse_key_collision_checks_diagnostics_and_preserves_prior(writable_index, persistence_bundle):
+    result, versions = persistence_bundle
+    changed = replace(result, diagnostics=tuple(reversed(result.diagnostics)))
+    assert changed.id == result.id
+    with writable_index.transaction():
+        writable_index.put_parse(result, versions)
+    with writable_index.transaction():
+        with pytest.raises(IndexContractError) as caught:
+            writable_index.put_parse(changed, ())
+        assert caught.value.code == "digest_collision"
+    assert writable_index.get_parse(result.id) == result
+    assert writable_index.check_integrity() == ()
+
+
+@pytest.mark.parametrize("metadata", ("lines", "synthetic_root"))
+def test_f1_parse_collision_checks_definition_metadata(writable_index, persistence_bundle, metadata):
+    result, versions = persistence_bundle
+    child, root = result.definitions
+    if metadata == "lines":
+        changed_child = replace(child, span=SourceSpan(10, 30, 3, 4))
+        changed = replace(result, definitions=(changed_child, root))
+        assert changed_child.id == child.id
+    else:
+        changed_root = replace(root, synthetic_root=False)
+        changed = replace(result, definitions=(child, changed_root))
+        assert changed_root.id == root.id
+    assert changed.id == result.id
+    with writable_index.transaction():
+        writable_index.put_parse(result, versions)
+        with pytest.raises(IndexContractError) as caught:
+            writable_index.put_parse(changed, ())
+        assert caught.value.code == "digest_collision"
+    assert writable_index.get_parse(result.id) == result
+
+
+@pytest.mark.parametrize("mismatch", ("kind", "parse_fingerprint"))
+def test_f1_definition_version_mismatch_is_invalid_and_preserves_cache(
+    writable_index, persistence_bundle, mismatch,
+):
+    result, versions = persistence_bundle
+    child, root = result.definitions
+    changes = {"kind": "method"} if mismatch == "kind" else {"parse_fingerprint": b"q" * 32}
+    contradictory = replace(versions[1], **changes)
+    child = replace(child, version_id=contradictory.id)
+    changed = replace(result, definitions=(child, root))
+    with writable_index.transaction():
+        writable_index.put_version(contradictory)
+    with writable_index.transaction():
+        with pytest.raises(IndexContractError) as caught:
+            writable_index.put_parse(changed, (versions[0],))
+        assert caught.value.code == "invalid_record"
+        assert writable_index.get_version(contradictory.id) == contradictory
+        assert writable_index.get_version(versions[0].id) is None
+        assert writable_index.get_parse(result.id) is None
+    assert writable_index.check_integrity() == ()
+
+
+def test_f1_equal_tokens_do_not_coalesce_different_source_digests(writable_index, records):
+    first = records["ver1"]
+    second = replace(first, source_digest=b"t" * 32)
+    assert first.id != second.id
+    with writable_index.transaction():
+        writable_index.put_version(first)
+        writable_index.put_version(second)
+    assert writable_index.get_version(first.id) == first
+    assert writable_index.get_version(second.id) == second
+    assert writable_index.connection.execute("SELECT COUNT(*) FROM version").fetchone()[0] == 2
+
+
+def test_f1_parse_language_mismatch_leaks_no_rows_when_caller_commits(
+    writable_index, persistence_bundle,
+):
+    result, versions = persistence_bundle
+    changed = replace(result, language="typescript")
+    sentinel = replace(versions[0], source_digest=b"z" * 32)
+    assert result.language == "python"
+    assert all(version.language == "python" for version in versions)
+    assert changed.id == result.id
+    assert changed.definitions == result.definitions
+    with writable_index.transaction():
+        writable_index.put_version(sentinel)
+        with pytest.raises(IndexContractError) as caught:
+            writable_index.put_parse(changed, versions)
+        assert caught.value.code == "invalid_record"
+        assert writable_index.connection.in_transaction
+        assert writable_index.get_parse(result.id) is None
+        assert all(writable_index.get_version(version.id) is None for version in versions)
+    assert not writable_index.connection.in_transaction
+    assert writable_index.get_version(sentinel.id) == sentinel
+    assert writable_index.get_parse(result.id) is None
+    assert all(writable_index.get_version(version.id) is None for version in versions)
+    for table, expected in (("version", 1), ("parse_result", 0), ("definition", 0)):
+        assert writable_index.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] == expected
+
+
+def test_f1_read_rejects_parse_language_mismatch_with_consistent_payload(
+    writable_index, store_api, persistence_bundle,
+):
+    import json
+
+    result, versions = persistence_bundle
+    changed = replace(result, language="typescript")
+    with writable_index.transaction():
+        writable_index.put_parse(result, versions)
+        document = json.loads(writable_index.connection.execute(
+            "SELECT fields_json FROM parse_result WHERE id = ?", (result.id,),
+        ).fetchone()[0])
+        assert document[0] == "tuple"
+        assert document[1][3] == result.language == "python"
+        document[1][3] = changed.language
+        writable_index.connection.execute(
+            "UPDATE parse_result SET fields_json = ?, canonical_payload = ? WHERE id = ?",
+            (json.dumps(document), canonical_encode("par1", changed.fields()), result.id),
+        )
+    assert tuple(writable_index.get_version(version.id) for version in versions) == versions
+    with pytest.raises(store_api.IndexStoreError) as caught:
+        writable_index.get_parse(result.id)
+    assert caught.value.code == "corrupt"
+
+
+@pytest.mark.parametrize("document", ('["tuple",', '["unknown", []]'))
+def test_f1_read_version_classifies_invalid_persisted_json_as_corrupt(
+    writable_index, store_api, records, document,
+):
+    version = records["ver1"]
+    with writable_index.transaction():
+        writable_index.put_version(version)
+        writable_index.connection.execute(
+            "UPDATE version SET fields_json = ? WHERE id = ?", (document, version.id),
+        )
+    with pytest.raises(store_api.IndexStoreError) as caught:
+        writable_index.get_version(version.id)
+    assert caught.value.code == "corrupt"
+
+
+def test_f1_read_parse_rejects_valid_but_identity_inconsistent_definition_bounds(
+    writable_index, store_api, persistence_bundle,
+):
+    result, versions = persistence_bundle
+    child, root = result.definitions
+    changed_span = SourceSpan(11, 31, child.span.start_line, child.span.end_line)
+    assert root.span.start_byte <= changed_span.start_byte < changed_span.end_byte <= root.span.end_byte
+    assert replace(child, span=changed_span).id != child.id
+    with writable_index.transaction():
+        writable_index.put_parse(result, versions)
+        writable_index.connection.execute(
+            "UPDATE definition SET start_byte = ?, end_byte = ? WHERE id = ?",
+            (changed_span.start_byte, changed_span.end_byte, child.id),
+        )
+    assert writable_index.check_integrity() == ()
+    with pytest.raises(store_api.IndexStoreError) as caught:
+        writable_index.get_parse(result.id)
+    assert caught.value.code == "corrupt"
+
+
+def test_f1_versions_preserve_none_versus_empty_in_every_representation(writable_index, records):
+    versions = tuple(
+        replace(records["ver1"], **{name: value})
+        for name in ("own", "signature", "body", "subtree") for value in (None, ())
+    )
+    assert len({version.id for version in versions}) == 8
+    with writable_index.transaction():
+        for version in versions:
+            writable_index.put_version(version)
+    assert tuple(writable_index.get_version(version.id) for version in versions) == versions
+
+
+def test_f1_version_serialization_preserves_unicode_and_full_token_tuples(writable_index, records):
+    tokens = ("\u00e9", "e\u0301", '"quoted"', "\\literal", "\x00", "", "\n", "\U0001f642")
+    version = replace(records["ver1"], own=tokens, signature=tuple(reversed(tokens)),
+                      body=tokens * 40, subtree=tokens * 80, source_digest=bytes(range(32)))
+    with writable_index.transaction():
+        writable_index.put_version(version)
+    stored = writable_index.get_version(version.id)
+    assert stored == version
+    assert stored.fields() == version.fields()
+
+
+def test_f1_parse_keys_preserve_raw_case_sensitive_paths(writable_index, parse_values):
+    from gita.index.model import ParseResult
+
+    paths = (
+        b"src/run.py", b"src/Run.py", b"src/\xc3\xa9.py", b"src/e\xcc\x81.py",
+        b"bad\xff.py", b"line\nname.py", b"tab\tname.py", b'dir/"quoted".py', b"dir\\literal.py",
+    )
+    results = tuple(ParseResult(**{**parse_values, "path": path, "definitions": ()}) for path in paths)
+    assert len({result.id for result in results}) == len(paths)
+    with writable_index.transaction():
+        for result in results:
+            writable_index.put_parse(result, ())
+    assert tuple(writable_index.get_parse(result.id) for result in results) == results
+    assert writable_index.connection.execute("SELECT COUNT(*) FROM parse_result").fetchone()[0] == len(paths)
+
+
+def test_f1_parse_round_trip_preserves_sha256_qualified_blob(writable_index, parse_values):
+    from gita.index.model import ParseResult
+
+    result = ParseResult(**{**parse_values, "blob": GitOid("sha256", bytes(range(32))), "definitions": ()})
+    with writable_index.transaction():
+        writable_index.put_parse(result, ())
+    assert writable_index.get_parse(result.id) == result
+
+
+def test_f1_all_incomplete_parse_outcomes_remain_retained_coverage(writable_index, parse_values):
+    from gita.index.model import ParseResult
+
+    results = tuple(ParseResult(**{
+        **parse_values, "path": status.value.encode("ascii") + b".py", "status": status,
+        "language": None, "definitions": (), "diagnostics": (status.value, "detail: \u00e9"),
+    }) for status in ParseStatus if status is not ParseStatus.COMPLETE)
+    with writable_index.transaction():
+        for result in results:
+            writable_index.put_parse(result, ())
+    for result in results:
+        stored = writable_index.get_parse(result.id)
+        assert stored == result
+        assert stored.complete is False
+        assert stored.definitions == ()
+    assert writable_index.connection.execute("SELECT COUNT(*) FROM parse_result").fetchone()[0] == 6
+    assert writable_index.connection.execute("SELECT COUNT(*) FROM definition").fetchone()[0] == 0
+    assert writable_index.check_integrity() == ()
+
+
+def test_f1_complete_empty_parse_is_distinct_from_missing(writable_index, parse_values):
+    from gita.index.model import ParseResult
+
+    result = ParseResult(**{**parse_values, "byte_length": 0, "definitions": ()})
+    assert writable_index.get_parse(result.id) is None
+    with writable_index.transaction():
+        writable_index.put_parse(result, ())
+    stored = writable_index.get_parse(result.id)
+    assert stored == result
+    assert stored.complete is True
+    assert stored.definitions == ()
+    assert stored.diagnostics == ()
+
+
+def test_f1_valid_unknown_ids_return_none(writable_index, persistence_bundle):
+    result, versions = persistence_bundle
+    assert writable_index.get_version(versions[0].id) is None
+    assert writable_index.get_parse(result.id) is None
+
+
+def test_f1_lookup_rejects_invalid_or_wrong_domain_ids(writable_index):
+    for identifier in ("ver1_short", PARSE_ID, "ver1_" + "zz" * 32):
+        with pytest.raises(IndexContractError) as caught:
+            writable_index.get_version(identifier)
+        assert caught.value.code == "invalid_record"
+    for identifier in ("par1_short", VERSION_ID, "par1_" + "zz" * 32):
+        with pytest.raises(IndexContractError) as caught:
+            writable_index.get_parse(identifier)
+        assert caught.value.code == "invalid_record"
+
+
+def test_f1_foreign_keys_protect_versions_referenced_by_definitions(writable_index, persistence_bundle):
+    import sqlite3
+
+    result, versions = persistence_bundle
+    with writable_index.transaction():
+        writable_index.put_parse(result, versions)
+    with writable_index.transaction():
+        with pytest.raises(sqlite3.IntegrityError):
+            writable_index.connection.execute("DELETE FROM version")
+    assert writable_index.get_parse(result.id) == result
+    assert tuple(writable_index.get_version(version.id) for version in versions) == versions
+    assert writable_index.check_integrity() == ()
+
+
+def test_f1_check_integrity_reports_injected_foreign_key_damage(writable_index, persistence_bundle):
+    result, versions = persistence_bundle
+    with writable_index.transaction():
+        writable_index.put_parse(result, versions)
+    connection = writable_index.connection
+    connection.execute("PRAGMA foreign_keys = OFF")
+    assert connection.execute("PRAGMA foreign_keys").fetchone()[0] == 0
+    connection.execute("DELETE FROM version")
+    connection.execute("PRAGMA foreign_keys = ON")
+    assert connection.execute("PRAGMA foreign_key_check").fetchall()
+    issues = writable_index.check_integrity()
+    assert type(issues) is tuple
+    assert issues and all(isinstance(issue, str) and issue for issue in issues)
+
+
+def test_f1_locate_from_nested_invocation_returns_absolute_common_path(repo, store_api, monkeypatch):
+    from gita.vcs.git import Repo
+
+    nested = repo.root / "folder with spaces" / "child"
+    nested.mkdir(parents=True)
+    monkeypatch.chdir(nested)
+    expected = (repo.root / ".git" / "gita" / "index.sqlite").resolve()
+    located = store_api.IndexStore.locate(Repo("."))
+    assert located.is_absolute()
+    assert located == expected
+    assert store_api.IndexStore.locate(repo) == expected
+    assert not expected.parent.exists()
+
+
+def test_f1_linked_worktree_and_main_share_index_location(repo, tmp_path, store_api):
+    from gita.vcs.git import Repo
+
+    linked = tmp_path / "linked worktree"
+    repo._run("worktree", "add", "--detach", str(linked), "HEAD")
+    nested = linked / "nested" / "child"
+    nested.mkdir(parents=True)
+    expected = (repo.root / ".git" / "gita" / "index.sqlite").resolve()
+    assert store_api.IndexStore.locate(Repo(nested)) == expected
+    assert store_api.IndexStore.locate(Repo(linked)) == expected
+    assert store_api.IndexStore.locate(repo) == expected
+    assert not expected.parent.exists()
+
+
+def test_f1_bare_repository_uses_its_own_common_directory(repo, tmp_path, store_api):
+    from gita.vcs.git import Repo
+
+    bare = tmp_path / "bare repository.git"
+    repo._run("clone", "--bare", "--no-hardlinks", str(repo.root), str(bare))
+    expected = (bare / "gita" / "index.sqlite").resolve()
+    assert store_api.IndexStore.locate(Repo(bare)) == expected
+    assert not expected.parent.exists()
+
+
+def test_f1_relative_common_dir_fallback_resolves_against_git_invocation(repo, store_api, monkeypatch):
+    from gita.vcs.git import GitError, Repo
+
+    nested = repo.root / "nested directory" / "child"
+    nested.mkdir(parents=True)
+    original_run = Repo._run
+    relative_calls = []
+
+    def old_git_run(current_repo, *args, check=True):
+        if "--git-common-dir" in args:
+            if "--path-format=absolute" in args:
+                if check:
+                    raise GitError("unknown option: --path-format=absolute")
+                return b""
+            relative_calls.append(current_repo.root)
+            return b"../../.git\n"
+        return original_run(current_repo, *args, check=check)
+
+    monkeypatch.setattr(Repo, "_run", old_git_run)
+    expected = (repo.root / ".git" / "gita" / "index.sqlite").resolve()
+    assert store_api.IndexStore.locate(Repo(nested)) == expected
+    assert relative_calls == [nested]
+    assert not expected.parent.exists()
+
+
+@pytest.mark.parametrize("cached", (False, True), ids=("incoming", "cached"))
+def test_f1_put_parse_rejects_version_language_mismatch(
+    writable_index, persistence_bundle, cached,
+):
+    result, versions = persistence_bundle
+    changed = replace(result, language="typescript")
+    assert changed.id == result.id
+    assert result.language == "python"
+    assert all(version.language == "python" for version in versions)
+    if cached:
+        with writable_index.transaction():
+            for version in versions:
+                writable_index.put_version(version)
+    with writable_index.transaction():
+        with pytest.raises(IndexContractError) as caught:
+            writable_index.put_parse(changed, () if cached else versions)
+        assert caught.value.code == "invalid_record"
+        assert writable_index.connection.in_transaction
+        assert writable_index.get_parse(result.id) is None
+        for version in versions:
+            assert writable_index.get_version(version.id) == (version if cached else None)
+        for table, expected in (("version", len(versions) if cached else 0),
+                                ("parse_result", 0), ("definition", 0)):
+            assert writable_index.connection.execute(
+                f"SELECT COUNT(*) FROM {table}",
+            ).fetchone()[0] == expected
+    assert writable_index.check_integrity() == ()
+
+
+@pytest.mark.parametrize("read_only", (True, False), ids=("read-only", "writable"))
+@pytest.mark.parametrize("version_index", (0, 1), ids=("root", "child"))
+def test_f1_get_parse_rejects_version_language_mismatch_without_writes(
+    tmp_path, store_api, persistence_bundle, monkeypatch, read_only, version_index,
+):
+    result, versions = persistence_bundle
+    path = tmp_path / "language mismatch.sqlite"
+    with store_api.IndexStore.create(path) as writer:
+        with writer.transaction():
+            writer.put_parse(result, versions)
+    before = path.read_bytes()
+    original = versions[version_index]
+    changed = replace(original, language="typescript")
+    with store_api.IndexStore.open(path, read_only=read_only) as reader:
+        get_version = reader.get_version
+
+        def mismatched_version(identifier):
+            return changed if identifier == original.id else get_version(identifier)
+
+        with monkeypatch.context() as patch:
+            patch.setattr(reader, "get_version", mismatched_version)
+            with reader.snapshot():
+                with pytest.raises(store_api.IndexStoreError) as caught:
+                    reader.get_parse(result.id)
+                assert caught.value.code == "corrupt"
+        assert reader.get_parse(result.id) == result
+        assert tuple(reader.get_version(version.id) for version in versions) == versions
+        assert reader.check_integrity() == ()
+    assert path.read_bytes() == before
+
+
+def test_f1_create_runs_integrity_checks_once_before_return(tmp_path, store_api, monkeypatch):
+    check_integrity = store_api.IndexStore.check_integrity
+    calls = []
+    states = []
+    statements = []
+    outcomes = []
+
+    def observed_integrity(store):
+        calls.append(store)
+        states.append((
+            store.connection.in_transaction,
+            store.connection.execute("PRAGMA user_version").fetchone()[0],
+            store.connection.execute("PRAGMA foreign_keys").fetchone()[0],
+            store.path,
+        ))
+        store.connection.set_trace_callback(statements.append)
+        try:
+            issues = check_integrity(store)
+            outcomes.append(issues)
+            return issues
+        finally:
+            store.connection.set_trace_callback(None)
+
+    monkeypatch.setattr(store_api.IndexStore, "check_integrity", observed_integrity)
+    path = tmp_path / "checked.sqlite"
+    with store_api.IndexStore.create(path) as store:
+        assert calls == [store]
+        assert store.path == path
+        assert states == [(False, store_api.SCHEMA_VERSION, 1, path)]
+        assert outcomes == [()]
+        executed = [statement.strip().rstrip(";").upper() for statement in statements]
+        assert executed.count("PRAGMA QUICK_CHECK") == 1
+        assert executed.count("PRAGMA FOREIGN_KEY_CHECK") == 1
+
+
+@pytest.fixture
+def manual_check(tmp_path, monkeypatch):
+    import importlib.util
+    import sys
+    from pathlib import Path
+    from uuid import uuid4
+
+    path = Path(__file__).resolve().parents[1] / "verify" / "check.py"
+    key = "_gita_manual_check_" + uuid4().hex
+    spec = importlib.util.spec_from_file_location(key, path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    monkeypatch.setattr(sys, "path", list(sys.path))
+    monkeypatch.setitem(sys.modules, key, module)
+    spec.loader.exec_module(module)
+    monkeypatch.setattr(module.tempfile, "tempdir", str(tmp_path))
+    original_repo = tmp_path / "original-repo"
+    original_repo.mkdir()
+    (original_repo / "user.md").write_bytes(b"user-owned data\n")
+    monkeypatch.setattr(module, "ROOT", original_repo)
+    monkeypatch.chdir(original_repo)
+    return module
+
+
+def test_manual_f1_evidence_returns_five_passes_with_independent_fixture_spans(
+    manual_check, store_api, monkeypatch,
+):
+    import ast
+
+    from gita.index import evidence
+
+    sources = []
+    restored = []
+    parse_evidence = evidence.parse_evidence
+    get_parse = store_api.IndexStore.get_parse
+
+    def observed_parse(source, path, *args, **kwargs):
+        sources.append((source, path))
+        return parse_evidence(source, path, *args, **kwargs)
+
+    def observed_get_parse(store, identifier):
+        result = get_parse(store, identifier)
+        if result is not None:
+            restored.append(result)
+        return result
+
+    monkeypatch.setattr(evidence, "parse_evidence", observed_parse)
+    monkeypatch.setattr(store_api.IndexStore, "get_parse", observed_get_parse)
+    results = manual_check.check_f1_evidence()
+    assert isinstance(results, list)
+    assert len(results) == 5
+    assert all(isinstance(result, manual_check.Result) for result in results)
+    assert all(result.verdict and result.verdict == manual_check.PASS for result in results)
+    assert any("span" in result.label.lower() for result in results)
+
+    compared = 0
+    for source, path in sources:
+        if not path.endswith(b".py"):
+            continue
+        assert isinstance(source, bytes)
+        try:
+            tree = ast.parse(source)
+        except (SyntaxError, UnicodeError):
+            continue
+        lines = source.splitlines(keepends=True)
+        offsets = [0]
+        for line in lines:
+            offsets.append(offsets[-1] + len(line))
+        expected = set()
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                continue
+            start_line, start_column = node.lineno, node.col_offset
+            if node.decorator_list:
+                decorator = node.decorator_list[0]
+                start_line, start_column = decorator.lineno, decorator.col_offset - 1
+            expected.add((
+                node.name, offsets[start_line - 1] + start_column,
+                offsets[node.end_lineno - 1] + node.end_col_offset,
+            ))
+        for result in restored:
+            if result.path != path or result.byte_length != len(source) or not result.complete:
+                continue
+            actual = {
+                (definition.names[-1], definition.span.start_byte, definition.span.end_byte)
+                for definition in result.definitions if not definition.synthetic_root
+            }
+            assert actual == expected
+            compared += len(expected)
+    assert compared > 0
+
+
+def test_manual_stage_shipped_requires_registered_runner_and_available_module(
+    manual_check, monkeypatch,
+):
+    monkeypatch.setattr(manual_check, "_module_exists", lambda name: True)
+    unregistered = manual_check.Stage("unregistered", "Future", None)
+    assert unregistered.shipped is False
+    stage = next(stage for stage in manual_check.STAGES if stage.key == "ws2")
+    assert stage.shipped is False
+    monkeypatch.setitem(manual_check.RUNNERS, stage.key, lambda: [])
+    assert stage.shipped is True
+    monkeypatch.setattr(manual_check, "_module_exists", lambda name: False)
+    assert stage.shipped is False
+
+
+def test_manual_f1_cli_is_scoped_and_uses_unique_nondestructive_temp_output(
+    manual_check, tmp_path, monkeypatch, capsys,
+):
+    import sys
+    from pathlib import Path
+
+    preserved = [manual_check.ROOT / "user.md"]
+    for name in ("gita-verify-f1", "gita-verify-f1-evidence"):
+        directory = tmp_path / name
+        directory.mkdir()
+        sentinel = directory / "user.md"
+        sentinel.write_bytes(b"user-owned data\n")
+        preserved.append(sentinel)
+    directories = []
+    mkdtemp = manual_check.tempfile.mkdtemp
+
+    def observed_mkdtemp(*args, **kwargs):
+        directory = Path(mkdtemp(*args, **kwargs)).resolve()
+        assert directory.is_relative_to(tmp_path.resolve())
+        assert directory != tmp_path.resolve()
+        assert directory not in directories
+        directories.append(directory)
+        return str(directory)
+
+    def outside_checkpoint():
+        pytest.fail("F1 evidence must not run another workstream or Year 1 acceptance")
+
+    monkeypatch.setattr(manual_check.tempfile, "mkdtemp", observed_mkdtemp)
+    monkeypatch.setattr(manual_check, "check_year1_target", outside_checkpoint)
+    for key in tuple(manual_check.RUNNERS):
+        if key != "f1-evidence":
+            monkeypatch.setitem(manual_check.RUNNERS, key, outside_checkpoint)
+    runner = manual_check.check_f1_evidence
+    calls = []
+
+    def observed_runner():
+        results = runner()
+        calls.append(results)
+        return results
+
+    monkeypatch.setitem(manual_check.RUNNERS, "f1-evidence", observed_runner)
+    monkeypatch.setattr(sys, "argv", ["verify/check.py", "--stage", "f1-evidence"])
+    for invocation in range(2):
+        before = len(directories)
+        assert manual_check.main() == 0
+        output = capsys.readouterr().out
+        assert "F1-EVIDENCE" in output or "F1" in output
+        assert "checkpoint" in output.lower()
+        assert "f1 complete" not in output.lower()
+        assert "foundation complete" not in output.lower()
+        assert "Year 1 acceptance" not in output
+        assert len(calls) == invocation + 1
+        assert len(directories) > before
+        notes = "\n".join(result.note for result in calls[-1]).replace("\\", "/")
+        assert any(str(directory).replace("\\", "/") in notes for directory in directories[before:])
+        assert all(sentinel.read_bytes() == b"user-owned data\n" for sentinel in preserved)
+        if invocation == 0:
+            for directory in directories:
+                directory.mkdir(parents=True, exist_ok=True)
+                sentinel = directory / "user.md"
+                sentinel.write_bytes(b"user-owned data\n")
+                preserved.append(sentinel)
+
+
+def test_manual_cli_unknown_stage_is_an_argument_error(manual_check, monkeypatch, capsys):
+    import sys
+
+    monkeypatch.setattr(sys, "argv", ["verify/check.py", "--stage", "unknown"])
+    with pytest.raises(SystemExit) as caught:
+        manual_check.main()
+    assert caught.value.code == 2
+    captured = capsys.readouterr()
+    assert "unknown" in (captured.out + captured.err).lower()
+
+
+def test_manual_cli_unverified_stages_never_claim_shipped_or_all_passed(
+    manual_check, monkeypatch, capsys,
+):
+    import sys
+
+    monkeypatch.setattr(manual_check, "_module_exists", lambda name: True)
+    monkeypatch.setattr(sys, "argv", ["verify/check.py", "--stage", "ws2"])
+    assert manual_check.main() == 2
+    captured = capsys.readouterr()
+    output = captured.out + captured.err
+    assert "WS2" in output.upper()
+    assert "SHIPPED" not in output.upper()
+
+    ws2 = next(stage for stage in manual_check.STAGES if stage.key == "ws2")
+    future = manual_check.Stage("unregistered", "Future", None)
+    monkeypatch.setattr(manual_check, "STAGES", [ws2, future])
+    monkeypatch.setattr(manual_check, "check_year1_target", lambda: [])
+    monkeypatch.setattr(sys, "argv", ["verify/check.py"])
+    manual_check.main()
+    output = capsys.readouterr().out.lower()
+    assert "ws2" in output and "unregistered" in output
+    assert any(label in output for label in ("unverified", "untested", "not built", "no runner"))
+    assert "all checks on shipped stages passed" not in output
+
+
+def test_manual_cli_failed_or_raising_runner_reports_failure(
+    manual_check, monkeypatch, capsys,
+):
+    import sys
+
+    def failed_runner():
+        return [manual_check.Result("injected", "bad", manual_check.FAIL)]
+
+    def raising_runner():
+        raise RuntimeError("injected runner failure")
+
+    monkeypatch.setattr(sys, "argv", ["verify/check.py", "--stage", "f1-evidence"])
+    for runner in (failed_runner, raising_runner):
+        monkeypatch.setitem(manual_check.RUNNERS, "f1-evidence", runner)
+        assert manual_check.main() == 1
+        captured = capsys.readouterr()
+        output = captured.out + captured.err
+        assert "FAIL" in output
+        assert "injected" in output
+
+
+def test_manual_cli_empty_runner_is_failure_not_vacuous_success(
+    manual_check, monkeypatch, capsys,
+):
+    import sys
+
+    monkeypatch.setitem(manual_check.RUNNERS, "f1-evidence", lambda: [])
+    monkeypatch.setattr(sys, "argv", ["verify/check.py", "--stage", "f1-evidence"])
+    assert manual_check.main() == 1
+    captured = capsys.readouterr()
+    output = captured.out + captured.err
+    assert "no checks" in output.lower()
+    assert "FAIL" in output
+    assert "All checks on shipped stages passed" not in output
+
+
+def test_manual_f1_evidence_missing_parse_is_a_reported_failure(
+    manual_check, store_api, monkeypatch,
+):
+    monkeypatch.setattr(store_api.IndexStore, "get_parse", lambda self, identifier: None)
+    results = manual_check.check_f1_evidence()
+    assert isinstance(results, list) and results
+    assert all(isinstance(result, manual_check.Result) and result.verdict for result in results)
+    assert any(result.verdict == manual_check.FAIL for result in results)

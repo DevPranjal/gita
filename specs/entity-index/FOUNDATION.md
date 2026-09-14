@@ -1112,8 +1112,9 @@ and uncertainty requirements.
 
 ## 14. Implementation Plan
 
-F0 is implemented as recorded below; F1-F4 remain Not Started, irrespective of
-WS-1's implemented status. Phase labels F0-F4 are delivery checkpoints, not time estimates.
+F0 is implemented and F1 has a partial evidence-cache checkpoint as recorded
+below. F2-F4 remain Not Started, irrespective of WS-1's implemented status.
+Phase labels F0-F4 are delivery checkpoints, not time estimates.
 Each item is test-first and bounded by ownership; an epic may contain sequential
 subitems but does not authorize simultaneous editing of the same path.
 
@@ -1145,9 +1146,52 @@ subitems but does not authorize simultaneous editing of the same path.
   `.venv\Scripts\python.exe -m pytest tests/test_index_builder.py::test_foundation_tracks_five_events_after_restart -q`.
   Expected current failure is exit `2` from the child CLI's unknown `index`
   command, surfaced as a failed assertion, not a successful foundation check.
-- Storage, matching policy execution, scope traversal, CLI indexed commands,
+- At this F0 checkpoint, storage, matching policy execution, scope traversal, CLI indexed commands,
   real-refactor precision/recall and performance gates remain unimplemented or
   unverified. Existing diff/history semantics are unchanged.
+
+### F1 Evidence Checkpoint (2026-09-14)
+
+This is partial EPIC-002 delivery, not completion of F1 or a usable entity index.
+
+- [store.py](../../src/gita/index/store.py) implements a four-table evidence cache:
+  metadata, versions, parse results and definitions. It validates canonical
+  payloads on write/read, compares collision payloads, preserves exact bytes and
+  token tuples, and checks definition/version fingerprint, kind and language.
+- Explicit creation and read-only opening are separate. WAL, foreign keys,
+  `synchronous=FULL`, initial integrity checking, caller-owned writer
+  transactions, atomic parse bundles, pinned read snapshots and typed storage
+  errors are exercised. Failed writes roll back; existing files are not deleted
+  as recovery. Common-dir location is tested for nested, linked and bare repos.
+- [evidence.py](../../src/gita/index/evidence.py) adds synchronous parsing of
+  original bytes with exact spans/digests, full literal names, own/signature/body
+  and subtree tokens, parser/artifact fingerprints and resource-limit outcomes.
+  Tests cover BOM, CRLF, multibyte text, newline boundaries, moved line positions,
+  duplicate siblings, meaningful literal whitespace and parse errors. SQL and
+  unsupported text remain explicitly unsupported in this adapter; legacy SQL
+  behavior is unchanged.
+- Observed RED preceded store, adapter and harness implementations. Review-led
+  regressions caught missing create-time integrity checks, skipped supplied-version
+  validation on duplicate parses, language mismatches, literal whitespace loss,
+  TOML value-field assumptions and trailing-newline span errors before repairs.
+  Harness tests first reported 266 passed / 8 failed, then **274 passed**.
+- Latest full Unit Test MCP regression: **921 passed, 1 failed**, no skips, in
+  301.5s. Exact selection confirmed the sole failure is
+  `test_foundation_tracks_five_events_after_restart`, still failing because
+  `gita index` is not implemented. Coverage percentages were not measured.
+- Manual command: `.venv\Scripts\python.exe verify\check.py --stage f1-evidence`.
+  Five checks passed: independent Python AST spans and BLAKE2b-256 digests,
+  close/reopen round trip, line-shift versus literal evidence, persisted syntax
+  errors, and rollback/read-only guards. Fixtures are retained under a unique
+  temporary path printed by the command. Round-trip checks share production
+  serialization code; they are not an independent proof of the full storage model.
+  Missing, empty or failing checkpoint runners cannot report a successful F1 run.
+- Remaining F1 work includes the rest of the relational schema, immutable
+  generations/publication, generation GC, the bounded parse worker, and byte-safe
+  offline Git enumeration/source retrieval. Matching-only source changes can
+  still invalidate parsing because the fingerprint includes the whole contract
+  module; full parse/match invalidation separation is not yet established.
+  No lineage builder, scope state, indexed commands or performance gates are done.
 
 ### EPIC-001: F0 Contracts and Failing Acceptance
 
@@ -1170,10 +1214,10 @@ complete coverage outcomes; no accepted lineage policy required yet.
 
 | Task | Description | Status | Relevant Files |
 | --- | --- | --- | --- |
-| ITEM-004 | Write failing store/schema/FK tests TEST-003/004, implement read-only open and declared relations/indexes, enforce immutable records, interval checks and generation references. | Not Started | FILE-002, FILE-011 store tests |
-| ITEM-005 | Write TEST-020/021/024/034 failure-boundary cases, implement one-writer transactions, rollback/publish, typed errors and non-destructive generation GC. | Not Started | FILE-002, FILE-011 store tests |
-| ITEM-006 | Write TEST-005/006/023 for byte/full-token evidence and parse fingerprints, implement the additive evidence adapter plus bounded parse worker; legacy extractor regression stays green. | Not Started | FILE-003, FILE-011 builder tests, FILE-012 extractor tests |
-| ITEM-007 | Write TEST-025/026, extend Git object/commit/path access with safe framing, empty/missing distinction and common-dir resolution; preserve WS-1 behavior. | Not Started | FILE-004, FILE-012 Git tests |
+| ITEM-004 | Write failing store/schema/FK tests TEST-003/004, implement read-only open and declared relations/indexes, enforce immutable records, interval checks and generation references. | Partial: four-table evidence cache and immutable record checks; remaining relations, intervals and generations pending | FILE-002, FILE-011 store tests |
+| ITEM-005 | Write TEST-020/021/024/034 failure-boundary cases, implement one-writer transactions, rollback/publish, typed errors and non-destructive generation GC. | Partial: cache transactions, rollback, read snapshots and typed errors; publication, generation GC and remaining failure gates pending | FILE-002, FILE-011 store tests |
+| ITEM-006 | Write TEST-005/006/023 for byte/full-token evidence and parse fingerprints, implement the additive evidence adapter plus bounded parse worker; legacy extractor regression stays green. | Partial: synchronous byte adapter and limits; bounded worker and complete invalidation separation pending | FILE-003, FILE-011 builder tests, FILE-012 extractor tests |
+| ITEM-007 | Write TEST-025/026, extend Git object/commit/path access with safe framing, empty/missing distinction and common-dir resolution; preserve WS-1 behavior. | Partial: tested common-dir location only; byte-safe offline Git access pending | FILE-004, FILE-012 Git tests |
 
 Store/evidence development MAY run in parallel only after ITEM-002 records are
 agreed. The contract owner serializes shared fixture edits. Neither owner changes
@@ -1232,3 +1276,7 @@ claims were validated by authoring alone.
 2026-09-14: F0 implemented test-first; wire framing, parse metadata and acceptance
 JSON shapes frozen. See section 14 for measured test results and the deliberately
 red end-to-end acceptance. No persistent index or new indexed commands exist yet.
+
+2026-09-14: Partial F1 evidence cache, byte adapter and scoped manual checkpoint
+implemented test-first. Section 14 records 921 passing tests, the one deliberately
+red CLI acceptance, five manual passes and the remaining F1 boundaries.

@@ -1,158 +1,105 @@
 # Verifying gita yourself
 
-You are relying on me for the implementation. This directory exists so you do
-not have to rely on me for the *evidence*.
+The harness reports measured checkpoint results separately from unimplemented
+work. The current contract is [FOUNDATION.md](../specs/entity-index/FOUNDATION.md);
+the older WS-2 through WS-5 plans are superseded. A passing checkpoint does not
+mean the entity index is complete or that identity decisions are correct.
 
-Two commands. The first checks the claims; the second lets you handle the thing
-directly.
+## F1 Evidence Checkpoint
 
-```powershell
-.venv\Scripts\python.exe verify\check.py          # is what I said true?
-.venv\Scripts\python.exe verify\check.py --demo   # let me see for myself
-```
-
----
-
-## 1. The harness
+Run from the repository root with the project dependencies installed:
 
 ```powershell
-.venv\Scripts\python.exe verify\check.py
+.venv\Scripts\python.exe verify\check.py --stage f1-evidence
 ```
 
-Prints one line per claim, with the measured value and a verdict. Exit code 0
-only if every check on a shipped stage passed.
+This scoped command runs five local checks and retains source fixtures and an
+SQLite database in a fresh `gita-verify-f1-*` temporary directory. It prints that
+path for inspection. It does not index or modify your repository and does not
+use the legacy harness's fixed scratch directories. No model or network is used;
+the parser grammar must already be installed.
 
-```
-WS1   Enumeration                                                SHIPPED
-  merge fallback removed                  1 git process (old path: 6) PASS
-  file lists identical to git             11 commits, 0 mismatched    PASS
-  answers unchanged by the speedup        11 commits compared         PASS
-  real history: flask                     40 commits, 0 mismatched    PASS
+| Check | Evidence |
+| --- | --- |
+| Original-byte spans and digests | Python's standard-library AST provides independent function bounds; original byte slices and BLAKE2b-256 digests are compared with the adapter. |
+| Parse cache round trip | Four parse bundles and their versions are written, closed and reopened; records and integrity checks must agree. |
+| Location and literal evidence | A prefix insertion changes definition location but preserves the leaf version; changed spaces inside a string change the normalized body. |
+| Syntax errors remain unknown | Independently invalid Python stays incomplete after reopen, with diagnostics and no authoritative definitions. |
+| Rollback and read-only guards | An aborted transaction leaves no parse or version rows; a reopened reader refuses a writer transaction. |
 
-WS2   Store                                                NOT BUILT YET
-...
+All five passed at the 2026-09-14 checkpoint. These are small Python fixtures.
+The AST/span checks are independent of tree-sitter; serialization round trips
+share production code and are not an independent proof of the whole database.
+No lineage, generation publication, indexed CLI, performance or accuracy gate is
+established here. The adapter is synchronous; its deadline worker and byte-safe
+Git enumeration are still pending. SQL is explicitly unsupported by this new
+adapter, without changing the existing SQL differ.
 
-Year 1 acceptance
-  history of a renamed and moved function gita 2 of 5  (git: 5 of 5)  EXPECTED FAIL
-```
-
-### Why this is worth more than my test suite
-
-**It does not run my tests.** If I write a bad test, running it again proves
-nothing. Every check here is re-derived from scratch, and wherever gita and git
-can answer the same question, **git is the oracle** — gita's file lists are
-compared against `git diff --name-status`, commit by commit, and any
-disagreement is a failure.
-
-**It includes a negative control.** The "merge fallback removed" line forces the
-*old* code path back on and measures both, so you see 6 processes become 1
-rather than taking a number on faith.
-
-**It can fail.** See §4 — you can prove that yourself in about thirty seconds.
-
-**Unbuilt stages say so.** A stage is detected by whether its module exists, so
-nothing can pass vacuously by not being written yet.
-
----
-
-## 2. Hands-on
+## Reading Results
 
 ```powershell
+.venv\Scripts\python.exe verify\check.py --stage ws2
+```
+
+This currently reports `NOT VERIFIED` and returns `2`, even though the partial
+store module exists. A checkpoint requires a registered runner and its required
+module. File presence alone is not a passing result.
+
+- `0`: selected registered checks completed without `FAIL`. Inspect any `SKIP`,
+  `EXPECTED FAIL` and unverified-stage lines; this is not a release verdict.
+- `1`: a check failed, a registered runner raised, or it returned no checks.
+- `2`: an unknown stage argument or an explicitly selected unverified stage.
+
+The default command runs registered checkpoints and the legacy Year 1 target,
+listing other stages as unverified. Eight harness regression tests exercise
+registration, missing modules, unique scratch paths, failed/raising/empty
+runners, unknown stage selection and a missing stored parse. They replace the
+previous instructions that edited and reverted tracked production source.
+
+## Existing Enumeration And History Checks
+
+```powershell
+.venv\Scripts\python.exe verify\check.py --stage ws1
 .venv\Scripts\python.exe verify\check.py --demo
 ```
 
-Builds a five-commit repository where one function is born, edited, **renamed**,
-**moved to another file**, and edited again. The ground truth is exact by
-construction — every one of those five commits touches the same function.
+**Scratch-directory warning:** these legacy paths and the default command reuse
+and clear fixed directories under the system temp folder:
+`gita-verify-merges` and/or `gita-verify-refactor`. Do not keep work there. The new
+`f1-evidence` command does not clear either directory.
 
-It prints the path and the commands to try. The short version:
+WS-1 compares changed-file lists with Git and forces the old enumeration path as
+a negative control. Its process count concerns the measured Git wrapper calls,
+not necessarily every process in a complete product workflow. Optional corpus
+checks may report `SKIP` when the local corpus is absent.
 
-```powershell
-cd $env:TEMP\gita-verify-refactor
+The demo builds five commits: function birth, body edit, rename, move and body
+edit. It prints the repository path and commands to inspect it. Legacy gita
+history currently returns two of these five events while `git log --follow`
+finds five in this fixture. Detecting individual rename/move diffs does not yet
+persist their relationship. Future indexed history is opt-in; this checkpoint
+does not change legacy history's behavior or promise transparent fallback.
 
-git log --follow --oneline -- security.py
-# five commits. git finds them all, by guessing from file similarity.
+## Regression And Remaining Gates
 
-Q:\projects\gita\.venv\Scripts\python.exe -m gita history check_token
-# two. gita loses the thread at the rename.
+Latest full Unit Test MCP run: **921 passed, 1 failed**, no skips, in 301.5s.
+The failure was separately confirmed as
+`test_foundation_tracks_five_events_after_restart`: the proposed `gita index`
+command is not implemented. The full suite is deliberately not green; no test
+is skipped or marked xfail to conceal that acceptance gap. Coverage percentages
+were not measured.
 
-Q:\projects\gita\.venv\Scripts\python.exe -m gita diff HEAD~3 HEAD~2 --brief
-# check_token  [renamed]     <- it saw the rename
-
-Q:\projects\gita\.venv\Scripts\python.exe -m gita diff HEAD~2 HEAD~1 --brief
-# check_token  [moved]       <- and the move
-```
-
-**That contrast is the entire argument for Year 1.** The engine detects the
-rename and the move correctly, one commit at a time — and then throws the link
-away, because today an entity's identity *is* its location
-(`auth.py::validate_token`). Rename the function and the identity changes.
-
-Right now gita is worse than `git log --follow` at this. When WS-3 and WS-4
-land, `gita history check_token` returns five, and the harness line above flips
-from `EXPECTED FAIL` to `PASS`.
-
----
-
-## 3. What each stage adds
-
-Re-run the harness after each one. New lines appear; nothing already passing
-should stop passing.
-
-| stage | what you will be able to check |
-| --- | --- |
-| **WS-1** *(done)* | merge walks cost one git process; file lists match git exactly |
-| **WS-2** | `.git/gita/index.sqlite` exists; a corrupt or stale index is detected and discarded rather than trusted |
-| **WS-3** | `gita index` builds; **building twice produces byte-identical identifiers**; incremental update equals a full rebuild |
-| **WS-4** | `gita id check_token` returns a stable id; `gita id validate_token` returns **the same id**; history returns 5 of 5 |
-| **WS-5** | identity precision and recall reported against two independent answer keys |
-
-The WS-3 line is the one to watch. If building the same history twice produces
-different identifiers, everything above it is unreliable, and I would rather you
-saw that directly than took my word that it holds.
-
----
-
-## 4. Catching me out
-
-A verification harness you cannot break is decoration. Prove this one bites:
+For a manual rerun:
 
 ```powershell
-# revert the WS-1 fix without touching anything else
-(Get-Content src\gita\vcs\git.py -Raw) `
-  -replace 'if self\.supports_diff_merges else \[\]', 'if False else []' `
-  | Set-Content src\gita\vcs\git.py -NoNewline
-
-.venv\Scripts\python.exe verify\check.py
-echo $LASTEXITCODE          # 1
-
-git checkout -- src/gita/vcs/git.py
-.venv\Scripts\python.exe verify\check.py
-echo $LASTEXITCODE          # 0
+.venv\Scripts\python.exe -m pytest -q
+.venv\Scripts\python.exe -m pytest tests/test_index_store.py -q
+.venv\Scripts\python.exe -m pytest tests/test_index_builder.py::test_foundation_tracks_five_events_after_restart -q
 ```
 
-With the fix reverted you should see three lines flip to `FAIL`, including
-`real history: flask   40 commits, 15 mismatched`.
-
-Worth noting what happens to the *fourth* line: "merge fallback removed" still
-reports `PASS`, because that break makes gita ask for fewer processes **and get
-the wrong answer**. A process count alone would have been fooled. The
-correctness checks are what caught it — which is the reason they compare against
-git rather than against my expectations.
-
----
-
-## 5. Independent checks I have not automated
-
-Worth doing occasionally, because they are the ones most likely to embarrass me:
-
-```powershell
-.venv\Scripts\python.exe -m pytest -q          # ~6 min, expect 574 passed
-.venv\Scripts\python.exe -m gita diff --brief  # gita reviewing its own changes
-git log --oneline first-principles ^main       # what I have actually committed
-```
-
-And the blunt one — pick any number in `specs/entity-index/` or
-`scratch/SPEC-ENTITY-INDEX.md` and ask me where it came from. Every measured
-figure in those documents traces to a script in `scratch/probe_*.py` that you
-can run. If one does not, that is a finding.
+The store file currently has 274 passing tests. The exact acceptance command
+above must still fail. [Foundation section 14](../specs/entity-index/FOUNDATION.md#14-implementation-plan)
+records implemented subsets and pending work. Full relational constraints,
+generation publication, offline Git access, lineage, indexed queries and the
+independent release gates remain unverified or unimplemented. Corrupt databases
+are rejected and preserved, never automatically deleted as recovery.

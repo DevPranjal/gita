@@ -1,15 +1,16 @@
-"""Independent verification of what has actually shipped.
+"""Independent verification of registered checkpoints.
 
 The point of this script is to be able to *fail*. It does not re-run gita's own
 test suite -- a bad test would pass its own assertions -- it re-derives each
 claim from scratch and, wherever possible, checks gita against git as an
 independent oracle.
 
-    python verify/check.py              everything that has shipped
+    python verify/check.py              registered checkpoints and Year 1 target
     python verify/check.py --stage ws1  one workstream
+    python verify/check.py --stage f1-evidence  evidence cache checkpoint only
     python verify/check.py -v           show the commands being run
 
-Exit code is 0 only if every check on a shipped stage passed.
+Unverified stages are listed, never counted as successful checkpoints.
 """
 
 from __future__ import annotations
@@ -58,9 +59,8 @@ class Stage:
 
     @property
     def shipped(self) -> bool:
-        if self.module is None:
-            return True
-        return _module_exists(self.module)
+        return bool(self.key in RUNNERS
+                    and (self.module is None or _module_exists(self.module)))
 
 
 def git(*args: str, cwd: Path) -> str:
@@ -205,6 +205,162 @@ def check_ws1() -> list[Result]:
     return results
 
 
+def check_f1_evidence() -> list[Result]:
+    """Check only the evidence cache, retaining all fixtures for inspection."""
+    import ast
+    from hashlib import blake2b
+
+    results = []
+    root = None
+    label = "evidence cache setup"
+    try:
+        root = Path(tempfile.mkdtemp(prefix="gita-verify-f1-")).resolve()
+        from gita.index.evidence import parse_evidence
+        from gita.index.model import ParseStatus
+        from gita.index.store import IndexStore, IndexStoreError
+
+        source = b'# byte prefix: \xc3\xa9\r\ndef sample():\r\n    return "a  b"\r\n'
+        sources = {
+            "source.py": source,
+            "shifted.py": b"# inserted prefix\r\n" + source,
+            "literal.py": source.replace(b'"a  b"', b'"a b"'),
+            "invalid.py": b"def sample(:\n    return 1\n",
+        }
+        bundles = []
+        for name, raw in sources.items():
+            fixture = root / name
+            fixture.write_bytes(raw)
+            bundles.append(parse_evidence(fixture.read_bytes(), name.encode("ascii")))
+        original, shifted, literal, invalid = bundles
+
+        label = "original-byte spans and digests"
+        mismatches = 0
+        compared = 0
+        for raw, bundle in zip(list(sources.values())[:3], bundles[:3]):
+            node = ast.parse(raw).body[0]
+            if not isinstance(node, ast.FunctionDef) or node.end_lineno is None \
+                    or node.end_col_offset is None:
+                raise ValueError("fixture must contain a function with AST end positions")
+            offsets = [0]
+            for line in raw.splitlines(keepends=True):
+                offsets.append(offsets[-1] + len(line))
+            start = offsets[node.lineno - 1] + node.col_offset
+            end = offsets[node.end_lineno - 1] + node.end_col_offset
+            definitions = [definition for definition in bundle.result.definitions
+                           if not definition.synthetic_root]
+            if not bundle.result.complete or len(definitions) != 1:
+                mismatches += 1
+                continue
+            definition = definitions[0]
+            version = next((version for version in bundle.versions
+                            if version.id == definition.version_id), None)
+            span = definition.span
+            compared += 1
+            if (definition.names != (node.name,)
+                    or (span.start_byte, span.end_byte, span.start_line, span.end_line)
+                    != (start, end, node.lineno, node.end_lineno)
+                    or version is None
+                    or version.source_digest != blake2b(raw[start:end], digest_size=32).digest()):
+                mismatches += 1
+        results.append(Result(
+            label, f"{compared} spans, {mismatches} mismatched",
+            PASS if compared == 3 and mismatches == 0 else FAIL,
+            f"Independent Python AST and BLAKE2b-256; fixtures retained at {root}",
+        ))
+
+        label = "parse cache round trip"
+        database = root / "evidence.sqlite"
+        with IndexStore.create(database) as writer:
+            abort = RuntimeError("intentional evidence rollback")
+            try:
+                with writer.transaction():
+                    writer.put_parse(literal.result, literal.versions)
+                    visible = writer.get_parse(literal.result.id) == literal.result
+                    raise abort
+            except RuntimeError as error:
+                if error is not abort:
+                    raise
+            rolled_back = (visible and not writer.connection.in_transaction
+                           and writer.get_parse(literal.result.id) is None
+                           and all(writer.get_version(version.id) is None
+                                   for version in literal.versions))
+            with writer.transaction():
+                for bundle in bundles:
+                    writer.put_parse(bundle.result, bundle.versions)
+        with IndexStore.open(database) as reader:
+            with reader.snapshot():
+                restored = [reader.get_parse(bundle.result.id) for bundle in bundles]
+                same_versions = all(
+                    reader.get_version(version.id) == version
+                    for bundle in bundles for version in bundle.versions
+                )
+                round_trip = (restored == [bundle.result for bundle in bundles]
+                              and same_versions and reader.check_integrity() == ())
+            read_only_rejected = False
+            try:
+                with reader.transaction():
+                    pass
+            except IndexStoreError as error:
+                if error.code != "read_only":
+                    raise
+                read_only_rejected = True
+        results.append(Result(
+            label, f"{len(bundles)} bundles reopened", PASS if round_trip else FAIL,
+            f"Parse records and full versions compared; evidence cache only: {database}",
+        ))
+
+        label = "location and literal evidence"
+        definitions = [next(definition for definition in bundle.result.definitions
+                            if not definition.synthetic_root)
+                       for bundle in (original, shifted, literal)]
+        versions = [next(version for version in bundle.versions
+                         if version.id == definition.version_id)
+                    for bundle, definition in zip((original, shifted, literal), definitions)]
+        same_leaf = versions[0] == versions[1]
+        moved_span = (definitions[0].id != definitions[1].id
+                      and definitions[0].span.start_byte != definitions[1].span.start_byte
+                      and definitions[0].span.start_line != definitions[1].span.start_line)
+        changed_literal = (versions[0].id != versions[2].id
+                           and versions[0].body is not None and versions[2].body is not None
+                           and versions[0].body != versions[2].body)
+        results.append(Result(
+            label, f"shift={same_leaf and moved_span}, literal={changed_literal}",
+            PASS if same_leaf and moved_span and changed_literal else FAIL,
+            "Prefix insertion preserves the leaf version; literal spaces change normalized body.",
+        ))
+
+        label = "syntax errors remain unknown"
+        try:
+            ast.parse(sources["invalid.py"])
+        except SyntaxError:
+            syntax_invalid = True
+        else:
+            syntax_invalid = False
+        restored_invalid = restored[-1]
+        unknown = (syntax_invalid and restored_invalid is not None
+                   and restored_invalid == invalid.result
+                   and restored_invalid.status == ParseStatus.PARSE_ERROR
+                   and not restored_invalid.complete and not restored_invalid.definitions
+                   and bool(restored_invalid.diagnostics) and not invalid.versions)
+        results.append(Result(
+            label, "syntax-error evidence reopened", PASS if unknown else FAIL,
+            "Incomplete evidence must retain diagnostics and no authoritative definitions.",
+        ))
+
+        label = "rollback and read-only guards"
+        results.append(Result(
+            label, f"rollback={rolled_back}, read-only={read_only_rejected}",
+            PASS if rolled_back and read_only_rejected else FAIL,
+            "Aborted parse and versions absent; reopened reader rejects a write transaction.",
+        ))
+    except Exception as error:
+        note = f"{type(error).__name__}: {error}"
+        if root is not None:
+            note += f"; fixtures retained at {root}"
+        results.append(Result(label, "checkpoint could not finish", FAIL, note))
+    return results
+
+
 # ------------------------------------------------------- Year 1 target ----
 
 def build_refactor_repo() -> Path:
@@ -264,13 +420,14 @@ def check_year1_target() -> list[Result]:
 
 STAGES = [
     Stage("ws1", "Enumeration", None),
+    Stage("f1-evidence", "Evidence cache checkpoint", "gita.index.evidence"),
     Stage("ws2", "Store", "gita.index.store"),
     Stage("ws3", "Builder", "gita.index.builder"),
     Stage("ws4", "Query and CLI", "gita.index.query"),
     Stage("ws5", "Verification", "gita.index.verify"),
 ]
 
-RUNNERS = {"ws1": check_ws1}
+RUNNERS = {"ws1": check_ws1, "f1-evidence": check_f1_evidence}
 
 
 def demo() -> int:
@@ -322,7 +479,8 @@ time. When WS-3 and WS-4 land, `gita history check_token` returns five.
 def main() -> int:
     global VERBOSE
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stage", help="only this workstream, e.g. ws1")
+    parser.add_argument("--stage", choices=[stage.key for stage in STAGES] + ["year1"],
+                        help="only this checkpoint or the year1 target")
     parser.add_argument("--demo", action="store_true",
                         help="build a repository to explore by hand")
     parser.add_argument("-v", "--verbose", action="store_true")
@@ -332,21 +490,36 @@ def main() -> int:
     if args.demo:
         return demo()
 
-    print("\ngita — stage verification")
+    print("\ngita - stage verification")
     print("=" * 72)
     print("Every check below is re-derived from scratch. Where gita and git can")
     print("answer the same question, git is treated as the oracle.\n")
 
     failures = 0
+    unverified = 0
+    completed = 0
     for stage in STAGES:
         if args.stage and stage.key != args.stage:
             continue
-        header = f"{stage.key.upper():<6}{stage.title}"
+        header = f"{stage.key.upper():<13}{stage.title}"
         if not stage.shipped:
-            print(f"{header:<52}{'NOT BUILT YET':>20}")
+            available = stage.module is None or _module_exists(stage.module)
+            status = "NOT VERIFIED" if available else "NOT BUILT"
+            print(f"{header:<52}{status:>20}")
+            print("  Unverified: no runner or required module unavailable.")
+            unverified += 1
+            if args.stage:
+                return 2
             continue
-        print(f"{header:<52}{'SHIPPED':>20}")
-        for result in RUNNERS.get(stage.key, lambda: [])():
+        print(f"{header:<52}{'CHECKPOINT':>20}")
+        try:
+            results = RUNNERS[stage.key]()
+            if not results:
+                results = [Result("no checks", "runner returned no checks", FAIL)]
+        except Exception as error:
+            results = [Result("runner exception", type(error).__name__, FAIL, str(error))]
+        completed += 1
+        for result in results:
             mark = result.verdict
             print(f"  {result.label:<40}{result.measured:<28}{mark}")
             if result.note:
@@ -367,9 +540,15 @@ def main() -> int:
 
     print("=" * 72)
     if failures:
-        print(f"{failures} check(s) FAILED — a claim in the specs does not hold.")
+        print(f"{failures} check(s) FAILED - a checkpoint claim does not hold.")
+    elif unverified and completed:
+        print("Completed registered checkpoint checks passed; unverified stages remain.")
+    elif unverified:
+        print("No registered checkpoint checks ran; unverified stages remain.")
+    elif args.stage == "year1":
+        print("Year 1 target checks completed.")
     else:
-        print("All checks on shipped stages passed.")
+        print("Completed registered checkpoint checks passed.")
     print("\nTo verify the test suite independently:")
     print("  .venv\\Scripts\\python.exe -m pytest -q\n")
     return 1 if failures else 0

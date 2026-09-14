@@ -29,7 +29,25 @@ and another branch's edits must not contaminate the answer.
 | [WS-1 enumeration](WS-1-enumeration.md) | Implemented previously. Remains a reusable Git plumbing improvement, not entity identity. No new test run during this spec draft. |
 | [Foundation contract](FOUNDATION.md) | F0 contracts implemented and tested. Persistent-index behavior and measured release gates are not complete. |
 | F0 | Complete as a contract checkpoint: 208 pure-contract checks and 13 fixture/assertion checks pass; five-event CLI acceptance is deliberately red. |
-| F1-F4 below | Not started. `gita index`, `gita id` and indexed history are still proposed commands. |
+| F1 | Partial: persistent parse/version evidence cache, transaction guards, byte-accurate synchronous adapter and scoped manual checkpoint implemented. Full schema, generation publication, deadline worker and byte-safe Git enumeration remain pending. |
+| F2-F4 below | Not started. `gita index`, `gita id` and indexed history are still proposed commands. |
+
+Latest full regression: **921 passed, 1 deliberately failed**, no skips, through
+Unit Test MCP in 301.5s. The failure is the five-event CLI acceptance, separately
+confirmed by exact test selection. This is not a release-ready persistent index.
+
+Run the partial F1 evidence checkpoint from the repository root:
+
+```powershell
+.venv\Scripts\python.exe verify\check.py --stage f1-evidence
+```
+
+All five checks passed: independent Python AST byte spans/digests, cache reopen,
+location versus literal changes, persisted syntax-error coverage, and rollback
+plus read-only guards. It retains fixtures in a unique temporary directory and
+does not index or modify this repository. See [the verification guide](../../verify/README.md)
+for limitations and [the F1 checkpoint](FOUNDATION.md#f1-evidence-checkpoint-2026-09-14)
+for implementation boundaries.
 
 ## Implementation Order
 

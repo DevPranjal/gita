@@ -196,3 +196,803 @@ def test_foundation_tracks_five_events_after_restart(refactor_repo):
     assert historical["generation"] == current["generation"]
     assert len(historical["results"]) == 1
     assert historical["results"][0]["eid"] == entity_id
+
+
+def _f1_definition(bundle, name):
+    matches = tuple(definition for definition in bundle.result.definitions
+                    if not definition.synthetic_root and definition.names[-1] == name)
+    assert len(matches) == 1, (name, bundle.result.definitions)
+    return matches[0]
+
+
+def _f1_version(bundle, definition):
+    matches = tuple(version for version in bundle.versions if version.id == definition.version_id)
+    assert len(matches) == 1
+    return matches[0]
+
+
+def _f1_assert_unknown(bundle, source, path, status):
+    import hashlib
+
+    from gita.index.model import GitOid, ParseStatus
+
+    result = bundle.result
+    assert result.status is ParseStatus(status)
+    assert result.complete is False
+    assert result.path == path
+    assert result.byte_length == len(source)
+    assert result.blob == GitOid("sha1", hashlib.sha1(
+        b"blob " + str(len(source)).encode("ascii") + b"\0" + source,
+    ).digest())
+    assert result.definitions == ()
+    assert bundle.versions == ()
+    assert result.diagnostics
+    assert all(type(message) is str and message for message in result.diagnostics)
+
+
+def test_f1_evidence_limits_have_frozen_defaults():
+    from dataclasses import FrozenInstanceError
+
+    from gita.index import evidence
+
+    limits = evidence.EvidenceLimits()
+    assert limits.max_blob_bytes == 5 * 1024 * 1024
+    assert limits.max_definitions == 50000
+    assert limits.max_representation_bytes == 32 * 1024 * 1024
+    for field_name in ("max_blob_bytes", "max_definitions", "max_representation_bytes"):
+        with pytest.raises(FrozenInstanceError):
+            setattr(limits, field_name, 1)
+
+
+def test_f1_evidence_limits_reject_negative_nonintegers_and_bool():
+    from gita.index import evidence
+    from gita.index.model import IndexContractError
+
+    for field_name in ("max_blob_bytes", "max_definitions", "max_representation_bytes"):
+        for invalid in (-1, True, False, 1.5, "1", None):
+            with pytest.raises(IndexContractError):
+                evidence.EvidenceLimits(**{field_name: invalid})
+
+
+def test_f1_evidence_zero_limits_force_explicit_unknown_outcomes():
+    from gita.index import evidence
+
+    source = b"def validate_token(raw):\n    return raw\n"
+    for field_name, status in (
+        ("max_blob_bytes", "oversized"),
+        ("max_definitions", "definition_limit"),
+        ("max_representation_bytes", "representation_limit"),
+    ):
+        limits = evidence.EvidenceLimits(**{field_name: 0})
+        assert getattr(limits, field_name) == 0
+        bundle = evidence.parse_evidence(source, b"auth.py", limits=limits)
+        _f1_assert_unknown(bundle, source, b"auth.py", status)
+
+
+def test_f1_evidence_fingerprint_is_stable_and_includes_each_limit():
+    from dataclasses import replace
+
+    from gita.index import evidence
+
+    limits = evidence.EvidenceLimits()
+    fingerprint = evidence.parse_fingerprint()
+    assert type(fingerprint) is bytes
+    assert len(fingerprint) == 32
+    assert evidence.parse_fingerprint(limits=limits) == fingerprint
+    fingerprints = {fingerprint}
+    for field_name in ("max_blob_bytes", "max_definitions", "max_representation_bytes"):
+        changed = replace(limits, **{field_name: getattr(limits, field_name) + 1})
+        changed_fingerprint = evidence.parse_fingerprint(limits=changed)
+        assert type(changed_fingerprint) is bytes and len(changed_fingerprint) == 32
+        assert changed_fingerprint not in fingerprints
+        assert evidence.parse_fingerprint(limits=changed) == changed_fingerprint
+        fingerprints.add(changed_fingerprint)
+    assert evidence.parse_fingerprint() == fingerprint
+
+
+def test_f1_evidence_fingerprint_tracks_effective_extraction_rules(monkeypatch):
+    from dataclasses import replace
+
+    from gita.entities import languages
+    from gita.entities.model import EntityKind
+    from gita.index import evidence
+
+    source = b"def validate_token(raw):\n    return raw\n"
+    before = evidence.parse_evidence(source, b"auth.py")
+    original = languages.BY_EXTENSION[".py"]
+    modified = replace(original, kinds={
+        **original.kinds, "function_definition": EntityKind.METHOD,
+    })
+    with monkeypatch.context() as scoped:
+        scoped.setitem(languages.BY_EXTENSION, ".py", modified)
+        fingerprint = evidence.parse_fingerprint()
+        assert fingerprint != before.result.parse_fingerprint
+        after = evidence.parse_evidence(source, b"auth.py")
+        assert after.result.parse_fingerprint == fingerprint
+        assert after.result.id != before.result.id
+        assert _f1_definition(after, "validate_token").kind == "method"
+        assert all(version.parse_fingerprint == fingerprint for version in after.versions)
+    assert evidence.parse_fingerprint() == before.result.parse_fingerprint
+    assert languages.BY_EXTENSION[".py"] is original
+
+
+def test_f1_evidence_fingerprint_tracks_adapter_version_without_stale_cache(monkeypatch):
+    from gita.index import evidence
+
+    assert evidence.ADAPTER_VERSION == 1
+    fingerprint = evidence.parse_fingerprint()
+    with monkeypatch.context() as scoped:
+        scoped.setattr(evidence, "ADAPTER_VERSION", 2)
+        changed = evidence.parse_fingerprint()
+        assert changed != fingerprint
+        assert evidence.parse_fingerprint() == changed
+        bundle = evidence.parse_evidence(b"pass\n", b"auth.py")
+        assert bundle.result.parse_fingerprint == changed
+        assert all(version.parse_fingerprint == changed for version in bundle.versions)
+    assert evidence.parse_fingerprint() == fingerprint
+
+
+def test_f1_evidence_bundle_is_frozen_deterministic_and_referentially_complete():
+    from dataclasses import FrozenInstanceError
+
+    from gita.index import evidence
+    from gita.index.model import EntityVersion, ParseResult, ParseStatus
+
+    source = b"def validate_token(raw):\n    return raw\n"
+    bundle = evidence.parse_evidence(source, b"auth.py")
+    assert type(bundle) is evidence.EvidenceBundle
+    assert type(bundle.result) is ParseResult
+    assert bundle.result.status is ParseStatus.COMPLETE
+    assert bundle.result.complete is True
+    assert bundle.result.parse_fingerprint == evidence.parse_fingerprint()
+    assert type(bundle.versions) is tuple
+    assert bundle.versions and all(type(version) is EntityVersion for version in bundle.versions)
+    assert {definition.version_id for definition in bundle.result.definitions} == {
+        version.id for version in bundle.versions
+    }
+    assert len({version.id for version in bundle.versions}) == len(bundle.versions)
+    for definition in bundle.result.definitions:
+        assert definition.parse_id == bundle.result.id
+        version = _f1_version(bundle, definition)
+        assert version.language == bundle.result.language
+        assert version.kind == definition.kind
+        assert version.parse_fingerprint == bundle.result.parse_fingerprint
+    assert evidence.parse_evidence(source, b"auth.py") == bundle
+    with pytest.raises(FrozenInstanceError):
+        bundle.result = bundle.result
+    with pytest.raises(FrozenInstanceError):
+        bundle.versions = ()
+
+
+@pytest.mark.parametrize("object_format", ("sha1", "sha256"))
+def test_f1_evidence_blob_and_parse_id_match_independent_byte_manifest(object_format):
+    import hashlib
+    from struct import pack
+
+    from gita.index import evidence
+    from gita.index.model import GitOid
+
+    source = b"def validate_token(raw):\n    return raw\n"
+    path = b"nested/auth.py"
+    bundle = evidence.parse_evidence(source, path, object_format=object_format)
+    expected_blob = hashlib.new(
+        object_format, b"blob " + str(len(source)).encode("ascii") + b"\0" + source,
+    ).digest()
+    assert bundle.result.blob == GitOid(object_format, expected_blob)
+    assert bundle.result.byte_length == len(source)
+    assert bundle.result.path == path
+    fingerprint = evidence.parse_fingerprint()
+    format_bytes = object_format.encode("ascii")
+    manifest = (
+        pack(">Q", 4) + b"par1" + pack(">Q", 1)
+        + b"\x01l" + pack(">Q", 3)
+        + b"\x01b" + pack(">Q", 32) + fingerprint
+        + b"\x01l" + pack(">Q", 2)
+        + b"\x01t" + pack(">Q", len(format_bytes)) + format_bytes
+        + b"\x01b" + pack(">Q", len(expected_blob)) + expected_blob
+        + b"\x01b" + pack(">Q", len(path)) + path
+    )
+    assert bundle.result.id == "par1_" + hashlib.blake2b(manifest, digest_size=32).hexdigest()
+    assert all(definition.parse_id == bundle.result.id for definition in bundle.result.definitions)
+
+
+def test_f1_evidence_rejects_nonbytes_source():
+    from gita.index import evidence
+    from gita.index.model import IndexContractError
+
+    for source in ("pass\n", bytearray(b"pass\n"), memoryview(b"pass\n"), None):
+        with pytest.raises(IndexContractError):
+            evidence.parse_evidence(source, b"auth.py")
+
+
+def test_f1_evidence_rejects_malformed_raw_paths():
+    from gita.index import evidence
+    from gita.index.model import IndexContractError
+
+    for path in ("auth.py", bytearray(b"auth.py"), b"", b"/auth.py", b"./auth.py",
+                 b"../auth.py", b"pkg//auth.py", b"pkg/../auth.py", b"pkg/", b"bad\0.py"):
+        with pytest.raises(IndexContractError):
+            evidence.parse_evidence(b"pass\n", path)
+
+
+def test_f1_evidence_rejects_unqualified_or_unknown_object_formats():
+    from gita.index import evidence
+    from gita.index.model import IndexContractError
+
+    for object_format in ("SHA1", "sha512", "sha1 ", b"sha1", True, None):
+        with pytest.raises(IndexContractError):
+            evidence.parse_evidence(b"pass\n", b"auth.py", object_format=object_format)
+
+
+@pytest.mark.parametrize("path", (b"notes.txt", b"schema.sql", b"Program.cs"))
+def test_f1_evidence_unsupported_language_retains_raw_blob_without_children(path):
+    from gita.index import evidence
+
+    source = b"content remains available even without a foundation adapter\n"
+    bundle = evidence.parse_evidence(source, path)
+    _f1_assert_unknown(bundle, source, path, "unsupported_language")
+    assert bundle.result.language is None
+
+
+def test_f1_evidence_invalid_utf8_never_uses_replacement_decoding():
+    from gita.index import evidence
+
+    source = b"def validate_token():\n    return '\xff'\n"
+    bundle = evidence.parse_evidence(source, b"auth.py")
+    _f1_assert_unknown(bundle, source, b"auth.py", "unsupported_encoding")
+
+
+def test_f1_evidence_embedded_nul_cannot_publish_successful_evidence():
+    from gita.index import evidence
+    from gita.index.model import ParseStatus
+
+    source = b"def validate_token():\n    return 'bad\0value'\n"
+    bundle = evidence.parse_evidence(source, b"auth.py")
+    assert bundle.result.status in (ParseStatus.UNSUPPORTED_ENCODING, ParseStatus.PARSE_ERROR)
+    _f1_assert_unknown(bundle, source, b"auth.py", bundle.result.status.value)
+
+
+@pytest.mark.parametrize("source", (b"", b" \t\n\n  "))
+def test_f1_evidence_empty_and_whitespace_files_have_one_full_span_module(source):
+    from hashlib import blake2b
+
+    from gita.index import evidence
+    from gita.index.model import ParseStatus
+
+    bundle = evidence.parse_evidence(source, b"empty.py")
+    assert bundle.result.status is ParseStatus.COMPLETE
+    assert len(bundle.result.definitions) == len(bundle.versions) == 1
+    root = bundle.result.definitions[0]
+    assert root.synthetic_root is True
+    assert root.kind == "module"
+    assert root.names == ("<module>",)
+    assert root.parent_id is None
+    assert root.span.start_byte == 0
+    assert root.span.end_byte == len(source)
+    assert root.span.start_line == 1
+    assert root.span.end_line == max(1, source[:-1].count(b"\n") + 1)
+    version = _f1_version(bundle, root)
+    assert version.source_digest == blake2b(source, digest_size=32).digest()
+    assert version.own == ()
+    assert version.body == ()
+    assert version.subtree == ()
+    assert version.signature is None
+
+
+@pytest.mark.parametrize("path, language, source", (
+    (b"auth.py", "python", b"def validate_token(raw):\n    return raw\n"),
+    (b"auth.js", "javascript", b"function validate_token(raw) { return raw; }\n"),
+    (b"auth.ts", "typescript", b"function validate_token(raw: string): string { return raw; }\n"),
+    (b"auth.go", "go", b"package auth\nfunc validate_token(raw string) string { return raw }\n"),
+    (b"auth.rs", "rust", b"fn validate_token(raw: i32) -> i32 { raw }\n"),
+))
+def test_f1_evidence_registered_code_grammars_emit_named_definitions(path, language, source):
+    from hashlib import blake2b
+
+    from gita.index import evidence
+    from gita.index.model import ParseStatus
+
+    bundle = evidence.parse_evidence(source, path)
+    assert bundle.result.status is ParseStatus.COMPLETE
+    assert bundle.result.language == language
+    roots = tuple(definition for definition in bundle.result.definitions if definition.synthetic_root)
+    assert len(roots) == 1
+    root = roots[0]
+    assert (root.span.start_byte, root.span.end_byte) == (0, len(source))
+    definition = _f1_definition(bundle, "validate_token")
+    assert definition.kind == "function"
+    assert definition.parent_id == root.id
+    version = _f1_version(bundle, definition)
+    expected = source[source.index(b"def " if language == "python" else
+                                   b"fn " if language == "rust" else
+                                   b"func " if language == "go" else b"function "):-1]
+    assert source[definition.span.start_byte:definition.span.end_byte] == expected
+    assert version.source_digest == blake2b(expected, digest_size=32).digest()
+    assert "validate_token" in version.own
+    assert "validate_token" in version.signature
+    assert "raw" in version.body
+
+
+@pytest.mark.parametrize("path, before, after", (
+    (b"config.json", b'{"version": "release_one"}\n', b'{"version": "release_two"}\n'),
+    (b"config.toml", b'version = "release_one"\n', b'version = "release_two"\n'),
+))
+def test_f1_evidence_structured_string_content_survives_tree_sitter_gaps(path, before, after):
+    from gita.index import evidence
+    from gita.index.model import ParseStatus
+
+    original = evidence.parse_evidence(before, path)
+    changed = evidence.parse_evidence(after, path)
+    assert original.result.status is changed.result.status is ParseStatus.COMPLETE
+    original_version = _f1_version(original, _f1_definition(original, "version"))
+    changed_version = _f1_version(changed, _f1_definition(changed, "version"))
+    for field_name in ("own", "body", "subtree"):
+        original_tokens = getattr(original_version, field_name)
+        changed_tokens = getattr(changed_version, field_name)
+        assert original_tokens is not None and changed_tokens is not None
+        assert "release_one" in "".join(original_tokens)
+        assert "release_two" in "".join(changed_tokens)
+        assert original_tokens != changed_tokens
+    assert original_version.signature == changed_version.signature
+    assert original_version.source_digest != changed_version.source_digest
+    assert original_version.id != changed_version.id
+
+
+@pytest.mark.parametrize("source, end_line", (
+    (b"pass\n", 1), (b"pass\r\n", 1), (b"pass\npass", 2),
+    (b"", 1), (b"\n", 1), (b"\n\n", 2),
+    pytest.param(b"pass", 1, id="no-final-newline"),
+    pytest.param(b"pass\n\n", 2, id="trailing-blank-line"),
+    pytest.param(b"pass\npass\n", 2, id="two-statements"),
+))
+def test_f1_evidence_root_end_line_uses_last_included_byte(source, end_line):
+    """Half-open byte spans exclude the position after a trailing newline."""
+    from gita.index import evidence
+    from gita.index.model import ParseStatus, SourceSpan
+
+    bundle = evidence.parse_evidence(source, b"root.py")
+    assert bundle.result.status is ParseStatus.COMPLETE
+    root, = (definition for definition in bundle.result.definitions if definition.synthetic_root)
+    assert root.span == SourceSpan(0, len(source), 1, end_line)
+
+
+@pytest.mark.parametrize("path, template, name, literal_quote", (
+    (b"config.toml", 'version = {literal}\n', "version", '"'),
+    (b"config.json", '{{"version": {literal}}}\n', "version", '"'),
+    (b"auth.py", 'def validate_token():\n    return {literal}\n', "validate_token", '"'),
+    (b"auth.js", 'function validate_token() {{ return {literal}; }}\n', "validate_token", '"'),
+    (b"auth.py", 'def validate_token():\n    return {literal}\n', "validate_token", "'"),
+))
+def test_f1_evidence_normalization_preserves_literal_whitespace(path, template, name, literal_quote):
+    from gita.index import evidence
+    from gita.index.model import ParseStatus
+
+    versions = []
+    for content in (" x ", "x", "   ", "", " x", "x ", r" \n ", r"\n", " "):
+        literal = literal_quote + content + literal_quote
+        source = template.format(literal=literal).encode("ascii")
+        bundle = evidence.parse_evidence(source, path)
+        assert bundle.result.status is ParseStatus.COMPLETE
+        version = _f1_version(bundle, _f1_definition(bundle, name))
+        for field_name in ("own", "body", "subtree"):
+            tokens = getattr(version, field_name)
+            assert tokens is not None
+            assert literal in "".join(tokens), (path, field_name, literal, tokens)
+        versions.append(version)
+    for field_name in ("own", "body", "subtree"):
+        assert len({getattr(version, field_name) for version in versions}) == len(versions)
+    assert len({version.signature for version in versions}) == 1
+    assert len({version.source_digest for version in versions}) == len(versions)
+    assert len({version.id for version in versions}) == len(versions)
+
+
+def test_f1_evidence_python_multiline_literal_keeps_leading_newlines():
+    from gita.index import evidence
+    from gita.index.model import ParseStatus
+
+    versions = []
+    for literal in ('"""\n x \n"""', '"""\n\n x \n"""', '""" x \n"""'):
+        source = f"def validate_token():\n    return {literal}\n".encode("ascii")
+        bundle = evidence.parse_evidence(source, b"auth.py")
+        assert bundle.result.status is ParseStatus.COMPLETE
+        version = _f1_version(bundle, _f1_definition(bundle, "validate_token"))
+        for field_name in ("own", "body", "subtree"):
+            tokens = getattr(version, field_name)
+            assert tokens is not None
+            assert literal in "".join(tokens)
+        versions.append(version)
+    for field_name in ("own", "body", "subtree"):
+        assert len({getattr(version, field_name) for version in versions}) == len(versions)
+
+
+def test_f1_evidence_fixture_spans_and_digests_use_original_newline_bytes(refactor_repo):
+    """Half-open root spans end on the last included byte, not after its newline."""
+    from hashlib import blake2b
+
+    from gita.index import evidence
+    from gita.index.model import ParseStatus, SourceSpan
+
+    original = refactor_repo["sources"][0]
+    for newline in (b"\n", b"\r\n", b""):
+        source = original.replace(b"\n", b"\r\n") if newline == b"\r\n" else original
+        if not newline:
+            source = source[:-1]
+        bundle = evidence.parse_evidence(source, b"auth.py")
+        assert bundle.result.status is ParseStatus.COMPLETE
+        definition = _f1_definition(bundle, "validate_token")
+        expected_bytes = source[:-len(newline)] if newline else source
+        assert definition.span == SourceSpan(0, len(expected_bytes), 1, 3)
+        assert source[definition.span.start_byte:definition.span.end_byte] == expected_bytes
+        version = _f1_version(bundle, definition)
+        assert version.source_digest == blake2b(expected_bytes, digest_size=32).digest()
+        root, = (item for item in bundle.result.definitions if item.synthetic_root)
+        assert root.span == SourceSpan(0, len(source), 1, 1 + source[:max(0, len(source) - 1)].count(b"\n"))
+        assert _f1_version(bundle, root).source_digest == blake2b(source, digest_size=32).digest()
+
+
+def test_f1_evidence_bom_and_multibyte_source_reach_native_parser_unchanged(monkeypatch):
+    from hashlib import blake2b
+
+    from gita.index import evidence
+    from gita.index.model import ParseStatus, SourceSpan
+
+    source = b"\xef\xbb\xbf# caf\xc3\xa9\n\ndef validate_token(raw):\n    return raw + '\xc3\xa9'\n"
+    get_parser = evidence.get_parser
+    observed = []
+
+    class RecordingParser:
+        def __init__(self, parser):
+            self.parser = parser
+
+        def parse(self, supplied, *args, **kwargs):
+            observed.append(supplied)
+            return self.parser.parse(supplied, *args, **kwargs)
+
+    monkeypatch.setattr(evidence, "get_parser", lambda language: RecordingParser(get_parser(language)))
+    bundle = evidence.parse_evidence(source, b"auth.py")
+    assert bundle.result.status is ParseStatus.COMPLETE
+    assert observed == [source]
+    assert type(observed[0]) is bytes
+    definition = _f1_definition(bundle, "validate_token")
+    expected = b"def validate_token(raw):\n    return raw + '\xc3\xa9'"
+    assert definition.span == SourceSpan(source.index(b"def "), len(source) - 1, 3, 4)
+    assert source[definition.span.start_byte:definition.span.end_byte] == expected
+    assert _f1_version(bundle, definition).source_digest == blake2b(expected, digest_size=32).digest()
+    root, = (item for item in bundle.result.definitions if item.synthetic_root)
+    assert (root.span.start_byte, root.span.end_byte) == (0, len(source))
+    assert _f1_version(bundle, root).source_digest == blake2b(source, digest_size=32).digest()
+
+
+def test_f1_evidence_non_utf8_filename_preserves_raw_path_and_ascii_extension():
+    from gita.index import evidence
+    from gita.index.model import ParseStatus
+
+    source = b"def validate_token(raw):\n    return raw\n"
+    raw = evidence.parse_evidence(source, b"bad\xff.py")
+    replacement = evidence.parse_evidence(source, b"bad\xef\xbf\xbd.py")
+    assert raw.result.status is ParseStatus.COMPLETE
+    assert raw.result.language == "python"
+    assert raw.result.path == b"bad\xff.py"
+    assert replacement.result.path == b"bad\xef\xbf\xbd.py"
+    assert raw.result.id != replacement.result.id
+    assert raw.result.blob == replacement.result.blob
+    assert {version.id for version in raw.versions} == {version.id for version in replacement.versions}
+
+
+def test_f1_evidence_duplicate_siblings_keep_literal_names_with_ordinal_discriminators():
+    from gita.index import evidence
+    from gita.index.model import ParseStatus
+
+    source = b"def validate_token(raw):\n    return raw\n\ndef validate_token(raw):\n    return raw\n"
+    bundle = evidence.parse_evidence(source, b"auth.py")
+    assert bundle.result.status is ParseStatus.COMPLETE
+    root, = (definition for definition in bundle.result.definitions if definition.synthetic_root)
+    siblings = sorted((definition for definition in bundle.result.definitions
+                       if not definition.synthetic_root), key=lambda definition: definition.span.start_byte)
+    assert len(siblings) == 2
+    first, second = siblings
+    assert first.names == second.names == ("validate_token",)
+    assert first.parent_id == second.parent_id == root.id
+    assert first.id != second.id
+    assert first.version_id == second.version_id
+    assert first.discriminator[:-1] == second.discriminator[:-1] == root.discriminator
+    assert second.discriminator[-1] == first.discriminator[-1] + 1
+    assert len({version.id for version in bundle.versions}) == len(bundle.versions) == 2
+
+
+def test_f1_evidence_literal_name_separators_are_not_split_or_collision_suffixes():
+    from gita.index import evidence
+    from gita.index.model import ParseStatus
+
+    source = b'{"literal.::#": 1, "literal.::#": 2, "literal.::##2": 3}\n'
+    bundle = evidence.parse_evidence(source, b"config.json")
+    assert bundle.result.status is ParseStatus.COMPLETE
+    definitions = sorted((definition for definition in bundle.result.definitions
+                          if not definition.synthetic_root), key=lambda definition: definition.span.start_byte)
+    assert [definition.names for definition in definitions] == [
+        ("literal.::#",), ("literal.::#",), ("literal.::##2",),
+    ]
+    assert len({definition.discriminator for definition in definitions}) == 3
+    assert len({definition.id for definition in definitions}) == 3
+
+
+def test_f1_evidence_nested_definitions_reference_canonical_parents():
+    from gita.index import evidence
+    from gita.index.model import ParseStatus
+
+    source = (b"class Validator:\n"
+              b"    def validate_token(self, raw):\n"
+              b"        def normalize(value):\n"
+              b"            return value.strip()\n"
+              b"        return normalize(raw)\n")
+    bundle = evidence.parse_evidence(source, b"auth.py")
+    assert bundle.result.status is ParseStatus.COMPLETE
+    assert len(bundle.result.definitions) == 4
+    root, = (definition for definition in bundle.result.definitions if definition.synthetic_root)
+    container = _f1_definition(bundle, "Validator")
+    method = _f1_definition(bundle, "validate_token")
+    inner = _f1_definition(bundle, "normalize")
+    assert root.parent_id is None
+    assert root.names == ("<module>",)
+    assert container.names == ("Validator",)
+    assert method.names == ("Validator", "validate_token")
+    assert inner.names == ("Validator", "validate_token", "normalize")
+    for parent, child in ((root, container), (container, method), (method, inner)):
+        assert child.parent_id == parent.id
+        assert child.parse_id == parent.parse_id == bundle.result.id
+        assert child.discriminator[:-1] == parent.discriminator
+        assert parent.span.start_byte <= child.span.start_byte < child.span.end_byte <= parent.span.end_byte
+        assert parent.span.start_line <= child.span.start_line <= child.span.end_line <= parent.span.end_line
+
+
+def test_f1_evidence_long_names_literals_and_signatures_are_not_display_truncated():
+    from gita.index import evidence
+
+    name = "validate_" + "identifier" * 24
+    argument = "argument_" + "value" * 48
+    literal = "begin" + " text.::#" * 48 + "end"
+    source = f"def {name}({argument}):\n    return '{literal}'\n".encode("utf-8")
+    bundle = evidence.parse_evidence(source, b"auth.py")
+    definition = _f1_definition(bundle, name)
+    assert definition.names == (name,)
+    version = _f1_version(bundle, definition)
+    assert name in version.own and name in version.signature
+    assert argument in version.own and argument in version.signature
+    assert len("".join(version.signature)) > 200
+    assert literal in "".join(version.body)
+    assert literal in "".join(version.own)
+    assert literal in "".join(version.subtree)
+
+
+def test_f1_evidence_descendant_body_edit_changes_subtree_but_not_parent_own():
+    from gita.index import evidence
+
+    source = (b"class Validator:\n"
+              b"    enabled = True\n"
+              b"    def validate_token(self, raw):\n"
+              b"        return raw.strip()\n")
+    before = evidence.parse_evidence(source, b"auth.py")
+    after = evidence.parse_evidence(source.replace(b"raw.strip()", b"raw.lower()"), b"auth.py")
+    assert before.result.id != after.result.id
+    for name in ("Validator", "validate_token"):
+        assert _f1_definition(before, name).id != _f1_definition(after, name).id
+    for original, changed in (
+        (_f1_definition(before, "Validator"), _f1_definition(after, "Validator")),
+        (next(item for item in before.result.definitions if item.synthetic_root),
+         next(item for item in after.result.definitions if item.synthetic_root)),
+    ):
+        original_version = _f1_version(before, original)
+        changed_version = _f1_version(after, changed)
+        assert original_version.own == changed_version.own
+        assert original_version.signature == changed_version.signature
+        assert original_version.body == changed_version.body
+        assert original_version.subtree != changed_version.subtree
+        assert original_version.source_digest != changed_version.source_digest
+        assert original_version.id != changed_version.id
+        assert "strip" not in original_version.own
+        assert "strip" in original_version.subtree
+        assert "lower" in changed_version.subtree
+    original_leaf = _f1_version(before, _f1_definition(before, "validate_token"))
+    changed_leaf = _f1_version(after, _f1_definition(after, "validate_token"))
+    assert original_leaf.signature == changed_leaf.signature
+    assert original_leaf.body != changed_leaf.body
+
+
+def test_f1_evidence_cosmetic_edit_changes_source_digest_not_normalized_representations():
+    from gita.index import evidence
+
+    source = b"def validate_token(raw):\n    return raw + 1\n"
+    cosmetic = b"def validate_token( raw ):\n    # ignored comment\n    return raw+1\n"
+    before = evidence.parse_evidence(source, b"auth.py")
+    after = evidence.parse_evidence(cosmetic, b"auth.py")
+    original = _f1_version(before, _f1_definition(before, "validate_token"))
+    changed = _f1_version(after, _f1_definition(after, "validate_token"))
+    assert before.result.id != after.result.id
+    assert original.id != changed.id
+    assert original.source_digest != changed.source_digest
+    for field_name in ("own", "signature", "body", "subtree"):
+        assert getattr(original, field_name) == getattr(changed, field_name)
+    assert "ignored" not in "".join(changed.subtree)
+
+
+def test_f1_evidence_line_shift_changes_parse_and_definition_not_leaf_version():
+    from gita.index import evidence
+
+    source = b"def validate_token(raw):\n    return raw\n"
+    prefix = b"# preceding source\n\n"
+    before = evidence.parse_evidence(source, b"auth.py")
+    after = evidence.parse_evidence(prefix + source, b"auth.py")
+    original = _f1_definition(before, "validate_token")
+    shifted = _f1_definition(after, "validate_token")
+    assert before.result.blob != after.result.blob
+    assert before.result.id != after.result.id
+    assert original.id != shifted.id
+    assert shifted.span.start_byte == original.span.start_byte + len(prefix)
+    assert shifted.span.end_byte == original.span.end_byte + len(prefix)
+    assert shifted.span.start_line == original.span.start_line + 2
+    assert shifted.span.end_line == original.span.end_line + 2
+    assert original.version_id == shifted.version_id
+    assert _f1_version(before, original) == _f1_version(after, shifted)
+
+
+def test_f1_evidence_path_move_preserves_root_and_leaf_versions(refactor_repo):
+    from gita.index import evidence
+
+    source = refactor_repo["sources"][0]
+    before = evidence.parse_evidence(source, b"auth.py")
+    after = evidence.parse_evidence(source, b"security.py")
+    assert before.result.path == b"auth.py"
+    assert after.result.path == b"security.py"
+    assert before.result.blob == after.result.blob
+    assert before.result.id != after.result.id
+    assert {version.id for version in before.versions} == {version.id for version in after.versions}
+    original_by_names = {definition.names: definition for definition in before.result.definitions}
+    moved_by_names = {definition.names: definition for definition in after.result.definitions}
+    assert original_by_names.keys() == moved_by_names.keys()
+    assert ("<module>",) in original_by_names
+    for names, original in original_by_names.items():
+        moved = moved_by_names[names]
+        assert original.id != moved.id
+        assert original.span == moved.span
+        assert original.version_id == moved.version_id
+        assert _f1_version(before, original) == _f1_version(after, moved)
+
+
+def test_f1_evidence_root_signature_is_unavailable_not_an_empty_method_signature():
+    from gita.index import evidence
+
+    source = b"SETTING = 7\n\nclass Validator:\n    def validate_token(self):\n        pass\n"
+    bundle = evidence.parse_evidence(source, b"auth.py")
+    root, = (definition for definition in bundle.result.definitions if definition.synthetic_root)
+    root_version = _f1_version(bundle, root)
+    method = _f1_version(bundle, _f1_definition(bundle, "validate_token"))
+    assert root_version.signature is None
+    assert root_version.own is not None and "SETTING" in root_version.own
+    assert root_version.body == root_version.own
+    assert method.signature is not None and "validate_token" in method.signature
+    assert method.body is not None and "pass" in method.body
+    assert "validate_token" not in root_version.own
+    assert "validate_token" in root_version.subtree
+
+
+def test_f1_evidence_blob_limit_rejects_before_parser_and_accepts_exact_size(monkeypatch):
+    from gita.index import evidence
+    from gita.index.model import ParseStatus
+
+    source = b"def validate_token(raw):\n    return raw\n"
+
+    def unexpected_parser(language):
+        pytest.fail(f"oversized input requested parser {language}")
+
+    with monkeypatch.context() as scoped:
+        scoped.setattr(evidence, "get_parser", unexpected_parser)
+        bundle = evidence.parse_evidence(
+            source, b"auth.py", limits=evidence.EvidenceLimits(max_blob_bytes=len(source) - 1),
+        )
+    _f1_assert_unknown(bundle, source, b"auth.py", "oversized")
+    accepted = evidence.parse_evidence(
+        source, b"auth.py", limits=evidence.EvidenceLimits(max_blob_bytes=len(source)),
+    )
+    assert accepted.result.status is ParseStatus.COMPLETE
+    assert _f1_definition(accepted, "validate_token").span.end_byte == len(source) - 1
+
+
+def test_f1_evidence_definition_limit_counts_module_and_never_publishes_prefix():
+    from gita.index import evidence
+    from gita.index.model import ParseStatus
+
+    source = b"def first():\n    return 1\n\ndef second():\n    return 2\n"
+    rejected = evidence.parse_evidence(
+        source, b"auth.py", limits=evidence.EvidenceLimits(max_definitions=2),
+    )
+    _f1_assert_unknown(rejected, source, b"auth.py", "definition_limit")
+    accepted = evidence.parse_evidence(
+        source, b"auth.py", limits=evidence.EvidenceLimits(max_definitions=3),
+    )
+    assert accepted.result.status is ParseStatus.COMPLETE
+    assert len(accepted.result.definitions) == 3
+    assert sum(definition.synthetic_root for definition in accepted.result.definitions) == 1
+    assert {definition.names for definition in accepted.result.definitions} == {
+        ("<module>",), ("first",), ("second",),
+    }
+
+
+def test_f1_evidence_representation_limit_counts_exact_utf8_token_bytes():
+    from gita.index import evidence
+    from gita.index.model import ParseStatus
+
+    source = b"def validate_token(raw):\n    return raw + '\xc3\xa9\xc3\xa9\xc3\xa9'\n"
+    baseline = evidence.parse_evidence(source, b"auth.py")
+    assert baseline.result.status is ParseStatus.COMPLETE
+    tokens = [token for version in baseline.versions
+              for representation in (version.own, version.signature, version.body, version.subtree)
+              if representation is not None for token in representation]
+    byte_total = sum(len(token.encode("utf-8")) for token in tokens)
+    assert byte_total > sum(len(token) for token in tokens) > 1
+    for limit in (1, byte_total - 1):
+        rejected = evidence.parse_evidence(
+            source, b"auth.py", limits=evidence.EvidenceLimits(max_representation_bytes=limit),
+        )
+        _f1_assert_unknown(rejected, source, b"auth.py", "representation_limit")
+    accepted = evidence.parse_evidence(
+        source, b"auth.py", limits=evidence.EvidenceLimits(max_representation_bytes=byte_total),
+    )
+    assert accepted.result.status is ParseStatus.COMPLETE
+    assert [definition.names for definition in accepted.result.definitions] == [
+        definition.names for definition in baseline.result.definitions
+    ]
+    assert sum(len(token.encode("utf-8")) for version in accepted.versions
+               for representation in (version.own, version.signature, version.body, version.subtree)
+               if representation is not None for token in representation) == byte_total
+
+
+def test_f1_evidence_root_parse_error_discards_otherwise_salvageable_definitions():
+    from gita.index import evidence
+
+    source = b"def validate_token(raw):\n    return raw\n\ndef broken(:\n    return 1\n"
+    bundle = evidence.parse_evidence(source, b"auth.py")
+    _f1_assert_unknown(bundle, source, b"auth.py", "parse_error")
+
+
+def test_f1_evidence_fixture_bundle_round_trips_through_reopened_store(tmp_path, refactor_repo):
+    from gita.index import evidence
+    from gita.index.model import ParseStatus
+    from gita.index.store import IndexStore
+
+    source = refactor_repo["sources"][0]
+    bundle = evidence.parse_evidence(source, refactor_repo["paths"][0].encode("utf-8"))
+    assert bundle.result.status is ParseStatus.COMPLETE
+    assert len(bundle.result.definitions) == 2
+    assert _f1_definition(bundle, "validate_token").span.end_byte == len(source) - 1
+    database = tmp_path / "parsed evidence.sqlite"
+    with IndexStore.create(database) as store:
+        with store.transaction():
+            assert store.put_parse(bundle.result, bundle.versions) == bundle.result.id
+    with IndexStore.open(database) as reopened:
+        with reopened.snapshot():
+            assert reopened.get_parse(bundle.result.id) == bundle.result
+            assert tuple(reopened.get_version(version.id) for version in bundle.versions) == bundle.versions
+            assert reopened.check_integrity() == ()
+
+
+@pytest.mark.parametrize("source, path, status", (
+    (b"def validate_token(:\n    pass\n", b"auth.py", "parse_error"),
+    (b"CREATE TABLE records (id INTEGER);\n", b"schema.sql", "unsupported_language"),
+))
+def test_f1_evidence_unknown_bundle_round_trips_without_definitions(tmp_path, source, path, status):
+    from gita.index import evidence
+    from gita.index.store import IndexStore
+
+    bundle = evidence.parse_evidence(source, path)
+    _f1_assert_unknown(bundle, source, path, status)
+    database = tmp_path / "unknown evidence.sqlite"
+    with IndexStore.create(database) as store:
+        with store.transaction():
+            assert store.put_parse(bundle.result, bundle.versions) == bundle.result.id
+    with IndexStore.open(database) as reopened:
+        with reopened.snapshot():
+            restored = reopened.get_parse(bundle.result.id)
+            assert restored == bundle.result
+            assert restored.definitions == ()
+            assert restored.diagnostics == bundle.result.diagnostics
+            assert reopened.check_integrity() == ()
