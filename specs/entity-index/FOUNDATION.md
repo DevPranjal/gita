@@ -1055,15 +1055,15 @@ name-filtered history while claiming identical indexed semantics.
 
 ## 12. Files
 
-This is the Files Affected inventory for future implementation, not a list of
-files changed while drafting. The current deliverable is documentation only;
-the production modules and tests below remain proposed.
+This is the Files Affected inventory for the foundation, not a claim that every
+listed responsibility is implemented. Section 14 records the delivered subsets;
+paths marked proposed do not yet exist.
 
 | ID | Existing or proposed path | Owner and bounded responsibility |
 | --- | --- | --- |
-| FILE-001 | Proposed `src/gita/index/model.py` | Contract owner: immutable records, statuses, canonical IDs/fingerprints and pure codecs; no Git or SQL orchestration. |
-| FILE-002 | Proposed `src/gita/index/store.py` | Store owner: DDL, lookup/write primitives, transactions, generation publication and GC; no matching policy. |
-| FILE-003 | Proposed `src/gita/index/evidence.py`; [extractor](../../src/gita/entities/extractor.py) | Evidence owner: complete parse outcomes and exact byte/full-representation adapter; legacy output unchanged. |
+| FILE-001 | [Contract model](../../src/gita/index/model.py) | Contract owner: immutable records, statuses, canonical IDs/fingerprints and pure codecs; no Git or SQL orchestration. |
+| FILE-002 | [Store](../../src/gita/index/store.py) | Store owner: DDL, lookup/write primitives, transactions, generation publication and GC; currently evidence-cache subset only. |
+| FILE-003 | [Evidence](../../src/gita/index/evidence.py), [worker](../../src/gita/index/worker.py); [extractor](../../src/gita/entities/extractor.py) | Evidence owner: exact byte/full-representation adapter and isolated operational deadlines; legacy output unchanged. |
 | FILE-004 | [Git plumbing](../../src/gita/vcs/git.py) | Evidence owner: additive commit-only, byte-safe paths/object enumeration and correct common-dir handling. |
 | FILE-005 | Proposed `src/gita/index/matching.py` | Lineage owner: strict tiers, guard evidence, candidate limits, multi-flag classification. |
 | FILE-006 | Proposed `src/gita/index/builder.py` | Lineage owner: scope walk, complete checkpoint, persisted frontier, transitions, coverage and bounded staging. |
@@ -1071,11 +1071,11 @@ the production modules and tests below remain proposed.
 | FILE-008 | [CLI](../../src/gita/cli/__init__.py); [renderer](../../src/gita/cli/render.py) | Query owner: proposed commands, envelopes/exits/cursors and bounded rendering; retain legacy behavior. |
 | FILE-009 | Proposed `src/gita/index/verify.py` | Verification owner: invariant/source checks and canonical logical export independent of builder matching decisions. |
 | FILE-010 | [Fixture home](../../tests/conftest.py) | Contract owner first, then coordinated edits: real refactor, duplicate/gap, branch, crash fixtures; reuse existing Git helpers. |
-| FILE-011 | Proposed `tests/test_index_store.py`, `tests/test_index_builder.py`, `tests/test_index_query.py`, `tests/test_index_verify.py` | Corresponding owners; four focused homes, not a new file per acceptance case. |
+| FILE-011 | [Store tests](../../tests/test_index_store.py), [builder tests](../../tests/test_index_builder.py); proposed `tests/test_index_query.py`, `tests/test_index_verify.py` | Corresponding owners; focused homes, not a new file per acceptance case. |
 | FILE-012 | [Extractor tests](../../tests/test_extractor.py), [object tests](../../tests/test_objects.py), [enumeration tests](../../tests/test_enumeration.py), [CLI tests](../../tests/test_cli.py), [history tests](../../tests/test_history.py) | Owning touched surface: byte/Git additive coverage and unchanged legacy behavior. |
 
-The proposed index package MAY need an empty `src/gita/index/__init__.py` for
-packaging; it MUST NOT become a second public API or an orchestration module.
+The existing [index package](../../src/gita/index/__init__.py) MUST NOT become a
+second public API or an orchestration module.
 Existing [diff matcher](../../src/gita/diff/differ.py),
 [model](../../src/gita/entities/model.py), and
 [TreeStore](../../src/gita/entities/store.py) are evidence/reference boundaries,
@@ -1193,6 +1193,46 @@ This is partial EPIC-002 delivery, not completion of F1 or a usable entity index
   module; full parse/match invalidation separation is not yet established.
   No lineage builder, scope state, indexed commands or performance gates are done.
 
+### F1 Worker Checkpoint (2026-09-14)
+
+This advances ITEM-006/TEST-034 without changing the synchronous adapter or store.
+The remaining-work list in the preceding checkpoint is historical; the isolated
+worker below is now implemented, while the other F1 boundaries remain open.
+
+- [worker.py](../../src/gita/index/worker.py) lazily starts one persistent spawn
+  child and serializes parse requests. A deadline-bounded I/O thread covers both
+  blocked sends and incomplete responses; there is no worker pool or database
+  connection in the child. Default deadline is five seconds, including startup
+  and transport. Library callers use the usual multiprocessing main guard.
+- Successful results equal the direct adapter's full bundle and identifiers.
+  Deadlines are operational, excluded from fingerprints. Timeout raises
+  `resource_limit`, not cached partial evidence. Crashes and malformed replies
+  raise `worker_failed`; failed or closed workers refuse reuse. Contract errors
+  retain their code, and parent cancellation propagates after cleanup.
+- Cleanup terminates/reaps the child and joins I/O, with kill fallback when
+  termination fails. Original parse errors survive cleanup failures; unreleased
+  resources stay owned for a later close retry. Response completion timestamps
+  reject replies arriving after the deadline. OS startup/reaping cannot provide
+  hard real-time guarantees; native process-tree RSS is not yet measured.
+- Observed RED: 40 missing-API failures, then GREEN. Independent review added two
+  failing regressions for termination failure and late success; repairs yielded
+  **42 passing worker cases**. A test-only shared Event barrier hung when signalled
+  after its waiting child was killed; replacing it with a semaphore fixed the
+  failure-injection cleanup without weakening timeout assertions.
+- The five new manual-harness cases were observed RED then GREEN. Full Unit Test
+  MCP regression: **968 passed, 1 failed**, no skips, in 316.6s. The known five-event
+  CLI acceptance remains red because `gita index` is absent; no coverage percentage
+  or release-ready foundation claim follows from these counts.
+- Manual command: `.venv\Scripts\python.exe verify\check.py --stage f1-worker`.
+  Four checks passed: reused-worker/direct equality, terminal deadline refusal,
+  persisted-cache rollback retaining prior evidence, and an identical fresh-worker
+  retry explicitly committed and reopened. Fixtures use a unique retained temp
+  directory. Its immediate deadline includes startup, not a parse-speed benchmark;
+  actual blocked-send/receive and cancellation controls are in the worker tests.
+- Generation publication, the remaining relational schema and GC, byte-safe
+  offline Git retrieval, and complete parse/match fingerprint separation are still
+  pending before F1 completion. F2 lineage and F3 indexed commands are not started.
+
 ### EPIC-001: F0 Contracts and Failing Acceptance
 
 Dependencies: none beyond existing fixtures. Traces: FR-002, FR-003, FR-004,
@@ -1216,7 +1256,7 @@ complete coverage outcomes; no accepted lineage policy required yet.
 | --- | --- | --- | --- |
 | ITEM-004 | Write failing store/schema/FK tests TEST-003/004, implement read-only open and declared relations/indexes, enforce immutable records, interval checks and generation references. | Partial: four-table evidence cache and immutable record checks; remaining relations, intervals and generations pending | FILE-002, FILE-011 store tests |
 | ITEM-005 | Write TEST-020/021/024/034 failure-boundary cases, implement one-writer transactions, rollback/publish, typed errors and non-destructive generation GC. | Partial: cache transactions, rollback, read snapshots and typed errors; publication, generation GC and remaining failure gates pending | FILE-002, FILE-011 store tests |
-| ITEM-006 | Write TEST-005/006/023 for byte/full-token evidence and parse fingerprints, implement the additive evidence adapter plus bounded parse worker; legacy extractor regression stays green. | Partial: synchronous byte adapter and limits; bounded worker and complete invalidation separation pending | FILE-003, FILE-011 builder tests, FILE-012 extractor tests |
+| ITEM-006 | Write TEST-005/006/023 for byte/full-token evidence and parse fingerprints, implement the additive evidence adapter plus bounded parse worker; legacy extractor regression stays green. | Partial: byte adapter, deterministic limits and isolated deadline worker tested; complete parse/match invalidation separation pending | FILE-003, FILE-011 builder tests, FILE-012 extractor tests |
 | ITEM-007 | Write TEST-025/026, extend Git object/commit/path access with safe framing, empty/missing distinction and common-dir resolution; preserve WS-1 behavior. | Partial: tested common-dir location only; byte-safe offline Git access pending | FILE-004, FILE-012 Git tests |
 
 Store/evidence development MAY run in parallel only after ITEM-002 records are
@@ -1280,3 +1320,7 @@ red end-to-end acceptance. No persistent index or new indexed commands exist yet
 2026-09-14: Partial F1 evidence cache, byte adapter and scoped manual checkpoint
 implemented test-first. Section 14 records 921 passing tests, the one deliberately
 red CLI acceptance, five manual passes and the remaining F1 boundaries.
+
+2026-09-14: F1 isolated worker implemented and independently reviewed. Section 14
+records 42 worker cases, five new harness cases, four manual passes and the latest
+full regression of 968 passed / one deliberately failed CLI acceptance.

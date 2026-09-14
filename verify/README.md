@@ -31,9 +31,40 @@ All five passed at the 2026-09-14 checkpoint. These are small Python fixtures.
 The AST/span checks are independent of tree-sitter; serialization round trips
 share production code and are not an independent proof of the whole database.
 No lineage, generation publication, indexed CLI, performance or accuracy gate is
-established here. The adapter is synchronous; its deadline worker and byte-safe
-Git enumeration are still pending. SQL is explicitly unsupported by this new
+established here. The adapter is synchronous; the separate worker checkpoint below
+adds deadline isolation. Byte-safe Git enumeration is still pending. SQL is explicitly unsupported by this new
 adapter, without changing the existing SQL differ.
+
+## F1 Worker Checkpoint
+
+```powershell
+.venv\Scripts\python.exe verify\check.py --stage f1-worker
+```
+
+This command retains fixtures in a unique `gita-verify-worker-*` directory without
+modifying the repository. All four checks passed on 2026-09-14:
+
+| Check | Evidence |
+| --- | --- |
+| Worker evidence matches direct parse | Two full bundles and source digests agree while reusing one isolated child. This shares the parser, not an independent AST oracle. |
+| Deadline refusal is terminal | An immediate deadline raises `resource_limit` without returning partial evidence; the worker then refuses another parse. |
+| Cache transaction rollback | Prior committed evidence survives; staged and timed-out evidence remain absent after reopen. |
+| Fresh worker retry and explicit persist | A new worker returns identical IDs; an explicit writer persists the result and read-only reopening verifies it. |
+
+The immediate deadline includes child startup and is not a parse-speed benchmark.
+The 42 worker tests separately exercise real blocked send/receive, process crash,
+cancellation, malformed replies, failed termination, late completion and retry
+identity. Five new harness cases cover real execution, unique retained fixtures,
+CLI registration and injected parse failures. No sleeps or polling are needed to
+coordinate the fault-injection workers.
+
+The worker defaults to five seconds per request, uses one persistent spawn child,
+and does not change deterministic evidence fingerprints. Deadline, transport and
+cancellation failures close the worker; a fresh instance is needed to retry.
+OS startup and reaping are not hard real-time guarantees. If cleanup itself fails,
+unfinished resources remain owned for another `close()` attempt. Native RSS limits,
+generation publication and the full indexed workflow remain unverified. Library
+callers on Windows need the usual `if __name__ == "__main__":` guard for spawning.
 
 ## Reading Results
 
@@ -66,7 +97,7 @@ previous instructions that edited and reverted tracked production source.
 **Scratch-directory warning:** these legacy paths and the default command reuse
 and clear fixed directories under the system temp folder:
 `gita-verify-merges` and/or `gita-verify-refactor`. Do not keep work there. The new
-`f1-evidence` command does not clear either directory.
+`f1-evidence` and `f1-worker` commands do not clear either directory.
 
 WS-1 compares changed-file lists with Git and forces the old enumeration path as
 a negative control. Its process count concerns the measured Git wrapper calls,
@@ -82,7 +113,7 @@ does not change legacy history's behavior or promise transparent fallback.
 
 ## Regression And Remaining Gates
 
-Latest full Unit Test MCP run: **921 passed, 1 failed**, no skips, in 301.5s.
+Latest full Unit Test MCP run: **968 passed, 1 failed**, no skips, in 316.6s.
 The failure was separately confirmed as
 `test_foundation_tracks_five_events_after_restart`: the proposed `gita index`
 command is not implemented. The full suite is deliberately not green; no test
@@ -97,7 +128,7 @@ For a manual rerun:
 .venv\Scripts\python.exe -m pytest tests/test_index_builder.py::test_foundation_tracks_five_events_after_restart -q
 ```
 
-The store file currently has 274 passing tests. The exact acceptance command
+The store file currently has 279 passing tests. The exact acceptance command
 above must still fail. [Foundation section 14](../specs/entity-index/FOUNDATION.md#14-implementation-plan)
 records implemented subsets and pending work. Full relational constraints,
 generation publication, offline Git access, lineage, indexed queries and the

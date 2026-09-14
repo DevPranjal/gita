@@ -8,6 +8,7 @@ independent oracle.
     python verify/check.py              registered checkpoints and Year 1 target
     python verify/check.py --stage ws1  one workstream
     python verify/check.py --stage f1-evidence  evidence cache checkpoint only
+    python verify/check.py --stage f1-worker  bounded parse worker checkpoint only
     python verify/check.py -v           show the commands being run
 
 Unverified stages are listed, never counted as successful checkpoints.
@@ -361,6 +362,145 @@ def check_f1_evidence() -> list[Result]:
     return results
 
 
+def check_f1_worker() -> list[Result]:
+    """Check worker isolation and cache rollback, retaining all fixtures."""
+    from hashlib import sha256
+
+    results = []
+    root = None
+    label = "worker evidence matches direct parse"
+    try:
+        root = Path(tempfile.mkdtemp(prefix="gita-verify-worker-")).resolve()
+        from gita.index.evidence import EvidenceBundle, parse_evidence
+        from gita.index.store import IndexStore
+        from gita.index.worker import EvidenceWorker, EvidenceWorkerError
+
+        sources = {
+            "committed.py": b'def committed(value):\n    return value + 1\n',
+            "staged.py": b'def staged(value):\n    return value * 2\n',
+            "retry.py": b'def retry(value):\n    return value - 3\n',
+        }
+        baselines = []
+        hashes = {}
+        for name, source in sources.items():
+            fixture = root / name
+            fixture.write_bytes(source)
+            hashes[name] = sha256(fixture.read_bytes()).digest()
+            baselines.append(parse_evidence(fixture.read_bytes(), name.encode("ascii")))
+        actual = []
+        with EvidenceWorker() as worker:
+            for name in ("committed.py", "staged.py"):
+                bundle = worker.parse((root / name).read_bytes(), name.encode("ascii"))
+                if type(bundle) is not EvidenceBundle or not bundle.result.complete:
+                    raise ValueError("worker did not return a complete EvidenceBundle")
+                actual.append(bundle)
+        same = (actual == baselines[:2] and all(
+            sha256((root / name).read_bytes()).digest() == digest
+            for name, digest in hashes.items()
+        ))
+        results.append(Result(
+            label, "2 inputs, one reused worker", PASS if same else FAIL,
+            f"Full bundles and source hashes compared; fixtures retained at {root}. "
+            "Direct baseline shares the parser: serialization check, not an independent AST oracle.",
+        ))
+
+        committed, staged = actual
+        expected_retry = baselines[2]
+        database = root / "evidence.sqlite"
+        label = "cache transaction rollback"
+        with IndexStore.create(database) as writer:
+            with writer.transaction():
+                writer.put_parse(committed.result, committed.versions)
+            label = "deadline refusal is terminal"
+            timed_out = False
+            timeout_result = None
+            with EvidenceWorker(timeout_seconds=1e-9) as limited:
+                try:
+                    with writer.transaction():
+                        writer.put_parse(staged.result, staged.versions)
+                        staged_visible = writer.get_parse(staged.result.id) == staged.result
+                        timeout_result = limited.parse(
+                            (root / "retry.py").read_bytes(), b"retry.py",
+                        )
+                        raise ValueError("immediate deadline unexpectedly returned evidence")
+                except EvidenceWorkerError as error:
+                    if error.code != "resource_limit":
+                        raise
+                    timed_out = True
+                closed = False
+                try:
+                    limited.parse((root / "retry.py").read_bytes(), b"retry.py")
+                except EvidenceWorkerError as error:
+                    if error.code != "worker_closed":
+                        raise
+                    closed = True
+            rolled_back = not writer.connection.in_transaction
+        results.append(Result(
+            label, f"timeout={timed_out}, closed={closed}",
+            PASS if timed_out and timeout_result is None and closed else FAIL,
+            "NOTE: Immediate deadline includes startup; not a parse-speed benchmark. "
+            "resource_limit returns no partial ParseResult; subsequent parse must report worker_closed.",
+        ))
+
+        label = "cache transaction rollback"
+        database_hash = sha256(database.read_bytes()).digest()
+        committed_ids = {version.id for version in committed.versions}
+        with IndexStore.open(database) as reader:
+            with reader.snapshot():
+                preserved = (reader.get_parse(committed.result.id) == committed.result
+                             and all(reader.get_version(version.id) == version
+                                     for version in committed.versions))
+                absent = all(
+                    reader.get_parse(bundle.result.id) is None
+                    and all(reader.get_version(version.id) is None
+                            for version in bundle.versions if version.id not in committed_ids)
+                    for bundle in (staged, expected_retry)
+                )
+                rollback_ok = (staged_visible and rolled_back and preserved and absent
+                               and reader.check_integrity() == ())
+        rollback_ok = rollback_ok and sha256(database.read_bytes()).digest() == database_hash
+        results.append(Result(
+            label, f"kept={preserved}, absent={absent}", PASS if rollback_ok else FAIL,
+            f"Committed bundle survives; staged and timed-out evidence absent after reopen: {database}. "
+            "Read-only inspection leaves the database hash unchanged.",
+        ))
+
+        label = "fresh worker retry and explicit persist"
+        with EvidenceWorker() as fresh:
+            retried = fresh.parse((root / "retry.py").read_bytes(), b"retry.py")
+            if type(retried) is not EvidenceBundle or not retried.result.complete:
+                raise ValueError("retry did not return a complete EvidenceBundle")
+        retry_same = retried == expected_retry
+        with IndexStore.open(database, read_only=False) as writer:
+            not_persisted = writer.get_parse(retried.result.id) is None
+            with writer.transaction():
+                writer.put_parse(retried.result, retried.versions)
+        database_hash = sha256(database.read_bytes()).digest()
+        with IndexStore.open(database) as reader:
+            with reader.snapshot():
+                reopened = all(
+                    reader.get_parse(bundle.result.id) == bundle.result
+                    and all(reader.get_version(version.id) == version for version in bundle.versions)
+                    for bundle in (committed, retried)
+                ) and reader.get_parse(staged.result.id) is None and reader.check_integrity() == ()
+        unchanged = (sha256(database.read_bytes()).digest() == database_hash and all(
+            sha256((root / name).read_bytes()).digest() == digest
+            for name, digest in hashes.items()
+        ))
+        results.append(Result(
+            label, f"same={retry_same}, reopened={reopened}",
+            PASS if retry_same and not_persisted and reopened and unchanged else FAIL,
+            "Fresh worker matches the direct bundle including all IDs; only the explicit writer "
+            f"persists it. Source and read-only database hashes unchanged; fixtures retained at {root}.",
+        ))
+    except Exception as error:
+        note = f"{type(error).__name__}: {error}"
+        if root is not None:
+            note += f"; fixtures retained at {root}"
+        results.append(Result(label, "checkpoint could not finish", FAIL, note))
+    return results
+
+
 # ------------------------------------------------------- Year 1 target ----
 
 def build_refactor_repo() -> Path:
@@ -421,13 +561,14 @@ def check_year1_target() -> list[Result]:
 STAGES = [
     Stage("ws1", "Enumeration", None),
     Stage("f1-evidence", "Evidence cache checkpoint", "gita.index.evidence"),
+    Stage("f1-worker", "Bounded parse worker checkpoint", "gita.index.worker"),
     Stage("ws2", "Store", "gita.index.store"),
     Stage("ws3", "Builder", "gita.index.builder"),
     Stage("ws4", "Query and CLI", "gita.index.query"),
     Stage("ws5", "Verification", "gita.index.verify"),
 ]
 
-RUNNERS = {"ws1": check_ws1, "f1-evidence": check_f1_evidence}
+RUNNERS = {"ws1": check_ws1, "f1-evidence": check_f1_evidence, "f1-worker": check_f1_worker}
 
 
 def demo() -> int:

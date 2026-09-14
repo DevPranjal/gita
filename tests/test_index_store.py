@@ -1865,3 +1865,121 @@ def test_manual_f1_evidence_missing_parse_is_a_reported_failure(
     assert isinstance(results, list) and results
     assert all(isinstance(result, manual_check.Result) and result.verdict for result in results)
     assert any(result.verdict == manual_check.FAIL for result in results)
+
+
+class TestWorkerCheckpointHarness:
+    def test_actual_worker_checkpoint_returns_four_passes(self, manual_check):
+        results = manual_check.check_f1_worker()
+
+        assert isinstance(results, list)
+        assert len(results) == 4
+        assert all(isinstance(result, manual_check.Result) for result in results)
+        assert all(result.verdict == manual_check.PASS for result in results)
+
+    def test_worker_checkpoint_retains_unique_fixtures_without_touching_sentinels(
+        self, manual_check, tmp_path, monkeypatch,
+    ):
+        from pathlib import Path
+
+        preserved = {manual_check.ROOT / "user.md": b"user-owned data\n"}
+        for name in ("gita-verify-worker", "gita-verify-f1-worker"):
+            directory = tmp_path / name
+            directory.mkdir()
+            sentinel = directory / "user.md"
+            sentinel.write_bytes(b"keep this temporary directory\n")
+            preserved[sentinel] = sentinel.read_bytes()
+        original_repo = {
+            path.relative_to(manual_check.ROOT): path.read_bytes()
+            for path in manual_check.ROOT.rglob("*") if path.is_file()
+        }
+        directories = []
+        mkdtemp = manual_check.tempfile.mkdtemp
+
+        def observed_mkdtemp(*args, **kwargs):
+            directory = Path(mkdtemp(*args, **kwargs)).resolve()
+            assert directory.parent == tmp_path.resolve()
+            assert directory.name.startswith("gita-verify-worker-")
+            assert directory not in directories
+            directories.append(directory)
+            return str(directory)
+
+        def legacy_scratch(*args, **kwargs):
+            pytest.fail("worker checkpoint must not use destructive _scratch")
+
+        monkeypatch.setattr(manual_check.tempfile, "mkdtemp", observed_mkdtemp)
+        monkeypatch.setattr(manual_check, "_scratch", legacy_scratch)
+        for invocation in range(2):
+            before = len(directories)
+            results = manual_check.check_f1_worker()
+
+            assert len(results) == 4
+            assert all(result.verdict == manual_check.PASS for result in results)
+            assert len(directories) > before
+            notes = "\n".join(result.note for result in results).replace("\\", "/")
+            for directory in directories[before:]:
+                assert directory.is_dir()
+                assert directory.as_posix() in notes
+                files = [path for path in directory.rglob("*") if path.is_file()]
+                assert any(path.suffix == ".py" and path.read_bytes() for path in files)
+                assert any(path.read_bytes().startswith(b"SQLite format 3\x00") for path in files)
+                sentinel = directory / "user.md"
+                sentinel.write_bytes(f"retained invocation {invocation}\n".encode("ascii"))
+                preserved[sentinel] = sentinel.read_bytes()
+            assert all(path.read_bytes() == content for path, content in preserved.items())
+            assert {
+                path.relative_to(manual_check.ROOT): path.read_bytes()
+                for path in manual_check.ROOT.rglob("*") if path.is_file()
+            } == original_repo
+
+    def test_actual_cli_runs_registered_worker_checkpoint(
+        self, manual_check, monkeypatch, capsys,
+    ):
+        import sys
+
+        runner = manual_check.check_f1_worker
+        stage = next(stage for stage in manual_check.STAGES if stage.key == "f1-worker")
+        assert stage.title == "Bounded parse worker checkpoint"
+        assert stage.module == "gita.index.worker"
+        assert manual_check.RUNNERS[stage.key] is runner
+        assert stage.shipped is True
+
+        def outside_checkpoint():
+            pytest.fail("worker checkpoint must not run another stage or Year 1 acceptance")
+
+        monkeypatch.setattr(manual_check, "check_year1_target", outside_checkpoint)
+        for key in tuple(manual_check.RUNNERS):
+            if key != "f1-worker":
+                monkeypatch.setitem(manual_check.RUNNERS, key, outside_checkpoint)
+        monkeypatch.setattr(sys, "argv", ["verify/check.py", "--stage", "f1-worker"])
+
+        assert manual_check.main() == 0
+        output = capsys.readouterr().out
+        assert "F1-WORKER" in output
+        assert "Bounded parse worker checkpoint" in output
+        assert "checkpoint" in output.lower()
+        assert "f1 complete" not in output.lower()
+        assert "Year 1 acceptance" not in output
+
+    @pytest.mark.parametrize("fault", ["worker_failed", "bad_return"])
+    def test_parse_fault_is_reported_as_failure_and_cli_returns_one(
+        self, manual_check, monkeypatch, capsys, fault,
+    ):
+        import sys
+
+        from gita.index import worker
+
+        def broken_parse(self, *args, **kwargs):
+            if fault == "worker_failed":
+                raise worker.EvidenceWorkerError("worker_failed", "injected")
+            return None
+
+        monkeypatch.setattr(worker.EvidenceWorker, "parse", broken_parse)
+        results = manual_check.check_f1_worker()
+
+        assert isinstance(results, list) and results
+        assert all(isinstance(result, manual_check.Result) for result in results)
+        assert any(result.verdict == manual_check.FAIL for result in results)
+        monkeypatch.setattr(sys, "argv", ["verify/check.py", "--stage", "f1-worker"])
+        assert manual_check.main() == 1
+        captured = capsys.readouterr()
+        assert "FAIL" in captured.out + captured.err

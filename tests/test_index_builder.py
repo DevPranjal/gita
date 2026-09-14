@@ -996,3 +996,580 @@ def test_f1_evidence_unknown_bundle_round_trips_without_definitions(tmp_path, so
             assert restored.definitions == ()
             assert restored.diagnostics == bundle.result.diagnostics
             assert reopened.check_integrity() == ()
+
+
+def _f1_worker_stall(connection, *, reached, release, before_read=False):
+    try:
+        if not before_read:
+            connection.recv()
+        reached.set()
+        release.acquire(timeout=15.0)
+    finally:
+        connection.close()
+
+
+def _f1_worker_crash(connection, *, reached):
+    connection.recv()
+    reached.set()
+    os._exit(23)
+
+
+def _f1_worker_malformed(connection, *, reached, release, response):
+    try:
+        connection.recv()
+        reached.set()
+        connection.send(response)
+        release.acquire(timeout=15.0)
+    finally:
+        connection.close()
+
+
+@pytest.fixture
+def f1_worker_processes(monkeypatch):
+    import multiprocessing
+
+    spawn_context = multiprocessing.get_context("spawn")
+    process_constructor = spawn_context.Process
+    processes = []
+
+    def record_process(*args, **kwargs):
+        process = process_constructor(*args, **kwargs)
+        processes.append(process)
+        return process
+
+    monkeypatch.setattr(type(spawn_context), "Process", staticmethod(record_process))
+    try:
+        yield processes
+    finally:
+        for process in processes:
+            try:
+                if process.pid is not None:
+                    if process.is_alive():
+                        process.terminate()
+                    process.join(5.0)
+                    if process.is_alive():
+                        process.kill()
+                        process.join(5.0)
+                    assert not process.is_alive(), "spawned test worker survived cleanup"
+                process.close()
+            except ValueError:
+                pass
+
+
+def _f1_assert_worker_reaped(processes):
+    assert len(processes) == 1
+    process = processes[0]
+    assert process.pid is not None
+    assert process.exitcode is not None
+    assert not process.is_alive()
+
+
+def _f1_assert_worker_terminal(worker, processes):
+    from gita.index.worker import EvidenceWorkerError
+
+    process_count = len(processes)
+    with pytest.raises(EvidenceWorkerError) as closed:
+        worker.parse(b"pass\n", b"auth.py")
+    assert closed.value.code == "worker_closed"
+    assert len(processes) == process_count
+    worker.close()
+    worker.close()
+
+
+class TestEvidenceWorker:
+    def test_default_deadline_is_five_seconds_and_unused_worker_is_lazy(self, f1_worker_processes):
+        from inspect import signature
+
+        from gita.index.worker import EvidenceWorker, EvidenceWorkerError
+
+        assert issubclass(EvidenceWorkerError, RuntimeError)
+        assert signature(EvidenceWorker).parameters["timeout_seconds"].default == 5.0
+        with EvidenceWorker() as worker:
+            assert f1_worker_processes == []
+        _f1_assert_worker_terminal(worker, f1_worker_processes)
+        assert f1_worker_processes == []
+
+    @pytest.mark.parametrize("object_format", ("sha1", "sha256"))
+    def test_real_roundtrip_preserves_raw_path_and_reuses_one_spawn_child(
+        self, f1_worker_processes, object_format,
+    ):
+        from gita.index.evidence import EvidenceBundle, parse_evidence
+        from gita.index.worker import EvidenceWorker
+
+        path = b"nested/bad\xff.py"
+        sources = (b"def validate_token(raw):\n    return raw\n",
+                   b"def validate_token(raw):\n    return raw.strip()\n")
+        expected = tuple(parse_evidence(source, path, object_format) for source in sources)
+        with EvidenceWorker() as worker:
+            assert f1_worker_processes == []
+            first = worker.parse(sources[0], path, object_format=object_format)
+            assert type(first) is EvidenceBundle
+            assert first == expected[0]
+            assert first.result.complete is True
+            assert len(f1_worker_processes) == 1
+            process = f1_worker_processes[0]
+            assert process.is_alive() and process.exitcode is None
+            second = worker.parse(sources[1], path, object_format=object_format)
+            assert type(second) is EvidenceBundle
+            assert second == expected[1]
+            assert second.result.id != first.result.id
+            assert f1_worker_processes == [process]
+            assert process.is_alive() and process.exitcode is None
+        _f1_assert_worker_reaped(f1_worker_processes)
+        _f1_assert_worker_terminal(worker, f1_worker_processes)
+
+    @pytest.mark.parametrize("source, path, limit_values, status", (
+        (b"content\n", b"notes.txt", {}, "unsupported_language"),
+        (b"value = '\xff'\n", b"auth.py", {}, "unsupported_encoding"),
+        (b"def valid():\n    pass\n\ndef broken(:\n    pass\n", b"auth.py", {}, "parse_error"),
+        (b"pass\n", b"auth.py", {"max_blob_bytes": 0}, "oversized"),
+        (b"def first():\n    pass\n\ndef second():\n    pass\n", b"auth.py",
+         {"max_definitions": 2}, "definition_limit"),
+        (b"def valid():\n    return 1\n", b"auth.py",
+         {"max_representation_bytes": 0}, "representation_limit"),
+    ))
+    def test_limits_and_unknown_outcomes_match_direct_evidence(
+        self, f1_worker_processes, source, path, limit_values, status,
+    ):
+        from gita.index.evidence import EvidenceLimits, parse_evidence
+        from gita.index.worker import EvidenceWorker
+
+        limits = EvidenceLimits(**limit_values)
+        expected = parse_evidence(source, path, limits=limits)
+        with EvidenceWorker() as worker:
+            actual = worker.parse(source, path, limits=limits)
+            assert actual == expected
+            _f1_assert_unknown(actual, source, path, status)
+        _f1_assert_worker_reaped(f1_worker_processes)
+
+    def test_positive_integer_and_float_deadlines_do_not_change_evidence(self, f1_worker_processes):
+        from gita.index.evidence import parse_evidence
+        from gita.index.worker import EvidenceWorker
+
+        source = b"def validate_token(raw):\n    return raw\n"
+        expected = parse_evidence(source, b"auth.py")
+        for timeout_seconds in (4, 5.0):
+            with EvidenceWorker(timeout_seconds=timeout_seconds) as worker:
+                actual = worker.parse(source, b"auth.py")
+                assert actual == expected
+                assert actual.result.parse_fingerprint == expected.result.parse_fingerprint
+                assert actual.result.id == expected.result.id
+            _f1_assert_worker_reaped(f1_worker_processes[-1:])
+        assert len(f1_worker_processes) == 2
+
+    @pytest.mark.parametrize("timeout_seconds", (
+        True, False, 0, 0.0, -1, -0.5, float("nan"), float("inf"), float("-inf"), "5", None,
+    ))
+    def test_invalid_deadline_is_a_contract_error_without_spawning(
+        self, f1_worker_processes, timeout_seconds,
+    ):
+        from gita.index.model import IndexContractError
+        from gita.index.worker import EvidenceWorker
+
+        with pytest.raises(IndexContractError) as invalid:
+            with EvidenceWorker(timeout_seconds=timeout_seconds):
+                pass
+        assert invalid.value.code == "invalid_limits"
+        assert f1_worker_processes == []
+
+    @pytest.mark.parametrize("source, path, options", (
+        ("pass\n", b"auth.py", {}),
+        (bytearray(b"pass\n"), b"auth.py", {}),
+        (None, b"auth.py", {}),
+        (b"pass\n", "auth.py", {}),
+        (b"pass\n", b"", {}),
+        (b"pass\n", b"../auth.py", {}),
+        (b"pass\n", b"bad\0.py", {}),
+        (b"pass\n", b"auth.py", {"object_format": "sha512"}),
+        (b"pass\n", b"auth.py", {"limits": None}),
+    ))
+    def test_invalid_parse_arguments_propagate_real_contract_errors(
+        self, f1_worker_processes, source, path, options,
+    ):
+        from gita.index.evidence import parse_evidence
+        from gita.index.model import IndexContractError
+        from gita.index.worker import EvidenceWorker
+
+        with pytest.raises(IndexContractError) as direct:
+            parse_evidence(source, path, **options)
+        with EvidenceWorker() as worker:
+            with pytest.raises(IndexContractError) as remote:
+                worker.parse(source, path, **options)
+            assert type(remote.value) is type(direct.value)
+            assert remote.value.code == direct.value.code
+            assert str(remote.value) == str(direct.value)
+        for process in f1_worker_processes:
+            _f1_assert_worker_reaped([process])
+
+    @pytest.mark.parametrize("before_read", (True, False), ids=("blocked-send", "no-response"))
+    def test_deadline_bounds_sending_and_receiving_and_reaps_child(
+        self, monkeypatch, f1_worker_processes, before_read,
+    ):
+        from functools import partial
+        import multiprocessing
+        from time import monotonic
+
+        from gita.index import worker as worker_module
+
+        spawn_context = multiprocessing.get_context("spawn")
+        reached, release = spawn_context.Event(), spawn_context.Semaphore(0)
+        monkeypatch.setattr(worker_module, "_serve", partial(
+            _f1_worker_stall, reached=reached, release=release, before_read=before_read,
+        ))
+        source = (b"#" + b"x" * (5 * 1024 * 1024 - 2) + b"\n" if before_read
+                  else b"def validate_token(raw):\n    return raw\n")
+        worker = worker_module.EvidenceWorker(timeout_seconds=3.0)
+        try:
+            started = monotonic()
+            with pytest.raises(worker_module.EvidenceWorkerError) as timeout:
+                worker.parse(source, b"auth.py")
+            elapsed = monotonic() - started
+            assert reached.is_set(), "child did not reach the injected blocking point"
+            assert timeout.value.code == "resource_limit"
+            assert elapsed < 8.0
+            _f1_assert_worker_reaped(f1_worker_processes)
+            _f1_assert_worker_terminal(worker, f1_worker_processes)
+        finally:
+            release.release()
+            worker.close()
+
+    def test_child_crash_without_result_is_worker_failed_and_reaped(
+        self, monkeypatch, f1_worker_processes,
+    ):
+        from functools import partial
+        import multiprocessing
+        from time import monotonic
+
+        from gita.index import worker as worker_module
+
+        reached = multiprocessing.get_context("spawn").Event()
+        monkeypatch.setattr(worker_module, "_serve", partial(_f1_worker_crash, reached=reached))
+        worker = worker_module.EvidenceWorker(timeout_seconds=5.0)
+        try:
+            started = monotonic()
+            with pytest.raises(worker_module.EvidenceWorkerError) as crashed:
+                worker.parse(b"pass\n", b"auth.py")
+            assert monotonic() - started < 10.0
+            assert reached.is_set()
+            assert crashed.value.code == "worker_failed"
+            _f1_assert_worker_reaped(f1_worker_processes)
+            assert f1_worker_processes[0].exitcode != 0
+            _f1_assert_worker_terminal(worker, f1_worker_processes)
+        finally:
+            worker.close()
+
+    @pytest.mark.parametrize("malformation", ("unknown-kind", "non-bundle", "missing-payload"))
+    def test_malformed_transport_result_cannot_be_trusted_as_success(
+        self, monkeypatch, f1_worker_processes, malformation,
+    ):
+        from functools import partial
+        import multiprocessing
+
+        from gita.index import worker as worker_module
+        from gita.index.evidence import parse_evidence
+
+        expected = parse_evidence(b"pass\n", b"auth.py")
+        response = {
+            "unknown-kind": ("not-an-evidence-result", expected),
+            "non-bundle": ("success", {"result": "not an EvidenceBundle"}),
+            "missing-payload": ("success",),
+        }[malformation]
+        spawn_context = multiprocessing.get_context("spawn")
+        reached, release = spawn_context.Event(), spawn_context.Semaphore(0)
+        monkeypatch.setattr(worker_module, "_serve", partial(
+            _f1_worker_malformed, reached=reached, release=release, response=response,
+        ))
+        worker = worker_module.EvidenceWorker(timeout_seconds=5.0)
+        try:
+            with pytest.raises(worker_module.EvidenceWorkerError) as malformed:
+                worker.parse(b"pass\n", b"auth.py")
+            assert reached.is_set()
+            assert malformed.value.code == "worker_failed"
+            _f1_assert_worker_reaped(f1_worker_processes)
+            _f1_assert_worker_terminal(worker, f1_worker_processes)
+        finally:
+            release.release()
+            worker.close()
+
+    def test_process_start_failure_closes_transport_and_terminal_worker(
+        self, monkeypatch, f1_worker_processes,
+    ):
+        import multiprocessing
+
+        from gita.index import worker as worker_module
+
+        spawn_context = multiprocessing.get_context("spawn")
+        pipe_constructor = spawn_context.Pipe
+        connections, start_attempts = [], []
+
+        def record_pipe(self, *args, **kwargs):
+            endpoints = pipe_constructor(*args, **kwargs)
+            connections.extend(endpoints)
+            return endpoints
+
+        def fail_start(process):
+            start_attempts.append(process)
+            raise OSError("injected spawn failure")
+
+        monkeypatch.setattr(type(spawn_context), "Pipe", record_pipe)
+        monkeypatch.setattr(multiprocessing.context.SpawnProcess, "start", fail_start)
+        worker = worker_module.EvidenceWorker()
+        try:
+            assert start_attempts == []
+            with pytest.raises(worker_module.EvidenceWorkerError) as failed:
+                worker.parse(b"pass\n", b"auth.py")
+            assert failed.value.code == "worker_failed"
+            assert len(start_attempts) == 1
+            assert start_attempts == f1_worker_processes
+            assert connections and all(connection.closed for connection in connections)
+            _f1_assert_worker_terminal(worker, f1_worker_processes)
+            assert len(start_attempts) == 1
+        finally:
+            worker.close()
+
+    def test_parent_keyboard_interrupt_at_exchange_wait_propagates_and_reaps(
+        self, monkeypatch, f1_worker_processes,
+    ):
+        from functools import partial
+        import multiprocessing
+        import threading
+
+        from gita.index import worker as worker_module
+
+        spawn_context = multiprocessing.get_context("spawn")
+        reached, release = spawn_context.Event(), spawn_context.Semaphore(0)
+        monkeypatch.setattr(worker_module, "_serve", partial(
+            _f1_worker_stall, reached=reached, release=release,
+        ))
+        original_join = threading.Thread.join
+        cancellation = KeyboardInterrupt("injected parent cancellation")
+        interrupted = []
+
+        def interrupt_exchange(thread, *args, **kwargs):
+            if not interrupted:
+                assert reached.wait(5.0), "child did not receive the request before cancellation"
+                interrupted.append(thread)
+                raise cancellation
+            return original_join(thread, *args, **kwargs)
+
+        worker = worker_module.EvidenceWorker(timeout_seconds=5.0)
+        try:
+            with monkeypatch.context() as scoped:
+                scoped.setattr(threading.Thread, "join", interrupt_exchange)
+                with pytest.raises(KeyboardInterrupt) as cancelled:
+                    worker.parse(b"pass\n", b"auth.py")
+            assert cancelled.value is cancellation
+            assert len(interrupted) == 1
+            assert reached.is_set()
+            _f1_assert_worker_reaped(f1_worker_processes)
+            _f1_assert_worker_terminal(worker, f1_worker_processes)
+        finally:
+            release.release()
+            worker.close()
+
+    def test_context_manager_reaps_live_child_on_enclosing_exception(self, f1_worker_processes):
+        from gita.index.evidence import parse_evidence
+        from gita.index.worker import EvidenceWorker
+
+        expected = parse_evidence(b"pass\n", b"auth.py")
+        failure = RuntimeError("enclosing operation failed")
+        with pytest.raises(RuntimeError) as raised:
+            with EvidenceWorker() as worker:
+                assert worker.parse(b"pass\n", b"auth.py") == expected
+                assert len(f1_worker_processes) == 1
+                assert f1_worker_processes[0].is_alive()
+                raise failure
+        assert raised.value is failure
+        _f1_assert_worker_reaped(f1_worker_processes)
+        _f1_assert_worker_terminal(worker, f1_worker_processes)
+
+    def test_timeout_rolls_back_new_evidence_and_fresh_retry_keeps_same_identity(
+        self, tmp_path, monkeypatch, f1_worker_processes,
+    ):
+        from functools import partial
+        import multiprocessing
+
+        from gita.index import worker as worker_module
+        from gita.index.evidence import parse_evidence
+        from gita.index.store import IndexStore
+
+        source, path = b"def validate_token(raw):\n    return raw\n", b"auth.py"
+        expected = parse_evidence(source, path)
+        committed = parse_evidence(b"def retained():\n    return 41\n", b"retained.py")
+        staged = parse_evidence(b"def staged():\n    return 42\n", b"staged.py")
+        assert not {version.id for version in committed.versions} & {
+            version.id for bundle in (staged, expected) for version in bundle.versions
+        }
+        spawn_context = multiprocessing.get_context("spawn")
+        reached, release = spawn_context.Event(), spawn_context.Semaphore(0)
+        database = tmp_path / "worker evidence.sqlite"
+        with IndexStore.create(database) as store:
+            with store.transaction():
+                store.put_parse(committed.result, committed.versions)
+            with monkeypatch.context() as scoped:
+                scoped.setattr(worker_module, "_serve", partial(
+                    _f1_worker_stall, reached=reached, release=release,
+                ))
+                worker = worker_module.EvidenceWorker(timeout_seconds=3.0)
+                try:
+                    with pytest.raises(worker_module.EvidenceWorkerError) as timeout:
+                        with store.transaction():
+                            store.put_parse(staged.result, staged.versions)
+                            assert store.get_parse(staged.result.id) == staged.result
+                            parsed = worker.parse(source, path)
+                            store.put_parse(parsed.result, parsed.versions)
+                    assert timeout.value.code == "resource_limit"
+                    assert reached.is_set()
+                    _f1_assert_worker_reaped(f1_worker_processes)
+                    _f1_assert_worker_terminal(worker, f1_worker_processes)
+                finally:
+                    release.release()
+                    worker.close()
+        with IndexStore.open(database, read_only=False) as reopened:
+            with reopened.snapshot():
+                assert reopened.get_parse(committed.result.id) == committed.result
+                assert tuple(reopened.get_version(version.id) for version in committed.versions) == committed.versions
+                assert reopened.get_parse(staged.result.id) is None
+                assert reopened.get_parse(expected.result.id) is None
+                for bundle in (staged, expected):
+                    assert all(reopened.get_version(version.id) is None for version in bundle.versions)
+                for table, expected_count in (
+                    ("parse_result", 1), ("definition", len(committed.result.definitions)),
+                    ("version", len(committed.versions)),
+                ):
+                    assert reopened.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] == expected_count
+                assert reopened.check_integrity() == ()
+            with worker_module.EvidenceWorker(timeout_seconds=5.0) as retry:
+                actual = retry.parse(source, path)
+                assert actual == expected
+                assert actual.result.id == expected.result.id
+                assert actual.result.parse_fingerprint == expected.result.parse_fingerprint
+                with reopened.transaction():
+                    assert reopened.put_parse(actual.result, actual.versions) == expected.result.id
+            assert len(f1_worker_processes) == 2
+            _f1_assert_worker_reaped(f1_worker_processes[-1:])
+        with IndexStore.open(database) as reopened:
+            with reopened.snapshot():
+                assert reopened.get_parse(committed.result.id) == committed.result
+                assert reopened.get_parse(staged.result.id) is None
+                assert reopened.get_parse(expected.result.id) == expected.result
+                assert tuple(reopened.get_version(version.id) for version in expected.versions) == expected.versions
+                assert reopened.connection.execute("SELECT COUNT(*) FROM parse_result").fetchone()[0] == 2
+                assert reopened.check_integrity() == ()
+
+    def test_timeout_preserves_resource_limit_and_reaps_child_when_terminate_fails(
+        self, monkeypatch, f1_worker_processes,
+    ):
+        from functools import partial
+        import multiprocessing
+        from time import monotonic
+
+        from gita.index import worker as worker_module
+
+        spawn_context = multiprocessing.get_context("spawn")
+        reached, release = spawn_context.Event(), spawn_context.Semaphore(0)
+        monkeypatch.setattr(worker_module, "_serve", partial(
+            _f1_worker_stall, reached=reached, release=release,
+        ))
+        process_type = multiprocessing.context.SpawnProcess
+        original_terminate, original_kill = process_type.terminate, process_type.kill
+        terminate_attempts, kill_attempts = [], []
+
+        def fail_first_terminate(process):
+            terminate_attempts.append(process)
+            if len(terminate_attempts) == 1:
+                raise OSError("injected terminate failure")
+            return original_terminate(process)
+
+        def record_kill(process):
+            kill_attempts.append(process)
+            return original_kill(process)
+
+        monkeypatch.setattr(process_type, "terminate", fail_first_terminate)
+        monkeypatch.setattr(process_type, "kill", record_kill)
+        worker = worker_module.EvidenceWorker(timeout_seconds=3.0)
+        try:
+            started = monotonic()
+            with pytest.raises(worker_module.EvidenceWorkerError) as timeout:
+                worker.parse(b"def validate_token(raw):\n    return raw\n", b"auth.py")
+            elapsed = monotonic() - started
+            assert reached.is_set(), "child did not reach the injected blocking point"
+            assert timeout.value.code == "resource_limit"
+            assert elapsed < 8.0
+            assert terminate_attempts and terminate_attempts[0] is f1_worker_processes[0]
+            assert f1_worker_processes[0] in kill_attempts
+            _f1_assert_worker_reaped(f1_worker_processes)
+            _f1_assert_worker_terminal(worker, f1_worker_processes)
+        finally:
+            release.release()
+            worker.close()
+
+    def test_late_valid_response_is_resource_limit_reaped_terminal_and_not_cached(
+        self, tmp_path, monkeypatch, f1_worker_processes,
+    ):
+        import threading
+
+        from gita.index import worker as worker_module
+        from gita.index.evidence import EvidenceBundle, parse_evidence
+        from gita.index.store import IndexStore
+
+        source, path = b"def validate_token(raw):\n    return raw\n", b"auth.py"
+        expected = parse_evidence(source, path)
+        clock = {"now": 0.0, "parent_reads": 0}
+        parent_thread = threading.current_thread()
+        release_response = threading.Event()
+        received_responses = []
+
+        def logical_monotonic():
+            current = clock["now"]
+            if threading.current_thread() is parent_thread:
+                clock["parent_reads"] += 1
+                if clock["parent_reads"] == 2:
+                    release_response.set()
+            return current
+
+        worker = worker_module.EvidenceWorker(timeout_seconds=5.0)
+        original_start = worker._start
+
+        def start_with_late_response():
+            original_start()
+            connection = worker._connection
+            assert connection is not None
+            original_recv = connection.recv
+
+            def receive_late_response():
+                response = original_recv()
+                assert type(response) is tuple and len(response) == 2
+                assert response[0] == "success" and type(response[1]) is EvidenceBundle
+                assert response[1] == expected
+                assert release_response.wait(5.0), "parent did not establish the exchange wait"
+                received_responses.append(response)
+                clock["now"] = 6.0
+                return response
+
+            monkeypatch.setattr(connection, "recv", receive_late_response)
+
+        monkeypatch.setattr(worker_module, "monotonic", logical_monotonic)
+        monkeypatch.setattr(worker, "_start", start_with_late_response)
+        try:
+            with IndexStore.create(tmp_path / "late worker evidence.sqlite") as store:
+                with pytest.raises(worker_module.EvidenceWorkerError) as timeout:
+                    with store.transaction():
+                        parsed = worker.parse(source, path)
+                        store.put_parse(parsed.result, parsed.versions)
+                assert timeout.value.code == "resource_limit"
+                assert received_responses == [("success", expected)]
+                assert clock["now"] == 6.0
+                _f1_assert_worker_reaped(f1_worker_processes)
+                _f1_assert_worker_terminal(worker, f1_worker_processes)
+                with pytest.raises(worker_module.EvidenceWorkerError) as closed:
+                    worker.parse(source, path)
+                assert closed.value.code == "worker_closed"
+                assert len(f1_worker_processes) == 1
+                with store.snapshot():
+                    assert store.get_parse(expected.result.id) is None
+                    assert all(store.get_version(version.id) is None for version in expected.versions)
+                    assert store.connection.execute("SELECT COUNT(*) FROM parse_result").fetchone()[0] == 0
+        finally:
+            release_response.set()
+            worker.close()
