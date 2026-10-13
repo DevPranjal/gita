@@ -1,3 +1,5 @@
+import pytest
+
 from gita import ChangeKind, diff_trees, extract, similarity
 from gita.diff.differ import diff_files
 
@@ -291,3 +293,144 @@ class TestRenumberingIsNotAChange:
         changes = [c for c in diff_trees(extract(self.BEFORE, "a.ts"),
                                          extract(swapped, "a.ts")) if not c.is_noise]
         assert changes == []
+
+
+class TestGuardedEditedRenames:
+    BEFORE = (
+        b"class Store {\n"
+        b"  int LoadPending(int limit) {\n"
+        b"    var rows = Query(\"pending\");\n"
+        b"    var total = 0;\n"
+        b"    foreach (var row in rows) {\n"
+        b"      total += Transform(row, \"pending\");\n"
+        b"    }\n"
+        b"    Record(\"pending\", total);\n"
+        b"    return Math.Min(total, limit);\n"
+        b"  }\n"
+        b"}\n"
+    )
+    AFTER = (BEFORE.replace(b"LoadPending", b"LoadReady")
+             .replace(b'"pending"', b'"ready"')
+             .replace(b"Query(", b"Fetch(")
+             .replace(b"Transform(", b"Convert(")
+             .replace(b"    Record(", b'    Record("scan", total);\n    Record('))
+
+    @pytest.mark.parametrize("reverse", [False, True])
+    def test_same_scope_rename_with_body_edits(self, reverse):
+        old, new = extract(self.BEFORE, "m.cs"), extract(self.AFTER, "m.cs")
+        assert similarity(old.get("m.cs::Store::LoadPending"),
+                          new.get("m.cs::Store::LoadReady")) < 0.6
+        if reverse:
+            old, new = new, old
+        material = [c for c in diff_trees(old, new) if not c.is_noise]
+        assert len(material) == 1
+        assert material[0].kind is ChangeKind.RENAMED
+        assert material[0].signature_changed and material[0].body_changed
+        assert material[0].similarity >= 0.8
+
+    def test_incompatible_signature_does_not_get_ordered_body_fallback(self):
+        after = self.AFTER.replace(b"int limit", b"long limit")
+        material = [c for c in diff_trees(extract(self.BEFORE, "m.cs"), extract(after, "m.cs"))
+                    if not c.is_noise]
+        assert {c.kind for c in material} == {ChangeKind.ADDED, ChangeKind.REMOVED}
+
+    def test_changed_parent_does_not_get_ordered_body_fallback(self):
+        before = self.BEFORE + b"class Other {}\n"
+        after = b"class Store {}\n" + self.AFTER.replace(b"class Store", b"class Other")
+        material = [c for c in diff_trees(extract(before, "m.cs"), extract(after, "m.cs"))
+                    if not c.is_noise]
+        methods = [c for c in material if c.entity.name.startswith("Load")]
+        assert {c.kind for c in methods} == {ChangeKind.ADDED, ChangeKind.REMOVED}
+
+    @pytest.mark.parametrize("duplicate_old", [False, True])
+    def test_ambiguous_edited_renames_stay_unmatched(self, duplicate_old):
+        before, after = self.BEFORE, self.AFTER
+        if duplicate_old:
+            before = before[:-2] + self.BEFORE.split(b"\n", 1)[1].replace(
+                b"LoadPending", b"LoadWaiting")
+        else:
+            after = after[:-2] + self.AFTER.split(b"\n", 1)[1].replace(
+                b"LoadReady", b"LoadAvailable")
+        material = [c for c in diff_trees(extract(before, "m.cs"), extract(after, "m.cs"))
+                    if not c.is_noise]
+        assert len(material) == 3
+        assert all(c.kind in (ChangeKind.ADDED, ChangeKind.REMOVED) for c in material)
+
+    def test_equal_jaccard_candidates_are_not_greedily_paired(self):
+        body = (b"    total = 0\n    for value in values:\n"
+                b"        total += value.price\n    return total\n")
+        before = b"def first(values):\n" + body + b"\ndef second(values):\n" + body
+        after = b"def renamed(values):\n" + body.replace(b"return total", b"return round(total)")
+        material = [c for c in diff_trees(extract(before, "m.py"), extract(after, "m.py"))
+                    if not c.is_noise]
+        assert len(material) == 3
+        assert all(c.kind in (ChangeKind.ADDED, ChangeKind.REMOVED) for c in material)
+
+    def test_short_boilerplate_does_not_get_ordered_body_fallback(self):
+        before = b'class Store { int Old(int n) { return Read("before", n); } }\n'
+        after = b'class Store { int New(int n) { return Read("after", n); } }\n'
+        material = [c for c in diff_trees(extract(before, "m.cs"), extract(after, "m.cs"))
+                    if not c.is_noise]
+        assert {c.kind for c in material} == {ChangeKind.ADDED, ChangeKind.REMOVED}
+
+    def test_signature_shape_excludes_only_declaration_name(self):
+        before = extract(b"class Holder { Store Store(Store value) { return value; } }\n", "m.cs")
+        after = extract(b"class Holder { Store Copy(Store value) { return value; } }\n", "m.cs")
+        assert before.get("m.cs::Holder::Store").signature_shape == after.get(
+            "m.cs::Holder::Copy").signature_shape
+        assert before.get("m.cs::Holder::Store").signature_shape.count("Store") == 2
+
+    def test_near_tied_candidates_are_not_accepted(self):
+        second = self.BEFORE.split(b"\n", 1)[1].replace(b"LoadPending", b"LoadWaiting")
+        second = second.replace(b'Record("pending", total)', b'Record("pending", total + 1)')
+        before = self.BEFORE[:-2] + second
+        material = [c for c in diff_trees(extract(before, "m.cs"), extract(self.AFTER, "m.cs"))
+                    if not c.is_noise]
+        assert len(material) == 3
+        assert all(c.kind in (ChangeKind.ADDED, ChangeKind.REMOVED) for c in material)
+
+
+class TestNestedRenumbering:
+    BEFORE = (
+        b"function Panel() {\n"
+        b"  const first = useCallback(() => {\n"
+        b"    setItems((prev) => prev.filter((item) => item.active));\n"
+        b"  }, []);\n"
+        b"  const second = useCallback(() => {\n"
+        b"    setItems(() => items.map((item) => item.id));\n"
+        b"  }, []);\n"
+        b"}\n"
+    )
+    INSERT = b"  const fresh = useCallback(() => refresh(), []);\n"
+
+    @pytest.mark.parametrize("crlf", [False, True])
+    @pytest.mark.parametrize("remove", [False, True])
+    def test_shifted_parents_do_not_change_descendant_identity(self, crlf, remove):
+        after = self.BEFORE.replace(b"  const first", self.INSERT + b"  const first")
+        before = self.BEFORE
+        if remove:
+            before, after = after, before
+        if crlf:
+            after = after.replace(b"\n", b"\r\n")
+        material = [c for c in diff_trees(extract(before, "m.ts"), extract(after, "m.ts"))
+                    if not c.is_noise and c.entity.name != "Panel"]
+        assert len(material) == 1
+        assert material[0].kind is (ChangeKind.REMOVED if remove else ChangeKind.ADDED)
+        assert material[0].entity.name == "useCallback(fn)"
+
+    def test_nested_edit_survives_parent_ordinal_shift(self):
+        after = self.BEFORE.replace(b"  const first", self.INSERT + b"  const first")
+        after = after.replace(b"item.id", b"item.key")
+        material = [c for c in diff_trees(extract(self.BEFORE, "m.ts"), extract(after, "m.ts"))
+                    if not c.is_noise and c.entity.name != "Panel"]
+        assert [c.kind for c in material] == [ChangeKind.ADDED, ChangeKind.BODY_CHANGED]
+        edited = material[1]
+        assert edited.previous.id.endswith("useCallback(fn)#2::setItems(fn)::items.map(fn)")
+        assert edited.current.id.endswith("useCallback(fn)#3::setItems(fn)::items.map(fn)")
+
+    def test_sibling_reordering_keeps_nested_callbacks_unchanged(self):
+        first = self.BEFORE.index(b"  const first")
+        second = self.BEFORE.index(b"  const second")
+        after = self.BEFORE[:first] + self.BEFORE[second:-2] + self.BEFORE[first:second] + b"}\n"
+        assert not [c for c in diff_trees(extract(self.BEFORE, "m.ts"), extract(after, "m.ts"))
+                    if not c.is_noise and c.entity.name != "Panel"]

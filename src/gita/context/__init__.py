@@ -12,14 +12,15 @@ from .navigate import (
     terms_of,
 )
 from .patch import entity_diff
-from .rank import is_test_path, score_change
-from .rollup import MAX_DEPTH, fit_lines, rollup_lines
+from .rank import Intent, intent_bonus, is_test_path, score_change
+from .rollup import MAX_DEPTH, fit_lines, line_span, rollup_lines
 from .tokens import count_tokens, token_method
 
 __all__ = [
     "MAX_DEPTH",
     "Cluster",
     "ContextView",
+    "Intent",
     "build_view",
     "cluster_changes",
     "count_tokens",
@@ -32,7 +33,9 @@ __all__ = [
     "focus",
     "focus_label",
     "head_of",
+    "intent_bonus",
     "is_test_path",
+    "line_span",
     "matches",
     "rollup_lines",
     "score_change",

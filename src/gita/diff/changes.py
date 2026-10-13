@@ -61,10 +61,10 @@ class EntityChange:
 
     def __str__(self) -> str:
         if self.kind is ChangeKind.RENAMED and self.previous and self.current:
-            return f"{self.previous.qualname} -> {self.current.qualname}  [renamed]"
+            return f"renamed {self.previous.qualname} -> {self.current.qualname}"
         if self.kind is ChangeKind.MOVED and self.previous and self.current:
-            return f"{self.previous.path} -> {self.current.path}::{self.current.qualname}  [moved]"
-        return f"{self.entity.id}  [{self.kind.value}]"
+            return f"moved {self.previous.path} -> {self.current.path}::{self.current.qualname}"
+        return f"{self.kind.value} {self.entity.id}"
 
 
 @dataclass(slots=True)

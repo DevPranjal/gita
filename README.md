@@ -1,174 +1,128 @@
-# gita
+# gita: git, reimagined for a world of agent coders
 
-**git, rebuilt for a world of agent coders.**
+*Don't pay to understand the code you wrote.*
 
-When a coding agent needs to understand a change, it runs `git diff` and reads every
-changed line. That is a wall of text, most of it irrelevant — and the agent pays for
-all of it, again, on every step that follows.
+Coding agents spend tokens reconstructing context from files and diffs. **Gita
+gives them reusable, evidence-backed code context directly from Git**: structural
+diffs, persistent entity identity, function history and exact historical source.
 
-gita answers the question instead: **which functions changed, and does anything
-break?** One command, and never bigger than the `git diff` it replaces.
+The agent owns the objective, planning and execution. Gita supplies the evidence.
+No model, cloud account or inference API key required.
 
-```bash
-gita diff HEAD^ HEAD
-```
+## Results
 
-```
-13 files | 192 changes | 172 interface | 1900 noise filtered
-files: documentation/2-options.md, source/core/options.ts, test/hooks.ts, ...
+In a held-out review evaluation on [AACR-Bench](https://github.com/alibaba/aacr-bench),
+covering **135 paired PRs across 46 repositories**:
 
-source/core/options.ts::Options::allowAbsoluteUrls  [added]
-source/core/options.ts::applyUrlOverride            [signature_changed]
-test/hooks.ts       (58 tests: 57 added, 1 body_changed)
-test/pagination.ts  (47 tests: 46 added, 1 body_changed)
+| Measure | Result |
+| --- | --- |
+| Reported Copilot credits | **23.1% lower** (95% interval: 18.0-27.1%) |
+| Serialized tool-output tokens | **18.7% fewer** (diagnostic count, not billed tokens) |
+| Macro reference recall | 10.00% baseline / 9.69% Gita; met the predeclared five-percentage-point non-inferiority margin |
 
---- source/core/options.ts::Options::allowAbsoluteUrls  [added]
-@@ ...
-```
-
-That commit is **16,713 tokens** of `git diff`. gita answers it in **3,969**, code
-included — and names `allowAbsoluteUrls`, which is what you actually asked.
-
----
-
-## The problem, plainly
-
-An agent reads code through a context window it pays for by the token, and a raw diff
-is a poor way to fill it.
-
-| What goes wrong | Why | What gita does |
-| --- | --- | --- |
-| **The answer is buried** | A diff is ordered by file, not by importance. The one function that broke sits somewhere inside 400 lines, and models pay least attention to the middle of a long input. | Puts what matters first. The broken signature is on line 3, and the whole answer is short enough that there is no middle to get lost in. |
-| **Most of it is not the change** | Reformatting, reordered imports, and three unchanged lines printed around every edit. | Removes it, and says how much it removed: `1900 noise filtered`. |
-| **The formatting itself costs money** | Every line carries a `+` or `-`, filenames repeat three times per file, and commit hashes are long random strings. Measured here: **25% extra tokens**, and **20 tokens** for a single commit hash. | Names each file once, no per-line prefixes, no hashes in the body. |
-| **You pay for it again on every step** | Tool output is re-sent to the model on every later step. A 16,713-token diff read early in a five-step task is billed five times — **83,565 tokens**. | One answer of 3,969 tokens is **19,845** over the same five steps, and it usually needs fewer steps. |
-| **It causes real mistakes** | Deleted code still looks like working code in the window, so agents call functions that no longer exist. One lockfile update can fill the entire window. | States a deletion as a fact (`[removed]`) rather than leaving it lying around as source. Hard size limit: a dependency update goes from **220,377 tokens to 2,203**. |
-
----
+This historical study used GPT-5.6 Sol and an older Gita revision, not this release.
+It did **not** establish lower input-token use or equal quality: PRs with a
+reference match fell from 64 to 57, and cache behavior affected credit results.
+See [methodology, uncertainty and negative results](evals/RESULTS.md).
 
 ## Install
 
-```bash
-pip install -e ".[dev]"     # Python 3.11+
+Requires **Git and Python 3.11+**. Install from source:
+
+```sh
+git clone https://github.com/DevPranjal/gita.git
+cd gita
+python -m venv .venv
 ```
 
-## Commands
+Activate with `source .venv/bin/activate` on Linux/macOS, or
+`.\.venv\Scripts\Activate.ps1` in PowerShell. Then:
 
-```bash
-gita diff                      # uncommitted work, including untracked files
-gita diff HEAD^ HEAD           # one commit
-gita diff main HEAD            # a branch or PR range
-
-  --interface-only   only changes that can break a caller
-  --patch            plain unified diff, noise removed
-  --brief            summary only, no code
-  --filter auth      narrow by name or path
-  --budget N         hard cap, honoured exactly
-  --json             machine-readable
-
-gita show <name>               # exact hunks for one entity
-gita expand <id>               # open a rolled-up line
-gita history <name>            # how one function changed over time, with the code
-gita savings                   # what this session cost vs raw git diffs
-gita serve                     # MCP server
+```sh
+python -m pip install -c constraints.txt -e ".[mcp]"
+python -c "from tree_sitter_language_pack import download; download(['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown'])"
 ```
 
-`-C <path>` selects the repository. Bare names work (`gita history fetch`).
-Ambiguity is **reported, never guessed**.
+Grammar provisioning uses the network once; indexed operations then use local
+Git objects. Omit `[mcp]` for CLI-only use.
 
-## Change kinds
+## Use from the CLI
 
-| Kind | Breaks a caller? |
+Run inside the repository you want to inspect, or add `-C <repo>`.
+Replace `MyFunction` with a real name; `HEAD~1` requires a preceding commit.
+
+```sh
+gita diff                                      # uncommitted changes
+gita diff HEAD~1 HEAD --budget 4000 --json       # bounded structural evidence
+gita diff HEAD~1 HEAD --filter MyFunction       # focus on one entity
+gita show path/to/file.py::MyFunction HEAD~1 HEAD
+```
+
+Build reusable identity and history explicitly:
+
+```sh
+gita index --scope project
+gita id MyFunction --scope project
+gita history MyFunction --indexed --scope project
+gita history HEAD~1 HEAD --indexed --scope project --brief
+```
+
+Repeat `gita index --scope project` after new commits to update incrementally.
+First builds traverse first-parent history; for large repositories, start with
+the [bounded-scope walkthrough](docs/QUICKSTART.md).
+Indexed reads never build an index on demand.
+
+## Connect an agent
+
+Any agent with shell access can use the CLI. MCP clients can launch **`gita serve`**
+over stdio; set `GITA_REPO` to the absolute path of the repository to inspect.
+Use the installed environment's absolute `gita` executable path if it is not on
+your client's `PATH`.
+
+| Task | MCP tools |
 | --- | --- |
-| `signature_changed`, `removed`, `renamed` | **yes** |
-| `added`, `moved`, `body_changed` | no |
-| `cosmetic` | filtered out before you see it |
+| Inspect structural changes | `gita_diff`, `gita_expand`, `gita_show` |
+| Build or inspect the index | `gita_index` (read-only status by default; explicit build) |
+| Resolve identity and history | `gita_id`, `gita_history`, `gita_state` |
+| Retrieve exact source or file entities | `gita_source`, `gita_entities` |
 
-Computed from four hashes per entity — raw, normalised, signature-only, body-only —
-so `signature_changed` is a fact, not an inference.
+An indexed investigation follows **index → identity → history/state → source**.
+Typed tools expose supported budgets, coverage and continuation cursors.
+For uncommitted MCP diffs pass `base="HEAD", head=null`; MCP otherwise defaults
+to the last commit. [Setup and tool details](docs/QUICKSTART.md#mcp-tools).
 
 ## How it works
 
-**Deterministic core, probabilistic garnish.** Every fact is computed: tree-sitter
-parse, then matching by stable entity id, then content hash, then similarity. No model
-decides what changed. A model may later improve summary *prose*; it may never supply a
-fact. gita degrades to worse prose, never to wrong facts.
+Gita separates **what code is from what it is called and where it lives**.
 
-Python, JavaScript, TypeScript, TSX, Go, Rust, plus structural Markdown, YAML, JSON and
-TOML. SQL is scanned rather than parsed — the available grammar is written for
-PostgreSQL and named 23% of a real T-SQL corpus after a parameter type, and a wrong
-name is worse than a coarse one. Unsupported files degrade to a whole-file entity
-rather than vanishing.
+- **Tree-sitter** extracts structural evidence rather than treating every changed line equally.
+- **Persistent entity IDs** connect supported edits, renames and moves through deterministic matching. Copies get separate identities; uncertain matches stay explicit.
+- **SQLite with immutable generations** stores evidence once for reuse, incremental updates and generation-pinned queries.
+- **Git remains the source of truth** for exact historical source. A diff compares endpoints; indexed history preserves intermediate changes, including reverts.
 
-## Does it actually work?
+Indexed languages: Python, JavaScript, TypeScript/TSX, C#, C++, Go, Rust,
+Markdown, JSON, YAML and TOML. Unsupported files and extraction gaps appear in
+coverage, not as proof that nothing exists.
 
-18 tasks over 5 real repositories (Flask, Express, Gin, ripgrep, got), two arms: an
-agent with plain `git`, and the same agent with `gita` also on `PATH`. gita is
-**never mentioned in the prompt** — it must be discovered and chosen. Cost is priced
-in real credits from the model's own logs.
+## Try the local viewer
 
-**216 runs** across two sweeps, three repetitions of every task in each:
-
-| | plain git | with gita | |
-| --- | ---: | ---: | ---: |
-| credits per task | 43.7 | 35.3 | **−14.3%** |
-| turns per task | 3.51 | 2.76 | **−21.4%** |
-| entity recall | 99.5% | 99.7% | +0.2pt |
-
-The cost figure is quoted after discarding the runs that lost the prompt cache —
-noise priced at 12.5×, unrelated to either tool — and carries a **95% interval of
-−3% to −25%**, bootstrapped over tasks. The two sweeps read −16.7% and −11.2%
-individually and **cannot be told apart** by this harness (the interval on their
-difference is −9 to +26 points), so they are pooled and both are shown rather
-than the better one being picked.
-
-Tool output is **not** reported as a headline. It reads −46% pooled, but it read
-−92% on ten tasks and **+0.4%** on eighteen — a number that swings that far with
-the sample is not measuring the tool.
-
-Two earlier claims did not survive more data, and are corrected here rather than
-quietly dropped:
-
-- **Tool output was published as −92.4%.** It was carried by one lockfile task
-  and collapsed once the corpus was large enough to dilute it. Withdrawn as a
-  headline claim.
-- **The headline was published as −15.4%.** The point estimate compared arm
-  totals while the interval beside it paired by task. On a balanced sweep those
-  agree exactly, which is how it survived fourteen sweeps. Paired, those same
-  runs read −17.9%.
-
-One benchmark task was also corrected: its answer key demanded the name of a test
-that the commit *deletes*. Both arms named the added test and both were marked
-down, so the fix moves both from 50% to 100% and cannot favour either.
-
-The invariant holds on every task — gita is never larger than the `git diff` it
-replaces — so adopting it cannot cost more than not adopting it. On small diffs it is
-roughly the same size as git; the wins concentrate where the pain is.
-
-## What gita does not do
-
-- **No call graph.** `unreferenced` is *name matching*: it catches dead code, not
-  dependents. Labelled as such wherever it appears.
-- **No "what should I re-test?"** Needs real caller edges. gita refuses rather than guesses.
-- **No natural-language questions.** gita reports facts it computed and refuses
-  questions it cannot answer exactly.
-- **Prose diffing is structural only** — sections and keys, not meaning.
-- **Bulk tests are summarised** when they accompany source changes; `--filter` to expand.
-
-## Roadmap
-
-- **WS-2 Blast radius** — real caller edges, making "what should I re-test" exact.
-- **WS-5 Memory** — persistent entity index, so history stops being O(commits).
-- **WS-7 Document semantics** — meaning-level diffing for prose and config.
-- **WS-3 Local narration** — on-device model for summary prose only, never facts.
-
-## Development
-
-```bash
-pytest -q --ignore=tests/test_corpus.py    # 335 tests
-python -m gita.eval.main --reps 3          # full evaluation sweep
+```sh
+python -m gita.web --create-demo
 ```
 
-Rationale in [docs/SCOPE.md](docs/SCOPE.md), measurements in
-[evals/RESULTS.md](evals/RESULTS.md), working log including failures in
-[scratch/JOURNAL.md](scratch/JOURNAL.md).
+Open **http://127.0.0.1:7357** to explore a fictional repository with renames,
+moves and reverted edits. The read-only viewer runs locally, with no frontend
+build or CDN. Restart with `python -m gita.web`; the scaffold refuses existing
+directories.
+
+## Boundaries and documentation
+
+Indexed history covers **committed first-parent scope**, not uncommitted edits or
+every branch of a merge. Structural evidence does not prove semantic equivalence,
+merge safety or test correctness. Independent index verification is not yet
+available (`gita index --verify` reports `verification_unavailable`).
+Telemetry is opt-in.
+
+[Quickstart](docs/QUICKSTART.md) · [Technical guide](docs/TECHNICAL.md) ·
+[Identity and storage contracts](docs/FOUNDATION.md) · [Evaluation harness](evals/README.md) ·
+[Changelog](CHANGELOG.md) · [MIT license](LICENSE)

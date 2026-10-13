@@ -14,9 +14,11 @@ from enum import Enum
 
 class EntityKind(str, Enum):
     MODULE = "module"
+    NAMESPACE = "namespace"
     CLASS = "class"
     FUNCTION = "function"
     METHOD = "method"
+    PROPERTY = "property"
     INTERFACE = "interface"
     TYPE = "type"
     ENUM = "enum"
@@ -35,6 +37,7 @@ class EntityKind(str, Enum):
 #: evidence than a hit on a leaf, so attribution prefers leaves.
 CONTAINER_KINDS = frozenset({
     EntityKind.MODULE,
+    EntityKind.NAMESPACE,
     EntityKind.CLASS,
     EntityKind.INTERFACE,
     EntityKind.TRAIT,
@@ -81,6 +84,10 @@ class Entity:
     children: list[str] = field(default_factory=list)
     tokens: tuple[str, ...] = ()
     synthetic: bool = False
+    start_column: int | None = None
+    end_column: int | None = None
+    signature_shape: tuple[str, ...] | None = None
+    body_tokens: tuple[str, ...] = ()
 
     @property
     def is_container(self) -> bool:
@@ -103,6 +110,19 @@ class Entity:
         return f"{self.id} [{self.kind.value}]"
 
 
+@dataclass(frozen=True, slots=True)
+class SyntaxRegion:
+    """A concrete syntax span for display, not a named entity or lineage."""
+
+    kind: str
+    parent_id: str
+    start_line: int
+    end_line: int
+    start_column: int
+    end_column: int
+    container_path: tuple[tuple[str, int], ...] = ()
+
+
 @dataclass(slots=True)
 class EntityTree:
     """All entities extracted from one revision of one file."""
@@ -112,6 +132,9 @@ class EntityTree:
     root_id: str
     entities: dict[str, Entity] = field(default_factory=dict)
     parse_error: bool = False
+    #: One-based blank lines confirmed to be code layout, not literal/data content.
+    layout_lines: frozenset[int] = frozenset()
+    regions: list[SyntaxRegion] = field(default_factory=list)
 
     def add(self, entity: Entity) -> None:
         self.entities[entity.id] = entity

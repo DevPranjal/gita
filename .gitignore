@@ -1,19 +1,40 @@
-# spike corpus — cloned on demand, never committed
-spikes/*/corpus/
-spikes/*/results.json
-
-# python
 .venv/
 __pycache__/
 *.py[cod]
-
-# node
-node_modules/
+.pytest_cache/
+.coverage*
+htmlcov/
+coverage/
+*.egg-info/
+build/
 dist/
-
-# editor / os
+node_modules/
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.log
+*.jsonl
+# Keep generated studies local; retain only the harness documentation and input.
+/evals/*
+!/evals/README.md
+!/evals/PROTOCOL.md
+!/evals/RESULTS.md
+!/evals/aacr-manifest.json
+/spikes/
+/brag-film-v2/
+/brag-output/
+/engineering-film/
+/hackathon-film/
+/hackathon-images/
+/launch-proposals/
+/terminal-look/
+/terminal-sections/
 .DS_Store
 Thumbs.db
-
-# eval artifacts: per-run copilot logs are megabytes each
-evals/runs/
+.vscode/
+.demo/
+.playwright-mcp/

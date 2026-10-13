@@ -11,7 +11,7 @@ from tree_sitter_language_pack import get_parser
 
 from .languages import LanguageSpec, for_path
 from .sql import SQL_EXTENSIONS, extract_sql
-from .model import Entity, EntityKind, EntityTree, digest
+from .model import Entity, EntityKind, EntityTree, SyntaxRegion, digest
 
 #: Wrappers to climb through when hunting for the binding site of a function value.
 _TRANSPARENT = frozenset({
@@ -30,6 +30,15 @@ _IDENTIFIER_NODES = frozenset({
 })
 
 MODULE_ENTITY = "<module>"
+_NATIVE_LITERAL_NODES = frozenset({
+    "string_literal", "char_literal", "raw_string_literal", "verbatim_string_literal", "string_content",
+})
+
+_LAYOUT_LANGUAGES = frozenset({"python", "javascript", "typescript", "tsx", "go", "rust"})
+_LITERAL_NODES = frozenset({
+    "string", "string_literal", "raw_string_literal", "interpreted_string_literal",
+    "template_string", "jsx_element", "jsx_fragment", "token_tree",
+})
 
 
 def _text(node) -> str:
@@ -79,7 +88,118 @@ def _binding_name(node) -> str:
     return "<anonymous>"
 
 
+def _file_namespace(node, spec: LanguageSpec):
+    if spec.name == "csharp" and node.type == "compilation_unit":
+        return next((child for child in node.named_children
+                     if child.type == "file_scoped_namespace_declaration"), None)
+    return None
+
+
+def _declaration(node, spec: LanguageSpec):
+    if spec.name == "cpp":
+        while node.type == "template_declaration":
+            declaration = next((child for child in reversed(node.named_children)
+                                if child.type in spec.kinds or child.type in
+                                ("template_declaration", "declaration", "field_declaration")), None)
+            if declaration is None:
+                break
+            node = declaration
+    return node
+
+
+def _declarator_child(node):
+    child = node.child_by_field_name("declarator")
+    if child is None and node.type in ("reference_declarator", "parenthesized_declarator"):
+        child = next(iter(node.named_children), None)
+    return child
+
+
+def _cpp_callable(node) -> bool:
+    if len(node.children_by_field_name("declarator")) != 1:
+        return False
+    declarator = node.child_by_field_name("declarator")
+    while declarator is not None:
+        if declarator.type == "operator_cast":
+            return True
+        if declarator.type == "function_declarator":
+            name = declarator.child_by_field_name("declarator")
+            return name is not None and name.type != "parenthesized_declarator"
+        declarator = _declarator_child(declarator)
+    return False
+
+
+def _entity_kind(node, spec: LanguageSpec):
+    if spec.name == "csharp":
+        if node.type == "record_declaration" and any(child.type == "struct" for child in node.children):
+            return EntityKind.STRUCT
+        if node.type == "file_scoped_namespace_declaration":
+            return None
+        if _file_namespace(node, spec) is not None:
+            return EntityKind.NAMESPACE
+    if spec.name == "cpp":
+        parent = node.parent
+        if parent is not None and parent.type == "template_declaration" and _declaration(parent, spec) != parent:
+            return None
+        declaration = _declaration(node, spec)
+        kind = spec.kinds.get(declaration.type)
+        if declaration.type in ("declaration", "field_declaration") and _cpp_callable(declaration):
+            kind = EntityKind.FUNCTION
+        if kind is EntityKind.FUNCTION:
+            while parent is not None:
+                if parent.type == "field_declaration_list":
+                    return EntityKind.METHOD
+                if parent.type in ("function_definition", "namespace_definition", "translation_unit"):
+                    break
+                parent = parent.parent
+        return kind
+    return spec.kinds.get(node.type)
+
+
+def _native_name(node, spec: LanguageSpec, read):
+    namespace = _file_namespace(node, spec)
+    if namespace is not None:
+        return read(namespace.child_by_field_name("name"))
+    if spec.name == "csharp":
+        if node.type == "destructor_declaration":
+            return "~" + read(node.child_by_field_name("name"))
+        if node.type == "indexer_declaration":
+            explicit = next((child for child in node.children if child.type == "explicit_interface_specifier"), None)
+            return read(explicit).rstrip(".") + ".this" if explicit is not None else "this"
+        if node.type == "operator_declaration":
+            children = node.children
+            operator = next(index for index, child in enumerate(children) if child.type == "operator")
+            return "operator " + " ".join(read(child) for child in children[operator + 1:]
+                                          if child.end_byte <= node.child_by_field_name("parameters").start_byte)
+        if node.type == "conversion_operator_declaration":
+            return "operator " + read(node.child_by_field_name("type"))
+        explicit = next((child for child in node.children if child.type == "explicit_interface_specifier"), None)
+        if explicit is not None:
+            return read(explicit).rstrip(".") + "." + read(node.child_by_field_name("name"))
+    if spec.name == "cpp":
+        node = _declaration(node, spec)
+        named = node.child_by_field_name("name")
+        if named is not None:
+            return read(named)
+        declarator = node.child_by_field_name("declarator")
+        while declarator is not None:
+            if declarator.type == "operator_cast":
+                function = declarator.child_by_field_name("declarator")
+                while function is not None and function.type != "abstract_function_declarator":
+                    function = _declarator_child(function)
+                if function is not None:
+                    return declarator.text[:function.start_byte - declarator.start_byte].decode("utf8", "replace").strip()
+                return read(declarator)
+            child = _declarator_child(declarator)
+            if child is None:
+                return read(declarator)
+            declarator = child
+    return None
+
+
 def _entity_name(node, spec: LanguageSpec) -> str:
+    native = _native_name(node, spec, _text)
+    if native is not None:
+        return native or "<anonymous>"
     if node.type in spec.anonymous_nodes:
         named = node.child_by_field_name("name")
         return _text(named) or _binding_name(node)
@@ -125,6 +245,9 @@ def _tokens(node, spec: LanguageSpec, skip: frozenset[int] = frozenset()) -> lis
         current = stack.pop()
         if current.id in skip or current.type in spec.comment_nodes:
             continue
+        if spec.name in ("csharp", "cpp") and current.type in _NATIVE_LITERAL_NODES:
+            out.append(current.text.decode("utf8", "replace"))
+            continue
         if current.child_count == 0:
             text = current.text.decode("utf8", "replace").strip()
             if text:
@@ -164,6 +287,12 @@ def _own_and_body(node, spec: LanguageSpec,
             if in_body:
                 body.append(current)
             continue
+        if spec.name in ("csharp", "cpp") and current.type in _NATIVE_LITERAL_NODES:
+            text = current.text.decode("utf8", "replace")
+            own.append(text)
+            if in_body:
+                body.append(text)
+            continue
         if current.child_count == 0:
             text = current.text.decode("utf8", "replace").strip()
             if text:
@@ -183,7 +312,7 @@ def _own_and_body(node, spec: LanguageSpec,
                 if gap:
                     items.append((gap, in_body))
             if (child.type not in spec.comment_nodes
-                    and child.type not in spec.entity_nodes):
+                    and _entity_kind(child, spec) is None):
                 items.append((child, in_body or child.id in body_ids))
             cursor = child.end_byte - base
         if cursor < len(raw):
@@ -196,11 +325,22 @@ def _own_and_body(node, spec: LanguageSpec,
 
 
 def _body_nodes(node, spec: LanguageSpec) -> frozenset[int]:
+    if _file_namespace(node, spec) is not None:
+        return frozenset(child.id for child in node.children
+                         if child.type != "file_scoped_namespace_declaration")
+    node = _declaration(node, spec)
     ids = set()
     for field_name in spec.body_fields:
         body = node.child_by_field_name(field_name)
         if body is not None:
             ids.add(body.id)
+    if spec.name == "csharp":
+        accessors = node.child_by_field_name("accessors")
+        if accessors is not None:
+            for accessor in accessors.named_children:
+                body = accessor.child_by_field_name("body")
+                if body is not None:
+                    ids.add(body.id)
     return frozenset(ids)
 
 
@@ -210,6 +350,7 @@ def _make_entity(node, spec, path, name, parent_id, entity_id, kind) -> Entity:
     signature_tokens = _tokens(node, spec, skip=body) if body else own
     if not body:
         body_tokens = own
+    name_node = _declaration(node, spec).child_by_field_name("name")
 
     return Entity(
         id=entity_id,
@@ -226,6 +367,11 @@ def _make_entity(node, spec, path, name, parent_id, entity_id, kind) -> Entity:
         signature=" ".join(signature_tokens)[:200],
         parent_id=parent_id,
         tokens=tuple(own),
+        start_column=node.start_point[1],
+        end_column=node.end_point[1],
+        signature_shape=(tuple(_tokens(node, spec, skip=body | {name_node.id}))
+                         if name_node is not None else None),
+        body_tokens=tuple(body_tokens),
     )
 
 
@@ -239,7 +385,8 @@ def extract(source: bytes, path: str, spec: LanguageSpec | None = None) -> Entit
     root_node = tree.root_node
 
     # Spike A finding 3: top-level statements need somewhere to live.
-    root_tokens = _own_tokens(root_node, spec)
+    namespace = _file_namespace(root_node, spec)
+    root_tokens = [] if namespace is not None else _own_tokens(root_node, spec)
     root = Entity(
         id=path,
         kind=EntityKind.MODULE,
@@ -267,10 +414,27 @@ def extract(source: bytes, path: str, spec: LanguageSpec | None = None) -> Entit
     # Sibling names collide (overloads, repeated `it(...)` labels). Disambiguate
     # by document order so ids stay stable across revisions.
     seen: dict[str, int] = {}
+    layout = ({i for i, line in enumerate(source.splitlines(), 1) if not line.strip()}
+              if spec.name in _LAYOUT_LANGUAGES and not root_node.has_error else set())
+    comments: list[tuple[int, int]] = []
 
-    def visit(node, parent_id: str) -> None:
+    def visit(node, parent_id: str, location: tuple[tuple[str, int], ...]) -> None:
+        if not root_node.has_error and (
+                node.type in spec.comment_nodes or node.type == "expression_statement"):
+            entity_tree.regions.append(SyntaxRegion(
+                "comment" if node.type in spec.comment_nodes else node.type,
+                parent_id, node.start_point[0] + 1, node.end_point[0] + 1,
+                node.start_point[1], node.end_point[1], location[:-1],
+            ))
+        if layout and (node.child_count == 0 or node.type in _LITERAL_NODES
+                       or node.type in spec.comment_nodes):
+            start = node.start_point[0] + 1
+            end = node.end_point[0] + (node.end_point[1] > 0)
+            layout.difference_update(range(start, end + 1))
+            if node.type in spec.comment_nodes:
+                comments.append((start, end))
         child_parent = parent_id
-        kind = spec.kinds.get(node.type)
+        kind = _entity_kind(node, spec)
 
         if kind is not None:
             name = _entity_name(node, spec)
@@ -282,12 +446,23 @@ def extract(source: bytes, path: str, spec: LanguageSpec | None = None) -> Entit
             entity_tree.add(_make_entity(node, spec, path, name, parent_id, entity_id, kind))
             child_parent = entity_id
 
-        for child in node.children:
-            visit(child, child_parent)
+        prefix = () if kind is not None else location
+        for index, child in enumerate(node.children):
+            visit(child, child_parent, prefix + ((child.type, index),))
 
-    for child in root_node.children:
-        visit(child, root.id)
+    if namespace is not None:
+        visit(root_node, root.id, ())
+    else:
+        for index, child in enumerate(root_node.children):
+            visit(child, root.id, ((child.type, index),))
 
+    # Blank separation can affect directives and documentation attachment.
+    for start, end in comments:
+        for line, step in ((start - 1, -1), (end + 1, 1)):
+            while line in layout:
+                layout.remove(line)
+                line += step
+    entity_tree.layout_lines = frozenset(layout)
     return entity_tree
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .diff.changes import ChangeSet
+from .diff.changes import ChangeKind, ChangeSet, EntityChange
 from .diff.differ import RENAME_THRESHOLD, diff_trees, reconcile_moves
 from .entities.extractor import extract_path
 from .entities.model import EntityTree
@@ -32,7 +32,8 @@ def diff_revisions(repo: str | Path | Repo, base: str = "HEAD",
                    head: str | None = WORKTREE,
                    rename_threshold: float = RENAME_THRESHOLD,
                    paths: list[str] | None = None,
-                   changed: list[ChangedFile] | None = None) -> ChangeSet:
+                   changed: list[ChangedFile] | None = None,
+                   collapse_files: bool = True) -> ChangeSet:
     """Context diff between two revisions.
 
     ``head`` may be a revision, ``None`` for the working tree, or ``STAGED``
@@ -41,6 +42,10 @@ def diff_revisions(repo: str | Path | Repo, base: str = "HEAD",
     ``paths`` restricts the comparison before any file is read, so git can prune
     by tree hash rather than gita parsing files it will only discard. ``changed``
     supplies that file list when a caller already has it, saving a git call.
+
+    ``collapse_files`` summarises tracked additions and deletions at file level.
+    History disables it to retain entity births and departures. Untracked files
+    always retain their entities so newly written functions remain discoverable.
     """
     repo = repo if isinstance(repo, Repo) else Repo(repo)
     changeset = ChangeSet()
@@ -78,7 +83,16 @@ def diff_revisions(repo: str | Path | Repo, base: str = "HEAD",
                 changeset.parse_errors += 1
                 break
 
-        collected += diff_trees(previous, current, rename_threshold)
+        if collapse_files and changed_file.is_added and changed_file.status != "?":
+            assert current is not None
+            assert current.root is not None
+            collected.append(EntityChange(ChangeKind.ADDED, current=current.root))
+        elif collapse_files and changed_file.is_deleted:
+            assert previous is not None
+            assert previous.root is not None
+            collected.append(EntityChange(ChangeKind.REMOVED, previous=previous.root))
+        else:
+            collected += diff_trees(previous, current, rename_threshold)
 
     changeset.extend(reconcile_moves(collected))
     return changeset

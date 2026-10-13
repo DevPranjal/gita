@@ -1,0 +1,7 @@
+# Direct versions used for validation; install with pip -c constraints.txt.
+tree-sitter==0.26.0
+tree-sitter-language-pack==1.14.3
+tiktoken==0.13.0
+pytest==9.1.1
+mcp==2.0.0
+pyyaml==6.0.3

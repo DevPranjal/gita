@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..diff.changes import EntityChange
-from .rank import score_change
+from .rank import Intent, score_change
 
 
 @dataclass(slots=True)
@@ -17,14 +17,16 @@ class Cluster:
     path: str
     title: str
     changes: list[EntityChange] = field(default_factory=list)
+    #: Carried so score and weight rank the same way the lines below them do.
+    intent: Intent | None = None
 
     @property
     def score(self) -> float:
-        return max((score_change(c) for c in self.changes), default=0.0)
+        return max((score_change(c, self.intent) for c in self.changes), default=0.0)
 
     @property
     def weight(self) -> float:
-        return sum(score_change(c) for c in self.changes)
+        return sum(score_change(c, self.intent) for c in self.changes)
 
     @property
     def id(self) -> str:
@@ -39,7 +41,8 @@ def head_of(change: EntityChange, depth: int = 1) -> str:
     return "::".join(change.entity.qualname.split("::")[:depth])
 
 
-def cluster_changes(changes: list[EntityChange]) -> list[Cluster]:
+def cluster_changes(changes: list[EntityChange],
+                    intent: Intent | None = None) -> list[Cluster]:
     clusters: dict[tuple[str, str], Cluster] = {}
 
     for change in changes:
@@ -48,7 +51,7 @@ def cluster_changes(changes: list[EntityChange]) -> list[Cluster]:
         key = (change.entity.path, head_of(change))
         cluster = clusters.get(key)
         if cluster is None:
-            cluster = Cluster(path=key[0], title=key[1])
+            cluster = Cluster(path=key[0], title=key[1], intent=intent)
             clusters[key] = cluster
         cluster.changes.append(change)
 

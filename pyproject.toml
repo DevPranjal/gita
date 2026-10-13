@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "gita"
 dynamic = ["version"]
-description = "git reimagined for a world of agent coders — context diffs, not line diffs"
+description = "Structural diffs and evidence-backed entity history for agents and developers"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -13,7 +13,7 @@ requires-python = ">=3.11"
 authors = [{ name = "Pranjal Gulati" }]
 keywords = ["git", "diff", "agents", "llm", "context", "tree-sitter", "mcp"]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 4 - Beta",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
@@ -33,14 +33,17 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "mcp>=1.2"]
+dev = ["pytest>=8.0", "mcp>=1.2", "pyyaml>=6.0"]
+# The evaluation harness reads its task manifest from YAML; gita.eval imports it
+# at package import, so the dashboard and the eval tests need this too.
+eval = ["pyyaml>=6.0"]
 mcp = ["mcp>=1.2"]
 
 [project.scripts]
 gita = "gita.cli:main"
 
 [project.urls]
-Homepage = "https://devpranjal.github.io/gita/"
+Homepage = "https://github.com/DevPranjal/gita"
 Source = "https://github.com/DevPranjal/gita"
 Issues = "https://github.com/DevPranjal/gita/issues"
 Changelog = "https://github.com/DevPranjal/gita/blob/main/CHANGELOG.md"
@@ -52,8 +55,15 @@ path = "src/gita/__init__.py"
 packages = ["src/gita"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src/gita", "tests", "README.md", "LICENSE", "CHANGELOG.md"]
+include = [
+    "src/gita", "tests", "verify", "docs",
+    "evals/README.md", "evals/PROTOCOL.md", "evals/RESULTS.md", "evals/aacr-manifest.json",
+    "constraints.txt", "README.md", "LICENSE", "CHANGELOG.md",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+    "slow: runs against the checked-out corpus; excluded with -m 'not slow'",
+]

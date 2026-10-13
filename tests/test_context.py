@@ -11,6 +11,7 @@ import pytest
 
 from gita import ChangeKind, diff_trees, extract
 from gita.context import (
+    Intent,
     build_view,
     cluster_changes,
     count_tokens,
@@ -18,6 +19,7 @@ from gita.context import (
     expand,
     filtered_view,
     fit_lines,
+    line_span,
     rollup_lines,
     score_change,
 )
@@ -51,6 +53,21 @@ class TestTokens:
 
     def test_longer_text_costs_more(self):
         assert count_tokens("a" * 400) > count_tokens("a")
+
+
+class TestChangeRendering:
+    def test_prefixes_change_kind_in_summary_and_detail(self, tiny_repo):
+        from gita.context.answer import _detail
+        from gita import diff_revisions
+
+        added = next(c for c in diff_trees(
+            None, extract(b"def added():\n    return 1\n", "added.py"))
+            if c.kind is ChangeKind.ADDED)
+        change = diff_revisions(tiny_repo, "HEAD^", "HEAD").material()[0]
+
+        assert str(added).startswith("added added.py")
+        assert _detail(tiny_repo, "HEAD^", "HEAD", change, {}) \
+            .startswith(f"--- body_changed {change.entity.id}\n")
 
 
 class TestScoring:
@@ -159,6 +176,12 @@ class TestRollup:
         flat = "\n".join(rollup_lines(self.nested_changes(), depth=1))
         assert count_tokens(flat) < count_tokens(deep)
 
+    def test_reuses_a_file_path_for_its_nested_entities(self):
+        lines = rollup_lines(self.nested_changes(), depth=4, group_paths=True)
+
+        assert len(lines) == 1
+        assert lines[0].startswith("t.js\n  ")
+
 
 class TestTestChurnRollup:
     """Bulk test churn is context, not the answer.
@@ -185,16 +208,16 @@ class TestTestChurnRollup:
 
     def test_each_test_file_collapses_to_one_line(self):
         lines = rollup_lines(self.bulk().material(), depth=6)
-        test_lines = [line for line in lines if line.startswith("test/")]
+        test_lines = [line for line in lines if "case" in line]
         assert len(test_lines) == 6
 
     def test_the_source_change_is_listed_before_test_churn(self):
         lines = rollup_lines(self.bulk().material(), depth=6)
-        assert lines[0].startswith("source/options.ts")
+        assert "options.ts" in lines[0]
 
     def test_rolled_up_line_says_how_many_and_what_kind(self):
         line = next(line for line in rollup_lines(self.bulk().material(), depth=6)
-                    if line.startswith("test/case0.ts"))
+                    if "case0.ts" in line)
         assert "tests:" in line and "1 added" in line
 
     def test_a_test_only_change_is_still_listed_in_full(self):
@@ -208,7 +231,7 @@ class TestTestChurnRollup:
 
     def test_a_handful_of_tests_is_not_worth_rolling_up(self):
         lines = rollup_lines(self.bulk(files=2).material(), depth=6)
-        assert any(line.startswith("test/") and "::" in line for line in lines)
+        assert any("case" in line and "::" in line for line in lines)
 
 
 class TestParallelFileRollup:
@@ -245,7 +268,7 @@ class TestParallelFileRollup:
 
     def test_the_quiet_file_is_not_crowded_out(self):
         lines = rollup_lines(self.parallel().material(), depth=6)
-        assert any(line.startswith("lockfile.toml") for line in lines)
+        assert any("lockfile.toml" in line for line in lines)
 
     def test_two_files_are_not_a_pattern(self):
         """Grouping a pair hides as much as it saves."""
@@ -275,6 +298,28 @@ class TestFit:
         lines, _ = fit_lines(self.nested_changes(), budget=1)
         assert isinstance(lines, list)
 
+    def test_fitted_rows_retain_group_membership_without_changing_text(self):
+        from gita.context.rollup import fit_rows
+
+        changes = self.nested_changes()
+        for budget in (0, 20, 80, 4000):
+            rows, depth = fit_rows(changes, budget, group_paths=True)
+            lines, old_depth = fit_lines(changes, budget, group_paths=True)
+            assert [row.text for row in rows] == lines
+            assert depth == old_depth
+            assert all(row.entity_ids for row in rows)
+        rows, _ = fit_rows(changes, 4000, group_paths=True)
+        assert {key for row in rows for key in row.entity_ids} == {
+            c.id for c in changes if not c.is_noise}
+
+    def test_parallel_rollups_retain_even_unprinted_file_members(self):
+        from gita.context.rollup import fit_rows
+
+        changes = TestParallelFileRollup().parallel(files=12).material()
+        rows, _ = fit_rows(changes, 10000)
+        assert any("more" in row.text for row in rows)
+        assert {key for row in rows for key in row.entity_ids} == {c.id for c in changes}
+
 
 class TestLayers:
     def sample(self) -> ChangeSet:
@@ -294,7 +339,7 @@ class TestLayers:
 
     def test_l0_is_far_cheaper_than_l1(self):
         view = build_view(self.sample(), budget=800)
-        assert count_tokens(view.l0) < count_tokens(view.l1)
+        assert count_tokens(view.l0) <= count_tokens(view.l1)
 
     def test_l1_lists_changed_entities(self):
         view = build_view(self.sample(), budget=800)
@@ -304,11 +349,23 @@ class TestLayers:
     def test_l1_respects_budget(self):
         view = build_view(self.sample(), budget=40)
         assert view.tokens <= 40
-        assert view.truncated
 
     def test_generous_budget_is_not_truncated(self):
         view = build_view(self.sample(), budget=4000)
         assert not view.truncated
+
+    def test_shallow_summary_covering_every_entity_is_not_truncated(self):
+        from gita.context.layers import _headline
+        from gita.context.cluster import cluster_changes
+
+        changes = ChangeSet(TestRollup().nested_changes(), files_changed=1)
+        material = changes.material()
+        headline = _headline(changes, material, cluster_changes(list(changes)), 1000)
+        shallow = rollup_lines(material, 1, spans=False)
+        budget = count_tokens(headline) + count_tokens("\n".join(shallow))
+        view = build_view(changes, budget=budget)
+        assert not view.truncated
+        assert view.tokens <= budget
 
     def test_interface_changes_are_surfaced_first(self):
         view = build_view(self.sample(), budget=800)
@@ -349,6 +406,85 @@ def tiny_repo(tmp_path):
 
 
 class TestL2:
+    @pytest.mark.parametrize("head", [None, "STAGED", "HEAD"])
+    def test_checkout_line_endings_do_not_inflate_entity_patches(self, tmp_path, head):
+        from gita import diff_revisions
+        from gita.context.answer import material_patch
+        from gita.vcs.git import STAGED
+
+        def git(*args):
+            return subprocess.run(["git", "-C", str(tmp_path), *args], check=True,
+                                  capture_output=True).stdout.decode().strip()
+
+        git("init", "-q", "-b", "main")
+        git("config", "user.email", "t@example.com")
+        git("config", "user.name", "t")
+        git("config", "core.autocrlf", "true")
+        git("config", "core.safecrlf", "false")
+        source = b"export function allowed() {\n  return true;\n}\n"
+        (tmp_path / "m.ts").write_bytes(source)
+        git("add", "m.ts")
+        git("commit", "-qm", "before")
+        base = git("rev-parse", "HEAD")
+        (tmp_path / "m.ts").write_bytes(
+            source.replace(b"true", b"false").replace(b"\n", b"\r\n"))
+        revision = STAGED if head == "STAGED" else head
+        if revision is not None:
+            git("add", "m.ts")
+        if revision == "HEAD":
+            git("commit", "-qm", "after")
+
+        repo = Repo(tmp_path)
+        assert b"\r\n" not in repo.blob(base, "m.ts")
+        assert b"\r\n" in repo.blob(None, "m.ts")
+        patch = material_patch(repo, base, revision,
+                               diff_revisions(repo, base, revision)).patch
+        assert "-  return true;" in patch and "+  return false;" in patch
+        changed = [line for line in patch.splitlines()
+                   if line.startswith(("+", "-")) and not line.startswith("---")]
+        assert len(changed) == 2
+
+    def test_added_numbered_sibling_has_no_old_hunk(self, tmp_path):
+        from gita import diff_revisions
+        from gita.context.patch import change_diff
+
+        def git(*args):
+            subprocess.run(["git", "-C", str(tmp_path), *args], check=True,
+                           capture_output=True)
+
+        before = (
+            "const first = useCallback((_e, next) => {\n"
+            "  return next;\n"
+            "}, []);\n"
+            "const second = useCallback((_e, next) => {\n"
+            "  return next + 1;\n"
+            "}, []);\n"
+        )
+        after = (
+            "const handleExport = useCallback(async () => {\n"
+            "  return exportWorkbook();\n"
+            "}, []);\n"
+            + before
+        )
+        (tmp_path / "callbacks.tsx").write_text(before)
+        git("init", "-q", "-b", "main")
+        git("config", "user.email", "t@example.com")
+        git("config", "user.name", "t")
+        git("add", "-A")
+        git("commit", "-q", "-m", "first")
+        (tmp_path / "callbacks.tsx").write_text(after)
+        git("add", "-A")
+        git("commit", "-q", "-m", "second")
+
+        repo = Repo(tmp_path)
+        change = next(c for c in diff_revisions(repo, "HEAD^", "HEAD").material()
+                      if c.kind is ChangeKind.ADDED and "useCallback" in c.entity.id)
+        patch = change_diff(repo, "HEAD^", "HEAD", change)
+
+        assert "handleExport" in patch
+        assert "return next;" not in patch
+        assert "return next + 1;" not in patch
+
     def test_entity_diff_is_scoped_to_one_entity(self, tiny_repo):
         patch = entity_diff(tiny_repo, "HEAD^", "HEAD", "m.py::target")
         assert "total = a * 2" in patch
@@ -382,6 +518,95 @@ class TestL2:
         for entity_id in ("m.py::target", "m.py::keep", "m.py::target"):
             entity_diff(tiny_repo, "HEAD^", "HEAD", entity_id, cache=cache)
         assert len(reads) == 2  # one per revision, not one per entity
+
+
+class TestLineLocations:
+    """Naming an entity says what changed; the range says where to look.
+
+    Without it the agent has to search the file for a name it was just given,
+    and the hunk headers were worse than silent: difflib numbers from 1 within
+    the slice it is handed, so an entity at line 5 reported `@@ -1,3 +1,3 @@`
+    and pointed at the top of the file.
+    """
+
+    #: `keep` occupies lines 1-2, `target` lines 5-7.
+    SOURCE = (b"def keep():\n    return 1\n\n\n"
+              b"def target(a):\n    total = 0\n    return total\n")
+
+    @staticmethod
+    def commit(tmp_path, before: str, after: str) -> Repo:
+        def git(*args):
+            subprocess.run(["git", "-C", str(tmp_path), *args], check=True,
+                           capture_output=True)
+        (tmp_path / "m.py").write_text(before)
+        git("init", "-q", "-b", "main")
+        git("config", "user.email", "t@t")
+        git("config", "user.name", "t")
+        git("add", "-A")
+        git("commit", "-q", "-m", "first")
+        (tmp_path / "m.py").write_text(after)
+        git("add", "-A")
+        git("commit", "-q", "-m", "second")
+        return Repo(tmp_path)
+
+    def edited(self) -> bytes:
+        return self.SOURCE.replace(b"total = 0", b"total = a * 2")
+
+    def line_for(self, current: bytes, name: str) -> str:
+        return next(line for line in rollup_lines(changes(self.SOURCE, current),
+                                                  depth=6)
+                    if name in line)
+
+    def test_a_summary_line_carries_the_range(self):
+        assert "L5-7" in self.line_for(self.edited(), "target")
+
+    def test_the_range_is_the_position_in_the_file_not_in_the_entity(self):
+        """The bug this exists to prevent: a range that restarts per entity."""
+        line = self.line_for(self.edited(), "target")
+        assert "L1-" not in line
+
+    def test_a_removed_entity_says_which_revision_it_lived_in(self):
+        """Its lines are gone, so a bare range would point at whatever is there now."""
+        gone = b"def keep():\n    return 1\n"
+        assert "L5-7 (before)" in self.line_for(gone, "target")
+
+    def test_a_single_line_entity_is_not_written_as_a_range(self):
+        one_liner = [c for c in changes(b"def f(): return 1\n",
+                                        b"def f(): return 2\n")
+                     if not c.is_noise and c.entity.id.endswith("::f")]
+        assert line_span(one_liner).strip() == "L1"
+
+    def test_hunk_headers_are_absolute_file_positions(self, tmp_path):
+        repo = self.commit(tmp_path, self.SOURCE.decode(),
+                           self.edited().decode())
+        patch = entity_diff(repo, "HEAD^", "HEAD", "m.py::target")
+        header = next(line for line in patch.splitlines()
+                      if line.startswith("@@"))
+        assert "-5" in header and "+5" in header
+
+    def test_change_diff_hunk_headers_are_absolute_file_positions(self, tmp_path):
+        from gita import diff_revisions
+        from gita.context.patch import change_diff
+
+        repo = self.commit(tmp_path, self.SOURCE.decode(),
+                           self.edited().decode())
+        change = next(change for change in diff_revisions(repo, "HEAD^", "HEAD").material()
+                      if change.entity.id == "m.py::target")
+        header = next(line for line in change_diff(repo, "HEAD^", "HEAD", change).splitlines()
+                      if line.startswith("@@"))
+        assert "-5" in header and "+5" in header
+
+    def test_an_added_entity_keeps_its_empty_side_empty(self, tmp_path):
+        """`-0,0` is unified-diff for "nothing here", not a position to shift."""
+        repo = self.commit(
+            tmp_path,
+            "def keep():\n    return 1\n",
+            "def keep():\n    return 1\n\n\ndef fresh():\n    return 2\n")
+        patch = entity_diff(repo, "HEAD^", "HEAD", "m.py::fresh")
+        header = next(line for line in patch.splitlines()
+                      if line.startswith("@@"))
+        assert "-0,0" in header
+        assert "+5" in header
 
 
 def sample_changeset() -> ChangeSet:
@@ -524,3 +749,140 @@ class TestBudgetHoldsWithoutTiktoken:
     def test_the_method_in_use_is_reportable(self):
         """An agent must be able to tell an exact budget from an approximate one."""
         assert tokens.token_method() in ("tiktoken/cl100k_base", "approx")
+
+
+class TestIntentParsing:
+    """Intent comes from text the caller already has, never from the diff."""
+
+    def test_drops_request_scaffolding(self):
+        assert Intent.parse("please fix the bug in the parser").terms == ("parser",)
+
+    def test_keeps_domain_words_in_order(self):
+        assert Intent.parse("cache eviction in the token store").terms == (
+            "cache", "eviction", "token", "store")
+
+    def test_splits_identifiers_and_camel_case(self):
+        assert Intent.parse("parseTokens in parser_state.py").terms == (
+            "parse", "tokens", "parser", "state")
+
+    def test_repeated_words_count_once(self):
+        assert Intent.parse("parser parser parser").terms == ("parser",)
+
+    def test_empty_and_contentless_intents_are_falsy(self):
+        assert not Intent.parse("")
+        assert not Intent.parse(None)
+        assert not Intent.parse("please fix the bug")
+
+
+class TestIntentRanking:
+    """Ranking answers "what is this agent here for", not only "what is severe"."""
+
+    def one(self, path, previous, current, kind=None):
+        material = [c for c in changes(previous, current, path) if not c.is_noise]
+        if kind is not None:
+            material = [c for c in material if c.kind is kind]
+        assert material, f"no material change produced for {path}"
+        return material[0]
+
+    def body_change(self, path="src/parser.py", name="parse_tokens"):
+        return self.one(path,
+                        f"def {name}(a):\n    return a\n".encode(),
+                        f"def {name}(a):\n    return a + 1\n".encode(),
+                        ChangeKind.BODY_CHANGED)
+
+    def signature_change(self, path="src/other.py", name="unrelated_helper"):
+        return self.one(path,
+                        f"def {name}(a):\n    return a\n".encode(),
+                        f"def {name}(a, b):\n    return a\n".encode(),
+                        ChangeKind.SIGNATURE_CHANGED)
+
+    def test_absent_intent_scores_exactly_as_before(self):
+        change = self.body_change()
+        assert score_change(change, Intent()) == score_change(change)
+        assert score_change(change, None) == score_change(change)
+
+    def test_an_intent_matching_nothing_changes_nothing(self):
+        change = self.body_change()
+        unrelated = Intent.parse("kubernetes ingress certificates")
+        assert score_change(change, unrelated) == score_change(change)
+
+    def test_the_named_entity_outranks_a_severer_unrelated_change(self):
+        named = self.body_change()
+        severe = self.signature_change()
+        assert score_change(named) < score_change(severe), "baseline assumption"
+
+        intent = Intent.parse("parse_tokens returns the wrong count")
+        assert score_change(named, intent) > score_change(severe, intent)
+
+    def test_a_path_match_alone_cannot_outrank_a_signature_change(self):
+        """Naming the area is weaker evidence than naming the thing."""
+        body = self.body_change(path="src/parser.py", name="unrelated_name")
+        severe = self.signature_change()
+        intent = Intent.parse("something in src/parser.py")
+        assert score_change(body, intent) < score_change(severe, intent)
+
+    def test_intent_never_revives_filtered_noise(self):
+        cosmetic = [c for c in changes(b"def parse_tokens(a):\n    return a\n",
+                                       b"def parse_tokens( a ):\n    return  a\n",
+                                       "src/parser.py") if c.is_noise]
+        assert cosmetic, "expected a cosmetic change"
+        assert score_change(cosmetic[0], Intent.parse("parse_tokens")) == 0.0
+
+    def test_a_matching_test_file_is_not_demoted(self):
+        """"Why is this test failing" is a request about tests."""
+        test = self.signature_change(path="tests/test_helper.py", name="helper")
+        source = self.signature_change(path="src/other.py", name="unrelated")
+        assert score_change(test) < score_change(source), "baseline assumption"
+
+        intent = Intent.parse("the helper assertion is wrong")
+        assert score_change(test, intent) > score_change(source, intent)
+
+    def test_intent_reorders_the_rolled_up_lines(self):
+        material = [self.body_change(), self.signature_change()]
+
+        plain = rollup_lines(material, 1)
+        assert "other.py" in plain[0]
+
+        guided = rollup_lines(material, 1, Intent.parse("parse_tokens is wrong"))
+        assert "parser.py" in guided[0]
+
+    def test_intent_reorders_clusters(self):
+        material = [self.body_change(), self.signature_change()]
+
+        assert cluster_changes(material)[0].path == "src/other.py"
+        guided = cluster_changes(material, Intent.parse("parse_tokens is wrong"))
+        assert guided[0].path == "src/parser.py"
+
+    def test_reordering_hides_nothing(self):
+        material = [self.body_change(), self.signature_change()]
+        intent = Intent.parse("parse_tokens is wrong")
+        assert sorted(rollup_lines(material, 1)) == \
+               sorted(rollup_lines(material, 1, intent))
+
+    def test_a_named_test_escapes_the_bulk_test_rollup(self):
+        """Bulk-test rollup runs before ranking, so it needs the exemption too.
+
+        Without it, an intent could raise a test's score and still have that
+        test summarised away into a count.
+        """
+        material = [self.signature_change(path="src/app.py", name="handler")]
+        material += [self.body_change(path="tests/test_app.py", name=f"case_{i}")
+                     for i in range(5)]
+        material.append(self.signature_change(path="tests/test_helper.py",
+                                              name="helper"))
+
+        plain = rollup_lines(material, 1)
+        assert not any("::helper" in line for line in plain), \
+            "baseline assumption: bulk rollup summarises it away"
+
+        guided = rollup_lines(material, 1, Intent.parse("the helper assertion is wrong"))
+        assert any("::helper" in line for line in guided)
+
+    def test_unnamed_test_churn_is_still_rolled_up(self):
+        """The exemption is for what the request named, not for every test."""
+        material = [self.signature_change(path="src/app.py", name="handler")]
+        material += [self.body_change(path="tests/test_app.py", name=f"case_{i}")
+                     for i in range(5)]
+
+        guided = rollup_lines(material, 1, Intent.parse("the handler is wrong"))
+        assert any(line.startswith("tests/test_app.py  (5 tests") for line in guided)

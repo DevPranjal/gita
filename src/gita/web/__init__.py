@@ -1,0 +1,1 @@
+"""Local, read-only demonstration of Gita's public tool interfaces."""

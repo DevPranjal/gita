@@ -94,13 +94,14 @@ def series(repo: str | Path | Repo, since: str | None = None, until: str = "HEAD
     if not batched:
         return [CommitSummary(sha=sha, subject=subject, date=date,
                               changes=diff_revisions(repo, repo.base_of(sha), sha,
-                                                     paths=paths).material())
+                                                     paths=paths,
+                                                     collapse_files=False).material())
                 for sha, subject, date in commits(repo, since, until, limit, paths)]
 
     summaries = []
     for record in repo.walk(since, until, limit, paths):
         changeset = diff_revisions(repo, record.parent, record.sha, paths=paths,
-                                   changed=record.files)
+                                   changed=record.files, collapse_files=False)
         summaries.append(CommitSummary(sha=record.sha, subject=record.subject,
                                        date=record.date,
                                        changes=changeset.material()))

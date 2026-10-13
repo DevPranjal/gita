@@ -2,20 +2,19 @@
 
 Matching runs in three passes, cheapest and most certain first:
 
-1. by stable id      -- the entity kept its place in the tree
+1. by matched parent and sibling content -- ordinals are positions, not identities
 2. by content hash   -- identical body somewhere else: moved or renamed
 3. by similarity     -- near-identical body: renamed and edited
 
-Whatever survives all three is genuinely added or removed.
+Unmatched entities remain added or removed; this does not prove absent continuity.
 """
 
 from __future__ import annotations
 
-import re
-
 from collections import defaultdict
+from difflib import SequenceMatcher
 
-from ..entities.model import Entity, EntityTree
+from ..entities.model import Entity, EntityKind, EntityTree, digest
 from .changes import ChangeKind, ChangeSet, EntityChange
 
 #: Jaccard floor for calling two entities the same thing under a new name.
@@ -26,6 +25,9 @@ RENAME_THRESHOLD = 0.6
 MIN_BODY_TOKENS = 3
 
 _SHINGLE = 3
+_RENAME_MARGIN = 0.1
+_ORDERED_BODY_THRESHOLD = 0.8
+_MIN_EDITED_BODY_TOKENS = 20
 
 
 def _unique_by(entities, key):
@@ -47,7 +49,7 @@ def _shingles(tokens: tuple[str, ...]) -> set[tuple[str, ...]]:
 
 
 def similarity(left: Entity, right: Entity) -> float:
-    """Jaccard overlap of token shingles. Deterministic, no model involved."""
+    """Jaccard overlap of own-token shingles, including the signature."""
     a, b = _shingles(left.tokens), _shingles(right.tokens)
     if not a or not b:
         return 1.0 if a == b else 0.0
@@ -112,21 +114,14 @@ def reconcile_moves(changes: list[EntityChange]) -> list[EntityChange]:
     return _sorted(kept + matched)
 
 
-_ORDINAL = re.compile(r"#\d+$")
-
-
-def _slot_group(entity_id: str) -> str:
-    """The id with its position stripped: what it is, not which slot it sits in."""
-    return _ORDINAL.sub("", entity_id)
-
-
-def _resolve_group(sources: list[Entity], targets: list[Entity]) -> list[EntityChange]:
+def _resolve_group(sources: list[Entity], targets: list[Entity],
+                   old_hashes: dict[str, str], new_hashes: dict[str, str]) -> list[EntityChange]:
     """Decide a set of same-named siblings together.
 
     `url`, `url#2`, `url#3` are slots, not identities. Inserting one member
     shifts every later one, so matching by id reports untouched members as
-    edited. Content is matched first, then equal ids, then whatever is left in
-    order -- so a genuine edit is still an edit.
+    edited. Match complete subtrees before own content or sibling slots, so
+    nested callbacks and checkout line endings cannot steal an unchanged peer.
     """
     changes: list[EntityChange] = []
     pool = list(sources)
@@ -134,14 +129,24 @@ def _resolve_group(sources: list[Entity], targets: list[Entity]) -> list[EntityC
 
     for target in targets:
         moved = next((i for i, s in enumerate(pool)
-                      if s.raw_hash == target.raw_hash and s.kind is target.kind), None)
+                      if old_hashes[s.id] == new_hashes[target.id]), None)
         if moved is None:
             pending.append(target)
         else:
-            changes.append(EntityChange(ChangeKind.UNCHANGED, target, pool.pop(moved)))
+            changes.append(_classify_matched(pool.pop(moved), target))
+
+    sources_by_hash = _unique_by(pool, lambda e: e.content_hash)
+    targets_by_hash = _unique_by(pending, lambda e: e.content_hash)
+    for key in sources_by_hash.keys() & targets_by_hash.keys():
+        source, target = sources_by_hash[key], targets_by_hash[key]
+        changes.append(_classify_matched(source, target))
+        pool.remove(source)
+        pending.remove(target)
 
     for target in list(pending):
-        same = next((i for i, s in enumerate(pool) if s.id == target.id), None)
+        slot = target.id.removeprefix(f"{target.parent_id}::")
+        same = next((i for i, s in enumerate(pool)
+                     if s.id.removeprefix(f"{s.parent_id}::") == slot), None)
         if same is not None:
             changes.append(_classify_matched(pool.pop(same), target))
             pending.remove(target)
@@ -154,22 +159,80 @@ def _resolve_group(sources: list[Entity], targets: list[Entity]) -> list[EntityC
     return changes
 
 
-def _ordinal_groups(old_entities: dict, new_entities: dict) -> dict[str, tuple[list, list]]:
-    """Sibling groups where more than one entity shares a name."""
-    old_groups: dict[str, list[Entity]] = defaultdict(list)
-    new_groups: dict[str, list[Entity]] = defaultdict(list)
-    for entity in old_entities.values():
-        old_groups[_slot_group(entity.id)].append(entity)
-    for entity in new_entities.values():
-        new_groups[_slot_group(entity.id)].append(entity)
+def _subtree_hashes(tree: EntityTree) -> dict[str, str]:
+    hashes: dict[str, str] = {}
+    for entity in reversed(list(tree.walk())):
+        hashes[entity.id] = digest(" ".join(
+            [entity.content_hash, *(hashes[child] for child in entity.children)]))
+    return hashes
 
-    groups = {}
-    for base in old_groups.keys() | new_groups.keys():
-        sources, targets = old_groups.get(base, []), new_groups.get(base, [])
-        if len(sources) > 1 or len(targets) > 1:
-            groups[base] = (sorted(sources, key=lambda e: e.start_line),
-                            sorted(targets, key=lambda e: e.start_line))
+
+def _child_groups(tree: EntityTree, parent: Entity) -> dict[tuple[EntityKind, str], list[Entity]]:
+    groups: dict[tuple[EntityKind, str], list[Entity]] = defaultdict(list)
+    for child_id in parent.children:
+        child = tree.entities[child_id]
+        groups[child.kind, child.name].append(child)
     return groups
+
+
+def _rename_score(source: Entity, target: Entity, parents: dict[str, str]) -> float:
+    score = similarity(source, target)
+    if (source.kind not in (EntityKind.FUNCTION, EntityKind.METHOD)
+            or source.parent_id is None
+            or parents.get(source.parent_id) != target.parent_id
+            or min(len(source.body_tokens), len(target.body_tokens)) < _MIN_EDITED_BODY_TOKENS):
+        return score
+    if source.signature_shape is None or source.signature_shape != target.signature_shape:
+        return score
+    ordered = min(SequenceMatcher(None, left, right, autojunk=False).ratio()
+                  for left, right in ((source.body_tokens, target.body_tokens),
+                                      (target.body_tokens, source.body_tokens)))
+    return max(score, ordered) if ordered >= _ORDERED_BODY_THRESHOLD else score
+
+
+def _pair_similar(removed: dict[str, Entity], added: dict[str, Entity],
+                  parents: dict[str, str], threshold: float) -> list[EntityChange]:
+    sources: dict[str, list[tuple[float, Entity]]] = defaultdict(list)
+    targets: dict[str, list[tuple[float, Entity]]] = defaultdict(list)
+
+    def consider(groups, key, score, entity):
+        candidates = groups[key]
+        candidates.append((score, entity))
+        candidates.sort(key=lambda item: (-item[0], item[1].id))
+        del candidates[2:]
+
+    for source in removed.values():
+        for target in added.values():
+            if source.kind is not target.kind:
+                continue
+            score = _rename_score(source, target, parents)
+            consider(sources, source.id, score, target)
+            consider(targets, target.id, score, source)
+
+    def best(ranked):
+        if (not ranked or ranked[0][0] < threshold
+                or (len(ranked) > 1 and ranked[0][0] < ranked[1][0] + _RENAME_MARGIN)):
+            return None
+        return ranked[0]
+
+    source_choices = {key: best(values) for key, values in sources.items()}
+    matched = []
+    for target_id, candidates in targets.items():
+        chosen = best(candidates)
+        if chosen is None:
+            continue
+        score, source = chosen
+        reciprocal = source_choices[source.id]
+        if reciprocal is None or reciprocal[1].id != target_id:
+            continue
+        target = added.pop(target_id)
+        removed.pop(source.id)
+        matched.append(EntityChange(
+            ChangeKind.MOVED if source.name == target.name else ChangeKind.RENAMED,
+            target, source, signature_changed=source.signature_hash != target.signature_hash,
+            body_changed=source.content_hash != target.content_hash, similarity=score,
+        ))
+    return matched
 
 
 def _sorted(changes: list[EntityChange]) -> list[EntityChange]:
@@ -206,29 +269,27 @@ def diff_trees(previous: EntityTree | None, current: EntityTree | None,
     new_entities = {e.id: e for e in current.walk()}
 
     changes: list[EntityChange] = []
-
-    # pass 0 -- same-named siblings, decided together and by content first.
-    # `url`, `url#2`, `url#3` are slots: inserting one member shifts the rest,
-    # and matching by id would report the untouched ones as edited.
-    groups = _ordinal_groups(old_entities, new_entities)
-    handled: set[str] = set()
-    for sources, targets in groups.values():
-        changes += _resolve_group(sources, targets)
-        handled.update(e.id for e in sources)
-        handled.update(e.id for e in targets)
-
-    # pass 1 -- stable id
-    for entity_id in old_entities.keys() & new_entities.keys():
-        if entity_id in handled:
-            continue
-        changes.append(_classify_matched(old_entities[entity_id], new_entities[entity_id]))
+    old_hashes, new_hashes = _subtree_hashes(previous), _subtree_hashes(current)
+    if previous.root_id == current.root_id:
+        assert previous.root is not None and current.root is not None
+        changes.append(_classify_matched(previous.root, current.root))
+    # Grow parent correspondence top-down; a child's old ordinal path is not an identity.
+    for match in changes:
+        assert match.previous is not None and match.current is not None
+        old_groups = _child_groups(previous, match.previous)
+        new_groups = _child_groups(current, match.current)
+        for key in old_groups.keys() & new_groups.keys():
+            paired = _resolve_group(old_groups[key], new_groups[key], old_hashes, new_hashes)
+            changes.extend(c for c in paired if c.previous is not None and c.current is not None)
+    old_handled = {c.previous.id for c in changes}
+    new_handled = {c.current.id for c in changes}
 
     # A module is bound to its file; git handles file renames, so it never
     # participates in move or rename matching.
     removed = {i: e for i, e in old_entities.items()
-               if i not in new_entities and i not in handled and not e.synthetic}
+               if i not in old_handled and not e.synthetic}
     added = {i: e for i, e in new_entities.items()
-             if i not in old_entities and i not in handled and not e.synthetic}
+             if i not in new_handled and not e.synthetic}
 
     # pass 2 -- identical content, then identical body, matched only where
     # the hash is unambiguous on both sides
@@ -236,27 +297,10 @@ def diff_trees(previous: EntityTree | None, current: EntityTree | None,
     changes += _pair_up(removed, added, lambda e: e.body_hash,
                         guard=lambda e: e.body_size >= MIN_BODY_TOKENS)
 
-    # pass 3 -- near-identical body under a new name
-    for entity_id, entity in list(added.items()):
-        best_score, best_source = 0.0, None
-        for source in removed.values():
-            if source.kind is not entity.kind:
-                continue
-            score = similarity(source, entity)
-            if score > best_score:
-                best_score, best_source = score, source
-
-        if best_source is None or best_score < rename_threshold:
-            continue
-
-        changes.append(EntityChange(
-            ChangeKind.RENAMED, entity, best_source,
-            signature_changed=best_source.signature_hash != entity.signature_hash,
-            body_changed=best_source.content_hash != entity.content_hash,
-            similarity=best_score,
-        ))
-        added.pop(entity_id)
-        removed.pop(best_source.id)
+    # Fuzzy continuation requires a mutual winner, not whichever target is visited first.
+    parents = {c.previous.id: c.current.id for c in changes
+               if c.previous is not None and c.current is not None}
+    changes += _pair_similar(removed, added, parents, rename_threshold)
 
     changes.extend(EntityChange(ChangeKind.ADDED, current=e) for e in added.values())
     changes.extend(EntityChange(ChangeKind.REMOVED, previous=e) for e in removed.values())

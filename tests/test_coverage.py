@@ -10,7 +10,7 @@ import subprocess
 
 import pytest
 
-from gita import diff_revisions, extract_path
+from gita import ChangeKind, diff_revisions, extract_path
 from gita.entities.languages import is_supported
 from gita.vcs.git import Repo
 
@@ -61,12 +61,19 @@ class TestWorkingTree:
         staged = diff_revisions(mixed, "HEAD", "STAGED")
         assert {c.entity.path for c in staged.material()} == {"a.py"}
 
-    def test_new_untracked_file_is_included(self, mixed):
+    def test_new_untracked_file_is_reported_once_at_file_level(self, mixed):
         (mixed.root / "new.py").write_text("def brand_new():\n    return 1\n")
         subprocess.run(["git", "-C", str(mixed.root), "add", "new.py"], check=True,
                        capture_output=True)
         changeset = diff_revisions(mixed, "HEAD", None)
-        assert any("brand_new" in c.entity.id for c in changeset.material())
+        added = [c for c in changeset.material() if c.entity.path == "new.py"]
+        assert [(c.kind, c.entity.id) for c in added] == [(ChangeKind.ADDED, "new.py")]
+
+    def test_deleted_file_is_reported_once_at_file_level(self, mixed):
+        (mixed.root / "a.py").unlink()
+        changeset = diff_revisions(mixed, "HEAD", None)
+        removed = [c for c in changeset.material() if c.entity.path == "a.py"]
+        assert [(c.kind, c.entity.id) for c in removed] == [(ChangeKind.REMOVED, "a.py")]
 
 
 class TestNonCodeFiles:

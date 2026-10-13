@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>gita / Relay</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/lucide.min.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="masthead">
+    <a class="brand" href="/" aria-label="Gita home"><i data-lucide="git-compare-arrows"></i><span>gita</span></a>
+    <span class="header-divider"></span><span class="workspace-label">version control, reimagined for a world of agent coders</span>
+    <button class="icon-button" id="reload" title="Reload repository" aria-label="Reload repository"><i data-lucide="refresh-cw"></i></button>
+  </header>
+  <main>
+    <section class="repo-heading" aria-label="Repository">
+      <div><div class="repository-title"><i data-lucide="book-marked"></i><h1 id="repo-name">Relay</h1></div><p class="repo-description">Order operations for independent retailers</p></div>
+      <div class="repo-actions"><div class="repo-facts" id="repo-facts"><span>Loading repository...</span></div><button class="cli-button" id="open-cli" title="Open Gita CLI"><i data-lucide="terminal"></i>CLI</button></div>
+    </section>
+    <div class="view-bar">
+      <nav class="view-tabs" aria-label="Repository views">
+        <button class="view-tab active" data-view="changes" aria-pressed="true"><i data-lucide="git-pull-request-arrow"></i>Changes<span id="changes-count" class="count">0</span></button>
+        <button class="view-tab" data-view="entities" aria-pressed="false"><i data-lucide="braces"></i>Entities<span id="entities-count" class="count">0</span></button>
+      </nav>
+      <span class="branch-label"><i data-lucide="git-branch"></i>main</span>
+    </div>
+    <section class="compare-bar" aria-label="Revision comparison">
+      <div class="revision-range"><label for="base">From</label><select id="base" aria-label="Base revision" disabled></select><i data-lucide="arrow-right"></i><label for="head">To</label><select id="head" aria-label="Head revision" disabled></select></div>
+      <label class="interface-filter"><input type="checkbox" id="interface-only">Interface only</label>
+      <button class="text-button" id="answer-button"><i data-lucide="terminal"></i>Gita output</button>
+    </section>
+    <div class="summary-bar"><span id="summary" role="status">Reading committed history...</span><span id="noise"></span></div>
+    <div id="error" class="error-banner" role="alert" hidden></div>
+    <div class="workbench" id="workbench">
+      <aside class="entity-pane" aria-label="Entity navigation">
+        <div class="search-field"><i data-lucide="search"></i><input id="search" type="search" placeholder="Find an entity..." aria-label="Find an entity"><span id="visible-count"></span></div>
+        <div id="entity-list" class="entity-list" aria-label="Entities"></div>
+      </aside>
+      <section class="detail-pane" aria-label="Entity detail" aria-busy="false">
+        <div class="detail-heading"><div><span id="detail-path" class="detail-path">relay/pricing.py</span><h2 id="detail-name">Loading...</h2></div><span id="detail-kind" class="change-label"></span></div>
+        <div class="detail-toolbar"><nav class="detail-tabs" aria-label="Entity views"><button data-detail="patch" class="active" aria-pressed="true">Code changes</button><button data-detail="history" aria-pressed="false">History<span id="history-count" class="count" hidden></span></button><button data-detail="source" aria-pressed="false">Source</button></nav><button class="icon-button" id="copy" title="Copy displayed code" aria-label="Copy displayed code"><i data-lucide="copy"></i></button></div>
+        <div class="detail-content" id="detail-content"><div class="empty-state">Loading repository...</div></div>
+        <div class="detail-footer" id="detail-footer"></div>
+      </section>
+    </div>
+    <footer class="page-footer"><span><i data-lucide="lock-keyhole"></i>Read-only</span><span id="coverage">Index coverage pending</span><span class="footer-right">Git is the source of truth.</span></footer>
+  </main>
+  <dialog id="output-dialog" aria-labelledby="output-title"><div class="dialog-heading"><h2 id="output-title">Gita output</h2><button class="icon-button" id="close-output" aria-label="Close output" title="Close"><i data-lucide="x"></i></button></div><code id="output-command"></code><pre id="output-text"></pre></dialog>
+  <dialog id="cli-dialog" aria-labelledby="cli-title">
+    <div class="dialog-heading"><div class="cli-title"><i data-lucide="terminal"></i><h2 id="cli-title">Gita CLI</h2><span class="cli-repo">relay / read-only</span></div><div class="cli-tools"><button class="icon-button" id="clear-cli" title="Clear terminal" aria-label="Clear terminal"><i data-lucide="eraser"></i></button><button class="icon-button" id="close-cli" title="Close CLI" aria-label="Close CLI"><i data-lucide="x"></i></button></div></div>
+    <div id="cli-transcript" role="log" aria-label="Command output" aria-live="polite"></div>
+    <form id="cli-form"><span class="cli-prompt" aria-hidden="true">$</span><input id="cli-command" aria-label="Gita command" autocomplete="off" spellcheck="false" maxlength="2048" value="gita diff v0.2.0 HEAD"><button class="icon-button" id="run-cli" type="submit" title="Run command" aria-label="Run command"><i data-lucide="play"></i></button></form>
+    <div class="cli-status" id="cli-status" role="status">Ready</div>
+  </dialog>
+</body>
+</html>

@@ -19,6 +19,7 @@ from typing import Iterable
 
 from ..diff.changes import ChangeSet, EntityChange
 from .layers import ContextView, build_view
+from .rank import Intent
 from .rollup import MAX_DEPTH, fit_lines
 
 _WORD = re.compile(r"[a-z0-9_]+")
@@ -48,14 +49,15 @@ def filter_changes(changes: Iterable[EntityChange], term: str = "",
 
 
 def expand(changes: Iterable[EntityChange], entity_id: str,
-           budget: int = 400, max_depth: int = MAX_DEPTH) -> list[str]:
+           budget: int = 400, max_depth: int = MAX_DEPTH,
+           intent: Intent | None = None) -> list[str]:
     """L1 lines for the descendants of ``entity_id``, within ``budget``."""
     prefix = f"{entity_id}::"
     selected = [c for c in changes
                 if not c.is_noise and c.entity.id.startswith(prefix)]
     if not selected:
         return []
-    lines, _ = fit_lines(selected, budget, max_depth=max_depth)
+    lines, _ = fit_lines(selected, budget, max_depth=max_depth, intent=intent)
     return lines
 
 
@@ -70,6 +72,12 @@ def focus(changeset: ChangeSet, term: str = "",
         return changeset
 
     selected = filter_changes(changeset.material(), term, interface_only)
+    if not interface_only:
+        # Explicit file matches retain the real root for independent comment
+        # blocks. A function-name filter must not acquire neighboring comments.
+        terms = terms_of(term)
+        selected += [c for c in changeset if c.is_noise and c.entity.synthetic
+                     and matches(c, terms)]
     focused = ChangeSet()
     focused.files_changed = len({c.entity.path for c in selected})
     focused.file_status = changeset.file_status
@@ -86,14 +94,15 @@ def focus_label(term: str = "", interface_only: bool = False) -> str:
 
 def filtered_view(changeset: ChangeSet, term: str = "",
                   interface_only: bool = False,
-                  budget: int = 1000) -> ContextView:
+                  budget: int = 1000,
+                  intent: Intent | None = None) -> ContextView:
     """A view restricted to matching entities.
 
     An empty result stays empty: silently widening the filter would be the same
     dishonesty as answering a question we cannot answer.
     """
     if not term and not interface_only:
-        return build_view(changeset, budget=budget)
+        return build_view(changeset, budget=budget, intent=intent)
 
     return build_view(focus(changeset, term, interface_only), budget=budget,
-                      focus=focus_label(term, interface_only))
+                      focus=focus_label(term, interface_only), intent=intent)

@@ -12,7 +12,8 @@ from dataclasses import dataclass, field
 
 from ..diff.changes import ChangeSet, EntityChange
 from .cluster import Cluster, cluster_changes
-from .rollup import MAX_DEPTH, fit_lines, rollup_lines
+from .rank import Intent
+from .rollup import fit_rows
 from .tokens import count_tokens
 
 #: L0 never eats more than this share of the budget.
@@ -95,23 +96,24 @@ def _headline(changeset: ChangeSet, material: list[EntityChange],
 
 
 def build_view(changeset: ChangeSet, budget: int = 1000,
-               focus: str | None = None) -> ContextView:
+               focus: str | None = None,
+               intent: Intent | None = None) -> ContextView:
     """Assemble a budgeted L0 + L1 view of a ChangeSet."""
     material = changeset.material()
-    clusters = cluster_changes(list(changeset))
+    clusters = cluster_changes(list(changeset), intent)
 
     l0_full = _headline(changeset, material, clusters, budget, focus)
     l0 = fit_text(l0_full, budget)
     remaining = max(0, budget - count_tokens(l0))
 
-    lines, depth = fit_lines(material, remaining)
-    full = rollup_lines(material, MAX_DEPTH)
+    rows, depth = fit_rows(material, remaining, intent=intent)
+    represented = {key for row in rows for key in row.entity_ids}
 
     return ContextView(
         l0=l0,
-        l1="\n".join(lines),
+        l1="\n".join(row.text for row in rows),
         clusters=clusters,
         depth=depth,
-        truncated=lines != full or l0 != l0_full,
+        truncated=bool({c.id for c in material} - represented) or l0 != l0_full,
         budget=budget,
     )
