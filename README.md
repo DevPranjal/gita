@@ -43,11 +43,13 @@ Activate with `source .venv/bin/activate` on Linux/macOS, or
 
 ```sh
 python -m pip install -c constraints.txt -e ".[mcp]"
-python -c "from tree_sitter_language_pack import download; download(['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown'])"
+python -c "from tree_sitter_language_pack import get_parser, downloaded_languages; names = ['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown']; [get_parser(name) for name in names]; assert set(names) <= set(downloaded_languages())"
 ```
 
 Grammar provisioning uses the network once; indexed operations then use local
 Git objects. Omit `[mcp]` for CLI-only use.
+Provisioning loads each parser and checks its installed inventory: a successful
+`download()` request alone does not prove native grammar files are available.
 
 ## Use from the CLI
 

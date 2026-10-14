@@ -25,13 +25,14 @@ reconstruction and the separate structural-review engine.
 [`DevPranjal/gita` commit `3bfca49`](https://github.com/DevPranjal/gita/commit/3bfca49a749fe2346aedef2c3ea189e5aaadf246).
 These documents do not claim either repository has already migrated.
 
-## The three specifications
+## Specifications
 
 | Spec | Question answered | Deliverable |
 | --- | --- | --- |
 | [S1: Safe retirement](01-safe-retirement.md) | How do we remove the old product without damaging indexed behavior, data, or shared parser rules? | Dependency separation, deliberate breaking-change policy, migration gates, package/API retirement, rollout and rollback. |
 | [S2: Index qualification](02-index-qualification.md) | How do we establish correctness and reliability, measure performance, and optimize without weakening identity? | Fixture/oracle design, benchmark manifest and results contracts, failure campaigns, instrumentation, baseline gates and optimization sequence. |
 | [S3: Indexed product contracts](03-indexed-product.md) | What should the unified product expose, and what is still missing? | Product workflows, CLI/Python/MCP parity, entity queries, lifecycle UX, verification, browser boundaries, and optional genuine endpoint comparison. |
+| [S4: Indexed review evaluation](04-review-evaluation.md) | How should the harness evaluate indexed Gita on AACR-Bench and ReviewBench without confusing review quality, proxy savings, and index correctness? | Harness audit, indexed/baseline/history arms, scorer conformance, leakage tests, statistical decisions and proposed success targets. |
 
 The [keep/retire report](../../INDEXED-PRODUCT-REPORT.md) records the preceding
 analysis. These specs turn it into testable product and engineering requirements.

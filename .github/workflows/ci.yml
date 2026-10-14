@@ -31,7 +31,8 @@ jobs:
       - name: Install dependencies
         run: python -m pip install -c constraints.txt -e ".[dev]"
       - name: Provision grammars
-        run: python -c "from tree_sitter_language_pack import download; download(['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown'])"
+        # language-pack 1.14.3 download() alone does not materialize native files.
+        run: python -c "from tree_sitter_language_pack import get_parser, downloaded_languages; names = ['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown']; [get_parser(name) for name in names]; assert set(names) <= set(downloaded_languages()), downloaded_languages()"
       - name: Test indexed default
         env:
           GITA_ENABLE_LEGACY: '0'
@@ -61,12 +62,12 @@ jobs:
           cache: pip
       - run: python -m pip install -c constraints.txt -e ".[dev,bench]"
       - name: Provision only fixture grammar before measurement
-        run: python -c "from tree_sitter_language_pack import download; download(['python'])"
+        run: python -c "from tree_sitter_language_pack import get_parser, downloaded_languages; get_parser('python'); assert 'python' in downloaded_languages(), downloaded_languages()"
       - name: Qualification contracts and publication recovery
-        run: python -m pytest tests/test_index_candidate_cache.py tests/test_index_qualification.py tests/test_index_reliability.py tests/test_index_oracle_gates.py -q --basetemp ../index-qualification-tests
+        run: python -m pytest tests/test_ci_grammars.py tests/test_index_candidate_cache.py tests/test_index_qualification.py tests/test_index_reliability.py tests/test_index_oracle_gates.py tests/test_public_index_benchmark.py -q --basetemp "${{ runner.temp }}/index-qualification-tests"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: index-qualification-${{ matrix.os }}
-          path: ../index-qualification-tests
+          path: ${{ runner.temp }}/index-qualification-tests
           retention-days: 7

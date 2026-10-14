@@ -211,3 +211,13 @@ CI's dedicated `index-qualification` job is configured to run these contracts an
 publication recovery/equivalence tests on Windows and Linux with legacy disabled,
 and retains artifacts. No T2/T3/real-repository, product F4, full fault campaign,
 query rendering, source/patch, suffix, rebuild or GC performance claim is made.
+
+## Public-repository observations
+
+Actual pinned Flask, Express and ripgrep snapshot/bounded-first-parent/update/
+no-op/read observations, including all failed attempts, independent sampled
+Git-byte/AST/reviewed-span checks, and sampled process-tree resources are recorded
+in [the public benchmark report](../docs/benchmarks/public-index-20261014.md).
+The [manifest](results/public-20261014.manifest.json) and
+[sanitized data](results/public-20261014.json) are checked in; corpora, indexes
+and raw logs are not. This is not full-history or F4 qualification.

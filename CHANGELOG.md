@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Record pinned public Flask, Express and ripgrep indexing observations, retaining
+  failures and partial coverage. Add reproducible public-corpus tooling and
+  independently member-bound source rechecks; do not claim full-history scale.
+- Specify indexed AACR/ReviewBench evaluation, harness audit, leakage/scoring
+  safeguards, accounting and proposed success gates; no new model review run.
+- Materialize and verify native grammars before CI measurements, and use an
+  absolute runner-temp path for qualification artifact upload.
+
 - Add manifest-driven offline index qualification with authored Git histories,
   independent source/query correctness gates, isolated build/update/no-op/query
   scenarios, failure receipts, resource sampling and baseline comparisons.
