@@ -20,6 +20,7 @@ from gita.mcp.tools import (
     diff_tool, entities_tool, history_tool, id_tool, index_tool, show_tool, source_tool,
 )
 from gita.web.demo import create_demo, git
+from gita.legacy import LegacyError, legacy_enabled, legacy_operation, require_legacy
 
 
 ASSETS = Path(__file__).parent
@@ -30,6 +31,7 @@ CLI_SLOTS = BoundedSemaphore(2)
 
 class DemoView:
     def __init__(self, repo: Path, scope: str = SCOPE):
+        legacy_enabled()
         self.repo = repo.resolve()
         self.scope = scope
         self.commits = []
@@ -88,12 +90,15 @@ class DemoView:
                             self.commits[min(1, len(self.commits) - 1)]["sha"])
         return {"name": self.repo.name, "commits": self.commits, "tags": self.tags,
                 "head": self.head, "base": default_base, "scope": self.scope,
+                "legacy_enabled": legacy_enabled(),
                 "generation": self.generation, **self.catalog(self.head)}
 
+    @legacy_operation
     @lru_cache(maxsize=64)
     def compare(self, base: str, head: str) -> dict:
         return diff_tool(str(self.repo), base=base, head=head, budget=12000)
 
+    @legacy_operation
     @lru_cache(maxsize=128)
     def patch(self, entity: str, base: str, head: str) -> dict:
         return show_tool(str(self.repo), entity=entity, base=base, head=head)
@@ -116,6 +121,10 @@ class DemoView:
                 "coverage": identity["coverage"], "generation": self.generation}
 
     def api(self, route: str, params: dict[str, list[str]]) -> dict:
+        legacy_enabled()
+        if route in {"/api/diff", "/api/patch"}:
+            require_legacy(route)
+
         def argument(name: str, default: str = "") -> str:
             values = params.get(name, [default])
             if len(values) != 1 or len(values[0]) > 2048:
@@ -153,6 +162,7 @@ class DemoView:
             return matches[0]
         raise ValueError("Revision is outside the published repository history.")
 
+    @legacy_operation
     def cli(self, command: str) -> dict:
         from gita.cli import _parser
 
@@ -244,6 +254,7 @@ class DemoView:
         try:
             env = {name: os.environ[name] for name in ("PATH", "SYSTEMROOT", "WINDIR", "TEMP", "TMP", "HOME", "LOCALAPPDATA", "USERPROFILE") if name in os.environ}
             env.update(PYTHONPATH=str(ASSETS.parents[1]), PYTHONUTF8="1", PYTHONIOENCODING="utf-8",
+                       GITA_ENABLE_LEGACY="1",
                        GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull, GIT_TERMINAL_PROMPT="0")
             with TemporaryFile() as output:
                 try:
@@ -260,6 +271,8 @@ class DemoView:
 
 
 def make_server(view: DemoView, port: int) -> ThreadingHTTPServer:
+    legacy_enabled()
+
     class Handler(BaseHTTPRequestHandler):
         def setup(self) -> None:
             super().setup()
@@ -298,6 +311,10 @@ def make_server(view: DemoView, port: int) -> ThreadingHTTPServer:
                     raise FileNotFoundError("Not found.")
                 filename, content_type = assets[url.path]
                 self.respond(200, (ASSETS / filename).read_bytes(), content_type + "; charset=utf-8")
+            except LegacyError as error:
+                self.respond(410 if error.code == "legacy_disabled" else 400,
+                             json.dumps({"error": {"code": error.code, "message": str(error)}}).encode(),
+                             "application/json")
             except FileNotFoundError as error:
                 self.respond(404, json.dumps({"error": str(error)}).encode(), "application/json")
             except ValueError as error:
@@ -317,6 +334,7 @@ def make_server(view: DemoView, port: int) -> ThreadingHTTPServer:
                 self.respond(403, b'{"error":"Same-origin requests only."}', "application/json")
                 return
             try:
+                require_legacy("/api/cli")
                 length = int(self.headers.get("Content-Length", "0"))
                 if not 0 < length <= 8192 or self.headers.get("Content-Type") != "application/json":
                     raise ValueError("Expected a JSON command body, at most 8192 bytes.")
@@ -325,6 +343,10 @@ def make_server(view: DemoView, port: int) -> ThreadingHTTPServer:
                     raise ValueError("Expected a command field.")
                 result = view.cli(payload["command"])
                 self.respond(200, json.dumps(result).encode("utf-8"), "application/json; charset=utf-8")
+            except LegacyError as error:
+                self.respond(410 if error.code == "legacy_disabled" else 400,
+                             json.dumps({"error": {"code": error.code, "message": str(error)}}).encode(),
+                             "application/json")
             except (ValueError, TypeError) as error:
                 self.respond(400, json.dumps({"error": str(error)}).encode(), "application/json")
             except Exception:
@@ -342,6 +364,7 @@ def main() -> None:
     parser.add_argument("--build-index", action="store_true", help="Explicitly build or update this repository's named index")
     args = parser.parse_args()
     try:
+        legacy_enabled()
         if args.create_demo:
             create_demo(args.repo)
         if args.create_demo or args.build_index:

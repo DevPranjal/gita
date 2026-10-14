@@ -15,38 +15,40 @@ import io
 import json
 from types import SimpleNamespace
 from typing import Any, Callable
+from collections.abc import Mapping
 
-from ..context import (
-    build_view,
-    count_tokens,
-    entity_diff,
-    expand,
-    focus,
-    focus_label,
-)
-from ..context.answer import DEFAULT_BUDGET as ANSWER_BUDGET
-from ..context.answer import compose
-from ..context.rank import Intent
+from ..context.tokens import count_tokens
+from ..legacy import LegacyError, legacy_enabled, require_legacy
 from ..index.model import IndexContractError
 from ..index.query import QueryError
 from ..index.store import IndexStoreError
-from ..revisions import diff_revisions
 from ..telemetry import record, timed
 from ..vcs.git import CommittedRepo, GitError, GitObjectError, Repo
 
 DEFAULT_BASE = "HEAD^"
 DEFAULT_HEAD = "HEAD"
-DEFAULT_BUDGET = ANSWER_BUDGET
+DEFAULT_BUDGET = 6000
 
 _MAX_SUGGESTIONS = 5
+
+
+def _load_legacy():
+    from .. import context, revisions
+    from ..context import answer, rank
+
+    for name in ("build_view", "entity_diff", "expand", "focus", "focus_label"):
+        globals()[name] = getattr(context, name)
+    globals().update(compose=answer.compose, Intent=rank.Intent,
+                     diff_revisions=revisions.diff_revisions)
 
 
 def _guard(fn: Callable[..., dict]) -> Callable[..., dict]:
     def wrapper(*args, **kwargs) -> dict:
         with timed() as elapsed:
             try:
+                legacy_enabled()
                 result = fn(*args, **kwargs)
-            except (QueryError, IndexStoreError, IndexContractError, GitObjectError) as error:
+            except (LegacyError, QueryError, IndexStoreError, IndexContractError, GitObjectError) as error:
                 result = {"status": error.code, "error": {"code": error.code, "message": str(error)}}
             except GitError as error:
                 result = {"error": str(error)}
@@ -106,6 +108,8 @@ def diff_tool(repo: str, base: str = DEFAULT_BASE, head: str | None = DEFAULT_HE
     Returns `next` only when the budget forced something out; otherwise there is
     nothing left to drill into and a follow-up call would waste a whole turn.
     """
+    require_legacy("gita_diff")
+    _load_legacy()
     if (scope is not None or generation is not None) and not indexed:
         raise ValueError("scope and generation require indexed=true")
     if indexed or patch:
@@ -148,6 +152,8 @@ def expand_tool(repo: str, entity: str, base: str = DEFAULT_BASE,
                 budget: int = DEFAULT_BUDGET,
                 intent: str = "") -> dict[str, Any]:
     """Descendants of a rolled-up entity, still without paying for hunks."""
+    require_legacy("gita_expand")
+    _load_legacy()
     repository = _open(repo, base, head)
     changeset = diff_revisions(repository, base, head)
     lines = expand(changeset, entity, budget=budget, intent=Intent.parse(intent))
@@ -169,6 +175,8 @@ def expand_tool(repo: str, entity: str, base: str = DEFAULT_BASE,
 def show_tool(repo: str, entity: str, base: str = DEFAULT_BASE,
               head: str = DEFAULT_HEAD) -> dict[str, Any]:
     """L2: the exact hunks for one entity. The expensive layer."""
+    require_legacy("gita_show")
+    _load_legacy()
     repository = _open(repo, base, head)
     patch = entity_diff(repository, base, head, entity)
     if not patch:
@@ -213,7 +221,7 @@ def history_tool(repo: str, entity: str | None = None, base: str | None = None,
                  scope: str | None = None, generation: str | None = None,
                  at: str | None = None, order: str | None = None,
                  limit: int = 20, cursor: str | None = None, brief: bool = False,
-                 budget: int = DEFAULT_BUDGET) -> dict[str, Any]:
+                 budget: int = DEFAULT_BUDGET, legacy: bool = False) -> dict[str, Any]:
     """History of one entity, or transitions across two explicit commits.
 
     Indexed entity history follows supported lineage. Indexed ranges are
@@ -226,7 +234,7 @@ def history_tool(repo: str, entity: str | None = None, base: str | None = None,
     return _command_result(repo, "history", [entity] if entity else [],
                            since=base, until=head, indexed=indexed, scope=scope,
                            generation=generation, at=at, order=order, limit=limit,
-                           cursor=cursor, brief=brief, budget=budget)
+                           cursor=cursor, brief=brief, budget=budget, legacy=legacy)
 
 
 @_guard
@@ -353,7 +361,7 @@ def source_tool(repo: str, occurrence: dict[str, Any], scope: str = "default",
     return _read_query(repo, "source", fetch, scope=scope, generation=pinned, at=at, budget=budget)
 
 
-TOOLS = {
+_TOOLS = {
     "gita_diff": diff_tool,
     "gita_expand": expand_tool,
     "gita_show": show_tool,
@@ -364,3 +372,23 @@ TOOLS = {
     "gita_source": source_tool,
     "gita_entities": entities_tool,
 }
+
+
+def available_tools():
+    enabled = legacy_enabled()
+    return {name: tool for name, tool in _TOOLS.items()
+            if enabled or name not in {"gita_diff", "gita_expand", "gita_show"}}
+
+
+class _ToolRegistry(Mapping):
+    def __getitem__(self, name):
+        return available_tools()[name]
+
+    def __iter__(self):
+        return iter(available_tools())
+
+    def __len__(self):
+        return len(available_tools())
+
+
+TOOLS = _ToolRegistry()

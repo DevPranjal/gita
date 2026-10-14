@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- Begin legacy retirement with strict `GITA_ENABLE_LEGACY=1` opt-in. Unset/`0`
+  disables the structural-review product; other values refuse clearly.
+- Ordinary CLI/MCP history now reads the published index, including scope/order
+  options. `--indexed` is a compatibility no-op; `--legacy` / `legacy=true`
+  explicitly selects old reconstructing history after opt-in.
+- Gate legacy diff/show/expand and aliases, direct reconstructing Python APIs,
+  and the old `diff --indexed` event adapter. Disabled operations return migration
+  guidance, never substitute events for an endpoint diff.
+- Hide legacy MCP tools by default; keep indexed imports independent of the
+  review pipeline. Preserve version access and shared Tree-sitter helpers.
+- Default the browser to indexed entities/history/source; legacy compare/patch
+  and CLI-playground routes refuse without opt-in. Legacy-dependent evaluation
+  runners refuse before side effects unless explicitly opted in.
+- This increment does not remove shipped legacy modules, alter parse/match
+  policy fingerprints or storage, qualify the index, implement query parity,
+  independent verification, or genuine indexed endpoint comparison.
+
 - Prepare the `public` branch for version 1.0.0: remove generated evaluation
   reports, hackathon presentation and personal deployment scripts. Retain the
   evaluation harness, frozen input, protocol and one historical summary.

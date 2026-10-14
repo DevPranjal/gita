@@ -7,6 +7,7 @@ import json
 import time
 from pathlib import Path, PurePosixPath
 from typing import Literal
+from ...legacy import LegacyError, legacy_enabled, require_legacy
 
 import tiktoken
 
@@ -41,6 +42,9 @@ def checked_path(path: str) -> str:
 
 class Evidence:
     def __init__(self, config: dict):
+        legacy_enabled()
+        if config.get("arm") == "gita":
+            require_legacy("legacy-dependent evaluation evidence")
         self.repo = Path(config["repo"])
         self.base = config["base"]
         self.head = config["head"]
@@ -134,6 +138,9 @@ class Evidence:
 
 
 def build_server(config: dict):
+    legacy_enabled()
+    if config.get("arm") == "gita":
+        require_legacy("legacy-dependent evaluation evidence")
     try:
         from mcp.server import MCPServer as Server
     except ImportError:
@@ -196,7 +203,10 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("config", type=Path)
     args = parser.parse_args()
-    build_server(read_json(args.config)).run(transport="stdio")
+    try:
+        build_server(read_json(args.config)).run(transport="stdio")
+    except LegacyError as error:
+        parser.exit(2, f"{error.code}: {error}\n")
 
 
 if __name__ == "__main__":

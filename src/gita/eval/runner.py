@@ -16,6 +16,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from ..legacy import legacy_enabled, require_legacy
 
 from ..telemetry import load_events
 from ..telemetry.shim import install as install_shim
@@ -45,7 +46,7 @@ Other forms, only if needed:
 ```
 gita diff <base> <head> --interface-only   only changes that can break a caller
 gita diff <base> <head> --patch            a plain unified diff, noise removed
-gita history <name>           how one function changed over time, with the code
+gita history <name> --legacy  reconstruct history, with the code (legacy opt-in)
 ```
 
 `gita history` and `gita show` accept a bare function name.
@@ -236,6 +237,9 @@ def _write_agents_md(repo_root: Path, enabled: bool) -> None:
 def run_once(task: Task, arm: ArmConfig, repo_root: Path, run_dir: Path,
              shim_dir: Path, gita_bin: Path, model: str,
              timeout: int = 600) -> dict:
+    legacy_enabled()
+    if arm.has_gita:
+        require_legacy("legacy-dependent evaluation")
     run_dir.mkdir(parents=True, exist_ok=True)
     run_id = run_dir.name
 

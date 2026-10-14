@@ -10,8 +10,9 @@ import os
 from typing import Any, Literal
 
 from . import tools
+from ..legacy import legacy_enabled
 
-SERVER_INSTRUCTIONS = """\
+LEGACY_SERVER_INSTRUCTIONS = """\
 gita gives you context diffs instead of line diffs.
 
 Start with gita_diff for a headline and a list of changed entities. It is cheap.
@@ -24,7 +25,8 @@ gita_diff takes `filter` to restrict to entities matching a term, and
 exact; gita does not guess at intent.
 
 Use gita_history with entity for one function, or base/head for a commit range.
-Set indexed=true for persistent lineage or recorded range events. History
+History is indexed by default; indexed=true is a compatibility no-op.
+Set legacy=true only to reconstruct unindexed history. History
 includes exact-source patches within budget; brief=true skips source reads.
 Inspect each event's patch_status: omitted_budget retains retrievable source
 references; unavailable marks missing or non-UTF-8 source, never an empty edit.
@@ -41,6 +43,20 @@ gita_index build/gc mutate only the local index; verify is not yet available.
 There is no caller graph, semantic equivalence proof, or merge-safety verdict.
 """
 
+SERVER_INSTRUCTIONS = """\
+Gita provides published indexed entity evidence.
+Start with gita_index(action="status"); build explicitly if needed.
+Use gita_id -> gita_history/gita_state -> gita_source.
+gita_entities lists a file's recorded occurrences.
+History is indexed by default; indexed is a compatibility no-op.
+Range history returns intermediate events, not endpoint diffs.
+Reads never build or parse; working-tree/staged/untracked queries are out of scope.
+Keep scope, generation, occurrence references and continuation cursors together.
+Report ambiguity and partial coverage. Source is never silently truncated.
+Patches are included within budget unless brief=true; inspect patch_status.
+Verification is unavailable; there is no semantic equivalence or merge-safety verdict.
+"""
+
 
 def _default_repo() -> str:
     return os.environ.get("GITA_REPO", ".")
@@ -48,6 +64,7 @@ def _default_repo() -> str:
 
 def build_server(repo_path: str | None = None):
     """Construct the MCP server. Imported lazily so the CLI works without the SDK."""
+    enabled = legacy_enabled()
     # Absolute import: this resolves to the SDK, not to the enclosing gita.mcp.
     try:
         from mcp.server import MCPServer as _Server  # SDK 2.x
@@ -61,9 +78,15 @@ def build_server(repo_path: str | None = None):
             ) from error
 
     root = repo_path or _default_repo()
-    server = _Server("gita", instructions=SERVER_INSTRUCTIONS)
+    instructions = SERVER_INSTRUCTIONS
+    if enabled:
+        instructions += "\nLegacy opt-in enabled (GITA_ENABLE_LEGACY=1).\n" + LEGACY_SERVER_INSTRUCTIONS
+    server = _Server("gita", instructions=instructions)
 
-    @server.tool()
+    def legacy_tool():
+        return server.tool() if enabled else lambda function: function
+
+    @legacy_tool()
     def gita_diff(base: str = tools.DEFAULT_BASE, head: str | None = tools.DEFAULT_HEAD,
                   budget: int = tools.DEFAULT_BUDGET, filter: str = "",
                   interface_only: bool = False, repo: str = "", brief: bool = False,
@@ -81,7 +104,7 @@ def build_server(repo_path: str | None = None):
                                intent=intent, patch=patch, indexed=indexed, scope=scope,
                                generation=generation)
 
-    @server.tool()
+    @legacy_tool()
     def gita_expand(entity: str, base: str = tools.DEFAULT_BASE,
                     head: str = tools.DEFAULT_HEAD,
                     budget: int = tools.DEFAULT_BUDGET, repo: str = "", intent: str = "") -> dict:
@@ -89,7 +112,7 @@ def build_server(repo_path: str | None = None):
         return tools.expand_tool(repo or root, entity, base=base, head=head,
                                  budget=budget, intent=intent)
 
-    @server.tool()
+    @legacy_tool()
     def gita_show(entity: str, base: str = tools.DEFAULT_BASE,
                   head: str = tools.DEFAULT_HEAD, repo: str = "") -> dict:
         """Exact hunks for one entity. Call only after diff or expand named it."""
@@ -101,10 +124,13 @@ def build_server(repo_path: str | None = None):
                      scope: str | None = None, generation: str | None = None,
                      at: str | None = None, order: Literal["newest", "oldest"] | None = None,
                      limit: int = 20, cursor: str | None = None, brief: bool = False,
-                     budget: int = tools.DEFAULT_BUDGET, repo: str = "") -> dict:
+                     budget: int = tools.DEFAULT_BUDGET, repo: str = "",
+                     legacy: bool = False) -> dict:
         """Trace one entity, or supply base/head for changes throughout a commit range.
 
-        indexed=true uses persistent evidence; indexed ranges are oldest-first.
+        Persistent evidence is the default; indexed is a compatibility no-op.
+        legacy=true requires GITA_ENABLE_LEGACY=1 and reconstructs old history.
+        Indexed ranges are oldest-first.
         For indexed entity history use at, not base/head. Keep returned cursor,
         scope and pinned range together. Reads never build an index.
         Patches are included within budget unless brief=true. patch_status
@@ -113,7 +139,7 @@ def build_server(repo_path: str | None = None):
         return tools.history_tool(repo or root, entity=entity, base=base, head=head,
                                   indexed=indexed, scope=scope, generation=generation,
                                   at=at, order=order, limit=limit, cursor=cursor,
-                                  brief=brief, budget=budget)
+                                  brief=brief, budget=budget, legacy=legacy)
 
     @server.tool()
     def gita_id(entity: str, scope: str | None = None, generation: str | None = None,

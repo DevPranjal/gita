@@ -11,19 +11,8 @@ import json
 import sys
 from typing import TextIO
 
-from ..context import (
-    build_view,
-    count_tokens,
-    entity_diff,
-    expand,
-    focus,
-    focus_label,
-)
-from ..context.answer import DEFAULT_BUDGET, compose, material_patch
-from ..context.layers import fit_text
-from ..context.rank import Intent
-from ..context.resolve import Ambiguous, resolve_entity
-from ..revisions import diff_revisions
+from ..context.tokens import count_tokens
+from ..legacy import LegacyError, legacy_enabled, require_legacy
 from ..telemetry import annotate, record, timed
 from ..vcs.git import GitError, Repo
 from . import render
@@ -37,19 +26,32 @@ ALIASES = {
 }
 
 USAGE = """\
-gita - context diffs for agent coders
+gita - persistent indexed entity history
 
-  gita diff <base> <head>     what changed: summary, files, functions and code
-  gita diff <base> <head> --interface-only   only changes that can break a caller
-  gita diff <base> <head> --patch            plain unified diff, noise removed
-  gita history <entity>       how one function changed over time
-    gita history <base> <head>  entity changes throughout a commit range
-  gita show <entity>          exact hunks for one entity
+  gita index --status        inspect the committed index
+  gita index                explicitly build/update the index
+  gita id <entity>           resolve an indexed identity
+  gita history <entity>      recorded identity history and exact-source patches
+  gita history <base> <head> recorded range events, not an endpoint diff
+  gita serve                serve the indexed MCP tools
 
-One `gita diff` should answer the question; it says so when output was cut.
-Run `gita <command> --help` for details."""
+Legacy diff/show/expand and history --legacy require GITA_ENABLE_LEGACY=1.
+Reads never build an index. Run `gita <command> --help` for details."""
 
-DEFAULT_BUDGET = DEFAULT_BUDGET
+DEFAULT_BUDGET = 6000
+
+
+def _load_legacy():
+    from .. import context
+    from ..context import answer, layers, rank, resolve
+    from .. import revisions
+
+    for name in ("build_view", "entity_diff", "expand", "focus", "focus_label"):
+        globals()[name] = getattr(context, name)
+    globals().update(compose=answer.compose, material_patch=answer.material_patch,
+                     fit_text=layers.fit_text, Intent=rank.Intent,
+                     Ambiguous=resolve.Ambiguous, resolve_entity=resolve.resolve_entity,
+                     diff_revisions=revisions.diff_revisions)
 
 
 class _IndexedUsageError(ValueError):
@@ -73,7 +75,7 @@ def _parser(indexed_errors: bool = False) -> argparse.ArgumentParser:
     parser_type = _IndexedParser if indexed_errors else argparse.ArgumentParser
     parser = parser_type(
         prog="gita",
-        description="context diffs for agent coders — what changed, not which bytes",
+        description="persistent indexed entity history; legacy commands require GITA_ENABLE_LEGACY=1",
     )
     parser.add_argument("-C", "--repo", default=".", metavar="PATH",
                         help="repository to inspect (default: current directory)")
@@ -138,7 +140,7 @@ def _parser(indexed_errors: bool = False) -> argparse.ArgumentParser:
     budget(identity)
 
     diff = sub.add_parser("diff", aliases=["darshan"], parents=[common],
-                          help="context diff between two revisions")
+                          help="legacy context diff (requires GITA_ENABLE_LEGACY=1)")
     revisions(diff, worktree_default=True)
     budget(diff)
     diff.add_argument("--filter", default="", metavar="TERM",
@@ -155,25 +157,21 @@ def _parser(indexed_errors: bool = False) -> argparse.ArgumentParser:
                       help="summary only, without the code")
     diff.add_argument("--patch", action="store_true",
                       help="unified diff with noise removed")
-    # The indexed engine decides identity once, strictly, at build time rather
-    # than re-guessing it from similarity on every call. It reads a published
-    # generation and never builds on demand, so this is opt-in: it needs
-    # `gita index` first and cannot see uncommitted work.
     diff.add_argument("--indexed", action="store_true",
-                      help="compare using the committed entity index instead of "
-                           "re-deriving entities (requires gita index)")
+                      help="legacy range-event adapter, not an endpoint diff; "
+                           "requires GITA_ENABLE_LEGACY=1 and gita index")
     diff.add_argument("--scope", default=None,
                       help="named index scope for --indexed (default: default)")
     diff.add_argument("--generation", default=None,
                       help="pin --indexed to one published generation")
 
     show = sub.add_parser("show", aliases=["shloka"], parents=[common],
-                          help="exact hunks for one entity")
+                          help="legacy entity hunks (requires GITA_ENABLE_LEGACY=1)")
     show.add_argument("entity")
     revisions(show)
 
     exp = sub.add_parser("expand", aliases=["vistaar"], parents=[common],
-                         help="drill into a rolled-up entity")
+                         help="legacy rolled-up descendants (requires GITA_ENABLE_LEGACY=1)")
     exp.add_argument("entity")
     revisions(exp)
     budget(exp)
@@ -197,7 +195,9 @@ def _parser(indexed_errors: bool = False) -> argparse.ArgumentParser:
     hist.add_argument("--brief", "--stat", "--oneline", action="store_true",
                       help="history summaries only, without code patches")
     hist.add_argument("--indexed", action="store_true",
-                      help="query the published committed entity index")
+                      help="compatibility no-op: history is indexed by default")
+    hist.add_argument("--legacy", action="store_true",
+                      help="reconstruct unindexed history (requires GITA_ENABLE_LEGACY=1)")
     indexed_query(hist)
     hist.add_argument("--order", choices=("newest", "oldest"), default=None)
     budget(hist)
@@ -267,6 +267,11 @@ def main(argv: list[str] | None = None, out: TextIO | None = None) -> int:
 
     out = out or sys.stdout
     argv = list(sys.argv[1:] if argv is None else argv)
+    try:
+        legacy_enabled()
+    except LegacyError as error:
+        _feature_error(out, error, "--json" in argv)
+        return 2
     indexed_command = indexed.intent(argv)
     parser = _parser(indexed_errors=indexed_command is not None)
     try:
@@ -356,13 +361,20 @@ def _normalize_history_arguments(repo, args) -> None:
 
 def _dispatch(command, out, repo, args, colour, parser) -> int:
     try:
+        legacy_enabled()
+        if command in ("diff", "show", "expand") or (
+                command == "history" and getattr(args, "legacy", False)):
+            require_legacy(f"gita {command}")
+            if command == "history" and (
+                    args.indexed or any(getattr(args, name, None) is not None
+                                        for name in ("scope", "at", "generation", "cursor", "order"))):
+                raise LegacyError("invalid_arguments",
+                                  "--legacy cannot be combined with indexed history selectors.")
+            _load_legacy()
         if command == "history":
             _normalize_history_arguments(repo, args)
         if command in ("index", "id") or (
-            command == "history" and (
-                args.indexed or any(getattr(args, name, None) is not None
-                                    for name in ("scope", "at", "generation", "cursor", "order"))
-            )
+            command == "history" and not getattr(args, "legacy", False)
         ):
             from . import indexed
 
@@ -386,6 +398,9 @@ def _dispatch(command, out, repo, args, colour, parser) -> int:
         if command == "expand":
             return _cmd_expand(out, repo, args, colour)
 
+    except LegacyError as error:
+        _feature_error(out, error, args.as_json)
+        return 2
     except GitError as error:
         # A bad revision and a missing repository look identical from inside git,
         # and "unknown revision: HEAD" sent agents hunting for a branch.
@@ -399,6 +414,14 @@ def _dispatch(command, out, repo, args, colour, parser) -> int:
 
     render.write(out, USAGE)
     return 2
+
+
+def _feature_error(out, error, as_json):
+    payload = {"status": error.code, "error": {
+        "code": error.code, "message": str(error), "retryable": False,
+        "recovery": "Use indexed operations, or explicitly configure GITA_ENABLE_LEGACY=1.",
+    }}
+    _emit(out, payload, f"gita: {error.code}: {error}", as_json)
 
 
 def _indexed_changeset(repo, args):

@@ -262,7 +262,9 @@ async function compare() {
   renderDetail();
   try {
     const [diff, catalog] = await Promise.all([
-      api("diff", { base: byId("base").value, head: byId("head").value }),
+      state.boot.legacy_enabled
+        ? api("diff", { base: byId("base").value, head: byId("head").value })
+        : { changes: [], files_changed: 0, noise_filtered: 0 },
       api("catalog", { at: byId("head").value }),
     ]);
     if (request !== state.comparisonRequest) return;
@@ -272,9 +274,11 @@ async function compare() {
     byId("changes-count").textContent = diff.changes.length;
     byId("entities-count").textContent = catalog.entities.length;
     const interfaceCount = diff.changes.filter((item) => item.interface).length;
-    byId("summary").textContent = `${diff.changes.length} entity changes / ${diff.files_changed} files / ${interfaceCount} interface changes`;
-    byId("noise").textContent = `${diff.noise_filtered} noise-only changes filtered`;
-    byId("answer-button").disabled = false;
+    byId("summary").textContent = state.boot.legacy_enabled
+      ? `${diff.changes.length} entity changes / ${diff.files_changed} files / ${interfaceCount} interface changes`
+      : `${catalog.entities.length} indexed entities at ${revisionLabel(byId("head").value)}`;
+    byId("noise").textContent = state.boot.legacy_enabled ? `${diff.noise_filtered} noise-only changes filtered` : "";
+    byId("answer-button").disabled = !state.boot.legacy_enabled;
     updateView();
     let candidates = state.view === "entities" ? state.catalog : diff.changes;
     if (state.view === "changes" && byId("interface-only").checked) candidates = candidates.filter((item) => item.interface);
@@ -304,6 +308,20 @@ async function boot() {
   byId("reload").disabled = true;
   try {
     state.boot = await api("bootstrap");
+    const legacy = state.boot.legacy_enabled;
+    document.querySelector('[data-view="changes"]').hidden = !legacy;
+    document.querySelector('[data-detail="patch"]').hidden = !legacy;
+    byId("open-cli").hidden = !legacy;
+    byId("base").hidden = !legacy;
+    document.querySelector('label[for="base"]').hidden = !legacy;
+    document.querySelector('.revision-range [data-lucide="arrow-right"]').toggleAttribute("hidden", !legacy);
+    document.querySelector(".interface-filter").hidden = !legacy;
+    byId("answer-button").hidden = !legacy;
+    if (!legacy) {
+      state.view = "entities";
+      state.detail = "source";
+      document.querySelector('label[for="head"]').textContent = "At";
+    }
     byId("repo-name").textContent = state.boot.name === "relay" ? "Relay" : state.boot.name;
     const facts = byId("repo-facts");
     facts.replaceChildren();

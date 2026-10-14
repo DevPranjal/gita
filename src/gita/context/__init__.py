@@ -1,20 +1,23 @@
 """WS-4 — context layers: L0 headline, L1 rolled entity view, L2 hunks on demand."""
 
-from .cluster import Cluster, cluster_changes, head_of
-from .layers import ContextView, build_view, fit_text
-from .navigate import (
-    expand,
-    filter_changes,
-    filtered_view,
-    focus,
-    focus_label,
-    matches,
-    terms_of,
-)
-from .patch import entity_diff
-from .rank import Intent, intent_bonus, is_test_path, score_change
-from .rollup import MAX_DEPTH, fit_lines, line_span, rollup_lines
-from .tokens import count_tokens, token_method
+from importlib import import_module
+
+_EXPORTS = {
+    **dict.fromkeys(("Cluster", "cluster_changes", "head_of"), ".cluster"),
+    **dict.fromkeys(("ContextView", "build_view", "fit_text"), ".layers"),
+    **dict.fromkeys(("expand", "filter_changes", "filtered_view", "focus",
+                    "focus_label", "matches", "terms_of"), ".navigate"),
+    "entity_diff": ".patch",
+    **dict.fromkeys(("Intent", "intent_bonus", "is_test_path", "score_change"), ".rank"),
+    **dict.fromkeys(("MAX_DEPTH", "fit_lines", "line_span", "rollup_lines"), ".rollup"),
+    **dict.fromkeys(("count_tokens", "token_method"), ".tokens"),
+}
+
+
+def __getattr__(name):
+    if name not in _EXPORTS:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    return getattr(import_module(_EXPORTS[name], __name__), name)
 
 __all__ = [
     "MAX_DEPTH",

@@ -11,8 +11,8 @@ import sqlite3
 import sys
 from typing import Any
 
-from ..context import count_tokens
-from ..context.patch import _absolute
+from ..context.tokens import count_tokens
+from ..patches import _absolute
 from ..index import builder, query, store as storage
 from ..index.model import GitOid, IndexContractError
 from ..index.store import IndexStore, IndexStoreError
@@ -28,7 +28,6 @@ _VALUE_FLAGS = {
     # value mistaken for a subcommand name.
     "--intent", "--filter",
 }
-_INDEXED_FLAGS = {"--indexed", "--scope", "--at", "--generation", "--cursor", "--order", "--historical"}
 
 
 def _arguments(argv):
@@ -47,13 +46,13 @@ def _arguments(argv):
 
 def intent(argv) -> str | None:
     command = None
-    indexed = False
+    legacy = False
     for flag, unused_value in _arguments(argv):
         if command is None and not flag.startswith("-"):
             command = "history" if flag == "katha" else flag
-        elif flag in _INDEXED_FLAGS:
-            indexed = True
-    if command in ("index", "id") or command == "history" and indexed:
+        elif flag == "--legacy":
+            legacy = True
+    if command in ("index", "id") or command == "history" and not legacy:
         return command
     return None
 
@@ -230,8 +229,6 @@ def _validate(command, args):
         if command == "id" and not args.entity:
             raise query.QueryError("invalid_query", "An entity token is required")
         if command == "history":
-            if not args.indexed:
-                raise query.QueryError("invalid_options", "Indexed history options require --indexed")
             if not args.entity:
                 if not (args.since or args.base) or not (args.until or args.head):
                     raise query.QueryError("invalid_query", "Select an entity or two explicit commits")

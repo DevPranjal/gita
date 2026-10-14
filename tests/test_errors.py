@@ -83,7 +83,7 @@ class TestEntityNotFound:
         assert "gita diff" in output
 
     def test_history_of_an_unknown_name_offers_a_next_step(self, repo):
-        _, output = run(repo.root, "history", "totally_not_a_function")
+        _, output = run(repo.root, "history", "totally_not_a_function", "--legacy")
         assert "gita diff" in output
 
 

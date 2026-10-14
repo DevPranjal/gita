@@ -1,5 +1,14 @@
 # Evaluation harness
 
+These retained studies depend on the legacy structural-review product. New
+legacy-dependent runs refuse before preparing directories, resetting repositories
+or invoking a model unless the process explicitly sets `GITA_ENABLE_LEGACY=1`.
+In PowerShell: `$env:GITA_ENABLE_LEGACY = '1'`; unset it after the historical run.
+The flag is passed to owned subprocesses, not enabled automatically. Unset/`0`
+disables it; any other value is an invalid configuration.
+These harnesses are not indexed-product qualification or proof of default-product
+quality/performance. No live model run is part of the feature-flag validation.
+
 The optional paired harness compares agent code reviews with and without gita.
 It records native usage, isolates evidence tools, grades reference-issue
 agreement blind to the arm, and retains failed attempts rather than treating

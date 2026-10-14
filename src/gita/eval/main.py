@@ -11,6 +11,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+from ..legacy import LegacyError, require_legacy
 
 from .runner import ArmConfig, build_revision, prepare, release_revision, run_once
 from .score import summarise_runs
@@ -34,6 +35,12 @@ def main(argv: list[str] | None = None) -> int:
              "Comparing sweeps cannot separate a code change from a drifting "
              "baseline; comparing arms within one sweep can.")
     args = parser.parse_args(argv)
+
+    try:
+        require_legacy("legacy-dependent evaluation")
+    except LegacyError as error:
+        print(f"{error.code}: {error}", file=sys.stderr)
+        return 2
 
     tasks = load_tasks(args.tasks)
     if args.only:

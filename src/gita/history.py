@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+from .legacy import legacy_operation
 
 from .diff.changes import ChangeKind, EntityChange
 from .context.resolve import resolve_entity
@@ -80,6 +81,7 @@ def commits(repo: Repo, since: str | None = None, until: str = "HEAD",
     return out
 
 
+@legacy_operation
 def series(repo: str | Path | Repo, since: str | None = None, until: str = "HEAD",
            limit: int = DEFAULT_LIMIT,
            paths: list[str] | None = None,
@@ -129,6 +131,7 @@ def paths_holding(repo: Repo, name: str, rev: str = "HEAD") -> list[str]:
     return found[:MAX_CANDIDATE_PATHS]
 
 
+@legacy_operation
 def entity_history(repo: str | Path | Repo, entity_id: str,
                    since: str | None = None, until: str = "HEAD",
                    limit: int = DEFAULT_LIMIT,
