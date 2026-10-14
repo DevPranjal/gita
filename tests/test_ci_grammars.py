@@ -13,6 +13,28 @@ import tree_sitter_language_pack as language_pack
 import yaml
 
 
+def copy_python_grammar_cache(installed_cache, destination):
+    originals = [
+        path for path in installed_cache.rglob("*python*")
+        if path.is_file() and path.suffix.lower() in {".so", ".pyd", ".dll", ".dylib"}
+    ]
+    assert originals, "Provision the Python grammar before running indexed tests"
+    for original in originals:
+        target = destination / original.relative_to(installed_cache)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(original, target)
+
+
+def test_copy_python_cache_preserves_platform_subdirectories(tmp_path):
+    installed = tmp_path / "installed"
+    native = installed / "linux-x86_64" / "libtree_sitter_python.so"
+    native.parent.mkdir(parents=True)
+    native.write_bytes(b"native grammar fixture")
+    destination = tmp_path / "copy"
+    copy_python_grammar_cache(installed, destination)
+    assert (destination / native.relative_to(installed)).read_bytes() == native.read_bytes()
+
+
 @pytest.mark.parametrize("job", ("test", "index-qualification"))
 def test_ci_provisions_native_grammars_not_just_download_requests(job, monkeypatch):
     workflow = yaml.safe_load(
@@ -75,10 +97,7 @@ assert evidence.parse_fingerprint() == before
         assert result.returncode == 0, result.stderr + result.stdout
 
     check("cold")
-    originals = list(Path(language_pack.cache_dir()).glob("tree_sitter_python.*"))
-    assert originals, "Provision the Python grammar before running indexed tests"
-    for original in originals:
-        shutil.copyfile(original, cache / original.name)
+    copy_python_grammar_cache(Path(language_pack.cache_dir()), cache)
     check("warm")
 
 
