@@ -120,28 +120,28 @@ class TestHistoryAnswersWhatChanged:
     """Saying *when* without *what* sent the agent back to git log."""
 
     def test_includes_the_code_that_changed(self, evolving):
-        code, output = run(evolving, "history", "fetch")
+        code, output = run(evolving, "history", "fetch", "--legacy")
         assert code == 0
         assert "@@" in output
         assert "range(3)" in output
 
     def test_still_lists_the_commits(self, evolving):
-        _, output = run(evolving, "history", "fetch")
+        _, output = run(evolving, "history", "fetch", "--legacy")
         assert "body_changed" in output
         assert "retry on failure" in output
 
     def test_brief_omits_the_code(self, evolving):
-        _, output = run(evolving, "history", "fetch", "--brief")
+        _, output = run(evolving, "history", "fetch", "--legacy", "--brief")
         assert "@@" not in output
         assert "retry on failure" in output
 
     def test_respects_a_budget(self, evolving):
         from gita.context import count_tokens
 
-        _, output = run(evolving, "history", "fetch", "--budget", "40")
+        _, output = run(evolving, "history", "fetch", "--legacy", "--budget", "40")
         assert count_tokens(output) <= 40
 
     def test_json_carries_the_detail(self, evolving):
-        payload = json.loads(run(evolving, "history", "fetch", "--json")[1])
+        payload = json.loads(run(evolving, "history", "fetch", "--legacy", "--json")[1])
         assert payload["events"]
         assert any(e.get("patch") for e in payload["events"])

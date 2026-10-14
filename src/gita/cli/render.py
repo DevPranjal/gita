@@ -8,9 +8,13 @@ from __future__ import annotations
 
 import os
 import sys
+from typing import TYPE_CHECKING
 
-from ..context import ContextView, count_tokens
-from ..diff.changes import ChangeSet, EntityChange
+from ..context.tokens import count_tokens
+
+if TYPE_CHECKING:
+    from ..context import ContextView
+    from ..diff.changes import ChangeSet, EntityChange
 
 _STYLES = {
     "dim": "\033[2m",

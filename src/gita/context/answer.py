@@ -20,6 +20,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Literal
+from ..legacy import legacy_operation
 
 from ..diff.changes import ChangeKind, ChangeSet, EntityChange
 from ..vcs.git import Repo
@@ -258,6 +259,7 @@ def _summary_lines(material: list[EntityChange], headline: str, budget: int,
     return rows, summary, shown
 
 
+@legacy_operation
 def compose(repo: Repo, base: str, head: str | None, changeset: ChangeSet,
             budget: int = DEFAULT_BUDGET, detail: bool = True,
             respect_raw_diff: bool = True,
@@ -390,6 +392,7 @@ def compose(repo: Repo, base: str, head: str | None, changeset: ChangeSet,
                   budget=budget, truncated=truncated)
 
 
+@legacy_operation
 def material_patch(repo: Repo, base: str, head: str | None,
                    changeset: ChangeSet, budget: int = DEFAULT_BUDGET,
                    respect_raw_diff: bool = True) -> PatchAnswer:

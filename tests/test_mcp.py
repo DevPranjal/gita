@@ -76,7 +76,8 @@ class TestFailureModes:
     @pytest.mark.parametrize("tool,args", [
         (diff_tool, ()),
     ])
-    def test_non_repository_reports_an_error(self, tmp_path, tool, args):
+    def test_non_repository_reports_an_error(self, tmp_path, tool, args, monkeypatch):
+        monkeypatch.setenv("GIT_CEILING_DIRECTORIES", str(tmp_path.parent))
         assert "error" in tool(str(tmp_path), *args)
 
     def test_bad_revision_reports_an_error(self, repo):
@@ -117,11 +118,11 @@ class TestServer:
     def test_history_executes_through_the_server(self, server):
         import asyncio
 
-        result = asyncio.run(server.call_tool("gita_history", {"entity": "handle", "brief": True}))
+        result = asyncio.run(server.call_tool("gita_history", {"entity": "handle", "brief": True, "legacy": True}))
         assert "signature_changed" in str(result)
 
     def test_instructions_point_at_the_cheap_layer_first(self):
-        from gita.mcp.server import SERVER_INSTRUCTIONS
+        from gita.mcp.server import LEGACY_SERVER_INSTRUCTIONS as SERVER_INSTRUCTIONS
 
         assert SERVER_INSTRUCTIONS.index("gita_diff") < \
                SERVER_INSTRUCTIONS.index("gita_show")
@@ -129,12 +130,12 @@ class TestServer:
 
 class TestHistoryTool:
     def test_entity_history_needs_no_index(self, repo):
-        result = history_tool(str(repo.root), entity="handle", brief=True)
+        result = history_tool(str(repo.root), entity="handle", brief=True, legacy=True)
         assert result["entity"] == "handle"
         assert result["events"][0]["kind"] == "signature_changed"
 
     def test_range_history_selects_commits(self, repo):
-        result = history_tool(str(repo.root), base="HEAD^", head="HEAD")
+        result = history_tool(str(repo.root), base="HEAD^", head="HEAD", legacy=True)
         assert [commit["subject"] for commit in result["commits"]] == ["second"]
 
     def test_missing_selector_is_an_error(self, repo):

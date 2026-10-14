@@ -10,6 +10,8 @@ import difflib
 import re
 from collections import Counter
 from dataclasses import dataclass
+from ..legacy import legacy_operation
+from ..patches import _absolute
 
 from ..diff.differ import diff_trees
 from ..entities.extractor import extract_path
@@ -65,40 +67,7 @@ def _slice(entity: Entity | None, source: list[str]) -> list[str]:
     return source[entity.start_line - 1:entity.end_line]
 
 
-_HUNK = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
-
-
-def _shift(start: str, offset: int) -> str:
-    # `0` means "this side is empty", a position no offset applies to.
-    number = int(start)
-    return str(number + offset) if number else "0"
-
-
-def _absolute(patch: str, old_offset: int, new_offset: int) -> str:
-    """Renumber hunk headers from entity-relative to file-absolute.
-
-    difflib numbers hunks from 1 within the lines it is handed, and it is
-    handed only the entity's own lines. An entity starting at line 18 therefore
-    reported `@@ +1,2 @@`, so an agent reading that as a file position landed on
-    the top of the file. The whole point of naming the entity is to say where to
-    look, and a confidently wrong location is worse than none.
-    """
-    if not old_offset and not new_offset:
-        return patch
-
-    out = []
-    for line in patch.splitlines(keepends=True):
-        match = _HUNK.match(line)
-        if match is None:
-            out.append(line)
-            continue
-        old_start, old_len, new_start, new_len = match.groups()
-        old = f"-{_shift(old_start, old_offset)}" + (f",{old_len}" if old_len else "")
-        new = f"+{_shift(new_start, new_offset)}" + (f",{new_len}" if new_len else "")
-        out.append(f"@@ {old} {new} @@{line[match.end():]}")
-    return "".join(out)
-
-
+@legacy_operation
 def entity_diff(repo: Repo, base: str, head: str, entity_id: str,
                 context_lines: int = 3, cache: dict | None = None) -> str:
     """Unified diff of one entity between two revisions.
@@ -127,6 +96,7 @@ def entity_diff(repo: Repo, base: str, head: str, entity_id: str,
     )
 
 
+@legacy_operation
 def change_diff(repo: Repo, base: str, head: str, change: EntityChange,
                 context_lines: int = 3, cache: dict | None = None) -> str:
     """Unified diff between Tree-sitter entities matched by a change."""
@@ -472,6 +442,7 @@ def _statement_patches(snapshots, identities, owners, material, matches,
                         promoted.setdefault(owner, set()).add(parent)
                     claimed[side, path].add(number)
     return promoted
+@legacy_operation
 def display_change_diffs(repo: Repo, base: str, head: str | None,
                          changes: list[EntityChange], context_lines: int = 1,
                          cache: dict | None = None) -> DisplayDiffs:

@@ -10,6 +10,7 @@ import time
 from importlib.metadata import version
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from ...legacy import LegacyError, require_legacy, legacy_enabled
 
 from .common import (
     MODEL, SEED, append_event, digest, final_json, parse_usage, read_events,
@@ -42,7 +43,7 @@ def cli_environment(home: Path) -> dict[str, str]:
     # credential storage remains usable. Never copy the user's configuration.
     for key in list(env):
         if key.startswith(("COPILOT_", "GITA_")) and key not in (
-                "COPILOT_GITHUB_TOKEN", "COPILOT_GH_HOST"):
+                "COPILOT_GITHUB_TOKEN", "COPILOT_GH_HOST", "GITA_ENABLE_LEGACY"):
             del env[key]
     env.update(COPILOT_HOME=str(home), COPILOT_AUTO_UPDATE="false",
                NO_COLOR="1", PYTHONIOENCODING="utf-8", USE_TGREP="false")
@@ -132,6 +133,9 @@ def audit_tools(events: list[dict], arm: str, tool_events: list[dict]) -> dict:
 
 
 def run_arm(task: dict, arm: str, repo: Path, directory: Path, timeout: int) -> dict:
+    legacy_enabled()
+    if arm == "gita":
+        require_legacy("legacy-dependent paired evaluation")
     result_path = directory / "result.json"
     if result_path.exists():
         return read_json(result_path)
@@ -145,6 +149,7 @@ def run_arm(task: dict, arm: str, repo: Path, directory: Path, timeout: int) -> 
         "type": "local", "command": sys.executable,
         "args": ["-m", "gita.eval.paired.evidence", str(directory / "evidence.json")],
         "env": {"PYTHONPATH": str(Path(__file__).resolve().parents[3]),
+                "GITA_ENABLE_LEGACY": os.environ.get("GITA_ENABLE_LEGACY", "0"),
                 "PYTHONIOENCODING": "utf-8"},
         "tools": ["*"],
     }}})
@@ -168,6 +173,7 @@ def run_arm(task: dict, arm: str, repo: Path, directory: Path, timeout: int) -> 
 
 
 def run_pair(task: dict, root: Path, repos: Path, timeout: int) -> list[dict]:
+    require_legacy("legacy-dependent paired evaluation")
     completed = [root / task["id"] / arm / "result.json" for arm in ("baseline", "gita")]
     if all(path.exists() for path in completed):
         return [read_json(path) for path in completed]
@@ -209,6 +215,10 @@ def main() -> None:
     parser.add_argument("--workers", type=int, default=2)
     parser.add_argument("--timeout", type=int, default=900)
     args = parser.parse_args()
+    try:
+        require_legacy("legacy-dependent paired evaluation")
+    except LegacyError as error:
+        parser.exit(2, f"{error.code}: {error}\n")
     root, repos = args.runs.resolve(), args.repos.resolve()
     manifest = read_json(args.manifest)
     tasks = [t for t in manifest["tasks"] if args.split == "all" or t["split"] == args.split]

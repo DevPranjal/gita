@@ -32,7 +32,13 @@ jobs:
         run: python -m pip install -c constraints.txt -e ".[dev]"
       - name: Provision grammars
         run: python -c "from tree_sitter_language_pack import download; download(['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown'])"
-      - name: Test
+      - name: Test indexed default
+        env:
+          GITA_ENABLE_LEGACY: '0'
+        run: python -m pytest tests/test_legacy_flag.py tests/test_index_query.py -q
+      - name: Test legacy compatibility
+        env:
+          GITA_ENABLE_LEGACY: '1'
         run: python -m pytest -q
       - name: Verify indexed workflow
         run: python verify/check.py --stage f3

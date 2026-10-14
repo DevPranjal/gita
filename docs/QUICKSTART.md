@@ -37,8 +37,23 @@ Use an existing repository and replace `YourFunction` with a real function name:
 $repo = 'C:\path\to\repository'
 .\.venv\Scripts\python.exe -m gita -C $repo index --scope demo --ref HEAD
 .\.venv\Scripts\python.exe -m gita -C $repo id YourFunction --scope demo
-.\.venv\Scripts\python.exe -m gita -C $repo history YourFunction --indexed --scope demo --order oldest
+.\.venv\Scripts\python.exe -m gita -C $repo history YourFunction --scope demo --order oldest
 ```
+
+History is indexed by default, even if legacy opt-in is enabled. `--indexed`
+is a compatibility no-op. Read attempts without a published compatible index
+refuse; they never create storage or parse source.
+
+Legacy `diff`, `show`, `expand` and aliases (including `diff --indexed`) require
+`$env:GITA_ENABLE_LEGACY = '1'`. Unset or exactly `0` disables them; all other
+values are invalid, including empty strings. Disabled operations return
+`legacy_disabled` with migration guidance, not indexed endpoint-diff results.
+For old reconstructing history, also pass `--legacy` (MCP: `legacy=true`);
+indexed scope/order/generation/cursor/at selectors cannot be mixed with it.
+Examples of old structural review later in this guide are historical opt-in
+workflows, not the default product. Legacy-dependent evaluation also requires
+the flag; this transitional increment does not qualify the index or add parity,
+independent verification or true endpoint diff.
 
 Repeat the index command after new commits to resume incrementally. Use a full
 returned EID when a name is ambiguous. Add `--json` for machine-readable output;
@@ -91,14 +106,11 @@ gita history HEAD~3 HEAD --indexed --scope demo --json
 
 One positional token always selects an entity, even if a Git ref has that name.
 With two positional tokens, a first token that resolves as a Git revision
-selects range history. Existing `history YourFunction <since>` and
-`history YourFunction <since> <until>` forms still work; use
-`history YourFunction --since <since> --until <until>` to disambiguate names
-that also resolve as refs.
+selects range history. Old entity-plus-revision forms require explicit `--legacy` and the environment
+opt-in. Indexed entity history instead uses `--at`.
 
-Without `--indexed`, entity history includes patches and range history lists
-per-commit entity changes. Indexed entity history follows persistent identity;
-indexed range history returns all recorded transitions in `(base, head]`,
+Ordinary entity history follows persistent identity and includes patches;
+range history returns all recorded transitions in `(base, head]`,
 oldest first. Both endpoints must belong to the selected first-parent index.
 Equal endpoints return an empty result. This is event history, not a net diff:
 an edit and its later reversal remain two transitions.
@@ -143,18 +155,20 @@ Restart an already-running MCP server after upgrading to discover the new tools.
 
 | Tool | Query |
 | --- | --- |
-| `gita_diff` | Structural changes; supports filter, interface-only, brief, intent, patch and indexed options. |
-| `gita_expand` | Changed children of a container, with optional intent ranking. |
-| `gita_show` | Exact changed hunks for an entity. |
-| `gita_history` | Supply `entity`, or `base` and `head`; `indexed=true` selects persistent evidence with budgeted patches; `brief=true` returns metadata only. |
+| `gita_diff` | Legacy opt-in only: structural changes and the old indexed event adapter. |
+| `gita_expand` | Legacy opt-in only: changed children of a container. |
+| `gita_show` | Legacy opt-in only: exact changed hunks for an entity. |
+| `gita_history` | Supply `entity`, or `base` and `head`; persistent evidence is the default, `indexed` is a compatibility no-op, `brief=true` returns metadata only. |
 | `gita_index` | `action="status"` by default; explicit `build`, `verify` or `gc`. |
 | `gita_id` | Resolve a name/locator/EID, including historical names. |
 | `gita_state` | State and source occurrence for a full EID at a revision. |
 | `gita_source` | Exact committed source from a returned occurrence. |
 | `gita_entities` | Paginated occurrences in a repository-relative file at a revision. |
 
-All tools accept a `repo` override. For uncommitted diffs use `base="HEAD"`,
-`head=null`; indexed reads exclude working-tree changes. An indexed workflow is
+All tools accept a `repo` override. The three legacy tools are absent from
+discovery unless the server starts with `GITA_ENABLE_LEGACY=1`; reconstructing
+history additionally selects `legacy=true`. Opted-in uncommitted diffs use
+`base="HEAD", head=null`; indexed reads exclude working-tree changes. An indexed workflow is
 `gita_index(action="build")`, then `gita_id`, `gita_history` or `gita_state`,
 and `gita_source`. Preserve the returned scope, generation and occurrence when
 following references. Read-only queries never build missing indexes.

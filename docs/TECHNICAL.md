@@ -5,6 +5,15 @@ description: "Structural context, persistent entity evidence, indexed history an
 
 # gita Technical Guide
 
+**Transitional release:** Indexed entity history is now the default. Legacy
+structural review, reconstructing Python APIs and browser/evaluation entry
+points require strict `GITA_ENABLE_LEGACY=1`; ordinary history remains indexed,
+with `--indexed` a compatibility no-op and `--legacy` the explicit old engine.
+The two-engine descriptions below explain retained internals, not default
+availability. Legacy still ships; parser/matcher policy and storage are unchanged.
+The index-first specs remain incomplete, including qualification, query parity,
+independent verification and genuine endpoint diff.
+
 **Version:** 1.0.0.
 This document describes shipped behavior. F0-F3 are implemented; independent
 F4 qualification is not.

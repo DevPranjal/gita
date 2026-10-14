@@ -43,6 +43,7 @@ from __future__ import annotations
 
 import hashlib
 from typing import Any
+from ..legacy import legacy_operation
 
 from ..diff.changes import ChangeKind, ChangeSet, EntityChange
 from ..entities.model import Entity, EntityKind
@@ -178,6 +179,7 @@ def _change(session, event: dict) -> EntityChange | None:
     )
 
 
+@legacy_operation
 def compare(repository, base: str, head: str, *, scope: str = "default",
             generation: str | None = None, page: int = PAGE
             ) -> tuple[ChangeSet, dict[str, Any]]:
@@ -245,4 +247,3 @@ def coverage_warning(coverage: dict[str, Any]) -> str:
 
 
 __all__ = ["compare", "coverage_warning", "QueryError", "PAGE"]
-

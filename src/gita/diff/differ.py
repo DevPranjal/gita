@@ -10,6 +10,7 @@ Unmatched entities remain added or removed; this does not prove absent continuit
 """
 
 from __future__ import annotations
+from ..legacy import legacy_operation
 
 from collections import defaultdict
 from difflib import SequenceMatcher
@@ -82,6 +83,7 @@ def _pair_up(removed: dict, added: dict, key, guard=lambda e: True) -> list[Enti
     return matched
 
 
+@legacy_operation
 def reconcile_moves(changes: list[EntityChange]) -> list[EntityChange]:
     """Second pass across file boundaries.
 
@@ -255,6 +257,7 @@ def _classify_matched(previous: Entity, current: Entity) -> EntityChange:
                         signature_changed=signature_changed, body_changed=True)
 
 
+@legacy_operation
 def diff_trees(previous: EntityTree | None, current: EntityTree | None,
                rename_threshold: float = RENAME_THRESHOLD) -> list[EntityChange]:
     """Compare two revisions of one file."""
@@ -308,6 +311,7 @@ def diff_trees(previous: EntityTree | None, current: EntityTree | None,
     return _sorted(changes)
 
 
+@legacy_operation
 def diff_files(files, rename_threshold: float = RENAME_THRESHOLD) -> ChangeSet:
     """Aggregate ``(previous_tree, current_tree)`` pairs into one ChangeSet."""
     changeset = ChangeSet()

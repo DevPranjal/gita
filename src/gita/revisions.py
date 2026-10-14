@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from .legacy import legacy_operation
 
 from .diff.changes import ChangeKind, ChangeSet, EntityChange
 from .diff.differ import RENAME_THRESHOLD, diff_trees, reconcile_moves
@@ -28,6 +29,7 @@ def _tree_at(repo: Repo, rev: str | None, path: str) -> EntityTree | None:
     return TREES.get(blob, path, _parse)
 
 
+@legacy_operation
 def diff_revisions(repo: str | Path | Repo, base: str = "HEAD",
                    head: str | None = WORKTREE,
                    rename_threshold: float = RENAME_THRESHOLD,

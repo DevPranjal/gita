@@ -261,7 +261,7 @@ class TestErrors:
     def test_no_command_prints_short_usage(self, repo):
         code, output = run(repo)
         assert code != 0
-        assert "gita diff" in output
+        assert "gita index" in output
         # orientation should be cheap: an agent reading this pays for every line
         assert len(output.splitlines()) <= 14
 
@@ -273,7 +273,8 @@ class TestErrors:
         assert code != 0
         assert "nope123" in output or "revision" in output.lower()
 
-    def test_non_repo_path_is_reported(self, tmp_path):
+    def test_non_repo_path_is_reported(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("GIT_CEILING_DIRECTORIES", str(tmp_path.parent))
         out = io.StringIO()
         code = main(["-C", str(tmp_path), "diff"], out=out)
         assert code != 0
@@ -289,32 +290,32 @@ class TestHistoryTakesRevisionsLikeEveryOtherCommand:
     """
 
     def test_positional_revisions_are_accepted(self, repo):
-        code, output = run(repo, "history", "handle", "HEAD^", "HEAD")
+        code, output = run(repo, "history", "--legacy", "handle", "HEAD^", "HEAD")
         assert code == 0
         assert "handle" in output
 
     def test_a_single_positional_revision_means_since(self, repo):
-        positional = run(repo, "history", "handle", "HEAD^")
-        flagged = run(repo, "history", "handle", "--since", "HEAD^")
+        positional = run(repo, "history", "--legacy", "handle", "HEAD^")
+        flagged = run(repo, "history", "--legacy", "handle", "--since", "HEAD^")
         assert positional == flagged
 
     def test_the_flag_form_still_works(self, repo):
-        code, _ = run(repo, "history", "handle", "--since", "HEAD^", "--until", "HEAD")
+        code, _ = run(repo, "history", "--legacy", "handle", "--since", "HEAD^", "--until", "HEAD")
         assert code == 0
 
     def test_flags_win_over_positionals(self, repo):
-        explicit = run(repo, "history", "handle", "HEAD~1", "--since", "HEAD^")
+        explicit = run(repo, "history", "--legacy", "handle", "HEAD~1", "--since", "HEAD^")
         assert explicit[0] == 0
 
     @pytest.mark.parametrize("command", ["history", "katha"])
     def test_two_commits_select_repository_history(self, repo, command):
-        positional = run(repo, command, "HEAD^", "HEAD", "--json")
-        flagged = run(repo, "history", "--since", "HEAD^", "--until", "HEAD", "--json")
+        positional = run(repo, command, "--legacy", "HEAD^", "HEAD", "--json")
+        flagged = run(repo, "history", "--legacy", "--since", "HEAD^", "--until", "HEAD", "--json")
         assert positional == flagged
 
     def test_one_token_remains_an_entity_even_when_a_ref_matches(self, repo):
         repo._run("branch", "handle")
-        code, output = run(repo, "history", "handle", "--json")
+        code, output = run(repo, "history", "--legacy", "handle", "--json")
         assert code == 0
         assert json.loads(output)["entity"] == "handle"
 
@@ -345,7 +346,7 @@ class TestSpeaksGitsDialect:
                run(repo, "diff", "HEAD^", "HEAD", "--brief")
 
     def test_history_accepts_them_too(self, repo):
-        code, _ = run(repo, "history", "handle", "--oneline")
+        code, _ = run(repo, "history", "--legacy", "handle", "--oneline")
         assert code == 0
 
 
@@ -834,8 +835,6 @@ class TestIndexedCli:
             ("history", "handle", "--indexed", "HEAD^", "HEAD"),
             ("history", "handle", "--indexed", "--since", "HEAD^"),
             ("history", "handle", "--indexed", "--until", "HEAD"),
-            ("history", "handle", "--scope", "default"),
-            ("history", "handle", "--at", "HEAD"),
         ]
         invalid += [(*command, "--limit", limit)
                     for command in (("id", "handle"), ("history", "handle", "--indexed"))
