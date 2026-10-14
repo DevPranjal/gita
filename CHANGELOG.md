@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Add manifest-driven offline index qualification with authored Git histories,
+  independent source/query correctness gates, isolated build/update/no-op/query
+  scenarios, failure receipts, resource sampling and baseline comparisons.
+- Bound repeated candidate-version decoding with a transaction-local token cache.
+  Identity rules and storage schema are unchanged, but the builder fingerprint
+  changes: existing indexed scopes require an explicit rebuild.
+- Add serial/parallel/incremental equivalence, publication recovery, reader/writer
+  and adversarial oracle tests, plus dedicated Windows/Linux qualification CI.
+  These gates do not implement product F4 verification or qualify arbitrary sizes.
+
 - Begin legacy retirement with strict `GITA_ENABLE_LEGACY=1` opt-in. Unset/`0`
   disables the structural-review product; other values refuse clearly.
 - Ordinary CLI/MCP history now reads the published index, including scope/order

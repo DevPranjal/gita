@@ -90,9 +90,13 @@ helpers remain available to the index.
 
 This is the first feature-flag increment, not complete retirement. Legacy code
 still ships; query parity, independent verification, endpoint comparison and
-index qualification remain follow-up work. Parser/matcher policy and storage
-formats are unchanged by this increment; an already-incompatible index still
-requires explicit handling.
+full index qualification remain follow-up work. The first S2 increment adds an
+[offline correctness-gated benchmark](verify/README.md#offline-s2-qualification)
+and publication recovery/equivalence campaigns. A bounded matching-token cache
+reduces repeated validated version decoding; it does not change matching rules or
+storage schema. The builder artifact fingerprint **does change**, so previously
+built indexes require an explicit rebuild under this interpretation. No arbitrary
+repository size, independent product F4 verification, or complete S2 delivery is claimed.
 
 ## Connect an agent
 

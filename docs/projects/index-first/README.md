@@ -8,8 +8,15 @@
 implemented: strict `GITA_ENABLE_LEGACY=1`, indexed history by default, lazy
 indexed import boundaries, and legacy API/CLI/MCP/browser/evaluation gates.
 This does not complete any milestone or whole specification; legacy still ships.
-S2 qualification and S3 query parity, independent verification and endpoint
-comparison remain unimplemented. Shared parse/match policy and storage are unchanged.
+S2 now has a bounded first engineering increment: deterministic authored Python
+histories, independent AST/Git/lineage gates, five separately measured scenarios,
+persisted failed attempts, owned-process sampling/cancellation, recovery and
+serial/parallel/resume equivalence tests, plus a profiled bounded token-cache
+optimization. See [verification tooling](../../../verify/README.md#offline-s2-qualification).
+This is not full S2 qualification or completion of a milestone. S3 query parity,
+independent **product** verification and endpoint comparison remain unimplemented.
+Storage schema and matching rules are unchanged; the builder artifact fingerprint
+changes and therefore requires explicit rebuilding of older interpretations.
 
 **Decision:** Keep the persistent indexed product; retire query-time entity
 reconstruction and the separate structural-review engine.
@@ -37,8 +44,9 @@ analysis. These specs turn it into testable product and engineering requirements
 - **Proposed** means implementation is required. Command examples in S3 describe
   the target interface, not commands to run against 1.0.0.
 - Numerical budgets and regression allowances in S2 are **proposed engineering
-  policy**, not measured performance claims. No benchmark has been run for this
-  specification set.
+  policy**, not measured performance claims. Initial correctness-gated smoke
+  observations are recorded in [the verification guide](../../../verify/README.md);
+  they do not complete the specified statistical or real-repository campaigns.
 - Every epic has an ID scoped to its spec. Dependencies are explicit; document
   order is not a dependency.
 - No spec authorizes rewriting Git history, changing repository visibility,

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections import deque
+from collections import OrderedDict, deque
 from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import ExitStack, closing, contextmanager
 from dataclasses import dataclass
@@ -31,6 +31,44 @@ class BuildError(RuntimeError):
 	def __init__(self, code: str, message: str) -> None:
 		self.code = code
 		super().__init__(message)
+
+
+class _CandidateTokens:
+	"""Transaction-local validated immutable own tokens, never candidate decisions.
+
+	Bound both serialized payload bytes and token/entry counts: a byte-only limit
+	would not account for Python object overhead on many tiny tokens.
+	"""
+
+	def __init__(self, store: IndexStore, *, max_bytes: int = 4 * 1024 ** 2,
+				 max_tokens: int = 65536, max_entries: int = 1024) -> None:
+		self.store = store
+		self.max_bytes, self.max_tokens, self.max_entries = max_bytes, max_tokens, max_entries
+		self.entries: OrderedDict[str, tuple[tuple[str, ...] | None, int, int]] = OrderedDict()
+		self.bytes = self.tokens = 0
+
+	def get(self, row: sqlite3.Row) -> tuple[str, ...] | None:
+		identifier = row["version_id"]
+		if identifier in self.entries:
+			self.entries.move_to_end(identifier)
+			return self.entries[identifier][0]
+		version = self.store.get_version(identifier)
+		if version is None:
+			raise BuildError("corrupt", "Candidate representation is unavailable")
+		tokens = version.own
+		size, count = len(row["own_payload"] or b""), len(tokens or ())
+		if size <= self.max_bytes and count <= self.max_tokens and self.max_entries:
+			while self.entries and (
+				self.bytes + size > self.max_bytes or self.tokens + count > self.max_tokens
+				or len(self.entries) >= self.max_entries
+			):
+				_, (_, old_size, old_count) = self.entries.popitem(last=False)
+				self.bytes -= old_size
+				self.tokens -= old_count
+			self.entries[identifier] = (tokens, size, count)
+			self.bytes += size
+			self.tokens += count
+		return tokens
 
 
 @dataclass(frozen=True, slots=True)
@@ -401,6 +439,7 @@ class _Builder:
 		self.considered = 0
 		self.limited = False
 		self.gaps: dict[str, bool] = {}
+		self._candidate_tokens = _CandidateTokens(self.store)
 		if prefix_count:
 			self.sequence = prefix_count - 1
 			member = self.store._member(generation, self.sequence)
@@ -928,11 +967,9 @@ class _Builder:
 							  self._count("before", before, "subtree"), self._count("after", after, "subtree"),
 							  (1, 1), counted=True)
 			return
-		old_version = self.store.get_version(before["version_id"])
-		new_version = self.store.get_version(after["version_id"])
-		if old_version is None or new_version is None:
-			raise BuildError("corrupt", "Candidate representation is unavailable")
-		numerator, denominator = matching.similarity(old_version.own, new_version.own)
+		numerator, denominator = matching.similarity(
+			self._candidate_tokens.get(before), self._candidate_tokens.get(after),
+		)
 		if denominator and 5 * numerator >= 3 * denominator:
 			self._refusal(before, after, "similarity", "candidate", "normalized_token_similarity",
 						  self._count("before", before, "own"), self._count("after", after, "own"),
