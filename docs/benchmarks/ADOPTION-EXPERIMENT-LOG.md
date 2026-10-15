@@ -380,3 +380,30 @@ for a clean committed runtime: it reported a source-pin mismatch while the
 prototype source was dirty, before checking its deliberately missing store.
 Do not weaken that source gate or change its expected error; commit the
 qualified source and rerun the test under its intended precondition.
+
+## Delivery freeze: one fixed25 validation run
+
+Delivery candidate `200c404`; source-packet/oracle/public-benchmark check:
+**56 tests passed** under the required clean-source pin. All original 25
+starter tasks are frozen, with 19 connected histories, 4 endpoint-only scopes
+and 2 recorded timeout fallbacks. No failed task is removed.
+
+Protocol:
+`3ef35ec7035e92e4a5349455f56c58186b0d2bcf9b468c7b3fdeb0a51ed4c691`.
+Reviewer `auto`, 50 primary sessions, no automatic retries; reviewer cap220 /
+judge cap80, combined with prior all-native upper bound644.1287544 for a total
+prospective bound944.1287544, below the original950 authorization.
+
+The canary pair passed inventory, source, output, call and usage checks.
+H requested `change_context` and actually received verified indexed source-diff
+previews; B requested raw source. H input25,973 versus B143,061, but H cost
+3.823263 versus B0.491216 with Claude versus GPT routing. No cost/quality win
+is inferred from this canary. Both receipts were inspected before continuation.
+
+The fixed25 run is now executing. This is a development validation of the
+frozen engine-plus-workflow candidate, **not** a claim that small pilots
+established a joint win, a held-out confirmation, or pure optional-tool
+availability. No further reviewer prompt/tool changes during this run. Next:
+consistent blinded judging, all-slot accounting, actual source/history/diff
+use and realized-route reporting, then publish the complete result regardless
+of direction. This replaces further open-ended micro-iterations.
