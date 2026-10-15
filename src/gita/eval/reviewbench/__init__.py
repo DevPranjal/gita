@@ -1,3 +1,3 @@
 """Versioned indexed ReviewBench experiment; independent of legacy paired eval."""
 
-VERSION = "reviewbench-auto-indexed-v1"
+VERSION = "reviewbench-auto-indexed-v2"

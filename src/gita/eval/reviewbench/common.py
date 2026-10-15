@@ -9,6 +9,9 @@ from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+EVIDENCE_CALL_LIMIT = 40
+FINALIZATION_GRACE = 5
+
 
 class ProtocolError(RuntimeError):
     """A refusal that must not be converted to a successful empty review."""

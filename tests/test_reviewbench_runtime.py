@@ -30,7 +30,7 @@ def test_mcp_schema_and_tool_completions_correlate(tmp_path):
     result = {"text": "exact source"}
     path = tmp_path / "tools.jsonl"
     import json
-    path.write_text(json.dumps({"tool": "read_file", "ok": True,
+    path.write_text(json.dumps({"sequence": 1, "tool": "read_file", "ok": True,
                                "argument_digest": digest(arguments),
                                "result_digest": digest(result), "result": result}) + "\n", encoding="utf8")
     start = {"type": "tool.execution_start", "data": {

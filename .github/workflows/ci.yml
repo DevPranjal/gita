@@ -29,7 +29,7 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: pip
       - name: Install dependencies
-        run: python -m pip install -c constraints.txt -e ".[dev]"
+        run: python -m pip install -c constraints.txt -e ".[dev,bench]"
       - name: Provision grammars
         # language-pack 1.14.3 download() alone does not materialize native files.
         run: python -c "from tree_sitter_language_pack import get_parser, downloaded_languages; names = ['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown']; [get_parser(name) for name in names]; assert set(names) <= set(downloaded_languages()), downloaded_languages()"
@@ -37,6 +37,10 @@ jobs:
         env:
           GITA_ENABLE_LEGACY: '0'
         run: python -m pytest tests/test_legacy_flag.py tests/test_index_query.py -q
+      - name: Offline indexed review harness (no model calls)
+        env:
+          GITA_ENABLE_LEGACY: '0'
+        run: python -c "import pathlib, pytest; raise SystemExit(pytest.main([str(p) for p in sorted(pathlib.Path('tests').glob('test_reviewbench*.py'))] + ['-q']))"
       - name: Test legacy compatibility
         env:
           GITA_ENABLE_LEGACY: '1'

@@ -161,10 +161,21 @@ def source_context(scope: dict, candidates: list[dict], golden: list[dict]) -> d
                     lines = source_lines(evidence.blob(path, commit))
                     text = "\n".join(f"{i}: {line}" for i, line in enumerate(lines, 1) if start <= i <= end)
                     snippets.append({"file": path, "commit": commit, "source": text})
-        patch = evidence.raw_diff()
-        require(not patch["truncated"], "Judge source-context patch budget exceeded; manual audit required")
+        parts, cursor, seen = [], "", set()
+        while True:
+            patch = evidence.raw_diff(cursor=cursor)
+            parts.append(patch["text"])
+            require(len(json.dumps("".join(parts))) <= 180000,
+                    "Judge fixed source-context patch limit exceeded")
+            next_cursor = patch.get("next_cursor")
+            require(bool(next_cursor) == bool(patch["truncated"]), "Inconsistent judge patch continuation")
+            if not next_cursor:
+                break
+            require(next_cursor not in seen, "Cyclic judge patch continuation")
+            seen.add(next_cursor)
+            cursor = next_cursor
         context = {"head": scope["task"]["head"], "effective_base": scope["effective_base"],
-                   "snippets": snippets, "patch": patch["text"],
+                   "snippets": snippets, "patch": "".join(parts),
                    "omissions": "Related unchanged files/imported APIs are not interactively investigated."}
         require(len(json.dumps(context)) <= 180000, "Judge fixed source-context limit exceeded")
         return context

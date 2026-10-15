@@ -12,7 +12,7 @@ import time
 from typing import Any
 from ...index.model import GitOid
 
-from .common import (EvidenceBudgetError, IntegrityError, ProtocolError, append_json, checked_path, digest, git,
+from .common import (EVIDENCE_CALL_LIMIT, EvidenceBudgetError, IntegrityError, ProtocolError, append_json, checked_path, digest, git,
                      oid, read_json, require, require_integrity, source_lines)
 
 PAGE_CHARS = 6000
@@ -53,7 +53,7 @@ DESCRIPTIONS = {
     "list_files": "List every tracked member path at an allowed commit; optional glob.",
     "commit_log": "Ordered allowed commits only, with subjects and parents qualified at the scope boundary.",
     "file_history": "Raw Git changes for a member path over the same declared allowed commit graph.",
-    "index_status": "Read preparation, generation, context and coverage availability; no build or mutation.",
+    "index_status": "Optional: inspect prebuilt index readiness and gaps. For named-function context, entities(path) or id(name) -> state/source can retrieve exact entity evidence instead of whole files. Raw Git fallback is valid. No build or mutation.",
     "entities": "Indexed file entities with exact occurrence references, coverage and opaque continuation.",
     "id": "Resolve an indexed EID or entity name at an allowed revision, preserving ambiguity.",
     "state": "Generation-qualified indexed entity state at an allowed revision.",
@@ -444,7 +444,8 @@ class Evidence:
         start = time.monotonic()
         self.calls += 1
         try:
-            require(self.calls <= 40, "Evidence call limit reached")
+            if self.calls > EVIDENCE_CALL_LIMIT:
+                raise EvidenceBudgetError("Evidence call limit reached; finalize the review without further evidence")
             require(name in self.tools, "Tool unavailable in this arm")
             require(type(arguments) is dict, "Invalid tool arguments")
             require(set(arguments) <= set(SCHEMAS[name]["properties"]), "Unexpected tool argument")

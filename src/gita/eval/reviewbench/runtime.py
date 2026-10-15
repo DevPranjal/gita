@@ -11,11 +11,11 @@ import subprocess
 import time
 from typing import Iterator
 
-from .common import (IntegrityError, ProtocolError, digest, read_json, require,
+from .common import (EVIDENCE_CALL_LIMIT, FINALIZATION_GRACE, IntegrityError, ProtocolError, digest, read_json, require,
                      require_integrity, utc_now, write_json)
 
 SESSION_CREDITS = 30  # CLI 1.0.97 rejects lower native caps.
-REVIEWER_CREDITS = 600
+REVIEWER_CREDITS = 400
 JUDGE_CREDITS = 200
 MAX_SESSIONS = 2
 MAX_SECONDS = 900
@@ -340,11 +340,9 @@ def command(directory: Path, prompt: str, allowed: list[str], mcp: Path | None) 
             "--allow-all-tools"]
     # Bare --available-tools is NOT an empty allowlist in CLI 1.0.97.
     args += ["--available-tools", ",".join(allowed) if allowed else "review-no-such-tool"]
-    if not allowed:
-        args += ["--deny-tool", "*"]
     if mcp is not None:
         args += ["--additional-mcp-config", "@" + str(mcp)]
-    return args + ["-p", prompt]
+    return args
 
 
 def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
@@ -354,17 +352,19 @@ def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
         (directory / name).mkdir(parents=True, exist_ok=False)
     args = command(directory, prompt, allowed, mcp)
     write_json(directory / "invocation.json", {
-        "arguments_without_prompt": args[:-2], "prompt_digest": digest(prompt),
-        "requested_model": "auto", "native_credit_cap": SESSION_CREDITS})
-    (directory / "prompt.txt").write_text(prompt, encoding="utf8")
+        "arguments_without_prompt": args, "prompt_digest": digest(prompt),
+        "prompt_transport": "utf8-stdin", "requested_model": "auto",
+        "native_credit_cap": SESSION_CREDITS})
+    (directory / "prompt.txt").write_text(prompt, encoding="utf8", newline="")
     start = time.monotonic()
     outcome = {"status": "runtime_failed", "usage": None, "error": None}
     with (directory / "events.jsonl").open("w", encoding="utf8") as output, (
-            directory / "stderr.txt").open("w", encoding="utf8") as errors:
+            directory / "stderr.txt").open("w", encoding="utf8") as errors, (
+            directory / "prompt.txt").open("rb") as incoming:
         process = None
         tree = None
         try:
-            process = subprocess.Popen(args, stdout=output, stderr=errors,
+            process = subprocess.Popen(args, stdout=output, stderr=errors, stdin=incoming,
                                        env=environment(directory / "home"),
                                        start_new_session=os.name != "nt")
             tree = ProcessTree(process)
@@ -374,9 +374,9 @@ def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
                 events = read_events(directory / "events.jsonl", partial=True)
                 inventories(events, set(allowed), final=False)
                 turns = sum(e.get("type") == "assistant.turn_start" for e in events)
-                require(turns <= MAX_TURNS, "Reviewer turn limit reached")
+                require(turns <= MAX_TURNS + FINALIZATION_GRACE, "Reviewer finalization turn limit reached")
                 calls = sum(e.get("type") == "tool.execution_start" for e in events)
-                require(calls <= 40, "Evidence call limit reached")
+                require(calls <= EVIDENCE_CALL_LIMIT + FINALIZATION_GRACE, "Evidence finalization grace exceeded")
                 time.sleep(0.25)
             require(process.returncode == 0, "CLI exited unsuccessfully")
             events = read_events(directory / "events.jsonl")

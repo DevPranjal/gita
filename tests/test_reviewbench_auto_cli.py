@@ -31,7 +31,7 @@ def test_new_protocol_reserves_headroom_for_failed_initial_canary(tmp_path, monk
                         SimpleNamespace(stdout="1.0.97"))
     monkeypatch.setattr("shutil.which", lambda name: "copilot.exe")
     result = campaign.protocol(tmp_path, scopes, {"policy_digest": "policy"})
-    assert result["budgets"]["reviewer_credits"] == 600
+    assert result["budgets"]["reviewer_credits"] == 400
     assert result["reasoning_effort"] == "auto-provider-default"
 
 
