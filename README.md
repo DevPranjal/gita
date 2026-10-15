@@ -43,8 +43,10 @@ and [NumPy coverage and failed first attempt](docs/benchmarks/numpy-snapshot-202
 The [indexed ReviewBench experiment](docs/benchmarks/reviewbench-indexed.md)
 uses `auto`, frozen paired tools and native accounting; both development cohorts
 stopped with unknown usage. The [second cohort's 21 valid pairs](docs/benchmarks/reviewbench-auto-pilot2-stopped.md)
-remain conditional, ungraded observations. No current indexed-review quality or
-savings claim is established.
+remain conditional observations. [Quality scores now cover all 21 completed pairs](docs/benchmarks/reviewbench-auto-indexed-quality.md):
+slightly higher grounded recall but lower augmented precision, with low indexed-tool
+adoption and wide uncertainty. No causal indexing benefit or general savings claim
+is established.
 
 ## Install
 

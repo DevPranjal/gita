@@ -5,6 +5,11 @@ description: "Versioned, capped paired-review harness and its implemented scient
 
 # Indexed Git versus Gita: ReviewBench
 
+**Current result:** [All 21 completed paired reviews are now quality-scored](reviewbench-auto-indexed-quality.md).
+The original 25-task reviewer campaign remains incomplete. Quality is mixed;
+low indexed-tool adoption prevents attribution to persistent entity evidence.
+The chronology below preserves earlier failures and source/transport revisions.
+
 ## Overview and status
 
 This compares **the same Copilot CLI agent using `--model auto` with different

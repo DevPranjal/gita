@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Publish quality for all21 completed indexed ReviewBench pairs, preserving all
+  failed/unstarted reviewer slots, prior judgments and unknown cost reservations.
+  Report mixed grounded/augmented agreement, low indexed-tool adoption,
+  exploratory paired uncertainty and complete native development spending.
+  No official score, causal indexing benefit or general credit-saving claim.
+
 - Add explicitly authorized, separately sealed partial-cohort quality analysis.
   Bind original source bytes, receipts, labels and unresolved cost bounds;
   preserve the stopped reviewer ledger and all fixed task denominators. Share
