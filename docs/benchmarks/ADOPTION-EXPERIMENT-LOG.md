@@ -407,3 +407,38 @@ availability. No further reviewer prompt/tool changes during this run. Next:
 consistent blinded judging, all-slot accounting, actual source/history/diff
 use and realized-route reporting, then publish the complete result regardless
 of direction. This replaces further open-ended micro-iterations.
+
+## User-directed fixed-model transition
+
+The user requested GPT-5.6 Sol / medium reasoning instead of `auto`. The auto
+coordinator was stopped at a **settled-session boundary**, holding the ledger
+lock so no new reservation could race with the stop. All26 started sessions
+settled: 57.368546 credits, zero unknown usage. Original receipts and operator
+stop records remain unchanged; do not pool this incomplete auto cohort with
+the coming fixed-model run.
+
+Reviewer settings now flow through protocol, commands, invocation receipts,
+output validation and replay: `reviewer_model="gpt-5.6-sol"`,
+`reviewer_reasoning="medium"`. Unexpected fallback/mixed realized models fail.
+Default auto behavior and older receipts remain compatible.154 offline evaluator
+tests passed. An actual zero-tool fixed-model qualification completed with
+the correct model and flags:1.516700 credits, one request, valid JSON.
+
+The user requested the **upstream benchmark judge**, not merely its arithmetic.
+Pinned ReviewBench was restored separately; its SDK supports `github-copilot`.
+The older registry needs an explicit Sol model entry. An isolated, credential-free
+model configuration is prepared. Upstream matcher defaults to low reasoning;
+only that setting was changed to medium (classifier already medium), retaining
+the matcher/classifier/scorer logic. Upstream TypeScript typecheck passed.
+
+Authentication remains a launch gate: the configured Gemini key was rejected
+by Google, so no Gemini inference ran. The user then selected Copilot-backed
+judging. Pi has no Copilot login, and the existing GitHub CLI account's
+first-party Copilot token exchange returned403. No alternate credential
+extraction, fallback account, or authentication bypass is attempted. A supported
+one-time Pi GitHub Copilot login is needed before the upstream judge smoke test.
+Local Copilot CLI reviewer authentication works; that does not authenticate Pi.
+
+No new fixed25 reviewers have been launched before the judge route is usable.
+The Copilot provider registry reports zero prices, which is not proof of free
+judging or a substitute for measured credit accounting.

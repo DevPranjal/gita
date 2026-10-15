@@ -12,7 +12,7 @@ from gita.eval.reviewbench.campaign import audit_calls, validate_receipt
 def test_timeout_kills_owned_process_and_retains_unknown_usage(tmp_path, monkeypatch):
     # This is harness-only Python, never repository source or a model invocation.
     monkeypatch.setattr("gita.eval.reviewbench.runtime.command",
-                        lambda *_: [sys.executable, "-c", "import time; time.sleep(60)"])
+                        lambda *_, **__: [sys.executable, "-c", "import time; time.sleep(60)"])
     directory = tmp_path / "attempt"
     directory.mkdir()
     result = invoke(directory, "synthetic", [], None, timeout=0.5)

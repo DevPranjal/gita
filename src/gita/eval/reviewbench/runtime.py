@@ -1,4 +1,4 @@
-"""Copilot-native auto accounting and fail-closed, persistent spend reservations."""
+"""Copilot-native requested-model accounting and fail-closed spend reservations."""
 from __future__ import annotations
 
 from contextlib import contextmanager
@@ -344,10 +344,28 @@ def environment(home: Path) -> dict:
     return env
 
 
-def command(directory: Path, prompt: str, allowed: list[str], mcp: Path | None) -> list[str]:
+def validate_settings(model: str, reasoning: str | None) -> None:
+    require(type(model) is str and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]*", model) is not None,
+            "Invalid requested model")
+    require(reasoning is None or (type(reasoning) is str and reasoning in (
+        "none", "minimal", "low", "medium", "high", "xhigh", "max")),
+        "Invalid requested reasoning effort")
+    require(model != "auto" or reasoning is None, "Auto model cannot override reasoning effort")
+
+
+def validate_realized_model(usage: dict, model: str) -> None:
+    """Fixed requests must not accept another route, even in mixed-model usage."""
+    if model != "auto":
+        require(usage["current_model"] == model and usage["models"] == [model],
+                "Realized model differs from fixed requested model; fallback is forbidden")
+
+
+def command(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
+            *, model: str = "auto", reasoning: str | None = None) -> list[str]:
+    validate_settings(model, reasoning)
     executable = shutil.which("copilot.exe") or shutil.which("copilot")
     require(executable is not None, "Copilot CLI missing")
-    args = [executable, "-C", str(directory / "workspace"), "--model", "auto",
+    args = [executable, "-C", str(directory / "workspace"), "--model", model,
             "--context", "default",
             "--max-ai-credits", str(SESSION_CREDITS), "--no-auto-update",
             "--no-custom-instructions", "--disable-builtin-mcps", "--no-ask-user",
@@ -356,6 +374,8 @@ def command(directory: Path, prompt: str, allowed: list[str], mcp: Path | None) 
             "--log-dir", str(directory / "logs"), "--log-level", "debug",
             "--dynamic-retrieval", "skills=off", "--max-autopilot-continues", "0",
             "--allow-all-tools"]
+    if reasoning is not None:
+        args += ["--reasoning-effort", reasoning]
     # Bare --available-tools is NOT an empty allowlist in CLI 1.0.97.
     args += ["--available-tools", ",".join(allowed) if allowed else "review-no-such-tool"]
     if mcp is not None:
@@ -365,11 +385,13 @@ def command(directory: Path, prompt: str, allowed: list[str], mcp: Path | None) 
 
 def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
            *, timeout: float = MAX_SECONDS, streaming: bool = True,
-           diagnostic_transport: bool = False) -> dict:
+           diagnostic_transport: bool = False, model: str = "auto",
+           reasoning: str | None = None) -> dict:
+    validate_settings(model, reasoning)
     require(0 < timeout <= MAX_SECONDS, "Invalid reviewer timeout")
     for name in ("workspace", "home", "logs"):
         (directory / name).mkdir(parents=True, exist_ok=False)
-    args = command(directory, prompt, allowed, mcp)
+    args = command(directory, prompt, allowed, mcp, model=model, reasoning=reasoning)
     require(type(streaming) is bool, "Streaming selection must be boolean")
     require(type(diagnostic_transport) is bool, "Diagnostic transport selection must be boolean")
     require(not diagnostic_transport or (not allowed and mcp is None),
@@ -378,12 +400,14 @@ def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
         args += ["--stream", "off"]
     write_json(directory / "invocation.json", {
         "arguments_without_prompt": args, "prompt_digest": digest(prompt),
-        "prompt_transport": "utf8-stdin", "requested_model": "auto",
+        "prompt_transport": "utf8-stdin", "requested_model": model,
+        "requested_reasoning": reasoning,
         "diagnostic_transport": diagnostic_transport,
         "native_credit_cap": SESSION_CREDITS})
     (directory / "prompt.txt").write_text(prompt, encoding="utf8", newline="")
     start = time.monotonic()
-    outcome = {"status": "runtime_failed", "usage": None, "error": None}
+    outcome = {"status": "runtime_failed", "usage": None, "error": None,
+               "requested_model": model, "requested_reasoning": reasoning}
     events = []
     with (directory / "events.jsonl").open("w", encoding="utf8") as output, (
             directory / "stderr.txt").open("w", encoding="utf8") as errors, (
@@ -431,6 +455,7 @@ def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
         write_json(directory / "transport-warnings.json", warnings)
     try:
         outcome["usage"] = parse_usage(read_json(directory / "usage.json"))
+        validate_realized_model(outcome["usage"], model)
     except (OSError, ValueError, ProtocolError) as error:
         outcome["usage_error"] = str(error)
         if not outcome.get("integrity_stop"):

@@ -77,7 +77,7 @@ def test_invoke_delivers_exact_utf8_prompt_over_stdin(tmp_path, monkeypatch):
     captured = tmp_path / "captured.bin"
     args = [sys.executable, "-c",
             f"import sys; from pathlib import Path; Path({str(captured)!r}).write_bytes(sys.stdin.buffer.read())"]
-    monkeypatch.setattr(runtime, "command", lambda *args_: args)
+    monkeypatch.setattr(runtime, "command", lambda *args_, **kwargs: args)
     directory = tmp_path / "attempt"
     directory.mkdir()
     prompt = "x" * 50000 + "\n" + chr(0x03BB) + "\r\n"

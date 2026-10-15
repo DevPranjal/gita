@@ -105,7 +105,7 @@ def test_frozen_source_archive_is_checked_not_assumed(tmp_path, monkeypatch):
 
 
 def test_nonstreaming_invoke_records_exact_native_flags(tmp_path, monkeypatch):
-    monkeypatch.setattr(runtime, "command", lambda *args:
+    monkeypatch.setattr(runtime, "command", lambda *args, **kwargs:
                         [sys.executable, "-c", "import sys; sys.stdin.buffer.read()"])
     directory = tmp_path / "attempt"
     directory.mkdir()

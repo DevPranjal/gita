@@ -20,7 +20,8 @@ from .evidence import COMMON_TOOLS, MAX_RESPONSE_CHARS, PAGE_CHARS
 from .preparation import policy_digest, preflight
 from .runtime import (CAMPAIGN_SECONDS, CreditLedger, MAX_SECONDS, MAX_TURNS,
                       JUDGE_CREDITS, REVIEWER_CREDITS, SESSION_CREDITS, file_lock, invoke, read_events)
-from .runtime import inventories, parse_usage, reconcile_judge_outcomes
+from .runtime import (inventories, parse_usage, reconcile_judge_outcomes,
+                      validate_realized_model, validate_settings)
 
 PROMPT = """Review the fixed code change exposed by the read-only evidence tools.
 Find actionable correctness, security, performance, maintainability or readability
@@ -67,7 +68,9 @@ def review_prompt(task: dict, *, arm: str | None = None, indexed_workflow: bool 
 
 def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261014,
              development_pilot: bool = False, indexed_workflow: bool = False,
-             reviewer_credits: int = REVIEWER_CREDITS, judge_credits: int = JUDGE_CREDITS) -> dict:
+             reviewer_credits: int = REVIEWER_CREDITS, judge_credits: int = JUDGE_CREDITS,
+             reviewer_model: str = "auto", reviewer_reasoning: str | None = None) -> dict:
+    validate_settings(reviewer_model, reviewer_reasoning)
     manifest = verify(root)
     package = Path(__file__).parent
     executable = __import__("shutil").which("copilot.exe") or __import__("shutil").which("copilot")
@@ -97,8 +100,9 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
                              "attempt": 0})
     body = {"version": VERSION, "dataset_digest": manifest["digest"], "pin": manifest["pin"],
             "source_git_head": git(package.parents[3], "rev-parse", "HEAD").decode().strip(),
-            "seed": seed, "schedule": schedule, "model": "auto", "cli_version": cli_version,
-            "reasoning_effort": "auto-provider-default", "context": "default",
+            "seed": seed, "schedule": schedule, "model": reviewer_model, "cli_version": cli_version,
+            "reviewer_model": reviewer_model, "reviewer_reasoning": reviewer_reasoning,
+            "reasoning_effort": reviewer_reasoning or "auto-provider-default", "context": "default",
             "product_policy_digest": policy_digest(), "parsers": parsers,
             "harness_sources": {path.name: file_digest(path)
                                 for path in sorted(package.glob("*")) if path.suffix in (".py", ".mjs")},
@@ -122,20 +126,24 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
                               "raw_initial_characters": PAGE_CHARS,
                               "sdk_offload": "prevented by bounded broker responses; no builtin view permission"},
             "scoring": "blinded-auto-reference-agreement; pinned official resolver/scorer",
-            "interpretation": "Product-auto experiment; routing may differ between arms. Development only."}
+            "interpretation": ("Product-auto experiment; routing may differ between arms. Development only."
+                               if reviewer_model == "auto" else
+                               "Fixed-reviewer-model experiment; routing fallback is forbidden. Development only.")}
     return {**body, "digest": digest(body)}
 
 
 def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed: int,
          development_pilot: bool = False, indexed_workflow: bool = False,
-         reviewer_credits: int = REVIEWER_CREDITS, judge_credits: int = JUDGE_CREDITS) -> dict:
+         reviewer_credits: int = REVIEWER_CREDITS, judge_credits: int = JUDGE_CREDITS,
+         reviewer_model: str = "auto", reviewer_reasoning: str | None = None) -> dict:
     require(run_root.resolve() != root.resolve() and root.resolve() not in run_root.resolve().parents,
             "Run artifacts must live outside corpus root")
     for scope in scopes:
         preflight(scope)
     frozen = protocol(root, scopes, parsers, seed=seed, development_pilot=development_pilot,
                       indexed_workflow=indexed_workflow, reviewer_credits=reviewer_credits,
-                      judge_credits=judge_credits)
+                      judge_credits=judge_credits, reviewer_model=reviewer_model,
+                      reviewer_reasoning=reviewer_reasoning)
     body = {k: v for k, v in frozen.items() if k != "digest"}
     body["run_root_digest"] = digest(str(run_root.resolve()))
     frozen = {**body, "digest": digest(body)}
@@ -151,6 +159,7 @@ def verify_protocol(run_root: Path, *, harness_root: Path | None = None) -> dict
     frozen = read_json(run_root / "protocol.json")
     require(frozen["digest"] == digest({k: v for k, v in frozen.items() if k != "digest"}),
             "Protocol document tampered")
+    reviewer_settings(frozen)
     require_integrity(frozen.get("run_root_digest") == digest(str(run_root.resolve())),
                       "Protocol belongs to a different run root; reseal a new protocol")
     require(frozen["product_policy_digest"] == policy_digest(), "Production policy changed; use new run root")
@@ -208,13 +217,36 @@ def audit_calls(events: list[dict], path: Path) -> dict:
         for call in calls), "errors": sum(not call["ok"] for call in calls)}
 
 
+def reviewer_settings(frozen: dict) -> tuple[str, str | None]:
+    """Read requested settings, retaining pre-configuration auto protocol support."""
+    model = frozen.get("model", "auto")
+    effort = frozen.get("reasoning_effort", "auto-provider-default")
+    reasoning = None if effort == "auto-provider-default" else effort
+    validate_settings(model, reasoning)
+    require(frozen.get("reviewer_model", model) == model
+            and frozen.get("reviewer_reasoning", reasoning) == reasoning,
+            "Frozen reviewer settings disagree")
+    return model, reasoning
+
+
+def attempt_identity(slot: dict, frozen: dict) -> dict:
+    model, reasoning = reviewer_settings(frozen)
+    identity = {**slot, "protocol_digest": frozen["digest"],
+                "dataset_digest": frozen["dataset_digest"], "model": model,
+                "task_tuple_digest": slot["task"]}
+    # Legacy captured auto receipts did not include a reasoning identity field.
+    if "reviewer_reasoning" in frozen or reasoning is not None:
+        identity["reasoning_effort"] = reasoning
+    return identity
+
+
 def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
             *, timeout: float = MAX_SECONDS) -> dict:
     require(not directory.exists(), "Started attempt cannot be overwritten or retried")
     directory.mkdir(parents=True)
-    identity = {**slot, "protocol_digest": frozen["digest"],
-                "dataset_digest": frozen["dataset_digest"], "model": "auto",
-                "task_tuple_digest": scope["task"]["id"]}
+    model, reasoning = reviewer_settings(frozen)
+    identity = attempt_identity(slot, frozen)
+    require(scope["task"]["id"] == slot["task"], "Attempt scope/task mismatch")
     write_json(directory / "started.json", {"identity": identity, "started": utc_now()})
     config = {**scope, "arm": slot["arm"], "cursor_secret": secrets.token_hex(32),
               "indexed_workflow": frozen.get("indexed_workflow", False),
@@ -231,7 +263,8 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
     try:
         prompt = review_prompt(scope["task"], arm=slot["arm"],
                                indexed_workflow=frozen.get("indexed_workflow", False))
-        outcome = invoke(directory, prompt, names, directory / "mcp.json", timeout=timeout)
+        outcome = invoke(directory, prompt, names, directory / "mcp.json", timeout=timeout,
+                         model=model, reasoning=reasoning)
     except IntegrityError as error:
         outcome = {"status": "integrity_failed", "integrity_stop": True, "error_code": error.code,
                    "usage": None, "error": str(error), "wall_seconds": None}
@@ -286,9 +319,8 @@ def validate_broker_config(config: dict, slot: dict, frozen: dict) -> None:
 
 def validate_receipt(path: Path, slot: dict, frozen: dict) -> dict:
     row = read_json(path / "result.json")
-    expected = {**slot, "protocol_digest": frozen["digest"],
-                "dataset_digest": frozen["dataset_digest"], "model": "auto",
-                "task_tuple_digest": slot["task"]}
+    model, reasoning = reviewer_settings(frozen)
+    expected = attempt_identity(slot, frozen)
     require(row["identity"] == expected, "Cached attempt identity/protocol mismatch")
     require(row["ended"] and row["status"] != "runtime_complete", "Nonterminal attempt receipt")
     for name, expected_hash in row["artifacts"].items():
@@ -296,6 +328,22 @@ def validate_receipt(path: Path, slot: dict, frozen: dict) -> dict:
     if row.get("usage") is not None:
         require((path / "usage.json").is_file()
                 and parse_usage(read_json(path / "usage.json")) == row["usage"], "Cached usage changed")
+    if model != "auto" or "reviewer_model" in frozen:
+        invocation = read_json(path / "invocation.json")
+        args = invocation["arguments_without_prompt"]
+        require(invocation["requested_model"] == model
+                and invocation["requested_reasoning"] == reasoning
+                and args.count("--model") == 1
+                and args[args.index("--model") + 1:args.index("--model") + 2] == [model],
+                "Cached requested model/protocol mismatch")
+        require((reasoning is None and "--reasoning-effort" not in args)
+                or (reasoning is not None and args.count("--reasoning-effort") == 1
+                    and args[args.index("--reasoning-effort") + 1:
+                             args.index("--reasoning-effort") + 2] == [reasoning]),
+                "Cached requested reasoning/protocol mismatch")
+        if row["status"] == "valid":
+            require(row.get("usage") is not None, "Requested-model receipt lacks realized usage")
+            validate_realized_model(row["usage"], model)
     if row["status"] != "valid":
         require(row.get("findings") is None, "Failed attempt cannot be represented as empty findings")
     if row["status"] == "valid":

@@ -236,7 +236,7 @@ def test_receipt_write_error_reaps_actual_parent_and_descendant(tmp_path, monkey
         f"Path({str(child_receipt)!r}).write_text(json.dumps({{'pid':child.pid}})); "
         "time.sleep(60)"
     )
-    monkeypatch.setattr(runtime, "command", lambda *_: [sys.executable, "-c", script])
+    monkeypatch.setattr(runtime, "command", lambda *_, **__: [sys.executable, "-c", script])
     real_write = runtime.write_json
     pids = []
     helpers = []
