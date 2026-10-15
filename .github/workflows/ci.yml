@@ -29,16 +29,49 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: pip
       - name: Install dependencies
-        run: python -m pip install -c constraints.txt -e ".[dev]"
+        run: python -m pip install -c constraints.txt -e ".[dev,bench]"
       - name: Provision grammars
-        run: python -c "from tree_sitter_language_pack import download; download(['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown'])"
+        # language-pack 1.14.3 download() alone does not materialize native files.
+        run: python -c "from tree_sitter_language_pack import get_parser, downloaded_languages; names = ['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown']; [get_parser(name) for name in names]; assert set(names) <= set(downloaded_languages()), downloaded_languages()"
       - name: Test indexed default
         env:
           GITA_ENABLE_LEGACY: '0'
         run: python -m pytest tests/test_legacy_flag.py tests/test_index_query.py -q
+      - name: Offline indexed review harness (no model calls)
+        env:
+          GITA_ENABLE_LEGACY: '0'
+        run: python -c "import pathlib, pytest; raise SystemExit(pytest.main([str(p) for p in sorted(pathlib.Path('tests').glob('test_reviewbench*.py'))] + ['-q']))"
       - name: Test legacy compatibility
         env:
           GITA_ENABLE_LEGACY: '1'
         run: python -m pytest -q
       - name: Verify indexed workflow
         run: python verify/check.py --stage f3
+
+  index-qualification:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    env:
+      GITA_ENABLE_LEGACY: '0'
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -c constraints.txt -e ".[dev,bench]"
+      - name: Provision only fixture grammar before measurement
+        run: python -c "from tree_sitter_language_pack import get_parser, downloaded_languages; get_parser('python'); assert 'python' in downloaded_languages(), downloaded_languages()"
+      - name: Qualification contracts and publication recovery
+        run: python -m pytest tests/test_ci_grammars.py tests/test_index_candidate_cache.py tests/test_index_qualification.py tests/test_index_reliability.py tests/test_index_oracle_gates.py tests/test_public_index_benchmark.py -q --basetemp "${{ runner.temp }}/index-qualification-tests"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: index-qualification-${{ matrix.os }}
+          path: ${{ runner.temp }}/index-qualification-tests
+          retention-days: 7

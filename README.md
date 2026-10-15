@@ -28,6 +28,26 @@ It did **not** establish lower input-token use or equal quality: PRs with a
 reference match fell from 64 to 57, and cache behavior affected credit results.
 See [methodology, uncertainty and negative results](evals/RESULTS.md).
 
+Current index measurements are separate from those legacy review results:
+
+| Indexed workload | Before / after |
+| --- | --- |
+| Generated 10,000-file snapshot | 234 / 101 seconds |
+| Generated bounded history | 322 / 147 seconds |
+| Generated incremental append | 128 / 23 seconds |
+| Actual NumPy snapshot | 123 seconds; partial coverage, explicit 2 GiB storage budget |
+
+These are recorded observations, not whole-history or arbitrary-size guarantees.
+See [delta measurements and remaining costs](docs/index-delta-performance.md)
+and [NumPy coverage and failed first attempt](docs/benchmarks/numpy-snapshot-20261015.md).
+The [indexed ReviewBench experiment](docs/benchmarks/reviewbench-indexed.md)
+uses `auto`, frozen paired tools and native accounting; both development cohorts
+stopped with unknown usage. The [second cohort's 21 valid pairs](docs/benchmarks/reviewbench-auto-pilot2-stopped.md)
+remain conditional observations. [Quality scores now cover all 21 completed pairs](docs/benchmarks/reviewbench-auto-indexed-quality.md):
+slightly higher grounded recall but lower augmented precision, with low indexed-tool
+adoption and wide uncertainty. No causal indexing benefit or general savings claim
+is established.
+
 ## Install
 
 Requires **Git and Python 3.11+**. Install from source:
@@ -43,11 +63,13 @@ Activate with `source .venv/bin/activate` on Linux/macOS, or
 
 ```sh
 python -m pip install -c constraints.txt -e ".[mcp]"
-python -c "from tree_sitter_language_pack import download; download(['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown'])"
+python -c "from tree_sitter_language_pack import get_parser, downloaded_languages; names = ['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown']; [get_parser(name) for name in names]; assert set(names) <= set(downloaded_languages())"
 ```
 
 Grammar provisioning uses the network once; indexed operations then use local
 Git objects. Omit `[mcp]` for CLI-only use.
+Provisioning loads each parser and checks its installed inventory: a successful
+`download()` request alone does not prove native grammar files are available.
 
 ## Use from the CLI
 
@@ -90,9 +112,15 @@ helpers remain available to the index.
 
 This is the first feature-flag increment, not complete retirement. Legacy code
 still ships; query parity, independent verification, endpoint comparison and
-index qualification remain follow-up work. Parser/matcher policy and storage
-formats are unchanged by this increment; an already-incompatible index still
-requires explicit handling.
+full index qualification remain follow-up work. The first S2 increment adds an
+[offline correctness-gated benchmark](verify/README.md#offline-s2-qualification)
+and publication recovery/equivalence campaigns. First-parent tree deltas carry
+complete inventories and identity populations forward; bounded decoding caches
+and ordered overlap validation reduce repeated work. Global copy/ambiguity guards
+and atomic publication remain enforced. Reopen hydration and checkpoint copying
+still have whole-population costs. The parser/builder fingerprints **change**, so previously
+built indexes require an explicit rebuild under this interpretation. No arbitrary
+repository size, independent product F4 verification, or complete S2 delivery is claimed.
 
 ## Connect an agent
 

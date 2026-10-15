@@ -1,9 +1,36 @@
 # S2: Index correctness, reliability, benchmarking, and optimization
 
 **Status:** Draft specification. **Priority:** Core release blocker.
-**Implementation update:** No S2 qualification or optimization is implemented
-by the transitional legacy-flag increment. Existing index behavior is preserved;
-the campaigns and benchmark contracts below remain proposed.
+**Implementation update:** A first S2 engineering increment is implemented, not
+full qualification. [`verify/index_qualification.py`](../../../verify/index_qualification.py)
+validates versioned manifests, supervises separate snapshot/history/single-update/
+no-op/query scenarios, retains failed attempts and samples owned process trees.
+[`index_corpus.py`](../../../verify/index_corpus.py) authors deterministic Python
+operation ledgers; [`index_oracle.py`](../../../verify/index_oracle.py) checks exact
+Git bytes, independent AST spans, lineage continuity/refusals, intermediate events
+and canonical evidence. Recovery/equivalence tests live in
+[`test_index_reliability.py`](../../../tests/test_index_reliability.py).
+The bounded `_CandidateTokens` cache in `builder.py` avoids repeated validated
+version decoding without skipping candidate/population/copy checks. Schema and
+matching rules are unchanged, but the artifact fingerprint changes: old indexes
+continue to refuse use/update until explicitly rebuilt.
+
+The local 80-file/800-function/10-commit experiment has three unprofiled
+samples per interpretation, equal independently mapped evidence and no failed
+attempts. These are smoke observations, **not** a T1/T2/T3 or statistical release
+gate. Both interpretations retain `partial` coverage for a cached-source
+availability record; all extraction results are complete and that partial
+outcome is retained in samples. A further 1,000-file/10,000-function/10-commit
+history observation has one sample per interpretation; its partial coverage also
+includes two matching candidate-limit records. Final runs use strengthened
+stored-record/source-digest and measured-query gates. See the
+[measurement table and limitations](../../../verify/README.md#offline-s2-qualification).
+Anonymous SQLite TEMP storage remains explicitly
+unavailable, not zero. Missing work includes the full multi-language/boundary/
+merge/parse-gap ledger corpus, approved real repositories, suffix/source/rebuild/
+GC scenarios, comprehensive fault boundaries, detailed SQL consumption and
+storage instrumentation, paired uncertainty and reference-machine qualification.
+The requirements below remain the target; no claim is made that all 13 are met.
 
 **Audience:** Index maintainers, test engineers, performance reviewers.
 

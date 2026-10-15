@@ -1,0 +1,1801 @@
+{
+  "benchmark": "ReviewBench",
+  "pin": "c17b05be9c90b85a1fc012ce39e455e2d09a7255",
+  "freeze_digest": "0bca21d6ada4117e2c78fa3f07969adfa8740d8f44cb28d885c94cbc52e656b3",
+  "sources": {
+    "corpus/manifest.json": "e74656b8c1c4bbab5ce85f1fcb742a7aaad550a4d7bd46e1f83a0746807bfa02",
+    "corpus/test/test.json": "0f277447878a0b02f587c0b40a76a74985d9d1db3cb212d9dfbc97b1d1270f60",
+    "AGENT_CONTRACT.md": "e4badd7f08505747317e5ee6a3d21703ea54fa24b4fd7e754744898c9a97d66c",
+    "LICENSE": "18a24e58967e165bcdd21030b16b85673e025439d55686d3af642c8f815d5840",
+    "scripts/lib/match-types.ts": "082ccf8a0e29b88cc043e435eccf04fbd31fb157268896ceaf6cbbf713339ad4",
+    "scripts/eval/scorer.ts": "d155f1ca20d912f1a045d323c937dd7a8d63346ba6b6934366f88337afd5a754",
+    "scripts/eval/matcher.ts": "0d87235f2092e33732e38896f8d8f09a10b9f7e923cbd67017a6f956dbf3e3c9",
+    "scripts/classifier/prompts.ts": "fa6c6ced1200f377d92d0d6e40dcad4e8b9d2e976fd81f32179d085de5a2f02d",
+    "scripts/eval/prompt-format.ts": "ec31f56e14a2d2b656729d781605a21e04f34062bc895f78de5a6ce509372b69",
+    "tests/scorer.test.ts": "c012ff9a44819ddfc7830d20dfa3db8d6136c41f6d73b19ef1bdedc75e117e30",
+    "tests/matcher-response.test.ts": "f73ce6b9217331da7945fcc56fb59c2fcc82aaf39f34601aaeecc888fca32922",
+    "package.json": "ded5308e848c04e09a8c70d02ea8b83e68dfb9381a2c13602137f11e69b946e2"
+  },
+  "full_task_count": 219,
+  "starter_ids": [
+    "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+    "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+    "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+    "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+    "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+    "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+    "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+    "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+    "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+    "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+    "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+    "bc277c0372a2c410587b86f47527f69bc7e76ae468a962c7fe668b452af88905",
+    "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+    "91db148075d74d9bde541c1702d065e340acf96f90bc4258edb975c71f0f0e92",
+    "7d1bf7158fd26470fa90ae3afa30ab61088ae3c62444c7c15a5001d978ec23a5",
+    "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+    "0362dfe9422a542cde29b9a429b4baa39d301262a128fccb0910d6801f939a86",
+    "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+    "ee7f15418560e783cdc668536f3c4d8692e231a7f231876ddc86a2fac069e9e2",
+    "82ec18705a16ae64998d181393c7f885543cc33b25921073d24ebecec40fbc15",
+    "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+    "3f4e836db70e52f2130f7c82f67af4af39f1091bb6d31a96258cb5d4add67a10",
+    "d701ed5ae7001b5fe7c881acdda33cf7759293132014f6d71abcbc657eb36d27",
+    "435c173f24b18a1fd88ab29dc033bc2fc1e42502df2db9d7e9312711c7a1ea3c",
+    "b673f3f386cf657bbc269b622ce6a14389e41cd0d0427b48254c43c2ccd38956"
+  ],
+  "tasks": [
+    {
+      "repo": "https://github.com/AA-Factory/aafactory-prototype",
+      "pr_number": 17,
+      "base": "e7f558c7360abac335af2df22f4ed376992b30ab",
+      "head": "a1978cb75950a879df8805e4a5f373eb6678f6f9",
+      "id": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "mirror": "https://github.com/review-bench/AA-Factory_aafactory-prototype.git"
+    },
+    {
+      "repo": "https://github.com/AY2526S2-CS2103T-W14-3/tp",
+      "pr_number": 152,
+      "base": "a27b3e40d94f92f229b9301a8a9d5207d9a5b0bb",
+      "head": "e0a9ce03c8c1cc839eaf409e2677b9abf2017b1f",
+      "id": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+      "mirror": "https://github.com/review-bench/AY2526S2-CS2103T-W14-3_tp.git"
+    },
+    {
+      "repo": "https://github.com/AgentParadise/agent-paradise-standards-system",
+      "pr_number": 61,
+      "base": "d541a92be2f2e1ceed397d4e0afaf933df8972fd",
+      "head": "fbdecd6bd0b3148b84d91b6c4eff3c6d7ce54198",
+      "id": "72a644b378be9828fbaf216dad707af7754994c5f185289f7b02344e6d726039",
+      "mirror": "https://github.com/review-bench/AgentParadise_agent-paradise-standards-system.git"
+    },
+    {
+      "repo": "https://github.com/Alan-Jowett/sonde",
+      "pr_number": 148,
+      "base": "eb6fa2805d4dcc8de0494ce06f82ea3d8a5132f1",
+      "head": "c58a06a5a4eb45ccfffb8c0ba75306d559482b39",
+      "id": "5f71fb3b1612522c222c4b003d188e6ab038e3fa33586db905f40eb1bae9c8e8",
+      "mirror": "https://github.com/review-bench/Alan-Jowett_sonde.git"
+    },
+    {
+      "repo": "https://github.com/AntManThePro/TwistedsCommandCenter",
+      "pr_number": 13,
+      "base": "2b0966dec5579a66899f15bccabb6f93c1f3f47b",
+      "head": "78f6157eaec39a413d216616a44734ac53df3d6e",
+      "id": "e96cb0474b1c86aefbf49c46e7fb961f95acbfe5c97aa964996a84ac7690834f",
+      "mirror": "https://github.com/review-bench/AntManThePro_TwistedsCommandCenter.git"
+    },
+    {
+      "repo": "https://github.com/Asjas/course-platform",
+      "pr_number": 946,
+      "base": "2fcdc8b36f1759f9a19ad71d3d5d9e5f5f642a28",
+      "head": "ef3adc91ad629487ca4b48db902c729c622fd95e",
+      "id": "4ba936d5d7772edc35c1e66b851ac6cc22c3a1bf951058acabc23b57e04da500",
+      "mirror": "https://github.com/review-bench/Asjas_course-platform.git"
+    },
+    {
+      "repo": "https://github.com/CLJunge/REFW.Umbra",
+      "pr_number": 88,
+      "base": "94e5bca2ce5588c41b8ff352c7e1d002825400d0",
+      "head": "600fa7cbebe28b1deadca0788144d86950a66e1c",
+      "id": "3d4635042aa86ddfca47b48c3adf6f91b52d5dfe83adb8b047c4e7c1f206fc47",
+      "mirror": "https://github.com/review-bench/CLJunge_REFW.Umbra.git"
+    },
+    {
+      "repo": "https://github.com/CommunityToolkit/Maui",
+      "pr_number": 3181,
+      "base": "c7cb65bc98e429401e4f792f6b7aa21f94e81933",
+      "head": "1e8d2e2f880cfe1d9bcbdfbc6078cb6b72fd35ce",
+      "id": "dc80f849ee62a5594b9ebdc0d48fb0f466260473761dd5be1cafb94893b108fe",
+      "mirror": "https://github.com/review-bench/CommunityToolkit_Maui.git"
+    },
+    {
+      "repo": "https://github.com/ComposioHQ/agent-orchestrator",
+      "pr_number": 1277,
+      "base": "ba77929c9345a0dc897d53115504d0ae32745ce5",
+      "head": "76652c7ccefa3a371be74e8648c5204adc7f09a5",
+      "id": "8c52bc88d70e3faf9d8960dd215350fd2edc19a0540f1259f5091a1a04b1aa8a",
+      "mirror": "https://github.com/review-bench/ComposioHQ_agent-orchestrator.git"
+    },
+    {
+      "repo": "https://github.com/DisciplinedSoftware/Codebase-Conversion",
+      "pr_number": 1,
+      "base": "ed10728c91f7858a0bd95a97c754f4bd6c0487ec",
+      "head": "4b46d68c215dd2448a62f751e81218a0da789165",
+      "id": "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+      "mirror": "https://github.com/review-bench/DisciplinedSoftware_Codebase-Conversion.git"
+    },
+    {
+      "repo": "https://github.com/EdV4H/usketch",
+      "pr_number": 534,
+      "base": "ff729b7dce02efaf7d1054780536289f86e8a5e7",
+      "head": "719aa8340584e714552d132a9ec6971582673a8b",
+      "id": "539f4645fc82b93bfe11f4ed9d7db5588e5dd72f7e350b7df6030256cc3b54c3",
+      "mirror": "https://github.com/review-bench/EdV4H_usketch.git"
+    },
+    {
+      "repo": "https://github.com/EtienneLescot/n8n-as-code",
+      "pr_number": 295,
+      "base": "37ddb43db1a29de4d31fd06e3feb9c7e5966d5af",
+      "head": "c85d30b5427310cdd0365ff1c77d2b7c6b9d88c9",
+      "id": "2007f28611a77f9e4216eb96206e0f0071da16660ec87abc6e85ec65ebbd81c7",
+      "mirror": "https://github.com/review-bench/EtienneLescot_n8n-as-code.git"
+    },
+    {
+      "repo": "https://github.com/FreeRTOS/FreeRTOS-Kernel",
+      "pr_number": 1379,
+      "base": "f1043c49d59944353291654c175852bd17b34f99",
+      "head": "c926adcf6e0be826e3313fc503a92b53a78f8ef8",
+      "id": "ab2a513cf1daf22ac38d25546791961c0e0a0334dab477fb7f8431d93416d2f1",
+      "mirror": "https://github.com/review-bench/FreeRTOS_FreeRTOS-Kernel.git"
+    },
+    {
+      "repo": "https://github.com/Gibbs-Morris/mississippi",
+      "pr_number": 471,
+      "base": "1e026c703d10ddd7abc724ff86ec75bea0aa23e6",
+      "head": "fdc4ff8d1579a24e830cd636317d62d959eb0d40",
+      "id": "708594d52b0e45311aad47cf0417bcdd14defbbc4f9e0bc2253420276b7901a2",
+      "mirror": "https://github.com/review-bench/Gibbs-Morris_mississippi.git"
+    },
+    {
+      "repo": "https://github.com/Hermione-Granger-1176/artifacts",
+      "pr_number": 24,
+      "base": "18e6f1f143c9d2b5374eb958d2bca7b059c7617d",
+      "head": "5d880a71d4b9f4c3d7ac8b16e925dcaeb42d984b",
+      "id": "d61df78977b74975060d86df1b55c3d603d95c0e204bcd5b6b8d4c9a11149d86",
+      "mirror": "https://github.com/review-bench/Hermione-Granger-1176_artifacts.git"
+    },
+    {
+      "repo": "https://github.com/Imageomics/catalog",
+      "pr_number": 75,
+      "base": "5f10688a0afd8b2891d6cec32f0c3bfca9a7aaed",
+      "head": "a8a7cdc7b0cbac54485dbcf53cf6ae6ddbecfe92",
+      "id": "8f974d5b8fe20f1543f046d73a6b34bff2aaa69d2c10324bd37c266161c4249c",
+      "mirror": "https://github.com/review-bench/Imageomics_catalog.git"
+    },
+    {
+      "repo": "https://github.com/JacobPEvans/ansible-splunk",
+      "pr_number": 120,
+      "base": "7605ceb952066b3e0d2825ec26e42caf1f6cd68b",
+      "head": "252ddc5745e35ff113181c51520891048e348efc",
+      "id": "ced756380d2b1a4697c6492780e2c9564b90a20541876f583a672e5c6953287a",
+      "mirror": "https://github.com/review-bench/JacobPEvans_ansible-splunk.git"
+    },
+    {
+      "repo": "https://github.com/LegionIO/legion-interlink",
+      "pr_number": 16,
+      "base": "1e2def3dff2262e93fefd56d955465bd2f208992",
+      "head": "c3dafce0a1545b4aa233bc1f3d2aaa3cd31eb8b5",
+      "id": "ac1f2fbf1472b6a58d4dd30c6aefac8c48c3bd1511ea7d3967d14b24273bb4a8",
+      "mirror": "https://github.com/review-bench/LegionIO_legion-interlink.git"
+    },
+    {
+      "repo": "https://github.com/LittleAndi/FileHorizon",
+      "pr_number": 19,
+      "base": "9992d8dce2020862bdc0177c540e11f7ad4f8a23",
+      "head": "958f48b3b6fac8f25acd594807e54d8089a7d686",
+      "id": "96758082501d7988cd375870f1bd38c3b6644398dba08a00ac2b882526d0e0fc",
+      "mirror": "https://github.com/review-bench/LittleAndi_FileHorizon.git"
+    },
+    {
+      "repo": "https://github.com/Martian-Engineering/lossless-claw",
+      "pr_number": 307,
+      "base": "4906c6283a4033f34397bf527ae4a5c40adccdfc",
+      "head": "9b9a04b6a5af7b0f8e7437ca6a2eb58aaf91e428",
+      "id": "092f338927a0f22bb54d35049cf319e3a56f183c50748c9f79cbcc672c1a6f60",
+      "mirror": "https://github.com/review-bench/Martian-Engineering_lossless-claw.git"
+    },
+    {
+      "repo": "https://github.com/Marvell-Consulting/statswales-frontend",
+      "pr_number": 626,
+      "base": "c1707c79a5a947cf7c6912af3ad00848c42a28e0",
+      "head": "30ba27a5f20318f12fe74f26059d8b62d62874e9",
+      "id": "b673f3f386cf657bbc269b622ce6a14389e41cd0d0427b48254c43c2ccd38956",
+      "mirror": "https://github.com/review-bench/Marvell-Consulting_statswales-frontend.git"
+    },
+    {
+      "repo": "https://github.com/MatthewPeterKelly/fractal-renderer",
+      "pr_number": 163,
+      "base": "e207fed4353027c450c9f0130c26ae473494725a",
+      "head": "0d3f5f18c93f50543946c1db1cb13868b0080861",
+      "id": "d3ad042f69b81df164dafac96334d555fd883ec2f7099798359106c0f3f16122",
+      "mirror": "https://github.com/review-bench/MatthewPeterKelly_fractal-renderer.git"
+    },
+    {
+      "repo": "https://github.com/Mirkiux/featkit",
+      "pr_number": 17,
+      "base": "471774c774a89902228a0b74b696ff7304332437",
+      "head": "de0187b0e5e781ca08ef7d7923e33cba6531c200",
+      "id": "e07e274c82d7489bd47cc28de8038845f55673b8ff270ed3ded25d33de035be4",
+      "mirror": "https://github.com/review-bench/Mirkiux_featkit.git"
+    },
+    {
+      "repo": "https://github.com/NCATSTranslator/translator-ingests",
+      "pr_number": 336,
+      "base": "58d880509f9cf6d37715153b7cf261205dfa0f96",
+      "head": "efb31e9c764865f416230073c6d0b1686a0f44b7",
+      "id": "7d1bf7158fd26470fa90ae3afa30ab61088ae3c62444c7c15a5001d978ec23a5",
+      "mirror": "https://github.com/review-bench/NCATSTranslator_translator-ingests.git"
+    },
+    {
+      "repo": "https://github.com/NKUST-ITC/NKUST-AP-Flutter",
+      "pr_number": 349,
+      "base": "e6954505205e110648ebb1487ed2b69c137a5942",
+      "head": "9586cd0abc7db9ca86686e592c2a808f0f26b32f",
+      "id": "c67f7916beb41d5f60c2c9e08328edfa6f1cfd506e7bd5ef10d922f40eac781a",
+      "mirror": "https://github.com/review-bench/NKUST-ITC_NKUST-AP-Flutter.git"
+    },
+    {
+      "repo": "https://github.com/NestDevLab/nestjs-yalc",
+      "pr_number": 123,
+      "base": "9b49dd800131e9746cdf9320011d23b544a2ea59",
+      "head": "3ce6ba5785304f07c0e5361347f8306404067d28",
+      "id": "aa96c6d60d4c49f0bc50a4f579190d5818bb4ff3957d93f97363208c94fa9fe6",
+      "mirror": "https://github.com/review-bench/NestDevLab_nestjs-yalc.git"
+    },
+    {
+      "repo": "https://github.com/NightHawkATL/ntp-dashboard",
+      "pr_number": 84,
+      "base": "5d73d0043457328ca1b10d3cd413c4afbe807cca",
+      "head": "2f4b8699bd3703971333cb6e691f8f3132aec0b1",
+      "id": "763537f23d341f34714c23bf4c25ede7d1dcbe7f660aec65daad335539d7a330",
+      "mirror": "https://github.com/review-bench/NightHawkATL_ntp-dashboard.git"
+    },
+    {
+      "repo": "https://github.com/NightHawkATL/ntp-dashboard",
+      "pr_number": 96,
+      "base": "28cb0f12873107287c8f2ba7b7c330339d432c9c",
+      "head": "2378227172859b977f576fa1a1e3dfd4b52fa524",
+      "id": "6715f4425db1d60e09bd9bf68cee719bc2d18a87ccc4ce4d34df17bebdaa1c5e",
+      "mirror": "https://github.com/review-bench/NightHawkATL_ntp-dashboard.git"
+    },
+    {
+      "repo": "https://github.com/Nixbug/entebus-android-operator",
+      "pr_number": 67,
+      "base": "c76abda7c3a3df4a03bf6544957e183edfe71353",
+      "head": "21b50bbbb0d95c95b0f0f69f3f713cbff06d1fde",
+      "id": "93106688d1bcc7766e20770d97337a2298625202454e86e92bd7fc12cb0c14c0",
+      "mirror": "https://github.com/review-bench/Nixbug_entebus-android-operator.git"
+    },
+    {
+      "repo": "https://github.com/Nixbug/entebus-web-executive",
+      "pr_number": 120,
+      "base": "a204e1b2c070fda02e100de55c0bc34c4659f538",
+      "head": "630b29d5edbd4c8db61a14f6e33f8b70d57b3d5f",
+      "id": "5c42b4ad349f19f4276a54b83df4925ce333fb907f0384bb71b6c55230e04beb",
+      "mirror": "https://github.com/review-bench/Nixbug_entebus-web-executive.git"
+    },
+    {
+      "repo": "https://github.com/OpenDevicePartnership/embedded-services",
+      "pr_number": 793,
+      "base": "90130bc3d3df2f186323d70a8f757a5dfa16c6a2",
+      "head": "f63a02462d1eebd5b06b45ebdf1d2705c919413a",
+      "id": "07318545dc15466768e8639fd6e90aaa2bb8a424dcccb4463dc23db039b1a19b",
+      "mirror": "https://github.com/review-bench/OpenDevicePartnership_embedded-services.git"
+    },
+    {
+      "repo": "https://github.com/PaulStSmith/PostmanOpenAPIConverter",
+      "pr_number": 7,
+      "base": "c97d31f73c39dc9d16761c0a2be0d5d83dc9b6fd",
+      "head": "41a95f208fa3d309b6ed6750af5a7d19ce5bf44b",
+      "id": "67a5b232292ab31af56cbe5e134bff6750cd6a9cca3653c59b2ea8b38db1e233",
+      "mirror": "https://github.com/review-bench/PaulStSmith_PostmanOpenAPIConverter.git"
+    },
+    {
+      "repo": "https://github.com/PaulStSmith/figlet-comment-generator",
+      "pr_number": 32,
+      "base": "3750acad624b6b38b768aa8b9aa3ba1573e2f63e",
+      "head": "1d0b6642fcf5ca31fc308c3d603b19ab02ea249e",
+      "id": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "mirror": "https://github.com/review-bench/PaulStSmith_figlet-comment-generator.git"
+    },
+    {
+      "repo": "https://github.com/PierreJanineh/TechDebtMCP",
+      "pr_number": 135,
+      "base": "ea0385c7349bbaee04456c57bf0ec3f217d63532",
+      "head": "16a54f0f85a9091f220418850eac6b4122782be5",
+      "id": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+      "mirror": "https://github.com/review-bench/PierreJanineh_TechDebtMCP.git"
+    },
+    {
+      "repo": "https://github.com/Pushedskydiver/chief-clancy",
+      "pr_number": 216,
+      "base": "a77f2542ee0d6e041810e373dfed09e8e6ffe696",
+      "head": "6baec2abdca4d6b74b716ee677e88a03a1e63060",
+      "id": "75fb2303b116fe1efdbd2303b84ba7a5f233be1fd22dec68933932c898bb4b53",
+      "mirror": "https://github.com/review-bench/Pushedskydiver_chief-clancy.git"
+    },
+    {
+      "repo": "https://github.com/ROCm/TransferBench",
+      "pr_number": 256,
+      "base": "2dba07f3716d74e6501a6a82d28812f5ba45244e",
+      "head": "1cfd8bd9bfb9cb1b93d8a134c62e03dd42e519a5",
+      "id": "2f8c8543baba06bce1a553b51485d6f97441b2ade3bacc7a03f8bc9cc3b3ac2b",
+      "mirror": "https://github.com/review-bench/ROCm_TransferBench.git"
+    },
+    {
+      "repo": "https://github.com/RobertAgterhuis/myAgentic-IT-Project-team-V2",
+      "pr_number": 331,
+      "base": "1a056641fd4b5aa7e35710134be1b86c74ade11c",
+      "head": "980b84fa16e16b4a69bcbdcbc5d8828f83ebb524",
+      "id": "beba932f044343afef2cf60fa0129812310f24c91da0349d3a3ea0ebbe5f7c5d",
+      "mirror": "https://github.com/review-bench/RobertAgterhuis_myAgentic-IT-Project-team-V2.git"
+    },
+    {
+      "repo": "https://github.com/Serapieum-of-alex/statista",
+      "pr_number": 130,
+      "base": "39d775aed9c2f48cb7d2137c3a4ac8ca5cc22d71",
+      "head": "31bd61f4dbe9dae542ad9eda41b62d982d20da74",
+      "id": "87dcdc3077485244abc5fec6848a149947cab30fb44c7a0e2362cdda0b0b47a1",
+      "mirror": "https://github.com/review-bench/Serapieum-of-alex_statista.git"
+    },
+    {
+      "repo": "https://github.com/SiaFoundation/indexd",
+      "pr_number": 939,
+      "base": "34903936328bedda64ba8ba4acbe0fa58d94ae4c",
+      "head": "933dc46dd64f5f927e1cc41fa845544dcbd749b1",
+      "id": "8114bd5447a88a184a180533dc8bbae803b2f01ea3cc148c928049a383eed1fd",
+      "mirror": "https://github.com/review-bench/SiaFoundation_indexd.git"
+    },
+    {
+      "repo": "https://github.com/SpanPanel/span",
+      "pr_number": 207,
+      "base": "fb408059e77858d187117ba47f92bdcede73b255",
+      "head": "212c534d8f2d584696b5579c2825b2a972cad719",
+      "id": "347034d4635209f371027cae038d0b6f6ed8e97ec6569dce96d46b61b85c0afc",
+      "mirror": "https://github.com/review-bench/SpanPanel_span.git"
+    },
+    {
+      "repo": "https://github.com/T-K-233/Actuator-Control",
+      "pr_number": 7,
+      "base": "963383f074645c7e813de775762395f9bc12d2f5",
+      "head": "87a346b7d0ed0d3b7ebcdce8a23453d8670e1964",
+      "id": "acf1933c4047b34804f86ec6a33c106d8d7957c5afd33cee43867f3df752ffac",
+      "mirror": "https://github.com/review-bench/T-K-233_Actuator-Control.git"
+    },
+    {
+      "repo": "https://github.com/TrossenRobotics/trumi",
+      "pr_number": 7,
+      "base": "360fae55862616a61f31252a42a4ecb38838f171",
+      "head": "65b522c8c401c21783e0239a7bab6413e0e6b344",
+      "id": "624fd92df30853515351e8c56f4de516cb4d0e1ee56b6b43c82a666db9097da5",
+      "mirror": "https://github.com/review-bench/TrossenRobotics_trumi.git"
+    },
+    {
+      "repo": "https://github.com/Tzeusy/butlers",
+      "pr_number": 1021,
+      "base": "b57517a5f8daf3b4e776884589ffedb35018b5d4",
+      "head": "403e15fe7702ac03ac466dedd11e49f9d6ce7d66",
+      "id": "fb4851b16efbc5b9d217d7af6b4f16af743c8449cede3b767c69dab2c3494476",
+      "mirror": "https://github.com/review-bench/Tzeusy_butlers.git"
+    },
+    {
+      "repo": "https://github.com/Tzeusy/butlers",
+      "pr_number": 990,
+      "base": "bb491643b06ff6474b7f3f36094bed5ad5d353da",
+      "head": "d66a3fe89cb5806944235ab540f233c79433d615",
+      "id": "4832c599408ed3432323e4a70bb3e9573534e2712fc104363597456b485d3409",
+      "mirror": "https://github.com/review-bench/Tzeusy_butlers.git"
+    },
+    {
+      "repo": "https://github.com/Tzeusy/butlers",
+      "pr_number": 997,
+      "base": "a7a601663f6a31cb94418d546b12afe5a7723292",
+      "head": "6890b2bc42112f30abf93e0285d348cafe12ad7a",
+      "id": "f3e1f553eb6ee0ba2ba4b3ff968e78b527aee5dfabfd68a95bc9e0e162d0e639",
+      "mirror": "https://github.com/review-bench/Tzeusy_butlers.git"
+    },
+    {
+      "repo": "https://github.com/UniverseCitiz3n/msgraph-kb-mcp",
+      "pr_number": 2,
+      "base": "fe5c686da4a817ca861f284f49f7820d7ea9dac9",
+      "head": "3e0bfe7268cfd621c2030d7259ea83a67b043767",
+      "id": "ed78ee28fb86674ca9877fab0c54b5e59fed4d73a42ee7cf9d6f78ff353b5d0a",
+      "mirror": "https://github.com/review-bench/UniverseCitiz3n_msgraph-kb-mcp.git"
+    },
+    {
+      "repo": "https://github.com/VeyronSakai/UniCortex",
+      "pr_number": 162,
+      "base": "233db744cb9334c90eea27eeeae0eb8610ea7c4a",
+      "head": "e74a1d695f764ce933bb0abac76aceb3b76f6254",
+      "id": "6ada99baba287b9d98663648c09a13e7e4e986ced46d08226053a8e959c3c5e0",
+      "mirror": "https://github.com/review-bench/VeyronSakai_UniCortex.git"
+    },
+    {
+      "repo": "https://github.com/Waferguard/waferguard-ml",
+      "pr_number": 17,
+      "base": "56411efab470a71e9ef342bc1e10fab767751de5",
+      "head": "62d4f66fbeaef3dd84578b7cd547f37d43086a26",
+      "id": "511ea7c10f859ff7c79740c2a210b927923b3bd70cdc995cb487b988b4a73d34",
+      "mirror": "https://github.com/review-bench/Waferguard_waferguard-ml.git"
+    },
+    {
+      "repo": "https://github.com/WhatIfWeDigDeeper/application-tracker",
+      "pr_number": 261,
+      "base": "fdac3c71dcb949a181b74f98e59562602f69c15b",
+      "head": "c1bdc879558947c4d1917519cee2dd2e7e3dabde",
+      "id": "dde5610d0861821b00cc412e55892a3cade7874b58a30c5dfbf907857c14eec6",
+      "mirror": "https://github.com/review-bench/WhatIfWeDigDeeper_application-tracker.git"
+    },
+    {
+      "repo": "https://github.com/YasserShkeir/django-smart-ratelimit",
+      "pr_number": 25,
+      "base": "442d4ac196a0dcac3aef6bc41a09ebf5a9a354d9",
+      "head": "d7c5c7c2ba6399e3cfcfa7f74eeb8c35c4429a79",
+      "id": "36029e23a99c8f2a7d41256b69db3a5154d9cbe9076552c9f71906c9eadff003",
+      "mirror": "https://github.com/review-bench/YasserShkeir_django-smart-ratelimit.git"
+    },
+    {
+      "repo": "https://github.com/ZhuoZhuoCrayon/throttled-py",
+      "pr_number": 135,
+      "base": "ab16e7e5e3ff5e20a1850be20494093335b76f45",
+      "head": "94c7df6076f93b2466807357ac3a4959a4b26aef",
+      "id": "89b406fe5f80902214521afd880bf40ae1d1174fa056260db38c5988d68f53bd",
+      "mirror": "https://github.com/review-bench/ZhuoZhuoCrayon_throttled-py.git"
+    },
+    {
+      "repo": "https://github.com/agent-sh/agentsys",
+      "pr_number": 298,
+      "base": "11dc08f5f3eeb1fd6c7c4f081e3892fa19617f4a",
+      "head": "a5224fae28f2cc4092bf2d19958bfd88afe0f667",
+      "id": "251320022ec7c6dac29c4b022b48b16fdce4bc081a2daa4c675e52c1125d12c2",
+      "mirror": "https://github.com/review-bench/agent-sh_agentsys.git"
+    },
+    {
+      "repo": "https://github.com/alexbol99/flatten-js",
+      "pr_number": 244,
+      "base": "2dfe44eac6c19364c88614545d199b054d414a78",
+      "head": "2f55807e28b99d80f1fba512beccc4cc08b502ad",
+      "id": "a5c00990d002cc66e64ec3ca562f971abb702114737eef8014b3616cad509980",
+      "mirror": "https://github.com/review-bench/alexbol99_flatten-js.git"
+    },
+    {
+      "repo": "https://github.com/allan-mobley-jr/gimmes",
+      "pr_number": 468,
+      "base": "08efd0bbc34fd29de2a4077f07d24f3dc02a63b6",
+      "head": "e1477f8b3f18c1de6ff87dbca9465a7b106dc193",
+      "id": "ee7f15418560e783cdc668536f3c4d8692e231a7f231876ddc86a2fac069e9e2",
+      "mirror": "https://github.com/review-bench/allan-mobley-jr_gimmes.git"
+    },
+    {
+      "repo": "https://github.com/andresharpe/dotbot",
+      "pr_number": 131,
+      "base": "3aca583499731814d73c2da1d78248dd102f0977",
+      "head": "cf5016a1a8c829b1a685ffd3b98292b64f31813f",
+      "id": "1dc9349c59565544eb4d36b5727df3b2aeabeec588cedff9cb17b39b865e7ac6",
+      "mirror": "https://github.com/review-bench/andresharpe_dotbot.git"
+    },
+    {
+      "repo": "https://github.com/anokye-labs/kbexplorer",
+      "pr_number": 38,
+      "base": "84bf940b71ac021cbe2afa4b1f445959774c4d63",
+      "head": "cf24fe27c4aa8f149ca00001846f56bfe23e8f70",
+      "id": "7ae0f63299e81372ff1724a77fcddb9d11dc602cdbda8f4c85da88c661023689",
+      "mirror": "https://github.com/review-bench/anokye-labs_kbexplorer.git"
+    },
+    {
+      "repo": "https://github.com/ardevd/jadx-collaboration",
+      "pr_number": 3,
+      "base": "a9627c7cd6695e2389a68033c3985a0809f2978e",
+      "head": "853179dcb73aed6afab52d11324ea3ff3eac8b8a",
+      "id": "bc277c0372a2c410587b86f47527f69bc7e76ae468a962c7fe668b452af88905",
+      "mirror": "https://github.com/review-bench/ardevd_jadx-collaboration.git"
+    },
+    {
+      "repo": "https://github.com/arolariu/arolariu.ro",
+      "pr_number": 615,
+      "base": "ffbc51dba52141fe693a4991ff911b4456fb5078",
+      "head": "ef4814f491112c82ae7e2fe9a821b71f9994b506",
+      "id": "8bf9a4a84b00d384fc1e930381c1c3ee0b2774a36d57029a7734b089b573b722",
+      "mirror": "https://github.com/review-bench/arolariu_arolariu.ro.git"
+    },
+    {
+      "repo": "https://github.com/auspatious/ldn-lulc",
+      "pr_number": 44,
+      "base": "42d906c968aef0ed088019f5f876b3d1671effff",
+      "head": "bc5877c7b59e0d574f18efa4f5508e6922eeeeec",
+      "id": "c195c452c02135d370676b7ff9ef4982397f9301a29eb04e233286bed273f29c",
+      "mirror": "https://github.com/review-bench/auspatious_ldn-lulc.git"
+    },
+    {
+      "repo": "https://github.com/basecamp/basecamp-cli",
+      "pr_number": 415,
+      "base": "4c6860be033f9f7b4ade38076ce00bcd976f85fa",
+      "head": "f78f6fb85d97397fbaeca5f1bbb8e514643e4cf1",
+      "id": "2b8cf57380eb1392f898436d1e5838fc1b75be5010036c5e4ff5ed0694c28b08",
+      "mirror": "https://github.com/review-bench/basecamp_basecamp-cli.git"
+    },
+    {
+      "repo": "https://github.com/basecamp/omarchy",
+      "pr_number": 5203,
+      "base": "8f441acbef103cab78fe594f54a389608296511e",
+      "head": "617eca58cacd87690ddaa4446410ba19150a6bf0",
+      "id": "9720d89cae872241bf198eae795bdeef5e386f8f5bd9226e9bce03669fbbb219",
+      "mirror": "https://github.com/review-bench/basecamp_omarchy.git"
+    },
+    {
+      "repo": "https://github.com/biralavor/42_transcendence",
+      "pr_number": 115,
+      "base": "6129477bd5b7b69876264efe2d2bdf87e29814b5",
+      "head": "928703e96a78a92ab527b32140717995898f3d81",
+      "id": "cf153c0266939eaadf0519a51a43564894855fbfb8b8fa5d1e2ebe930ad1adcb",
+      "mirror": "https://github.com/review-bench/biralavor_42_transcendence.git"
+    },
+    {
+      "repo": "https://github.com/bitmovin/bitmovin-player-ui",
+      "pr_number": 848,
+      "base": "5625eaf297b28370b8918d403e774f4cc0d2da1d",
+      "head": "9d3d63c33a173fe565bb9bb5db74748ea4b88c54",
+      "id": "38f8420dd98b8ab37fbacc781a15ce5f6a756d36e9c948ff293d7d7fe00af126",
+      "mirror": "https://github.com/review-bench/bitmovin_bitmovin-player-ui.git"
+    },
+    {
+      "repo": "https://github.com/blamechris/chroxy",
+      "pr_number": 2266,
+      "base": "bf30d68c121d7446b42cb964032245c04567606e",
+      "head": "7febfc488e2fc7a47b7c74bb627ff21622f762cd",
+      "id": "1fa3b8ed3b939467f8d8eff8d50595c6faf5306413b5aac37612c479f0416dd7",
+      "mirror": "https://github.com/review-bench/blamechris_chroxy.git"
+    },
+    {
+      "repo": "https://github.com/bndF1/wavely",
+      "pr_number": 133,
+      "base": "506621184cd1c5373931f24116276ed488ba1b12",
+      "head": "70f0d898e58d036aa80c47ab43a6e6866b5d12af",
+      "id": "2052e97efd3c4e0fe016a5921bdad0e821d76ba681dcf68cbbbc6ea817cffa3f",
+      "mirror": "https://github.com/review-bench/bndF1_wavely.git"
+    },
+    {
+      "repo": "https://github.com/bndF1/wavely",
+      "pr_number": 198,
+      "base": "b305300ad4809a5b311822dd784c0e1dee52fbdb",
+      "head": "389866126801ae4ffb733275783657282804432a",
+      "id": "37d6d062dd181e34853c3410a21b83a3af1f0b9fad325642ee0e3d5c1f3ce923",
+      "mirror": "https://github.com/review-bench/bndF1_wavely.git"
+    },
+    {
+      "repo": "https://github.com/brendanjerwin/simple_wiki",
+      "pr_number": 766,
+      "base": "642528cca446173e59a044717165351a2b9c3f52",
+      "head": "dc1bd9aecf652eaa797a22df901c3792b71b0d59",
+      "id": "772a1e1ab0fccd045def23f10358c530751831b9d26facdc194b4ac427adcdae",
+      "mirror": "https://github.com/review-bench/brendanjerwin_simple_wiki.git"
+    },
+    {
+      "repo": "https://github.com/brianc/node-postgres",
+      "pr_number": 3650,
+      "base": "c6028a875f953eff9e8e403622b0aac127d1b4a6",
+      "head": "b922f0ddfa3914cc7b05387cd12fc606bc658dc4",
+      "id": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "mirror": "https://github.com/review-bench/brianc_node-postgres.git"
+    },
+    {
+      "repo": "https://github.com/burglekitt/worktree",
+      "pr_number": 17,
+      "base": "99dfbcadd3f925a7e3580e4f951e69259397152c",
+      "head": "276940da48291a2505750371b2d50d9541b698f3",
+      "id": "86c0d772fa20a26a8eec5acafc35905ee09477c46d14d85efe306dbe4ffd0d11",
+      "mirror": "https://github.com/review-bench/burglekitt_worktree.git"
+    },
+    {
+      "repo": "https://github.com/caasi/town-zero",
+      "pr_number": 6,
+      "base": "10daec495f5c7513cfcfe25543f3c7bdf9fd7f94",
+      "head": "f6ef91cec23186113b32a994b447ce89bcbc5cc6",
+      "id": "97479bb231ce02c9308e2f7a96adc5c63660f111350c6a0f68a0eaf075e754e2",
+      "mirror": "https://github.com/review-bench/caasi_town-zero.git"
+    },
+    {
+      "repo": "https://github.com/calkit/calkit",
+      "pr_number": 757,
+      "base": "86f34f29bb2f49dc46e39bc281c9565cd1935802",
+      "head": "872db6c9f0ed141364b329b7865c6966a61d9770",
+      "id": "9cdbf7613322e423df71180b8dba19c4b8b1d2daa1bbe524f7d4996807eaf278",
+      "mirror": "https://github.com/review-bench/calkit_calkit.git"
+    },
+    {
+      "repo": "https://github.com/capawesome-team/cli",
+      "pr_number": 126,
+      "base": "a03825128b8380f86dcf85e8d3507b3a41d9f775",
+      "head": "2d997db6e53c75213cbb13f2d3fdb636984eead4",
+      "id": "d2b49f7094b694aff9bb25964fae7985aa429f541ef181b15a9ddd4c88be65db",
+      "mirror": "https://github.com/review-bench/capawesome-team_cli.git"
+    },
+    {
+      "repo": "https://github.com/capawesome-team/cli",
+      "pr_number": 127,
+      "base": "a03825128b8380f86dcf85e8d3507b3a41d9f775",
+      "head": "5c1cc1c9c9601f7bc5d05718dc5a875fa42ce76b",
+      "id": "c984266004726f9b8f0affdb982c683bdd56e98065e2f227722a90545c4f803e",
+      "mirror": "https://github.com/review-bench/capawesome-team_cli.git"
+    },
+    {
+      "repo": "https://github.com/cardstack/boxel",
+      "pr_number": 4369,
+      "base": "7848a41383a06db0ec0ebaabb603636306c0acaa",
+      "head": "e9a6ef340c9a6bee7b5872588c2b4af6d16d64cb",
+      "id": "03b114ad6cd7cd436a5b59f464d4a7ebcad340630e184e9ed2c9c0c18df58c4c",
+      "mirror": "https://github.com/review-bench/cardstack_boxel.git"
+    },
+    {
+      "repo": "https://github.com/cds-snc/notification-terraform",
+      "pr_number": 2458,
+      "base": "96a2f52be60841c7088a47de8b60ded32b464aeb",
+      "head": "f3a830d5a5c0bec275c342d29f65e8afdec8c6d1",
+      "id": "8d99ba2bf5d339d4dac378d19f0a18945be1f810fa729aa5a582314990b57b47",
+      "mirror": "https://github.com/review-bench/cds-snc_notification-terraform.git"
+    },
+    {
+      "repo": "https://github.com/chrisdevchroma/gsd-ng",
+      "pr_number": 16,
+      "base": "8b21a0c2ca2bf79c3ca5b4e0de3f1ba14a8eecb7",
+      "head": "3a6681c0e9f84cec275f191bb2960d35990f02c1",
+      "id": "dea40290fe40d601d7c3c980c1ba005a34e411bfba40c3984460d28e646bc45e",
+      "mirror": "https://github.com/review-bench/chrisdevchroma_gsd-ng.git"
+    },
+    {
+      "repo": "https://github.com/cjolivier01/hm-cupano",
+      "pr_number": 14,
+      "base": "7abef34a645daae09b8b0617c2abb133a491d7f6",
+      "head": "03aa02465ce1ab5aae982ace21812b35cbe04eb3",
+      "id": "b5bcc30cc8b2a4f7b406693cfad6e561346ca33a892daa0a8a818a45d698caaf",
+      "mirror": "https://github.com/review-bench/cjolivier01_hm-cupano.git"
+    },
+    {
+      "repo": "https://github.com/cli/cli",
+      "pr_number": 13175,
+      "base": "f79cc02bdde49e0d6a20ecec3454e20cc68c4aef",
+      "head": "75909ed2ba1bb034630edf49b18fb58ff5b64c04",
+      "id": "67bcc251ce449546b38f93f05671911104291738deb5f83ed61e6aa7106c1bea",
+      "mirror": "https://github.com/review-bench/cli_cli.git"
+    },
+    {
+      "repo": "https://github.com/cmik/apilix",
+      "pr_number": 12,
+      "base": "4fe23e22e3937c38cb859a3b9c00b193bb309aa1",
+      "head": "0c34439aeebedc646d76d90db6b79a5c54b4cb8f",
+      "id": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "mirror": "https://github.com/review-bench/cmik_apilix.git"
+    },
+    {
+      "repo": "https://github.com/concord-consortium/collaborative-learning",
+      "pr_number": 2816,
+      "base": "fd3bc6241f856ddd2db4a0c2f24553b05835c4d1",
+      "head": "16329ddcee590f752cbdb600e9ff88d141d3d3e2",
+      "id": "907be05fcf2be3fb79a0bc6ce09e2eda59af753de0e70e334b96e3f066bac6e1",
+      "mirror": "https://github.com/review-bench/concord-consortium_collaborative-learning.git"
+    },
+    {
+      "repo": "https://github.com/confluentinc/mcp-confluent",
+      "pr_number": 143,
+      "base": "b5ce7d99978c2ba1714861a5b59b2fdde23ccb94",
+      "head": "abcb5d9f237f7428064d3529cc0d7bc822a79424",
+      "id": "2d3da45888a963d5b1b33d36d3d61e71609eb8bb4bf5a906076ab01b2be04e4d",
+      "mirror": "https://github.com/review-bench/confluentinc_mcp-confluent.git"
+    },
+    {
+      "repo": "https://github.com/cybershoe/PingBar",
+      "pr_number": 4,
+      "base": "4d3e6a709035034b02f8a20fa5de158750f2a305",
+      "head": "e40744b3e202baec480f06c308d3ef071918bc1f",
+      "id": "22e399b48e5c5f6e32d063f130127263f387f1a1c40902b3b1465fdb865efcd6",
+      "mirror": "https://github.com/review-bench/cybershoe_PingBar.git"
+    },
+    {
+      "repo": "https://github.com/davidortinau/SentenceStudio",
+      "pr_number": 68,
+      "base": "ccc8680560e5aeebc4594ce840cd41f87674bf0e",
+      "head": "ac86e5c3f872e80651ef5ca46eabb62ddf7361d9",
+      "id": "32a55c0911f19e01a75f0248686d889c6978f4c8fbb0f954decbab5951c6773c",
+      "mirror": "https://github.com/review-bench/davidortinau_SentenceStudio.git"
+    },
+    {
+      "repo": "https://github.com/davidortinau/SentenceStudio",
+      "pr_number": 72,
+      "base": "b488d228ceeea1c29d5d54591a4b5c8ba9790712",
+      "head": "8941b5da55823d738d340cad6a429021318d8211",
+      "id": "54aead641bd74caaf2f5b9d9c9c04742abc557a1618b0582567980e8e8572208",
+      "mirror": "https://github.com/review-bench/davidortinau_SentenceStudio.git"
+    },
+    {
+      "repo": "https://github.com/demaconsulting/BuildMark",
+      "pr_number": 137,
+      "base": "8d706c3e4ce616802f682c696a00dca848c67b63",
+      "head": "74a4b88d07f6d2d66f4f5f8b34ec83a53cf12f02",
+      "id": "f9a53bab2d69a88543899722bab11c398933cd665f0a916d4e43c82668f07c60",
+      "mirror": "https://github.com/review-bench/demaconsulting_BuildMark.git"
+    },
+    {
+      "repo": "https://github.com/demaconsulting/TemplateDotNetLibrary",
+      "pr_number": 84,
+      "base": "0dd705cf7d10055bac341dae48705f81dfd4617e",
+      "head": "917f008daf391e82581ca0405850c71a16ff3a0e",
+      "id": "2ad1ae31b5ac4be46753c8148e1c1866cea35f5961aa0953069ffa5ba927690b",
+      "mirror": "https://github.com/review-bench/demaconsulting_TemplateDotNetLibrary.git"
+    },
+    {
+      "repo": "https://github.com/dotnet/android",
+      "pr_number": 11084,
+      "base": "e67a3fd36ca5e24b0007a170ea77037e4437f9d3",
+      "head": "ac02d09a29b6492b0e1a01b48f5fcb3efa561a6c",
+      "id": "d26346ddfe7365678928f9db38c5a5df9f4ee8f64d7745a52893eeac39a71b3a",
+      "mirror": "https://github.com/review-bench/dotnet_android.git"
+    },
+    {
+      "repo": "https://github.com/dotnet/efcore",
+      "pr_number": 38115,
+      "base": "fec5da438f8879ca73c9752683e323cda8be77e6",
+      "head": "009f41901ee1a943ce85425652bc454fe85d2278",
+      "id": "41c513250724c8bed6e886acf18d190675a6f8f615a165bceac9c3c980e5fad5",
+      "mirror": "https://github.com/review-bench/dotnet_efcore.git"
+    },
+    {
+      "repo": "https://github.com/dotnet/sdk",
+      "pr_number": 53693,
+      "base": "96683a0ad81c5694820f7824342a4ca5079bdd64",
+      "head": "e993b64d1603f69af66f23ba32f54aadb2397067",
+      "id": "16b44044a143d7d894ccc5f3eb3d5909e4adec6a51fdf4134e1258e1e37c438e",
+      "mirror": "https://github.com/review-bench/dotnet_sdk.git"
+    },
+    {
+      "repo": "https://github.com/dotnet/sdk",
+      "pr_number": 53906,
+      "base": "5be3937332d7d45a12cb8a95fdbfc67c8fb99513",
+      "head": "a2a01660cad071645b1b18ddf910ef3d105b0e4e",
+      "id": "135b30260963e8958da5578126d2f25692c31f2208f8e4f8a894be35b149fe35",
+      "mirror": "https://github.com/review-bench/dotnet_sdk.git"
+    },
+    {
+      "repo": "https://github.com/dougborg/katana-openapi-client",
+      "pr_number": 309,
+      "base": "d524e5a233d972cd5fe59a224ed5a1a2f323d415",
+      "head": "dfc5d17b9e4f98357ffd4a36f1ca8bd9201e4884",
+      "id": "da124062b2645d511f71751120199e3289ceaf81b047cf4a96e09104d97a0808",
+      "mirror": "https://github.com/review-bench/dougborg_katana-openapi-client.git"
+    },
+    {
+      "repo": "https://github.com/edercnj/ia-dev-environment",
+      "pr_number": 134,
+      "base": "f70b5cb07f6ef735822a3fba16b4a402956490b2",
+      "head": "986305ffd838ca4b17ede2517f62332e0affe8a0",
+      "id": "902a8c574946b70a67387f6c89ad91de88a102b3f86bf13d67915e576d422e02",
+      "mirror": "https://github.com/review-bench/edercnj_ia-dev-environment.git"
+    },
+    {
+      "repo": "https://github.com/edercnj/ia-dev-environment",
+      "pr_number": 198,
+      "base": "949c62fe2ace8c41d41dd9d7dfd7b51ab268d25f",
+      "head": "76a992582e9e73897987a43bd520bb581f0e7ce7",
+      "id": "761523ca8145e4db70bb5d3f43e82c5917d7964fe9b8ae7fd45d03d5d29a31c0",
+      "mirror": "https://github.com/review-bench/edercnj_ia-dev-environment.git"
+    },
+    {
+      "repo": "https://github.com/edercnj/ia-dev-environment",
+      "pr_number": 202,
+      "base": "2159a5434ce888127b578ad8b788e550fd3412ce",
+      "head": "7e51d062b3fd69794c941b43f3aa8830a7a1729f",
+      "id": "5b6ab2318e560af81a7c4d51057e1902cf11e630dad8c5e985c37e27e2fe798b",
+      "mirror": "https://github.com/review-bench/edercnj_ia-dev-environment.git"
+    },
+    {
+      "repo": "https://github.com/evdboom/Bindery",
+      "pr_number": 63,
+      "base": "19b77e41591a5bbc56045b3621b28510257aa65e",
+      "head": "3dd03d6616aaa1a89e61358271f48d15c3a331f3",
+      "id": "b35b824a34f1b9244d1e0b64ea7a03a7fbaa9f07f23ae68eb9b3e77bac57401c",
+      "mirror": "https://github.com/review-bench/evdboom_Bindery.git"
+    },
+    {
+      "repo": "https://github.com/everruns/bashkit",
+      "pr_number": 1314,
+      "base": "e51470a94becc1fab2e335ff7f1a41888d5cd113",
+      "head": "9afc1db1dfa755747eea72b33d004ae95c4cced9",
+      "id": "04a0b74707d26f137d16c78eb7aa27e52cf1d250c4c933e16e309bd3f192c8d3",
+      "mirror": "https://github.com/review-bench/everruns_bashkit.git"
+    },
+    {
+      "repo": "https://github.com/fentas/b",
+      "pr_number": 136,
+      "base": "57d153d72000867b04db6b94b968834a33cddd0d",
+      "head": "6423e61023ae918e04fdbc80541991f180062397",
+      "id": "6f0004434143c4c6482d8aad9c747d2d752a51b5cec916541312803e337c5f2f",
+      "mirror": "https://github.com/review-bench/fentas_b.git"
+    },
+    {
+      "repo": "https://github.com/fernando-msa/bacula-log-archiver",
+      "pr_number": 1,
+      "base": "14992b0df80b27d5e4f28fb4fecb5d42ac25e771",
+      "head": "bc9e7308ec630018a9402979ff6432965e238398",
+      "id": "447314ff68e848c05f11ce8170d0bf01db980111c08974c332f941480c5aaf28",
+      "mirror": "https://github.com/review-bench/fernando-msa_bacula-log-archiver.git"
+    },
+    {
+      "repo": "https://github.com/fivetran/fivetran-csdk-connectors",
+      "pr_number": 6,
+      "base": "c28e04168f1bab11fe99daa225acde556006e3e4",
+      "head": "7449da117ca25d53135e250561a9c263568d5612",
+      "id": "ef0043acf4cd7e299aae3e847cf0a77c1bb54432e15a90b4bc3db1177d074c36",
+      "mirror": "https://github.com/review-bench/fivetran_fivetran-csdk-connectors.git"
+    },
+    {
+      "repo": "https://github.com/franklesniak/PSStyleGuide",
+      "pr_number": 47,
+      "base": "9ac12092cca8c7e5eacc0508469d40628d06c1f7",
+      "head": "3dfce1e3ee95726bff7bed27592e02c8b4507d7c",
+      "id": "e36a43975b04aa2bc5c833e86e4f44f74927d531b1edb53bbd6592a3c6d3c68a",
+      "mirror": "https://github.com/review-bench/franklesniak_PSStyleGuide.git"
+    },
+    {
+      "repo": "https://github.com/fredericboyer/dev-team",
+      "pr_number": 797,
+      "base": "5708e07e9626ec3621b8eed703bb6fb08e457c0a",
+      "head": "3bc9ea25d3896d759a6395a585aaf1400ea05c28",
+      "id": "8d5eb6e4d7a3e13f16de4d04f5f9c6d978c0bc51303a1faef8ce229ffbe555ec",
+      "mirror": "https://github.com/review-bench/fredericboyer_dev-team.git"
+    },
+    {
+      "repo": "https://github.com/gagneurlab/PROTRIDER",
+      "pr_number": 10,
+      "base": "22740c695315543a1064915930f806abf5b058ce",
+      "head": "b462b109b630dd1e1a9a78088b18429d2baaae9b",
+      "id": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "mirror": "https://github.com/review-bench/gagneurlab_PROTRIDER.git"
+    },
+    {
+      "repo": "https://github.com/github/copilot-sdk",
+      "pr_number": 1049,
+      "base": "6029b37401e8a9f85f4c1afab128ef55cc128773",
+      "head": "4f18d31b70f5c23aa4a23701ca4cfd85c7eeae25",
+      "id": "8d1399fc5196700a16b013d841c1352d332fd343ea0656c944ea50258272a2ce",
+      "mirror": "https://github.com/review-bench/github_copilot-sdk.git"
+    },
+    {
+      "repo": "https://github.com/github/gh-aw",
+      "pr_number": 26515,
+      "base": "f2874327b8838d9bed8bca7aef3ea2cdbc9b566f",
+      "head": "b028adc4e6f4c6003a4e5d2df4af674aad045fda",
+      "id": "5ac6c4597b3acd79761476956783d02182b185099df15b92c8abf34165833f90",
+      "mirror": "https://github.com/review-bench/github_gh-aw.git"
+    },
+    {
+      "repo": "https://github.com/godaddy/antares",
+      "pr_number": 142,
+      "base": "f910afef727b67f484a672fcae7a94d86272aed9",
+      "head": "12f376d05689fdecb86096f51f7ab2f7169c3f0a",
+      "id": "932a08bc1cd7ded644304057f6598d2ccbcdaa46b57cfd7ff94e0cd813eec4ae",
+      "mirror": "https://github.com/review-bench/godaddy_antares.git"
+    },
+    {
+      "repo": "https://github.com/godotengine/godot-angle-static",
+      "pr_number": 18,
+      "base": "c7c2bb9a034bc6e31379a987fb2f461d31ec9362",
+      "head": "71c014962453f10d3d40ee8c6ff10ab517a1fa68",
+      "id": "dd7b056ed11c02b420911389fc3c940f5c496ba49d6dc98fa2f69d30c960481d",
+      "mirror": "https://github.com/review-bench/godotengine_godot-angle-static.git"
+    },
+    {
+      "repo": "https://github.com/gtronset/tablo-legacy-m3u",
+      "pr_number": 30,
+      "base": "3d6d8d760d62008d395e852e2d73fc42e78fc039",
+      "head": "051c9cf394ac3f247779034233df9e9590887993",
+      "id": "2c701ad8bd150037776d319e20c38ab93836b5d4c0a1062b9b2fc838833d9abb",
+      "mirror": "https://github.com/review-bench/gtronset_tablo-legacy-m3u.git"
+    },
+    {
+      "repo": "https://github.com/hackforla/devops-security",
+      "pr_number": 154,
+      "base": "12f355213639cd3dd16133ef960008cdfeed7215",
+      "head": "dabde0cbb2cd71d88da17c02b42cf42e2c713139",
+      "id": "2c325df058d73d0ffcb5d44ab555debd7a5af04c075d30310034342d9e8abb35",
+      "mirror": "https://github.com/review-bench/hackforla_devops-security.git"
+    },
+    {
+      "repo": "https://github.com/handlebars-lang/handlebars.js",
+      "pr_number": 2132,
+      "base": "70b8f1145dbbb6c925dc1e52c81673cacea8cfa1",
+      "head": "dcaafb425e64e5587d500a9175542756ab2b6417",
+      "id": "0df7dc7c2dcdbff6b81f76dbafbe44e33ef33795f5952c56a51f929c89b8c92c",
+      "mirror": "https://github.com/review-bench/handlebars-lang_handlebars.js.git"
+    },
+    {
+      "repo": "https://github.com/haoling/diary-notebook-blog-transformer",
+      "pr_number": 24,
+      "base": "d98d6da454bafa63c79df728790e0c50bb8ca668",
+      "head": "876934a63ff912a060320102a818b48476a59136",
+      "id": "611472808df957dc9107ef7810f2c1ebcc52b4e5a20aebeb32864f487ecf4f97",
+      "mirror": "https://github.com/review-bench/haoling_diary-notebook-blog-transformer.git"
+    },
+    {
+      "repo": "https://github.com/heyitsaamir/teamscli",
+      "pr_number": 31,
+      "base": "e06b7f24444a75a36acd28fbaab3a3f08b33abce",
+      "head": "ec0e9d9a60bff66e8b28af4656803836c22001dd",
+      "id": "0bcd79a6883c9e70b022247cd68ab57d78f95f47a5a7433ed9e0573373b7fae7",
+      "mirror": "https://github.com/review-bench/heyitsaamir_teamscli.git"
+    },
+    {
+      "repo": "https://github.com/hoangsonww/Claude-Code-Agent-Monitor",
+      "pr_number": 58,
+      "base": "2f6197153266bae183b265043326840b2df5b348",
+      "head": "cd6b385a8750a02ddba89715e72ff7877f731647",
+      "id": "13905a78cc0ce03ff599787fcfd78a40fe6b60abb8eb67e3bc714c36a2658cc4",
+      "mirror": "https://github.com/review-bench/hoangsonww_Claude-Code-Agent-Monitor.git"
+    },
+    {
+      "repo": "https://github.com/hughdidit/DAISy-Agency",
+      "pr_number": 274,
+      "base": "72ccdfaa52365466e9ce3a07b096f8c0f096b8a2",
+      "head": "1c88a2381c97cfc434d381876515f003078f83d9",
+      "id": "b549f83ffb87a91f1c74da95ee981ace327fc7043eb5a204398094a0d3a4764e",
+      "mirror": "https://github.com/review-bench/hughdidit_DAISy-Agency.git"
+    },
+    {
+      "repo": "https://github.com/hughdidit/DAISy-Agency",
+      "pr_number": 294,
+      "base": "daa9f5234921318a97907361b3c464b914089949",
+      "head": "690f26b60a336e59f40204fd105c8ecd6c8cd115",
+      "id": "2cc1094e05af3753ca4307aa75ec6efea267a2589fde29d743bf63dbca2e86b1",
+      "mirror": "https://github.com/review-bench/hughdidit_DAISy-Agency.git"
+    },
+    {
+      "repo": "https://github.com/hughdidit/DAISy-Agency",
+      "pr_number": 309,
+      "base": "130fc084dcec4731e67de96162d1abccae44f7ce",
+      "head": "ac6e2196f5c307fd09fa6ad8a64ba9ada14ab385",
+      "id": "aaa9d269683f531a1d4ff5934b2be1d288643e3aa3d6f88bc977e78735c16d03",
+      "mirror": "https://github.com/review-bench/hughdidit_DAISy-Agency.git"
+    },
+    {
+      "repo": "https://github.com/iTwin/presentation",
+      "pr_number": 1288,
+      "base": "bbd50c283e2b9e3597a7bf7fdbb735ce8cd2f898",
+      "head": "31c0f13af9ed1c2a6998f4dee23efb86210da50d",
+      "id": "34720e250f2529830a81cc46e2886cbbe6135b588e494d2bb398dff5f1c94dad",
+      "mirror": "https://github.com/review-bench/iTwin_presentation.git"
+    },
+    {
+      "repo": "https://github.com/indice-co/Indice.Cryptography",
+      "pr_number": 18,
+      "base": "315ff594f66bd3b716b4bb695e1d4cc9eb92de24",
+      "head": "5c0b52a39593b9f7439e84d5f493eb60a0abc1ca",
+      "id": "3c0be4bbd7f6744506345e3f2f6fe3cea937afbcea7b7002a850234b13db7eeb",
+      "mirror": "https://github.com/review-bench/indice-co_Indice.Cryptography.git"
+    },
+    {
+      "repo": "https://github.com/jannekbuengener/Claire_de_Binare",
+      "pr_number": 1550,
+      "base": "7cb64a6bd0840f915629b067f44f0d8cc915253a",
+      "head": "67c39c630a7b2f8750d7d2be7bc62f770d1c6428",
+      "id": "ececeacd31aa91acdece2ed657040b1530c965f9a15db1653fd15e0cb9396698",
+      "mirror": "https://github.com/review-bench/jannekbuengener_Claire_de_Binare.git"
+    },
+    {
+      "repo": "https://github.com/jeduden/mdsmith",
+      "pr_number": 112,
+      "base": "0b239cd5e14de6817e953c230c7fa5eca94b1654",
+      "head": "ac0127ef6fa437a99d486ae5f31586cc9267e533",
+      "id": "12118a5f6b4d099639cdbc1a588f0a27df724eb820228f29cad41c9fd1ece5c5",
+      "mirror": "https://github.com/review-bench/jeduden_mdsmith.git"
+    },
+    {
+      "repo": "https://github.com/jeduden/mdsmith",
+      "pr_number": 125,
+      "base": "4193ee5a64fc948386b03a05cde8444cd9f86796",
+      "head": "06f9d050aef8ca40c6c1a49478aecee995dce362",
+      "id": "86c86c90111ca48d314305f65e5be3f891d22ddab8590d0093694aed72753033",
+      "mirror": "https://github.com/review-bench/jeduden_mdsmith.git"
+    },
+    {
+      "repo": "https://github.com/jenreh/appkit",
+      "pr_number": 48,
+      "base": "a76ed1d8347b3cced79cd1f8a9ba462c9e71f4dd",
+      "head": "0c634d306294b43d149275b4f234be61999e2a7b",
+      "id": "def0ba51826155fa366b81602f1070c278e8c22ade71a7b068532e7527c62f76",
+      "mirror": "https://github.com/review-bench/jenreh_appkit.git"
+    },
+    {
+      "repo": "https://github.com/jongalloway/DiagramForge",
+      "pr_number": 101,
+      "base": "969398a66116b68aafa8d267e824442000229ec7",
+      "head": "8be727e43f0bfd1dd285794ce5c557b5ea44336e",
+      "id": "066cd55633feb57df29408cd38abc201bd548c1830a478a0ceb1724ac969ec4b",
+      "mirror": "https://github.com/review-bench/jongalloway_DiagramForge.git"
+    },
+    {
+      "repo": "https://github.com/joshjohanning/bulk-github-repo-settings-sync-action",
+      "pr_number": 120,
+      "base": "5c594c2c8cf0a27dbc674d136e1366f749632ae4",
+      "head": "7d62e090c20e28e78685700094b2440e7f576711",
+      "id": "52f715d3c8f6f08a3d539c87544e5b1e7475b0d3b8bb7714e34aa3b1d3828eea",
+      "mirror": "https://github.com/review-bench/joshjohanning_bulk-github-repo-settings-sync-action.git"
+    },
+    {
+      "repo": "https://github.com/joshjohanning/npm-version-check-action",
+      "pr_number": 92,
+      "base": "07b04f0ea37de3f7ef1856351823972176766903",
+      "head": "a9fce75678bb88cbbaabf793b8e7bd89abc100fb",
+      "id": "03a6a641423c08cd9ba407eed93e091935d1078e5d1f4f878ab6b97243b08fc7",
+      "mirror": "https://github.com/review-bench/joshjohanning_npm-version-check-action.git"
+    },
+    {
+      "repo": "https://github.com/k1LoW/gh-copilot-review",
+      "pr_number": 9,
+      "base": "5f3765a9ef25d9c5a57699418bed105d9ac54691",
+      "head": "f98281938e63acd1d2df9b89d6af98dcf58c9fa8",
+      "id": "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+      "mirror": "https://github.com/review-bench/k1LoW_gh-copilot-review.git"
+    },
+    {
+      "repo": "https://github.com/khanjal/gig-logger",
+      "pr_number": 430,
+      "base": "b22f30db9db71d86d5934a32db0e9252c1a37461",
+      "head": "f5e5bf9b0730d0326a525e5f37609bdd76c02460",
+      "id": "be58e5405975820ee77e8c532226802e70433ff118b8be06eb45aa65acc4d5cf",
+      "mirror": "https://github.com/review-bench/khanjal_gig-logger.git"
+    },
+    {
+      "repo": "https://github.com/kodrunhq/opencode-autopilot",
+      "pr_number": 86,
+      "base": "817c1a45ed2e4496274fe09bf6efc0e34aba4c82",
+      "head": "3bb1ca09fd515c03d77e168e48ba347734b2ef16",
+      "id": "fae12a02fa535e2cb0f3e926074e4b45192b221adbfac3eeba8c784925630648",
+      "mirror": "https://github.com/review-bench/kodrunhq_opencode-autopilot.git"
+    },
+    {
+      "repo": "https://github.com/konturio/disaster-ninja-fe",
+      "pr_number": 1081,
+      "base": "9f04fad3b614c5bad660916916d4f1f5ff0e8b9e",
+      "head": "d2c0c636fc49cb7e318c17ad8e4a96aaddba9511",
+      "id": "b2ec65c0211ab7b6751994bcefbfad078956b6e0b0bda9deb05105d635986376",
+      "mirror": "https://github.com/review-bench/konturio_disaster-ninja-fe.git"
+    },
+    {
+      "repo": "https://github.com/konturio/disaster-ninja-fe",
+      "pr_number": 1082,
+      "base": "62514588e0b4024cfa3ca6417505cb728c7f0fe6",
+      "head": "a54020e9cfa29fe786d81752434b88bb39cd52f4",
+      "id": "f0baf05a6c536bc491ea7f0873a69a866c2330ea393198a6c78d205eed274812",
+      "mirror": "https://github.com/review-bench/konturio_disaster-ninja-fe.git"
+    },
+    {
+      "repo": "https://github.com/konturio/disaster-ninja-fe",
+      "pr_number": 1115,
+      "base": "49802085fc7ba9e94925a8c776026bfd1aaf9227",
+      "head": "f5f539ca6460793eea0cf060ac518a144b15f509",
+      "id": "d0f3173aaa7bc90fada8ba725cd5200626f9d7fa59a1bbfc139c20afbc3a540e",
+      "mirror": "https://github.com/review-bench/konturio_disaster-ninja-fe.git"
+    },
+    {
+      "repo": "https://github.com/konturio/disaster-ninja-fe",
+      "pr_number": 1128,
+      "base": "49802085fc7ba9e94925a8c776026bfd1aaf9227",
+      "head": "421e2dbe0832b9e7a46ca664e8a04ddf8ce34405",
+      "id": "1d0fe373b1655a34f265edba41d67196070777cd876486ef61a422dc8e40f200",
+      "mirror": "https://github.com/review-bench/konturio_disaster-ninja-fe.git"
+    },
+    {
+      "repo": "https://github.com/konturio/disaster-ninja-fe",
+      "pr_number": 1166,
+      "base": "cdc5015dcd8381a96408c71f44b435791e2207d0",
+      "head": "728066014427766309128a2d297ab574ad0eaf35",
+      "id": "9ac3376014203d0221037baecbc78094d234cd3e5ff01e3b029d295c0a6c2078",
+      "mirror": "https://github.com/review-bench/konturio_disaster-ninja-fe.git"
+    },
+    {
+      "repo": "https://github.com/konturio/disaster-ninja-fe",
+      "pr_number": 1203,
+      "base": "75f9f78fbcd43ba62b3e1abfe56592e8b1786c3d",
+      "head": "65f8e8d6327ce9378c4f787a0f46319ce57ecf95",
+      "id": "a37ecd148d24625c176fec6acd232b634ce57ab32d108ed279ff93de92f5586a",
+      "mirror": "https://github.com/review-bench/konturio_disaster-ninja-fe.git"
+    },
+    {
+      "repo": "https://github.com/konturio/disaster-ninja-fe",
+      "pr_number": 1208,
+      "base": "75f9f78fbcd43ba62b3e1abfe56592e8b1786c3d",
+      "head": "04c27fe9ae865972c3cb6c6a0ee0fd0f85186758",
+      "id": "98aa66cdcc5988ba05770fc1ed8dd247a4e59dbc0a5a935b0000cc0e0ec027f2",
+      "mirror": "https://github.com/review-bench/konturio_disaster-ninja-fe.git"
+    },
+    {
+      "repo": "https://github.com/konturio/disaster-ninja-fe",
+      "pr_number": 1230,
+      "base": "3c1900acccaae22cb69adb02dd8351f24fe4e8b5",
+      "head": "d169e9da6b816d04a9697359406cdf154b2f8067",
+      "id": "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+      "mirror": "https://github.com/review-bench/konturio_disaster-ninja-fe.git"
+    },
+    {
+      "repo": "https://github.com/konturio/disaster-ninja-fe",
+      "pr_number": 1234,
+      "base": "3c1900acccaae22cb69adb02dd8351f24fe4e8b5",
+      "head": "2271e59046b1afe806dfc49d92435d40131df30f",
+      "id": "45cd184cdd735ba61ebcc33a5a29fe159abb97852dc72719b4d2c7a26a0ce60d",
+      "mirror": "https://github.com/review-bench/konturio_disaster-ninja-fe.git"
+    },
+    {
+      "repo": "https://github.com/konturio/disaster-ninja-fe",
+      "pr_number": 1237,
+      "base": "e42573e7366165d9a100406d746c210fa0febe99",
+      "head": "09807d0d604613e8b301f6bc2930878b0688ff48",
+      "id": "a8d96a420e2f510493d049ab3193c52958901aa1e9b924fb0e97931ac2a6150c",
+      "mirror": "https://github.com/review-bench/konturio_disaster-ninja-fe.git"
+    },
+    {
+      "repo": "https://github.com/kutanti/litmusai",
+      "pr_number": 67,
+      "base": "8d3aac3ea03aa726497d05b48d37df4d1e797bef",
+      "head": "48e739834ed4780252d4e86ec0114b594ca21d8a",
+      "id": "2e0c611cd50f4875d67bb3e9c4b9582bd88ed54ade75f05edb512ddcce800e19",
+      "mirror": "https://github.com/review-bench/kutanti_litmusai.git"
+    },
+    {
+      "repo": "https://github.com/laser-base/laser-core",
+      "pr_number": 393,
+      "base": "5a11f6a074bb84abaf4cd79355c6dcad987cfc52",
+      "head": "345c542111cf72a59552431dd06d2ab001e0cc40",
+      "id": "7145cabf2834da8a0b1d004bca427c3fab5c883ba8d8edb434998fdc3e37e609",
+      "mirror": "https://github.com/review-bench/laser-base_laser-core.git"
+    },
+    {
+      "repo": "https://github.com/logos-blockchain/lez-programs",
+      "pr_number": 52,
+      "base": "6c86b5b9cec4ea2253fd36d3797005558972e6f4",
+      "head": "9f34384dd77b616bb25db01a40e2acb667d95c16",
+      "id": "e7b606e77d73497b7d20a16e45d45d6658bf065a2af4ed5f5d3836daf4950364",
+      "mirror": "https://github.com/review-bench/logos-blockchain_lez-programs.git"
+    },
+    {
+      "repo": "https://github.com/ls1intum/Artemis",
+      "pr_number": 12479,
+      "base": "dec2422f27c4b4fa45a1d70142604ea827b51301",
+      "head": "237b36560d91b57ec1b8948b4425cdba7ff25bb3",
+      "id": "c2cb53a6d950101fe93f86a80487f14170d9d9273074fa4a6fb7686e75986f7f",
+      "mirror": "https://github.com/review-bench/ls1intum_Artemis.git"
+    },
+    {
+      "repo": "https://github.com/mamu7211/feirb-mailclient",
+      "pr_number": 215,
+      "base": "76d9db59beaf6a0942c84522b9d33058f721ee86",
+      "head": "d15c6ca689e20a95a1c5468d0e87f71f8b5e7496",
+      "id": "7a72faad8d7678c85a9e30b7969f81d58b4b461df2b697b326d289065d9cffeb",
+      "mirror": "https://github.com/review-bench/mamu7211_feirb-mailclient.git"
+    },
+    {
+      "repo": "https://github.com/mareklesko/ProxmoxMCP-Plus",
+      "pr_number": 1,
+      "base": "5a8047f5bc592e5e170d3828e9633dd018f13cbe",
+      "head": "b44013c3e80fd71ca639ee272b88c5e07af4b507",
+      "id": "f70422733d51799ccbe28e504af5af82ef8ce20854a3d7f61423077456284036",
+      "mirror": "https://github.com/review-bench/mareklesko_ProxmoxMCP-Plus.git"
+    },
+    {
+      "repo": "https://github.com/melroyanthony/healthstream-rag",
+      "pr_number": 34,
+      "base": "adfd09b776343d041eaa1109d06282867580084a",
+      "head": "a1d2b3e09cc4cb67477de2abc4ecfb429c37aa13",
+      "id": "92cadd53b38bb908a6aaa1ef9b30cdbadbb96a7f96e65959dd57bc3431fe1633",
+      "mirror": "https://github.com/review-bench/melroyanthony_healthstream-rag.git"
+    },
+    {
+      "repo": "https://github.com/mheuss/chronicle",
+      "pr_number": 14,
+      "base": "17e33ca1ebf643d47201a8f94b8ab3e88848cf23",
+      "head": "04ac4c02d48083676c14dd3fa70d26ca102bd50e",
+      "id": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "mirror": "https://github.com/review-bench/mheuss_chronicle.git"
+    },
+    {
+      "repo": "https://github.com/mikecubed/m3OS",
+      "pr_number": 84,
+      "base": "1f04d09ca740bac5640d9163ef9edc06768e6c60",
+      "head": "5e9d78eba1ea7c359c17beae6351d22aaab1fb6b",
+      "id": "dbbcaed315a81e9e5801d1a2055ac92d49413591a4104ab9f5ab14cac6137a2d",
+      "mirror": "https://github.com/review-bench/mikecubed_m3OS.git"
+    },
+    {
+      "repo": "https://github.com/motif-ui/motifreact",
+      "pr_number": 34,
+      "base": "b66efb837ea8895d80cf6d3e1de1b5ff61fcf155",
+      "head": "cb636a17d7bc9fa011dfae20ef8e55c2c0fc4854",
+      "id": "95aa3a77aab8c237a365185d2cd1e578af0f0eb41c4090324b66093cc07ae35a",
+      "mirror": "https://github.com/review-bench/motif-ui_motifreact.git"
+    },
+    {
+      "repo": "https://github.com/muir/libschema",
+      "pr_number": 353,
+      "base": "f9d69f0f9766ca274c340cbc0d21c05ad81c856c",
+      "head": "0cc504c4ac335d0db754ce9682ea8b77d6b0ae90",
+      "id": "2511ca93611e4a4ffebe32398b68678a8e016de35709e65275a048ee92f55cf7",
+      "mirror": "https://github.com/review-bench/muir_libschema.git"
+    },
+    {
+      "repo": "https://github.com/namehash/ensnode",
+      "pr_number": 1938,
+      "base": "d594a384de9dbd8e323c2ff55963acff5bd5d3ad",
+      "head": "73085b3296a7991cd1351e5cd010ebb6fab80cb3",
+      "id": "3ff9c5597f37b973b7e7ad0e52095abc795914a0210fffa35348a3028ed63e49",
+      "mirror": "https://github.com/review-bench/namehash_ensnode.git"
+    },
+    {
+      "repo": "https://github.com/navikt/k9-brukerdialog-prosessering",
+      "pr_number": 480,
+      "base": "f396016e3e4517af046049e08b2433f9149423b0",
+      "head": "f828e2d8d4c5ace8c7aa70389e52c7e61761c14d",
+      "id": "d7457b2e8f41e297cdb3b3177c1e778f40cd42e657315aa016543c74b9479c44",
+      "mirror": "https://github.com/review-bench/navikt_k9-brukerdialog-prosessering.git"
+    },
+    {
+      "repo": "https://github.com/nipoppy/nipoppy",
+      "pr_number": 964,
+      "base": "5575427b46328a907e5c4b15ee3bfa341ba85907",
+      "head": "9421a7142852552900aa26fa86027ac6cd6cddb9",
+      "id": "1bda3946e4eea9f7ad2619fc2674dca9e4d14280eea84a4b74b7ad16774d5d98",
+      "mirror": "https://github.com/review-bench/nipoppy_nipoppy.git"
+    },
+    {
+      "repo": "https://github.com/obot-platform/obot",
+      "pr_number": 6351,
+      "base": "0c683c4c64ebde81021cd229224b2e2b4f3de2c2",
+      "head": "343e5688641d1d989d8535e0276a08a1adc9ede8",
+      "id": "a8319be013ccb6180b90e2ab49106f428f22e64a961a6867935f5381a1908ebd",
+      "mirror": "https://github.com/review-bench/obot-platform_obot.git"
+    },
+    {
+      "repo": "https://github.com/obot-platform/obot",
+      "pr_number": 6355,
+      "base": "e7eab882033243249f8ca3106157a15be8d4bd44",
+      "head": "1414ee32f2a7f0b6297de61314d4defb7260b472",
+      "id": "542626cba2b571fab3a1683629a87af40ead9fbce8831c9edb60b98a790c2e14",
+      "mirror": "https://github.com/review-bench/obot-platform_obot.git"
+    },
+    {
+      "repo": "https://github.com/openai/openai-dotnet",
+      "pr_number": 1104,
+      "base": "e89f79ca1d3be326b1703c7bc188297f47a20272",
+      "head": "1f8fb4c6455a2553565cee371e57c276a9110a53",
+      "id": "b9de9e2a7999e653dd747a67c3ced75396adcbc0ac1ff8fd45f614afb803fc1c",
+      "mirror": "https://github.com/review-bench/openai_openai-dotnet.git"
+    },
+    {
+      "repo": "https://github.com/pacnpal/callis",
+      "pr_number": 3,
+      "base": "7e001d4fc9d1461e22a015315674919847bb405f",
+      "head": "27a4c21852511e3ad1a263574f0896ba32f8fc9c",
+      "id": "b3c35171ccc81d9d294bbf28e4772831860be96a5500067e897e963b0c8dcb68",
+      "mirror": "https://github.com/review-bench/pacnpal_callis.git"
+    },
+    {
+      "repo": "https://github.com/playcanvas/editor",
+      "pr_number": 1955,
+      "base": "03b2190e01216196b7149554840d3a7c8280ec5c",
+      "head": "f3fdcf8a7e5336a0019a4a38722677e63030bd32",
+      "id": "7e45f9343dfc3bb848cd07bf7f2c6a616a62ed95e100dc1470b1d87b3018c9e6",
+      "mirror": "https://github.com/review-bench/playcanvas_editor.git"
+    },
+    {
+      "repo": "https://github.com/pnp/cli-microsoft365",
+      "pr_number": 7191,
+      "base": "7182dbb5a5bbf283e890fa3774bbbd8d78573f59",
+      "head": "a44ec57153539d3b87c3d8fe819575574b2dee9e",
+      "id": "a991f6347cc5cfe8236f686234781ec844f67ab6d9dd07336b398055e99d3c12",
+      "mirror": "https://github.com/review-bench/pnp_cli-microsoft365.git"
+    },
+    {
+      "repo": "https://github.com/pnpm/pnpm",
+      "pr_number": 11268,
+      "base": "b738043ab1ebac66277790083d595366527dcdc6",
+      "head": "e4127110f2d9dcf4d8ca9bb24d6f92ce10ac1013",
+      "id": "5add3c9c5ce988823cacb556abedbbbe81737f6250e70493650272051e0a4790",
+      "mirror": "https://github.com/review-bench/pnpm_pnpm.git"
+    },
+    {
+      "repo": "https://github.com/psalm/psalm-plugin-laravel",
+      "pr_number": 642,
+      "base": "9d7696b1edbe260325a1d129ecfeceb11dffd717",
+      "head": "a867cca3f7a1f9844445f89d1c0b005048fba9af",
+      "id": "f2c638cd045a942f909e9fcbf0137f9ba5b546a9a2ef5ef84bfeee3c77e3663d",
+      "mirror": "https://github.com/review-bench/psalm_psalm-plugin-laravel.git"
+    },
+    {
+      "repo": "https://github.com/psalm/psalm-plugin-laravel",
+      "pr_number": 668,
+      "base": "379b56f488200652e3dd8a11792822fe174ddd06",
+      "head": "b5bbf831815009e4906eb69960364dc26102306c",
+      "id": "ec9ad3ab36edd025b67e1cce5b16a74a4f382d97f02cf87bf3644f24be589925",
+      "mirror": "https://github.com/review-bench/psalm_psalm-plugin-laravel.git"
+    },
+    {
+      "repo": "https://github.com/psalm/psalm-plugin-laravel",
+      "pr_number": 674,
+      "base": "867705a441207cb064eaa8f7b9f6bd6c40edd9cc",
+      "head": "f356608500e6cac425185e592a796c0cd640dfea",
+      "id": "fbcba60ce037fe941cd007159fae10d266a6e5b209874a17b88da8e2f37e82fc",
+      "mirror": "https://github.com/review-bench/psalm_psalm-plugin-laravel.git"
+    },
+    {
+      "repo": "https://github.com/psxsplash/splashedit",
+      "pr_number": 22,
+      "base": "fd3707d5cfef99ea11984af0811b7c82119895e2",
+      "head": "431d5728e1849863d3c4e23b65f6b98cca67b114",
+      "id": "2eb85a2637e7dd882e6a39ad35af06d7949b381a992b660381d2c3b0ad9defc9",
+      "mirror": "https://github.com/review-bench/psxsplash_splashedit.git"
+    },
+    {
+      "repo": "https://github.com/rcrsr/rill",
+      "pr_number": 53,
+      "base": "237cccc6a7726c10b01fc547cfbacf281dc0b7e3",
+      "head": "2ed44cafed83491d4f58902d478b23cbc0fd01ef",
+      "id": "3debd9903d4a65172211514ddba531bc3b251ddffe71aa2739fdeef261072a6c",
+      "mirror": "https://github.com/review-bench/rcrsr_rill.git"
+    },
+    {
+      "repo": "https://github.com/reactiveui/Akavache",
+      "pr_number": 1174,
+      "base": "eb0d2c1e54c1b773629d8c5acce58cea1654d8b7",
+      "head": "14146ee22d67a23a33d14bb177a9d511485f14c4",
+      "id": "8a0b55ea0ae481e5a0cb8c48714cc7f493b012340639deba3e2992759b8bb84a",
+      "mirror": "https://github.com/review-bench/reactiveui_Akavache.git"
+    },
+    {
+      "repo": "https://github.com/renedierking/LANdalf",
+      "pr_number": 88,
+      "base": "cc81fa3dc87a8a50654c1279b3bdb2761e94f832",
+      "head": "bc1698f4dbc3a99dee0a6dcf7629813f2027682a",
+      "id": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "mirror": "https://github.com/review-bench/renedierking_LANdalf.git"
+    },
+    {
+      "repo": "https://github.com/resplab/leap",
+      "pr_number": 48,
+      "base": "e7e2065f7e50e2525683947d6ec6e39d79ad2f4c",
+      "head": "fced06441c1e3969952312e13525ee355d7a9356",
+      "id": "11669b45417024a83aea9d6d2fe8cdbff458d3c2f9fd8dbc19a3f49b476dd7a2",
+      "mirror": "https://github.com/review-bench/resplab_leap.git"
+    },
+    {
+      "repo": "https://github.com/rulecom/rule-io-sdk",
+      "pr_number": 35,
+      "base": "0e5589a360bb89f887f214f0b2d81bc2a4ad7fa3",
+      "head": "9b3046d9158445e422d08047b98fd0e5a24c524a",
+      "id": "2175fd1a7a12514537fd475057d909c60d44649dcc22ab60cfe9c6c05003fda7",
+      "mirror": "https://github.com/review-bench/rulecom_rule-io-sdk.git"
+    },
+    {
+      "repo": "https://github.com/rulecom/rule-io-sdk",
+      "pr_number": 36,
+      "base": "63089a6f9c49127afd22da65e366977ed24a1419",
+      "head": "778a137bbaa1aa3ecc25970da48655620bab8632",
+      "id": "565dda50122f9775813ce9af0082796cf5663061a69f75d2793888978686e1ef",
+      "mirror": "https://github.com/review-bench/rulecom_rule-io-sdk.git"
+    },
+    {
+      "repo": "https://github.com/rulecom/rule-io-sdk",
+      "pr_number": 40,
+      "base": "fc84004ae8c148cc7c5eaf7e62789d96a35efa73",
+      "head": "550f7bc03fbc4e1760f9f4f4382cd612f7aeedf8",
+      "id": "b02c943570a714425a1f867e8bb002149b86ef0d1f7d83ca857f70f0c88b7ba0",
+      "mirror": "https://github.com/review-bench/rulecom_rule-io-sdk.git"
+    },
+    {
+      "repo": "https://github.com/s205109/AHKFlowApp",
+      "pr_number": 32,
+      "base": "bc7d959e12bd1fdc9762d43a3f58050f751064ba",
+      "head": "86f3922e0c488d1c7c00e9e0c6769a0dfc856843",
+      "id": "8376f76586ada453a1c6a11bb04b21fb4d1baedd75f97114c3d5fe06f4fd298c",
+      "mirror": "https://github.com/review-bench/s205109_AHKFlowApp.git"
+    },
+    {
+      "repo": "https://github.com/s205109/AHKFlowApp",
+      "pr_number": 35,
+      "base": "b39f97c4b144b32609705cdfa57c7dca981373eb",
+      "head": "9ec13217fb700d3289ce4a293c17e287bacdff1c",
+      "id": "50501e8d55422e9154dcc5a1a3ca752e70517ce5dcd21ba0882412d7e2628601",
+      "mirror": "https://github.com/review-bench/s205109_AHKFlowApp.git"
+    },
+    {
+      "repo": "https://github.com/saasquatch/program-tools",
+      "pr_number": 490,
+      "base": "9e552794ea3a5e8124b4f02609b76ee25343e42f",
+      "head": "7a9aa6b405af88c754abfa1f8e8e9a3f03cde398",
+      "id": "588a38064482cf41201c36f1861ebd98c8b539f0dabe1f1e72af6c6a0745467a",
+      "mirror": "https://github.com/review-bench/saasquatch_program-tools.git"
+    },
+    {
+      "repo": "https://github.com/scorbo2/ext-sn-statistics",
+      "pr_number": 15,
+      "base": "eef945e2a8d421ccfa3ded7e7cd62e6731394b26",
+      "head": "05bd09018cd9a4b6274dc5e3f6dcffe37cba8cbe",
+      "id": "992bc30ae0dde753dbff5ced35a777e96b8c2e985f317abef96dc344f2b95710",
+      "mirror": "https://github.com/review-bench/scorbo2_ext-sn-statistics.git"
+    },
+    {
+      "repo": "https://github.com/scorbo2/ext-sn-statistics",
+      "pr_number": 19,
+      "base": "5165c1719d4a81eca84654760955663d297353c6",
+      "head": "8ef352bd1d5402b18b076bad6af7a34c96940e6a",
+      "id": "55eec6c3df5e442cc0e07cff976c4860eca2c3c09909ac5fdc8a475c282b9477",
+      "mirror": "https://github.com/review-bench/scorbo2_ext-sn-statistics.git"
+    },
+    {
+      "repo": "https://github.com/scorbo2/ext-sn-statistics",
+      "pr_number": 20,
+      "base": "da54721276e4132447cd708c35f18f3a635815a2",
+      "head": "12fad8312a7ca0ecc58480c2a582649386cf08a4",
+      "id": "6cf947b525ae09581d06ef38e6897bf2841b38ffb0aa58f4b09321c13901a9a6",
+      "mirror": "https://github.com/review-bench/scorbo2_ext-sn-statistics.git"
+    },
+    {
+      "repo": "https://github.com/scotthamilton77/agents-config",
+      "pr_number": 1,
+      "base": "3776d9195827d79efec978fb900573f3a5a53339",
+      "head": "1fc789709ae044579908fed58c8c14638d0db095",
+      "id": "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+      "mirror": "https://github.com/review-bench/scotthamilton77_agents-config.git"
+    },
+    {
+      "repo": "https://github.com/scottlz0310/Mcp-Docker",
+      "pr_number": 29,
+      "base": "63baf3dbbc10d271710706f56150dd8425dd4b4a",
+      "head": "e7705d269ea374d49e7999bdb8bc42e9480a6b37",
+      "id": "3f4e836db70e52f2130f7c82f67af4af39f1091bb6d31a96258cb5d4add67a10",
+      "mirror": "https://github.com/review-bench/scottlz0310_Mcp-Docker.git"
+    },
+    {
+      "repo": "https://github.com/sdsykes/fastimage",
+      "pr_number": 165,
+      "base": "7a0dcf780e6d8cd7686520a3a1f57e7cd85b0b46",
+      "head": "8fc7cd32904240c2c841e70aef2ba5c3bb659ffd",
+      "id": "435c173f24b18a1fd88ab29dc033bc2fc1e42502df2db9d7e9312711c7a1ea3c",
+      "mirror": "https://github.com/review-bench/sdsykes_fastimage.git"
+    },
+    {
+      "repo": "https://github.com/semitexa/semitexa-core",
+      "pr_number": 38,
+      "base": "05cdd9b3642eb63c076e0cde70f3c3e5dd57d560",
+      "head": "bc76e026856d13bca75ff37165e419fec87b75eb",
+      "id": "b9197d5bbf000739e1b4de28b245f12b3a0a041a70008b94500cc9da855a6970",
+      "mirror": "https://github.com/review-bench/semitexa_semitexa-core.git"
+    },
+    {
+      "repo": "https://github.com/semitexa/semitexa-demo",
+      "pr_number": 17,
+      "base": "09b148604dcdd5724e2b23a7d002d1c8c8b4c3c3",
+      "head": "2449142d3b557fe1b3f59e6977eb2827b396bf74",
+      "id": "c5397821a760a2656f99ac7c735000fdd747b487ef37be8c668621bafd8771af",
+      "mirror": "https://github.com/review-bench/semitexa_semitexa-demo.git"
+    },
+    {
+      "repo": "https://github.com/shartma2/TTP_v2",
+      "pr_number": 33,
+      "base": "c7ad43487d4ae9bc3ed85a6ea2838b81b1ea2cd8",
+      "head": "e249f90f89cf7cc8c92205a4e8dba2703a6fa176",
+      "id": "01dfb03f9810abe8a5c370073d168b309c0b0cb48eb4000c37d9ed2569b8527d",
+      "mirror": "https://github.com/review-bench/shartma2_TTP_v2.git"
+    },
+    {
+      "repo": "https://github.com/shaypal5/pr-agent-context",
+      "pr_number": 51,
+      "base": "ffba1ee697ab328c53a074476269c298fdd3f389",
+      "head": "a2fa89b78692d7026d34a60b81177fa557b69b93",
+      "id": "b1f68daafdcd597dc471cfa83518649f2ed910cf2f68ec4a66d4874d5fc3c6a5",
+      "mirror": "https://github.com/review-bench/shaypal5_pr-agent-context.git"
+    },
+    {
+      "repo": "https://github.com/shaypal5/pr-agent-context",
+      "pr_number": 75,
+      "base": "a1024c89f97abe95af0537d3a83f5ce54a207993",
+      "head": "7c51cc54400b8a4b62b118c3d196a611f38a9e1d",
+      "id": "7d6d9e9280a6550663cd39ed3f43cf04fb81e0b91b762ce239e4ba9be7078df9",
+      "mirror": "https://github.com/review-bench/shaypal5_pr-agent-context.git"
+    },
+    {
+      "repo": "https://github.com/simnaut/emdash",
+      "pr_number": 2,
+      "base": "5beb0ddc334deb862ba90cedbf03f052b58e4974",
+      "head": "41d750067fc7a39eb29f6a530cf0d4ae0f8bdb41",
+      "id": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "mirror": "https://github.com/review-bench/simnaut_emdash.git"
+    },
+    {
+      "repo": "https://github.com/sirosfoundation/go-wallet-backend",
+      "pr_number": 76,
+      "base": "a1485bf4cd0f0a25cbd5b5c352bbc8dd595a530b",
+      "head": "28ffb41aa8c3db76a718f7c712a47977223f0d25",
+      "id": "2edd581ad80266227c071b23a695de36fc9ce20a1d083888f31118271f3643eb",
+      "mirror": "https://github.com/review-bench/sirosfoundation_go-wallet-backend.git"
+    },
+    {
+      "repo": "https://github.com/slbug/claude-ruby-grape-rails",
+      "pr_number": 24,
+      "base": "d94389141c466dc41e39dcca8aad09532658d9c1",
+      "head": "f660a6f01ca3153cf2b6a6bf84093182231a69b4",
+      "id": "dc01c4d9b6250998c476113647e93dd7357d794213ff891b1758d78ed396297d",
+      "mirror": "https://github.com/review-bench/slbug_claude-ruby-grape-rails.git"
+    },
+    {
+      "repo": "https://github.com/snb4crazy/ai_agent_laravel_backend",
+      "pr_number": 2,
+      "base": "965f1889b05513602624f0e077d3e8534be36c5e",
+      "head": "cbd7b5329f29fc4c379242b44d4f21c7258799f3",
+      "id": "2038d4227e07ef3fbdb06b3fa968465ea6aace89b5088df023fc737a678ff9a5",
+      "mirror": "https://github.com/review-bench/snb4crazy_ai_agent_laravel_backend.git"
+    },
+    {
+      "repo": "https://github.com/stuckj/mkvdup",
+      "pr_number": 180,
+      "base": "538ee9455c82b96e15746003cd21e1670f9dc696",
+      "head": "4177c9e48dd263a9f2f82299348a77b1aef4abd1",
+      "id": "94d2c78163a48e1b04817115edd0595e6151d0e18ab93c4c22dfed2d4259718e",
+      "mirror": "https://github.com/review-bench/stuckj_mkvdup.git"
+    },
+    {
+      "repo": "https://github.com/supa-magic/spm",
+      "pr_number": 19,
+      "base": "35ba12abad66326fe01c152803a23fc282368d67",
+      "head": "c60d2e03d217cbe8abaed6d12c4fb7b0bdb0049f",
+      "id": "c8b1c35854e8849c71556f3d4430e97a6920605c9fb1b87c06b85f3124ed854a",
+      "mirror": "https://github.com/review-bench/supa-magic_spm.git"
+    },
+    {
+      "repo": "https://github.com/superhighfives/pika",
+      "pr_number": 200,
+      "base": "bdda75cbeeb8cd72a2cb197f93623c3e197cf49c",
+      "head": "b227aff048155b8d2a8426b4d84bcec4504e7c01",
+      "id": "0362dfe9422a542cde29b9a429b4baa39d301262a128fccb0910d6801f939a86",
+      "mirror": "https://github.com/review-bench/superhighfives_pika.git"
+    },
+    {
+      "repo": "https://github.com/superyyrrzz/ForgeMap",
+      "pr_number": 106,
+      "base": "2ce83d91f981fc579ec53baf9bce4957fdc240fc",
+      "head": "2f3977edabcb8fdf5f947704e727d798a46fe96f",
+      "id": "82ec18705a16ae64998d181393c7f885543cc33b25921073d24ebecec40fbc15",
+      "mirror": "https://github.com/review-bench/superyyrrzz_ForgeMap.git"
+    },
+    {
+      "repo": "https://github.com/sw5005-sus/ceramicraft-argocd-deploy",
+      "pr_number": 89,
+      "base": "9cf42c1eecc554ca953c3685fa1b6a34eeed910c",
+      "head": "d7a4532170487a111654cf8aa742f4007334b6e2",
+      "id": "eb4212547c1ba1cbfb310f8f3e14ebe0d94b245f3896fd5848cf73f84a11504d",
+      "mirror": "https://github.com/review-bench/sw5005-sus_ceramicraft-argocd-deploy.git"
+    },
+    {
+      "repo": "https://github.com/swarmbase/swarmbase",
+      "pr_number": 161,
+      "base": "1aab894f631e1f4ba552583189c2328cc6495297",
+      "head": "46963834141328168e1f6a268c12b375ad9309e8",
+      "id": "62dd26d30bc8f7dde80769a20b6789929bf69ab3c74b84dc5e467a64ef9e0589",
+      "mirror": "https://github.com/review-bench/swarmbase_swarmbase.git"
+    },
+    {
+      "repo": "https://github.com/swt-labs/vibe-better-with-claude-code-vbw",
+      "pr_number": 358,
+      "base": "d27d102b5687ecbc29f5db3d6f287cdaf6e5369a",
+      "head": "c60823535d6086eb09f11a009f289e908ebf4758",
+      "id": "52b1a60ae71907ff3cd5bb2d2b6b7c64e35eb3f433b51ede9c27f7b0f3ace4df",
+      "mirror": "https://github.com/review-bench/swt-labs_vibe-better-with-claude-code-vbw.git"
+    },
+    {
+      "repo": "https://github.com/tableau/server-client-python",
+      "pr_number": 1760,
+      "base": "f4a1003609b2a7cf6daf9da9e8ab5432ffefd9d7",
+      "head": "c2c05c5fd648d75946b1fecc6041f83cb81dc99c",
+      "id": "83d9cad2e8787c47b167ca2f0d63ad986368b37fe9d807759bfc5316b243577e",
+      "mirror": "https://github.com/review-bench/tableau_server-client-python.git"
+    },
+    {
+      "repo": "https://github.com/tallclub/matimo",
+      "pr_number": 77,
+      "base": "f78e67fb015f315ed1689505b77285dae39916b9",
+      "head": "7e7831397b172845c84460674cf589bb6196cfaa",
+      "id": "1ef1553eee0fbe8178bb1160ef9e7582aeb35d5fe2f89f0ce2e412291ee5f8b2",
+      "mirror": "https://github.com/review-bench/tallclub_matimo.git"
+    },
+    {
+      "repo": "https://github.com/taskless/skills",
+      "pr_number": 16,
+      "base": "387a9cbf49ede04c7a6322abc17ef0d26d958c4d",
+      "head": "d7b6f3f5d8ce72d2922533e578585a5ce422bc95",
+      "id": "09742acaaf0935089a36bbf2ccd3341f33c595eb9d8fe6de1f6ba72bfb1586c6",
+      "mirror": "https://github.com/review-bench/taskless_skills.git"
+    },
+    {
+      "repo": "https://github.com/tforster/gilbert",
+      "pr_number": 39,
+      "base": "bcb96e5317abfc4de175c9cdbc9aecd41d967b82",
+      "head": "9ccd6995f57aefd123f9e3d1d83ce32534c4489a",
+      "id": "a2afaa7efa7544812474955dd184f6b7386e9a9577388b4d64cc3b717c82c884",
+      "mirror": "https://github.com/review-bench/tforster_gilbert.git"
+    },
+    {
+      "repo": "https://github.com/thomHayner/bicycle-repair-stations",
+      "pr_number": 6,
+      "base": "d6a8d86d691cbd6c1f857870f3220e32506f743e",
+      "head": "567f44d48ff8667629a470fa0bf808257a24cce2",
+      "id": "d0d1c1defc0d2ba0c307c1cb1dc73541612dfe43f1e01bb5557ef5874778899c",
+      "mirror": "https://github.com/review-bench/thomHayner_bicycle-repair-stations.git"
+    },
+    {
+      "repo": "https://github.com/tile-ai/TileOPs",
+      "pr_number": 864,
+      "base": "517d9438a608dd59a5f4ee08bdc746958beb6cce",
+      "head": "574d04dc2f085ff0251de6893488afc4dfe7822c",
+      "id": "5ac3bfc04fba4aad19124a2fb6f9cdc8169c2c0d58437b9a240f4fa76e34c0dd",
+      "mirror": "https://github.com/review-bench/tile-ai_TileOPs.git"
+    },
+    {
+      "repo": "https://github.com/torchfont/torchfont",
+      "pr_number": 133,
+      "base": "5a2c993caa9c1183f58b1cc50aea6a2609d96959",
+      "head": "7604bc745c38d151e23b8f7528a65f74c2613545",
+      "id": "04bb0ed57b673fee215dfe0549d2a35ccc57655bc16845d1a193b4572cf247bc",
+      "mirror": "https://github.com/review-bench/torchfont_torchfont.git"
+    },
+    {
+      "repo": "https://github.com/vanyastaff/nebula",
+      "pr_number": 224,
+      "base": "c4879eb1c460e45c11ce28e3e8a305194023b64e",
+      "head": "d5ba86dd1014b79e263d93a1e324eeec0d0b306c",
+      "id": "91db148075d74d9bde541c1702d065e340acf96f90bc4258edb975c71f0f0e92",
+      "mirror": "https://github.com/review-bench/vanyastaff_nebula.git"
+    },
+    {
+      "repo": "https://github.com/vndee/memex",
+      "pr_number": 6,
+      "base": "d64f6b43067367cd7d6a7cbbc649cc45dfe8a81f",
+      "head": "e392a168b59a2ab4bf765e6391aa0ae4ce34b876",
+      "id": "0277384e8cb3d967337e212730defabc5055982d8c58fc7a026b7e051754216b",
+      "mirror": "https://github.com/review-bench/vndee_memex.git"
+    },
+    {
+      "repo": "https://github.com/vriesdemichael/keycloak-operator",
+      "pr_number": 696,
+      "base": "bd0524bce599ccc367a4481f9b792305a8b074a1",
+      "head": "4db0ddeaea75e5d1d1a312473465153ed8f60661",
+      "id": "063a7aa2ea48c27804c88c73b5380e77ee0079c39fb0e3d304a9c876c990e86f",
+      "mirror": "https://github.com/review-bench/vriesdemichael_keycloak-operator.git"
+    },
+    {
+      "repo": "https://github.com/whispr-messenger/mobile-app",
+      "pr_number": 64,
+      "base": "100ea317d71af37b848d438b20a69c9100865c54",
+      "head": "9e7742e57cff9c9a2cf5110f66ad59348c5c7979",
+      "id": "f39ac37bf236754d9aae56b7722370583eb17a62fa2cf867a5371d852465b268",
+      "mirror": "https://github.com/review-bench/whispr-messenger_mobile-app.git"
+    },
+    {
+      "repo": "https://github.com/wirechat/wirechat",
+      "pr_number": 183,
+      "base": "7f645146da1285f3817a9dfcb04be0a53ee50ecd",
+      "head": "6e3156e78da9b47cb4c6d596883b3ef0730b8cf8",
+      "id": "d701ed5ae7001b5fe7c881acdda33cf7759293132014f6d71abcbc657eb36d27",
+      "mirror": "https://github.com/review-bench/wirechat_wirechat.git"
+    },
+    {
+      "repo": "https://github.com/wiyco/review-insights",
+      "pr_number": 31,
+      "base": "5614fbab711f17e800401d6bacca0200bd4eff0a",
+      "head": "e9c5280f80a69136f5f247f4ac7f1c0fa49f1e29",
+      "id": "dc982219c624a0a68a7006fb5c85aa81b0133281fbc01dbc1027c5fc1c75ec8b",
+      "mirror": "https://github.com/review-bench/wiyco_review-insights.git"
+    },
+    {
+      "repo": "https://github.com/wspulse/client-kt",
+      "pr_number": 24,
+      "base": "5db235d5cc51aba5ddc3cc50f576a6f57a8bc308",
+      "head": "bc2ac1a4be2e0583597f65d48321802736e3d1a6",
+      "id": "13349a5f8fd207c0002a9c8bbae7b77dc90b3d89b7698ad59a98734e00674f24",
+      "mirror": "https://github.com/review-bench/wspulse_client-kt.git"
+    },
+    {
+      "repo": "https://github.com/wspulse/client-ts",
+      "pr_number": 18,
+      "base": "bc83e29d0253c3544674d151a4fccefacb4b4703",
+      "head": "436a4dea148a3c23668c41d435849d21598e6367",
+      "id": "8db36303da3cc085c5e4ddb7bc0b12a8405122f71ff78b47a9e95a91f159bec9",
+      "mirror": "https://github.com/review-bench/wspulse_client-ts.git"
+    },
+    {
+      "repo": "https://github.com/wspulse/client-ts",
+      "pr_number": 20,
+      "base": "62334471fc96815e541552365dad3acda964982e",
+      "head": "2c7574bcd1ad0a4962d6e6271c7389714163afe3",
+      "id": "8a1ae9159d5129c0259bf29590b5e2ff12860fb94331e876e5e0e5ee443bbc64",
+      "mirror": "https://github.com/review-bench/wspulse_client-ts.git"
+    },
+    {
+      "repo": "https://github.com/zircote/nsip-example",
+      "pr_number": 27,
+      "base": "c765b47b60b3d289f92ea4e49b4fe873af22024e",
+      "head": "b6e16d4e6d0553bc5b1d9634248cb11ad27bdd7b",
+      "id": "52d38afa7d13bfb17d4b140cca007e2f68907c5968301766d93ec6973486153a",
+      "mirror": "https://github.com/review-bench/zircote_nsip-example.git"
+    },
+    {
+      "repo": "https://github.com/jenkinsci/gitea-plugin",
+      "pr_number": 141,
+      "base": "19c54c3e5d9cc19d47302688526d1b016dd2110d",
+      "head": "2e021e56de9104d8d124cac086cf6b208b6b4a88",
+      "id": "bfb44e3dbd906a7140f7453fcc890a33572587a0556669e4fd1fee00c4d71d1a",
+      "mirror": "https://github.com/review-bench/jenkinsci_gitea-plugin.git"
+    },
+    {
+      "repo": "https://github.com/ls1intum/Artemis",
+      "pr_number": 12594,
+      "base": "5aeb9373e6b4a6d75d92fc4b4fc43731744e2a14",
+      "head": "d60ff38a39b535f3ff24cfdc8ac843346de89d43",
+      "id": "af631cf7fbee2012a313b5f114cf5d3ade7dd49fb136d1199bd7fa4885424e77",
+      "mirror": "https://github.com/review-bench/ls1intum_Artemis.git"
+    },
+    {
+      "repo": "https://github.com/control-theory/gonzo",
+      "pr_number": 129,
+      "base": "6870fd9ba13616da10d7f6aa091c16b1aaed39ac",
+      "head": "0b9dd56fd231a64414a353ac62328a18eadbc72d",
+      "id": "2570bb8f209e12c5e6be9ae621fb498bea596948ff3f748a7da9ef344c4a4fb6",
+      "mirror": "https://github.com/review-bench/control-theory_gonzo.git"
+    },
+    {
+      "repo": "https://github.com/brexhq/CrabTrap",
+      "pr_number": 15,
+      "base": "b29930e93765700608313c0f0d32c4818734e158",
+      "head": "5ef0884c59b3ee1d5a986dd02686a8232570c80f",
+      "id": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "mirror": "https://github.com/review-bench/brexhq_CrabTrap.git"
+    },
+    {
+      "repo": "https://github.com/charmbracelet/catwalk",
+      "pr_number": 268,
+      "base": "1902a50102a8657a1db822fdc43fa5552f22783d",
+      "head": "69124a435edb2431c929e8ff1db7b2efd835f789",
+      "id": "c011f458ad7bc938adfe0c12320ea334e46124a56b6e0745f764f51a8b339943",
+      "mirror": "https://github.com/review-bench/charmbracelet_catwalk.git"
+    },
+    {
+      "repo": "https://github.com/axios/axios",
+      "pr_number": 10836,
+      "base": "90ae1993e0eaa39ccccbaa25957bb23cc5676df7",
+      "head": "9cd706ccb836c581371c760b4c6a5c61c656ea1f",
+      "id": "f813ccdde71b400e80518b6c8eeec6be8e3467afadf13ae8df1602441a9a8c08",
+      "mirror": "https://github.com/review-bench/axios_axios.git"
+    },
+    {
+      "repo": "https://github.com/SolidOS/solid-panes",
+      "pr_number": 598,
+      "base": "a078e15fe4c5294c090d0bcb57c5390e4928e77d",
+      "head": "38141b1ff25aab76e8f24b9fa591816d257e4c42",
+      "id": "ba68058fdd637402ccb1f2ce6b0410b7e4f39baa6b58ec9bf03055c9cb0f1bf9",
+      "mirror": "https://github.com/review-bench/SolidOS_solid-panes.git"
+    },
+    {
+      "repo": "https://github.com/NIAEFEUP/enei",
+      "pr_number": 194,
+      "base": "a74461de5337f3618effdcdb6f115dccd2f94a15",
+      "head": "0442935c8fe466a2f1115b76240c9ad9df2be1e5",
+      "id": "86829537ce6e59fb26b3764fc796a8edb8b2a60d346d03f38a06f19649446512",
+      "mirror": "https://github.com/review-bench/NIAEFEUP_enei.git"
+    }
+  ]
+}

@@ -12,10 +12,11 @@ from pathlib import Path
 import pstats
 import sqlite3
 import sys
-import tempfile
 from threading import Timer
 from time import perf_counter
+from uuid import uuid4
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, os.environ.get("GITA_BENCH_SOURCE", str(Path(__file__).resolve().parents[1] / "src")))
 
 from gita.index.evidence import parse_evidence
@@ -42,9 +43,11 @@ class TimedConnection:
             self.timings[statement] = (count + 1, elapsed + perf_counter() - started)
 
 
-def main() -> None:
+def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("target", type=Path, help="Source file or Git repository")
+    parser.add_argument("target", type=Path, nargs="?", help="Source file or Git repository (legacy mode)")
+    parser.add_argument("--manifest", type=Path, help="Strict versioned offline qualification manifest")
+    parser.add_argument("--output", type=Path, help="New unique output directory, outside the checkout")
     parser.add_argument("--repeat", type=int, default=10)
     parser.add_argument("--ref", default="HEAD")
     parser.add_argument("--parse-timeout", type=float, default=5.0)
@@ -54,6 +57,16 @@ def main() -> None:
     parser.add_argument("--profile", action="store_true")
     parser.add_argument("--sql-profile", action="store_true")
     args = parser.parse_args()
+    if args.manifest is not None:
+        legacy_options = {"--repeat", "--ref", "--parse-timeout", "--workers",
+                          "--max-seconds", "--cache-mib", "--profile", "--sql-profile"}
+        if (args.target is not None or args.output is None
+                or any(argument.split("=", 1)[0] in legacy_options for argument in sys.argv[1:])):
+            parser.error("--manifest requires --output and excludes positional target/legacy options")
+        from verify.index_qualification import main as qualify
+        return qualify(args.manifest, args.output)
+    if args.target is None:
+        parser.error("provide a positional target or --manifest")
     if args.repeat < 1 or not isfinite(args.max_seconds) or args.max_seconds <= 0:
         parser.error("--repeat and --max-seconds must be positive")
     if args.cache_mib is not None and args.cache_mib < 1:
@@ -81,7 +94,9 @@ def main() -> None:
         profile.enable()
     try:
         if args.target.is_dir():
-            destination = Path(tempfile.mkdtemp(prefix="gita-index-bench-")) / "index.sqlite"
+            output = args.output or Path(__file__).resolve().parents[2] / ("gita-index-bench-" + uuid4().hex)
+            output.mkdir(parents=True, exist_ok=False)
+            destination = output / "index.sqlite"
             print(f"Cold snapshot index: {destination}", flush=True)
             with CommittedRepo(args.target) as repository, IndexStore.create(destination) as store:
                 connections.append(store.connection)
@@ -144,7 +159,8 @@ def main() -> None:
         if args.profile:
             profile.disable()
             pstats.Stats(profile).strip_dirs().sort_stats("cumulative").print_stats(25)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

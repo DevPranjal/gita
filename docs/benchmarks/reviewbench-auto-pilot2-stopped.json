@@ -1,0 +1,2107 @@
+{
+  "version": "reviewbench-auto-indexed-v2",
+  "protocol": "ddc9607478cb72f1f17a8d2a4a8f00f8776903c6fe287a3f94206d37e70711e9",
+  "pin": "c17b05be9c90b85a1fc012ce39e455e2d09a7255",
+  "experiment": "agent+product-auto+tools; NOT fixed-model causal attribution",
+  "cohort": "public development starter; one repeat; no automatic retries",
+  "scheduled_tasks": 25,
+  "scheduled_sessions": 50,
+  "arms": {
+    "B": {
+      "scheduled_slots": 25,
+      "valid": 21,
+      "unfinished": 3,
+      "failed": 1,
+      "measured_attempts": 21,
+      "observed_credits": 102.67762500000002,
+      "campaign_credit_total": null,
+      "observed_input_tokens": 1742247,
+      "mean_input_per_fixed_slot": null
+    },
+    "H": {
+      "scheduled_slots": 25,
+      "valid": 22,
+      "unfinished": 3,
+      "failed": 0,
+      "measured_attempts": 22,
+      "observed_credits": 97.55346689999998,
+      "campaign_credit_total": null,
+      "observed_input_tokens": 1354109,
+      "mean_input_per_fixed_slot": null
+    }
+  },
+  "slots": [
+    {
+      "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 2,
+      "credits": 4.448034,
+      "wall_seconds": 23.921000000089407,
+      "usage": {
+        "input_tokens": 35770,
+        "output_tokens": 1387,
+        "cache_read_tokens": 22376,
+        "cache_write_tokens": 13054,
+        "model_requests": 4,
+        "uncached_input_tokens": 340,
+        "credits": 4.448034,
+        "total_nano_aiu": 4448034000,
+        "api_seconds": 14.349,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 35770,
+            "output_tokens": 1387,
+            "cache_read_tokens": 22376,
+            "cache_write_tokens": 13054,
+            "model_requests": 4,
+            "reasoning_tokens": 463,
+            "native_model_nano_aiu": 4448034000
+          }
+        },
+        "reasoning_tokens": 463
+      },
+      "tool_audit": {
+        "evidence_calls": 4,
+        "executed_call_attempts": 4,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 2,
+      "credits": 7.228539,
+      "wall_seconds": 30.640000000130385,
+      "usage": {
+        "input_tokens": 88011,
+        "output_tokens": 1829,
+        "cache_read_tokens": 65691,
+        "cache_write_tokens": 21636,
+        "model_requests": 8,
+        "uncached_input_tokens": 684,
+        "credits": 7.228539,
+        "total_nano_aiu": 7228539000,
+        "api_seconds": 21.368,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 88011,
+            "output_tokens": 1829,
+            "cache_read_tokens": 65691,
+            "cache_write_tokens": 21636,
+            "model_requests": 8,
+            "reasoning_tokens": 494,
+            "native_model_nano_aiu": 7228539000
+          }
+        },
+        "reasoning_tokens": 494
+      },
+      "tool_audit": {
+        "evidence_calls": 8,
+        "executed_call_attempts": 8,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 0,
+      "credits": 3.643542,
+      "wall_seconds": 25.967999999877065,
+      "usage": {
+        "input_tokens": 55910,
+        "output_tokens": 860,
+        "cache_read_tokens": 44848,
+        "cache_write_tokens": 10550,
+        "model_requests": 6,
+        "uncached_input_tokens": 512,
+        "credits": 3.643542,
+        "total_nano_aiu": 3643542000,
+        "api_seconds": 16.229,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 55910,
+            "output_tokens": 860,
+            "cache_read_tokens": 44848,
+            "cache_write_tokens": 10550,
+            "model_requests": 6,
+            "reasoning_tokens": 362,
+            "native_model_nano_aiu": 3643542000
+          }
+        },
+        "reasoning_tokens": 362
+      },
+      "tool_audit": {
+        "evidence_calls": 5,
+        "executed_call_attempts": 5,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 0,
+      "credits": 3.525651,
+      "wall_seconds": 24.5,
+      "usage": {
+        "input_tokens": 51139,
+        "output_tokens": 722,
+        "cache_read_tokens": 39849,
+        "cache_write_tokens": 10778,
+        "model_requests": 6,
+        "uncached_input_tokens": 512,
+        "credits": 3.525651,
+        "total_nano_aiu": 3525651000,
+        "api_seconds": 14.551,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 51139,
+            "output_tokens": 722,
+            "cache_read_tokens": 39849,
+            "cache_write_tokens": 10778,
+            "model_requests": 6,
+            "reasoning_tokens": 258,
+            "native_model_nano_aiu": 3525651000
+          }
+        },
+        "reasoning_tokens": 258
+      },
+      "tool_audit": {
+        "evidence_calls": 5,
+        "executed_call_attempts": 5,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 3,
+      "credits": 1.810827,
+      "wall_seconds": 18.469000000040978,
+      "usage": {
+        "input_tokens": 11727,
+        "output_tokens": 827,
+        "cache_read_tokens": 7243,
+        "cache_write_tokens": 4316,
+        "model_requests": 2,
+        "uncached_input_tokens": 168,
+        "credits": 1.810827,
+        "total_nano_aiu": 1810827000,
+        "api_seconds": 8.51,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 11727,
+            "output_tokens": 827,
+            "cache_read_tokens": 7243,
+            "cache_write_tokens": 4316,
+            "model_requests": 2,
+            "reasoning_tokens": 0,
+            "native_model_nano_aiu": 1810827000
+          }
+        },
+        "reasoning_tokens": 0
+      },
+      "tool_audit": {
+        "evidence_calls": 1,
+        "executed_call_attempts": 1,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 3,
+      "credits": 1.754901,
+      "wall_seconds": 17.483999999705702,
+      "usage": {
+        "input_tokens": 13589,
+        "output_tokens": 746,
+        "cache_read_tokens": 9104,
+        "cache_write_tokens": 4317,
+        "model_requests": 2,
+        "uncached_input_tokens": 168,
+        "credits": 1.754901,
+        "total_nano_aiu": 1754901000,
+        "api_seconds": 7.818,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 13589,
+            "output_tokens": 746,
+            "cache_read_tokens": 9104,
+            "cache_write_tokens": 4317,
+            "model_requests": 2,
+            "reasoning_tokens": 0,
+            "native_model_nano_aiu": 1754901000
+          }
+        },
+        "reasoning_tokens": 0
+      },
+      "tool_audit": {
+        "evidence_calls": 1,
+        "executed_call_attempts": 1,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 5,
+      "credits": 5.32845,
+      "wall_seconds": 29.765999999828637,
+      "usage": {
+        "input_tokens": 86796,
+        "output_tokens": 1738,
+        "cache_read_tokens": 72825,
+        "cache_write_tokens": 13201,
+        "model_requests": 9,
+        "uncached_input_tokens": 770,
+        "credits": 5.32845,
+        "total_nano_aiu": 5328450000,
+        "api_seconds": 20.666,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 86796,
+            "output_tokens": 1738,
+            "cache_read_tokens": 72825,
+            "cache_write_tokens": 13201,
+            "model_requests": 9,
+            "reasoning_tokens": 0,
+            "native_model_nano_aiu": 5328450000
+          }
+        },
+        "reasoning_tokens": 0
+      },
+      "tool_audit": {
+        "evidence_calls": 9,
+        "executed_call_attempts": 9,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 2,
+      "credits": 3.968685,
+      "wall_seconds": 27.234000000171363,
+      "usage": {
+        "input_tokens": 43707,
+        "output_tokens": 1675,
+        "cache_read_tokens": 34045,
+        "cache_write_tokens": 9236,
+        "model_requests": 5,
+        "uncached_input_tokens": 426,
+        "credits": 3.968685,
+        "total_nano_aiu": 3968685000,
+        "api_seconds": 16.635,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 43707,
+            "output_tokens": 1675,
+            "cache_read_tokens": 34045,
+            "cache_write_tokens": 9236,
+            "model_requests": 5,
+            "reasoning_tokens": 705,
+            "native_model_nano_aiu": 3968685000
+          }
+        },
+        "reasoning_tokens": 705
+      },
+      "tool_audit": {
+        "evidence_calls": 5,
+        "executed_call_attempts": 5,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 1,
+      "credits": 0.21967245,
+      "wall_seconds": 39.15599999995902,
+      "usage": {
+        "input_tokens": 44833,
+        "output_tokens": 1319,
+        "cache_read_tokens": 33238,
+        "cache_write_tokens": 11577,
+        "model_requests": 6,
+        "uncached_input_tokens": 18,
+        "credits": 0.21967245,
+        "total_nano_aiu": 219672450,
+        "api_seconds": 23.233,
+        "models": [
+          "gpt-6-luna"
+        ],
+        "current_model": "gpt-6-luna",
+        "per_model": {
+          "gpt-6-luna": {
+            "input_tokens": 44833,
+            "output_tokens": 1319,
+            "cache_read_tokens": 33238,
+            "cache_write_tokens": 11577,
+            "model_requests": 6,
+            "reasoning_tokens": 875,
+            "native_model_nano_aiu": 219672450
+          }
+        },
+        "reasoning_tokens": 875
+      },
+      "tool_audit": {
+        "evidence_calls": 10,
+        "executed_call_attempts": 10,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 1
+      }
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 1,
+      "credits": 0.23131665,
+      "wall_seconds": 37.29700000025332,
+      "usage": {
+        "input_tokens": 42703,
+        "output_tokens": 1200,
+        "cache_read_tokens": 29281,
+        "cache_write_tokens": 13407,
+        "model_requests": 5,
+        "uncached_input_tokens": 15,
+        "credits": 0.23131665,
+        "total_nano_aiu": 231316650,
+        "api_seconds": 21.438,
+        "models": [
+          "gpt-6-luna"
+        ],
+        "current_model": "gpt-6-luna",
+        "per_model": {
+          "gpt-6-luna": {
+            "input_tokens": 42703,
+            "output_tokens": 1200,
+            "cache_read_tokens": 29281,
+            "cache_write_tokens": 13407,
+            "model_requests": 5,
+            "reasoning_tokens": 697,
+            "native_model_nano_aiu": 231316650
+          }
+        },
+        "reasoning_tokens": 697
+      },
+      "tool_audit": {
+        "evidence_calls": 11,
+        "executed_call_attempts": 11,
+        "denied_over_budget": 0,
+        "indexed_calls": 2,
+        "errors": 1
+      }
+    },
+    {
+      "task": "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 3,
+      "credits": 4.409064,
+      "wall_seconds": 26.563000000081956,
+      "usage": {
+        "input_tokens": 43006,
+        "output_tokens": 1441,
+        "cache_read_tokens": 30301,
+        "cache_write_tokens": 12279,
+        "model_requests": 5,
+        "uncached_input_tokens": 426,
+        "credits": 4.409064,
+        "total_nano_aiu": 4409064000,
+        "api_seconds": 17.561,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 43006,
+            "output_tokens": 1441,
+            "cache_read_tokens": 30301,
+            "cache_write_tokens": 12279,
+            "model_requests": 5,
+            "reasoning_tokens": 513,
+            "native_model_nano_aiu": 4409064000
+          }
+        },
+        "reasoning_tokens": 513
+      },
+      "tool_audit": {
+        "evidence_calls": 5,
+        "executed_call_attempts": 5,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 2,
+      "credits": 5.861421,
+      "wall_seconds": 29.07800000021234,
+      "usage": {
+        "input_tokens": 80463,
+        "output_tokens": 1711,
+        "cache_read_tokens": 63684,
+        "cache_write_tokens": 16181,
+        "model_requests": 7,
+        "uncached_input_tokens": 598,
+        "credits": 5.861421,
+        "total_nano_aiu": 5861421000,
+        "api_seconds": 20.493,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 80463,
+            "output_tokens": 1711,
+            "cache_read_tokens": 63684,
+            "cache_write_tokens": 16181,
+            "model_requests": 7,
+            "reasoning_tokens": 654,
+            "native_model_nano_aiu": 5861421000
+          }
+        },
+        "reasoning_tokens": 654
+      },
+      "tool_audit": {
+        "evidence_calls": 7,
+        "executed_call_attempts": 7,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 1,
+      "credits": 4.067919,
+      "wall_seconds": 24.140999999828637,
+      "usage": {
+        "input_tokens": 30675,
+        "output_tokens": 1312,
+        "cache_read_tokens": 18516,
+        "cache_write_tokens": 11819,
+        "model_requests": 4,
+        "uncached_input_tokens": 340,
+        "credits": 4.067919,
+        "total_nano_aiu": 4067919000,
+        "api_seconds": 15.475,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 30675,
+            "output_tokens": 1312,
+            "cache_read_tokens": 18516,
+            "cache_write_tokens": 11819,
+            "model_requests": 4,
+            "reasoning_tokens": 597,
+            "native_model_nano_aiu": 4067919000
+          }
+        },
+        "reasoning_tokens": 597
+      },
+      "tool_audit": {
+        "evidence_calls": 3,
+        "executed_call_attempts": 3,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 1,
+      "credits": 3.962268,
+      "wall_seconds": 23.5,
+      "usage": {
+        "input_tokens": 33852,
+        "output_tokens": 1291,
+        "cache_read_tokens": 22227,
+        "cache_write_tokens": 11285,
+        "model_requests": 4,
+        "uncached_input_tokens": 340,
+        "credits": 3.962268,
+        "total_nano_aiu": 3962268000,
+        "api_seconds": 14.546,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 33852,
+            "output_tokens": 1291,
+            "cache_read_tokens": 22227,
+            "cache_write_tokens": 11285,
+            "model_requests": 4,
+            "reasoning_tokens": 585,
+            "native_model_nano_aiu": 3962268000
+          }
+        },
+        "reasoning_tokens": 585
+      },
+      "tool_audit": {
+        "evidence_calls": 3,
+        "executed_call_attempts": 3,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 4,
+      "credits": 2.709297,
+      "wall_seconds": 20.625,
+      "usage": {
+        "input_tokens": 23255,
+        "output_tokens": 1200,
+        "cache_read_tokens": 16628,
+        "cache_write_tokens": 6373,
+        "model_requests": 3,
+        "uncached_input_tokens": 254,
+        "credits": 2.709297,
+        "total_nano_aiu": 2709297000,
+        "api_seconds": 11.735,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 23255,
+            "output_tokens": 1200,
+            "cache_read_tokens": 16628,
+            "cache_write_tokens": 6373,
+            "model_requests": 3,
+            "reasoning_tokens": 246,
+            "native_model_nano_aiu": 2709297000
+          }
+        },
+        "reasoning_tokens": 246
+      },
+      "tool_audit": {
+        "evidence_calls": 2,
+        "executed_call_attempts": 2,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 6,
+      "credits": 7.162407,
+      "wall_seconds": 35.57800000021234,
+      "usage": {
+        "input_tokens": 75045,
+        "output_tokens": 2718,
+        "cache_read_tokens": 56213,
+        "cache_write_tokens": 18234,
+        "model_requests": 7,
+        "uncached_input_tokens": 598,
+        "credits": 7.162407,
+        "total_nano_aiu": 7162407000,
+        "api_seconds": 26.52,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 75045,
+            "output_tokens": 2718,
+            "cache_read_tokens": 56213,
+            "cache_write_tokens": 18234,
+            "model_requests": 7,
+            "reasoning_tokens": 502,
+            "native_model_nano_aiu": 7162407000
+          }
+        },
+        "reasoning_tokens": 502
+      },
+      "tool_audit": {
+        "evidence_calls": 8,
+        "executed_call_attempts": 8,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 0,
+      "credits": 5.543757,
+      "wall_seconds": 28.530999999959022,
+      "usage": {
+        "input_tokens": 78895,
+        "output_tokens": 1715,
+        "cache_read_tokens": 63538,
+        "cache_write_tokens": 14759,
+        "model_requests": 7,
+        "uncached_input_tokens": 598,
+        "credits": 5.543757,
+        "total_nano_aiu": 5543757000,
+        "api_seconds": 18.86,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 78895,
+            "output_tokens": 1715,
+            "cache_read_tokens": 63538,
+            "cache_write_tokens": 14759,
+            "model_requests": 7,
+            "reasoning_tokens": 451,
+            "native_model_nano_aiu": 5543757000
+          }
+        },
+        "reasoning_tokens": 451
+      },
+      "tool_audit": {
+        "evidence_calls": 6,
+        "executed_call_attempts": 6,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 2,
+      "credits": 7.564122,
+      "wall_seconds": 29.328999999910593,
+      "usage": {
+        "input_tokens": 81158,
+        "output_tokens": 1822,
+        "cache_read_tokens": 56988,
+        "cache_write_tokens": 23574,
+        "model_requests": 7,
+        "uncached_input_tokens": 596,
+        "credits": 7.564122,
+        "total_nano_aiu": 7564122000,
+        "api_seconds": 20.644,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 81158,
+            "output_tokens": 1822,
+            "cache_read_tokens": 56988,
+            "cache_write_tokens": 23574,
+            "model_requests": 7,
+            "reasoning_tokens": 589,
+            "native_model_nano_aiu": 7564122000
+          }
+        },
+        "reasoning_tokens": 589
+      },
+      "tool_audit": {
+        "evidence_calls": 7,
+        "executed_call_attempts": 7,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 2,
+      "credits": 1.84149,
+      "wall_seconds": 18.859000000171363,
+      "usage": {
+        "input_tokens": 11326,
+        "output_tokens": 963,
+        "cache_read_tokens": 7250,
+        "cache_write_tokens": 3908,
+        "model_requests": 2,
+        "uncached_input_tokens": 168,
+        "credits": 1.84149,
+        "total_nano_aiu": 1841490000,
+        "api_seconds": 9.819,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 11326,
+            "output_tokens": 963,
+            "cache_read_tokens": 7250,
+            "cache_write_tokens": 3908,
+            "model_requests": 2,
+            "reasoning_tokens": 479,
+            "native_model_nano_aiu": 1841490000
+          }
+        },
+        "reasoning_tokens": 479
+      },
+      "tool_audit": {
+        "evidence_calls": 1,
+        "executed_call_attempts": 1,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 3,
+      "credits": 1.601928,
+      "wall_seconds": 16.735000000335276,
+      "usage": {
+        "input_tokens": 13180,
+        "output_tokens": 679,
+        "cache_read_tokens": 9107,
+        "cache_write_tokens": 3905,
+        "model_requests": 2,
+        "uncached_input_tokens": 168,
+        "credits": 1.601928,
+        "total_nano_aiu": 1601928000,
+        "api_seconds": 7.822,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 13180,
+            "output_tokens": 679,
+            "cache_read_tokens": 9107,
+            "cache_write_tokens": 3905,
+            "model_requests": 2,
+            "reasoning_tokens": 0,
+            "native_model_nano_aiu": 1601928000
+          }
+        },
+        "reasoning_tokens": 0
+      },
+      "tool_audit": {
+        "evidence_calls": 1,
+        "executed_call_attempts": 1,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 2,
+      "credits": 10.25316,
+      "wall_seconds": 36.811999999918044,
+      "usage": {
+        "input_tokens": 135154,
+        "output_tokens": 2375,
+        "cache_read_tokens": 103035,
+        "cache_write_tokens": 31265,
+        "model_requests": 10,
+        "uncached_input_tokens": 854,
+        "credits": 10.25316,
+        "total_nano_aiu": 10253160000,
+        "api_seconds": 27.725,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 135154,
+            "output_tokens": 2375,
+            "cache_read_tokens": 103035,
+            "cache_write_tokens": 31265,
+            "model_requests": 10,
+            "reasoning_tokens": 1100,
+            "native_model_nano_aiu": 10253160000
+          }
+        },
+        "reasoning_tokens": 1100
+      },
+      "tool_audit": {
+        "evidence_calls": 9,
+        "executed_call_attempts": 9,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 2,
+      "credits": 8.907948,
+      "wall_seconds": 38.125,
+      "usage": {
+        "input_tokens": 124666,
+        "output_tokens": 2583,
+        "cache_read_tokens": 99222,
+        "cache_write_tokens": 24674,
+        "model_requests": 9,
+        "uncached_input_tokens": 770,
+        "credits": 8.907948,
+        "total_nano_aiu": 8907948000,
+        "api_seconds": 29.325,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 124666,
+            "output_tokens": 2583,
+            "cache_read_tokens": 99222,
+            "cache_write_tokens": 24674,
+            "model_requests": 9,
+            "reasoning_tokens": 1357,
+            "native_model_nano_aiu": 8907948000
+          }
+        },
+        "reasoning_tokens": 1357
+      },
+      "tool_audit": {
+        "evidence_calls": 8,
+        "executed_call_attempts": 8,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "bc277c0372a2c410587b86f47527f69bc7e76ae468a962c7fe668b452af88905",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 3,
+      "credits": 6.295104,
+      "wall_seconds": 32.9839999997057,
+      "usage": {
+        "input_tokens": 57072,
+        "output_tokens": 2182,
+        "cache_read_tokens": 39291,
+        "cache_write_tokens": 17269,
+        "model_requests": 6,
+        "uncached_input_tokens": 512,
+        "credits": 6.295104,
+        "total_nano_aiu": 6295104000,
+        "api_seconds": 23.633,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 57072,
+            "output_tokens": 2182,
+            "cache_read_tokens": 39291,
+            "cache_write_tokens": 17269,
+            "model_requests": 6,
+            "reasoning_tokens": 658,
+            "native_model_nano_aiu": 6295104000
+          }
+        },
+        "reasoning_tokens": 658
+      },
+      "tool_audit": {
+        "evidence_calls": 6,
+        "executed_call_attempts": 6,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "bc277c0372a2c410587b86f47527f69bc7e76ae468a962c7fe668b452af88905",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 3,
+      "credits": 6.691806,
+      "wall_seconds": 36.82800000021234,
+      "usage": {
+        "input_tokens": 63638,
+        "output_tokens": 2482,
+        "cache_read_tokens": 45544,
+        "cache_write_tokens": 17582,
+        "model_requests": 6,
+        "uncached_input_tokens": 512,
+        "credits": 6.691806,
+        "total_nano_aiu": 6691806000,
+        "api_seconds": 26.556,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 63638,
+            "output_tokens": 2482,
+            "cache_read_tokens": 45544,
+            "cache_write_tokens": 17582,
+            "model_requests": 6,
+            "reasoning_tokens": 866,
+            "native_model_nano_aiu": 6691806000
+          }
+        },
+        "reasoning_tokens": 866
+      },
+      "tool_audit": {
+        "evidence_calls": 6,
+        "executed_call_attempts": 6,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 1,
+      "credits": 1.12070385,
+      "wall_seconds": 155.26500000013039,
+      "usage": {
+        "input_tokens": 387889,
+        "output_tokens": 7163,
+        "cache_read_tokens": 344469,
+        "cache_write_tokens": 43363,
+        "model_requests": 19,
+        "uncached_input_tokens": 57,
+        "credits": 1.12070385,
+        "total_nano_aiu": 1120703850,
+        "api_seconds": 107.607,
+        "models": [
+          "gpt-6-luna"
+        ],
+        "current_model": "gpt-6-luna",
+        "per_model": {
+          "gpt-6-luna": {
+            "input_tokens": 387889,
+            "output_tokens": 7163,
+            "cache_read_tokens": 344469,
+            "cache_write_tokens": 43363,
+            "model_requests": 19,
+            "reasoning_tokens": 4361,
+            "native_model_nano_aiu": 1120703850
+          }
+        },
+        "reasoning_tokens": 4361
+      },
+      "tool_audit": {
+        "evidence_calls": 34,
+        "executed_call_attempts": 34,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 1
+      }
+    },
+    {
+      "task": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 1,
+      "credits": 12.246498,
+      "wall_seconds": 57.92200000025332,
+      "usage": {
+        "input_tokens": 240346,
+        "output_tokens": 4220,
+        "cache_read_tokens": 210997,
+        "cache_write_tokens": 28149,
+        "model_requests": 14,
+        "uncached_input_tokens": 1200,
+        "credits": 12.246498,
+        "total_nano_aiu": 12246498000,
+        "api_seconds": 47.286,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 240346,
+            "output_tokens": 4220,
+            "cache_read_tokens": 210997,
+            "cache_write_tokens": 28149,
+            "model_requests": 14,
+            "reasoning_tokens": 1834,
+            "native_model_nano_aiu": 12246498000
+          }
+        },
+        "reasoning_tokens": 1834
+      },
+      "tool_audit": {
+        "evidence_calls": 13,
+        "executed_call_attempts": 13,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "91db148075d74d9bde541c1702d065e340acf96f90bc4258edb975c71f0f0e92",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 2,
+      "credits": 4.549896,
+      "wall_seconds": 26.79700000025332,
+      "usage": {
+        "input_tokens": 68554,
+        "output_tokens": 1047,
+        "cache_read_tokens": 54584,
+        "cache_write_tokens": 13372,
+        "model_requests": 7,
+        "uncached_input_tokens": 598,
+        "credits": 4.549896,
+        "total_nano_aiu": 4549896000,
+        "api_seconds": 17.211,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 68554,
+            "output_tokens": 1047,
+            "cache_read_tokens": 54584,
+            "cache_write_tokens": 13372,
+            "model_requests": 7,
+            "reasoning_tokens": 187,
+            "native_model_nano_aiu": 4549896000
+          }
+        },
+        "reasoning_tokens": 187
+      },
+      "tool_audit": {
+        "evidence_calls": 6,
+        "executed_call_attempts": 6,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "91db148075d74d9bde541c1702d065e340acf96f90bc4258edb975c71f0f0e92",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 1,
+      "credits": 6.728139,
+      "wall_seconds": 38.875,
+      "usage": {
+        "input_tokens": 90521,
+        "output_tokens": 1366,
+        "cache_read_tokens": 68711,
+        "cache_write_tokens": 21212,
+        "model_requests": 7,
+        "uncached_input_tokens": 598,
+        "credits": 6.728139,
+        "total_nano_aiu": 6728139000,
+        "api_seconds": 19.869,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 90521,
+            "output_tokens": 1366,
+            "cache_read_tokens": 68711,
+            "cache_write_tokens": 21212,
+            "model_requests": 7,
+            "reasoning_tokens": 472,
+            "native_model_nano_aiu": 6728139000
+          }
+        },
+        "reasoning_tokens": 472
+      },
+      "tool_audit": {
+        "evidence_calls": 8,
+        "executed_call_attempts": 8,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "7d1bf7158fd26470fa90ae3afa30ab61088ae3c62444c7c15a5001d978ec23a5",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 2,
+      "credits": 2.973897,
+      "wall_seconds": 20.54699999978766,
+      "usage": {
+        "input_tokens": 34645,
+        "output_tokens": 974,
+        "cache_read_tokens": 26308,
+        "cache_write_tokens": 7997,
+        "model_requests": 4,
+        "uncached_input_tokens": 340,
+        "credits": 2.973897,
+        "total_nano_aiu": 2973897000,
+        "api_seconds": 11.389,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 34645,
+            "output_tokens": 974,
+            "cache_read_tokens": 26308,
+            "cache_write_tokens": 7997,
+            "model_requests": 4,
+            "reasoning_tokens": 190,
+            "native_model_nano_aiu": 2973897000
+          }
+        },
+        "reasoning_tokens": 190
+      },
+      "tool_audit": {
+        "evidence_calls": 3,
+        "executed_call_attempts": 3,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "7d1bf7158fd26470fa90ae3afa30ab61088ae3c62444c7c15a5001d978ec23a5",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 2,
+      "credits": 3.814371,
+      "wall_seconds": 20.95299999974668,
+      "usage": {
+        "input_tokens": 30919,
+        "output_tokens": 994,
+        "cache_read_tokens": 18619,
+        "cache_write_tokens": 11960,
+        "model_requests": 4,
+        "uncached_input_tokens": 340,
+        "credits": 3.814371,
+        "total_nano_aiu": 3814371000,
+        "api_seconds": 11.561,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 30919,
+            "output_tokens": 994,
+            "cache_read_tokens": 18619,
+            "cache_write_tokens": 11960,
+            "model_requests": 4,
+            "reasoning_tokens": 249,
+            "native_model_nano_aiu": 3814371000
+          }
+        },
+        "reasoning_tokens": 249
+      },
+      "tool_audit": {
+        "evidence_calls": 3,
+        "executed_call_attempts": 3,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 3,
+      "credits": 10.541115,
+      "wall_seconds": 43.07799999974668,
+      "usage": {
+        "input_tokens": 208923,
+        "output_tokens": 2319,
+        "cache_read_tokens": 178275,
+        "cache_write_tokens": 29620,
+        "model_requests": 12,
+        "uncached_input_tokens": 1028,
+        "credits": 10.541115,
+        "total_nano_aiu": 10541115000,
+        "api_seconds": 30.451,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 208923,
+            "output_tokens": 2319,
+            "cache_read_tokens": 178275,
+            "cache_write_tokens": 29620,
+            "model_requests": 12,
+            "reasoning_tokens": 573,
+            "native_model_nano_aiu": 10541115000
+          }
+        },
+        "reasoning_tokens": 573
+      },
+      "tool_audit": {
+        "evidence_calls": 13,
+        "executed_call_attempts": 13,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 3,
+      "credits": 6.043059,
+      "wall_seconds": 32.938000000081956,
+      "usage": {
+        "input_tokens": 80689,
+        "output_tokens": 2038,
+        "cache_read_tokens": 64441,
+        "cache_write_tokens": 15650,
+        "model_requests": 7,
+        "uncached_input_tokens": 598,
+        "credits": 6.043059,
+        "total_nano_aiu": 6043059000,
+        "api_seconds": 23.782,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 80689,
+            "output_tokens": 2038,
+            "cache_read_tokens": 64441,
+            "cache_write_tokens": 15650,
+            "model_requests": 7,
+            "reasoning_tokens": 677,
+            "native_model_nano_aiu": 6043059000
+          }
+        },
+        "reasoning_tokens": 677
+      },
+      "tool_audit": {
+        "evidence_calls": 7,
+        "executed_call_attempts": 7,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 1
+      }
+    },
+    {
+      "task": "0362dfe9422a542cde29b9a429b4baa39d301262a128fccb0910d6801f939a86",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 1,
+      "credits": 5.909796,
+      "wall_seconds": 38.17199999978766,
+      "usage": {
+        "input_tokens": 76228,
+        "output_tokens": 2133,
+        "cache_read_tokens": 60789,
+        "cache_write_tokens": 14755,
+        "model_requests": 8,
+        "uncached_input_tokens": 684,
+        "credits": 5.909796,
+        "total_nano_aiu": 5909796000,
+        "api_seconds": 25.372,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 76228,
+            "output_tokens": 2133,
+            "cache_read_tokens": 60789,
+            "cache_write_tokens": 14755,
+            "model_requests": 8,
+            "reasoning_tokens": 971,
+            "native_model_nano_aiu": 5909796000
+          }
+        },
+        "reasoning_tokens": 971
+      },
+      "tool_audit": {
+        "evidence_calls": 7,
+        "executed_call_attempts": 7,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "0362dfe9422a542cde29b9a429b4baa39d301262a128fccb0910d6801f939a86",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 1,
+      "credits": 2.524698,
+      "wall_seconds": 20.921000000089407,
+      "usage": {
+        "input_tokens": 29722,
+        "output_tokens": 827,
+        "cache_read_tokens": 22647,
+        "cache_write_tokens": 6735,
+        "model_requests": 4,
+        "uncached_input_tokens": 340,
+        "credits": 2.524698,
+        "total_nano_aiu": 2524698000,
+        "api_seconds": 11.926,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 29722,
+            "output_tokens": 827,
+            "cache_read_tokens": 22647,
+            "cache_write_tokens": 6735,
+            "model_requests": 4,
+            "reasoning_tokens": 371,
+            "native_model_nano_aiu": 2524698000
+          }
+        },
+        "reasoning_tokens": 371
+      },
+      "tool_audit": {
+        "evidence_calls": 3,
+        "executed_call_attempts": 3,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 2,
+      "credits": 7.576587,
+      "wall_seconds": 31.359000000171363,
+      "usage": {
+        "input_tokens": 100417,
+        "output_tokens": 1783,
+        "cache_read_tokens": 76793,
+        "cache_write_tokens": 22854,
+        "model_requests": 9,
+        "uncached_input_tokens": 770,
+        "credits": 7.576587,
+        "total_nano_aiu": 7576587000,
+        "api_seconds": 21.784,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 100417,
+            "output_tokens": 1783,
+            "cache_read_tokens": 76793,
+            "cache_write_tokens": 22854,
+            "model_requests": 9,
+            "reasoning_tokens": 535,
+            "native_model_nano_aiu": 7576587000
+          }
+        },
+        "reasoning_tokens": 535
+      },
+      "tool_audit": {
+        "evidence_calls": 9,
+        "executed_call_attempts": 9,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 1,
+      "credits": 2.837403,
+      "wall_seconds": 18.858999999705702,
+      "usage": {
+        "input_tokens": 41485,
+        "output_tokens": 602,
+        "cache_read_tokens": 32497,
+        "cache_write_tokens": 8562,
+        "model_requests": 5,
+        "uncached_input_tokens": 426,
+        "credits": 2.837403,
+        "total_nano_aiu": 2837403000,
+        "api_seconds": 10.276,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 41485,
+            "output_tokens": 602,
+            "cache_read_tokens": 32497,
+            "cache_write_tokens": 8562,
+            "model_requests": 5,
+            "reasoning_tokens": 59,
+            "native_model_nano_aiu": 2837403000
+          }
+        },
+        "reasoning_tokens": 59
+      },
+      "tool_audit": {
+        "evidence_calls": 5,
+        "executed_call_attempts": 5,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "ee7f15418560e783cdc668536f3c4d8692e231a7f231876ddc86a2fac069e9e2",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 1,
+      "credits": 0.3628917,
+      "wall_seconds": 56.109999999869615,
+      "usage": {
+        "input_tokens": 53736,
+        "output_tokens": 2500,
+        "cache_read_tokens": 34213,
+        "cache_write_tokens": 19508,
+        "model_requests": 5,
+        "uncached_input_tokens": 15,
+        "credits": 0.3628917,
+        "total_nano_aiu": 362891700,
+        "api_seconds": 37.306,
+        "models": [
+          "gpt-6-luna"
+        ],
+        "current_model": "gpt-6-luna",
+        "per_model": {
+          "gpt-6-luna": {
+            "input_tokens": 53736,
+            "output_tokens": 2500,
+            "cache_read_tokens": 34213,
+            "cache_write_tokens": 19508,
+            "model_requests": 5,
+            "reasoning_tokens": 1566,
+            "native_model_nano_aiu": 362891700
+          }
+        },
+        "reasoning_tokens": 1566
+      },
+      "tool_audit": {
+        "evidence_calls": 13,
+        "executed_call_attempts": 13,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "ee7f15418560e783cdc668536f3c4d8692e231a7f231876ddc86a2fac069e9e2",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 1,
+      "credits": 0.36779625,
+      "wall_seconds": 48.45300000021234,
+      "usage": {
+        "input_tokens": 59762,
+        "output_tokens": 2031,
+        "cache_read_tokens": 38250,
+        "cache_write_tokens": 21497,
+        "model_requests": 5,
+        "uncached_input_tokens": 15,
+        "credits": 0.36779625,
+        "total_nano_aiu": 367796250,
+        "api_seconds": 29.167,
+        "models": [
+          "gpt-6-luna"
+        ],
+        "current_model": "gpt-6-luna",
+        "per_model": {
+          "gpt-6-luna": {
+            "input_tokens": 59762,
+            "output_tokens": 2031,
+            "cache_read_tokens": 38250,
+            "cache_write_tokens": 21497,
+            "model_requests": 5,
+            "reasoning_tokens": 1045,
+            "native_model_nano_aiu": 367796250
+          }
+        },
+        "reasoning_tokens": 1045
+      },
+      "tool_audit": {
+        "evidence_calls": 16,
+        "executed_call_attempts": 16,
+        "denied_over_budget": 0,
+        "indexed_calls": 2,
+        "errors": 1
+      }
+    },
+    {
+      "task": "82ec18705a16ae64998d181393c7f885543cc33b25921073d24ebecec40fbc15",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 2,
+      "credits": 6.397776,
+      "wall_seconds": 30.875,
+      "usage": {
+        "input_tokens": 61316,
+        "output_tokens": 2113,
+        "cache_read_tokens": 42949,
+        "cache_write_tokens": 17855,
+        "model_requests": 6,
+        "uncached_input_tokens": 512,
+        "credits": 6.397776,
+        "total_nano_aiu": 6397776000,
+        "api_seconds": 20.555,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 61316,
+            "output_tokens": 2113,
+            "cache_read_tokens": 42949,
+            "cache_write_tokens": 17855,
+            "model_requests": 6,
+            "reasoning_tokens": 621,
+            "native_model_nano_aiu": 6397776000
+          }
+        },
+        "reasoning_tokens": 621
+      },
+      "tool_audit": {
+        "evidence_calls": 7,
+        "executed_call_attempts": 7,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "82ec18705a16ae64998d181393c7f885543cc33b25921073d24ebecec40fbc15",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 2,
+      "credits": 1.694097,
+      "wall_seconds": 16.015000000130385,
+      "usage": {
+        "input_tokens": 13501,
+        "output_tokens": 699,
+        "cache_read_tokens": 9098,
+        "cache_write_tokens": 4235,
+        "model_requests": 2,
+        "uncached_input_tokens": 168,
+        "credits": 1.694097,
+        "total_nano_aiu": 1694097000,
+        "api_seconds": 7.036,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 13501,
+            "output_tokens": 699,
+            "cache_read_tokens": 9098,
+            "cache_write_tokens": 4235,
+            "model_requests": 2,
+            "reasoning_tokens": 192,
+            "native_model_nano_aiu": 1694097000
+          }
+        },
+        "reasoning_tokens": 192
+      },
+      "tool_audit": {
+        "evidence_calls": 1,
+        "executed_call_attempts": 1,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 1,
+      "credits": 2.540205,
+      "wall_seconds": 20.594000000040978,
+      "usage": {
+        "input_tokens": 18619,
+        "output_tokens": 1058,
+        "cache_read_tokens": 11990,
+        "cache_write_tokens": 6375,
+        "model_requests": 3,
+        "uncached_input_tokens": 254,
+        "credits": 2.540205,
+        "total_nano_aiu": 2540205000,
+        "api_seconds": 12.235,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 18619,
+            "output_tokens": 1058,
+            "cache_read_tokens": 11990,
+            "cache_write_tokens": 6375,
+            "model_requests": 3,
+            "reasoning_tokens": 531,
+            "native_model_nano_aiu": 2540205000
+          }
+        },
+        "reasoning_tokens": 531
+      },
+      "tool_audit": {
+        "evidence_calls": 2,
+        "executed_call_attempts": 2,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 1,
+      "credits": 1.598013,
+      "wall_seconds": 16.484000000171363,
+      "usage": {
+        "input_tokens": 13093,
+        "output_tokens": 700,
+        "cache_read_tokens": 9122,
+        "cache_write_tokens": 3803,
+        "model_requests": 2,
+        "uncached_input_tokens": 168,
+        "credits": 1.598013,
+        "total_nano_aiu": 1598013000,
+        "api_seconds": 7.67,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 13093,
+            "output_tokens": 700,
+            "cache_read_tokens": 9122,
+            "cache_write_tokens": 3803,
+            "model_requests": 2,
+            "reasoning_tokens": 287,
+            "native_model_nano_aiu": 1598013000
+          }
+        },
+        "reasoning_tokens": 287
+      },
+      "tool_audit": {
+        "evidence_calls": 1,
+        "executed_call_attempts": 1,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "3f4e836db70e52f2130f7c82f67af4af39f1091bb6d31a96258cb5d4add67a10",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "valid",
+      "findings_count": 2,
+      "credits": 11.372841,
+      "wall_seconds": 40.25,
+      "usage": {
+        "input_tokens": 160421,
+        "output_tokens": 2569,
+        "cache_read_tokens": 124979,
+        "cache_write_tokens": 34586,
+        "model_requests": 10,
+        "uncached_input_tokens": 856,
+        "credits": 11.372841,
+        "total_nano_aiu": 11372841000,
+        "api_seconds": 31.151,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "current_model": "claude-sonnet-5.5",
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "input_tokens": 160421,
+            "output_tokens": 2569,
+            "cache_read_tokens": 124979,
+            "cache_write_tokens": 34586,
+            "model_requests": 10,
+            "reasoning_tokens": 973,
+            "native_model_nano_aiu": 11372841000
+          }
+        },
+        "reasoning_tokens": 973
+      },
+      "tool_audit": {
+        "evidence_calls": 11,
+        "executed_call_attempts": 11,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 1
+      }
+    },
+    {
+      "task": "3f4e836db70e52f2130f7c82f67af4af39f1091bb6d31a96258cb5d4add67a10",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "measurement_invalid",
+      "findings_count": null,
+      "credits": null,
+      "wall_seconds": 31.219000000040978,
+      "usage": null,
+      "tool_audit": null
+    },
+    {
+      "task": "d701ed5ae7001b5fe7c881acdda33cf7759293132014f6d71abcbc657eb36d27",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "unfinished",
+      "credits": null,
+      "findings_count": null
+    },
+    {
+      "task": "d701ed5ae7001b5fe7c881acdda33cf7759293132014f6d71abcbc657eb36d27",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "unfinished",
+      "credits": null,
+      "findings_count": null
+    },
+    {
+      "task": "435c173f24b18a1fd88ab29dc033bc2fc1e42502df2db9d7e9312711c7a1ea3c",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "unfinished",
+      "credits": null,
+      "findings_count": null
+    },
+    {
+      "task": "435c173f24b18a1fd88ab29dc033bc2fc1e42502df2db9d7e9312711c7a1ea3c",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "unfinished",
+      "credits": null,
+      "findings_count": null
+    },
+    {
+      "task": "b673f3f386cf657bbc269b622ce6a14389e41cd0d0427b48254c43c2ccd38956",
+      "arm": "H",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "unfinished",
+      "credits": null,
+      "findings_count": null
+    },
+    {
+      "task": "b673f3f386cf657bbc269b622ce6a14389e41cd0d0427b48254c43c2ccd38956",
+      "arm": "B",
+      "repeat": 0,
+      "attempt": 0,
+      "status": "unfinished",
+      "credits": null,
+      "findings_count": null
+    }
+  ],
+  "quality": null,
+  "reviewer_observed_credits": 200.23109189999994,
+  "judge_observed_credits": 0,
+  "campaign_observed_credits": 200.23109189999994,
+  "campaign_credit_bounds": {
+    "observed_lower": 200.23109189999994,
+    "upper_with_unsettled_reservations": 230.23109189999994
+  },
+  "separate_plumbing_overhead_credits": 0.422946,
+  "evaluation_observed_credits_including_plumbing": 200.65403789999993,
+  "accounting_complete": false,
+  "conclusion": "Development measurements only. No efficacy claim; manual quality audit required.",
+  "publication_context": {
+    "status": "stopped; no retries or resumed slots",
+    "stopping_cause": "Malformed native CLI JSON in an assistant.reasoning_delta frame; no terminal native usage export",
+    "source_git_head": "97afb8fae05d2c38d655d6c8a44c7e081474a3ef",
+    "harness_sources": {
+      "__init__.py": "aeb97e160ca79ae2c4fbac74c4020594a59f5d1ea205975d201fd45324d572ce",
+      "__main__.py": "366a97c8739a97b7c94e356fc51f3b13e92a9fab6abdfe5f0c634e6bc00606fd",
+      "campaign.py": "f6844689da20a5e1905ff2899cee53e7d4a742a49b2ca1fc12d781b66745a3b6",
+      "common.py": "f22b213ee67302daf2d41f1cf993b3dc271d60440fae3faf8e9a4e81b6a08666",
+      "dataset.py": "3c27f40b7183455662fd329e89e8c464994bf2a576d1d0d8f086bd18f94eea6e",
+      "evidence.py": "017f73d95f179b0dbddce18f1cb40ef4b2123085eae72324efa7dd517e6d580f",
+      "judge.py": "8725c2db5c21a99af622ab31afe81571c05ddfbe0573e3ac86e5e3ac437a38b4",
+      "preparation.py": "f04ba0c44507ad050109fe4ded26ea4e001ece616801715ed14420c29ca142d2",
+      "report.py": "b8b77b29e24ea2ac70428841f535665e1507cdc215ec4e1e05e2693cc7b576e6",
+      "runtime.py": "a290ae85c40297b9113da4f1bae8a6291f890eee9231bf1a9429e9fa894a055d",
+      "score_bridge.mjs": "c048897cbbded5d067c05495265f2baea13c185ec1392551674022b463607d31"
+    },
+    "paired_observed_only": {
+      "captured_at": "2026-10-15T06:22:51.009554+00:00",
+      "protocol": "ddc9607478cb72f1f17a8d2a4a8f00f8776903c6fe287a3f94206d37e70711e9",
+      "valid_complete_pairs": 21,
+      "planned_pairs": 25,
+      "completed_sessions": 44,
+      "planned_sessions": 50,
+      "statuses": {
+        "valid": 43,
+        "measurement_invalid": 1
+      },
+      "arms": {
+        "B": {
+          "paired_sessions": 21,
+          "credits": 102.67762499999999,
+          "input_tokens": 1742247,
+          "output_tokens": 40570,
+          "uncached_input_tokens": 9906,
+          "cache_read_tokens": 1373798,
+          "cache_write_tokens": 358543,
+          "model_requests": 145,
+          "evidence_calls": 167,
+          "indexed_calls": 0,
+          "denied_over_budget": 0,
+          "errors": 2,
+          "findings": 42,
+          "sessions_with_indexed_calls": 0,
+          "realized_model_session_counts": {
+            "claude-sonnet-5.5": 18,
+            "gpt-6-luna": 3
+          }
+        },
+        "H": {
+          "paired_sessions": 21,
+          "credits": 86.18062590000002,
+          "input_tokens": 1193688,
+          "output_tokens": 30774,
+          "uncached_input_tokens": 8552,
+          "cache_read_tokens": 920998,
+          "cache_write_tokens": 264138,
+          "model_requests": 110,
+          "evidence_calls": 115,
+          "indexed_calls": 4,
+          "denied_over_budget": 0,
+          "errors": 3,
+          "findings": 39,
+          "sessions_with_indexed_calls": 2,
+          "realized_model_session_counts": {
+            "claude-sonnet-5.5": 19,
+            "gpt-6-luna": 2
+          }
+        }
+      },
+      "ledger": {
+        "known_credits": 200.23109189999994,
+        "unknown_reservations": 30,
+        "in_flight_reservations": 0,
+        "ceiling": 400
+      },
+      "terminal_stop": null,
+      "campaign_stop": "Missing usage; campaign stopped",
+      "review_campaign_finished": true,
+      "quality": "ungraded; findings count is not correctness",
+      "observed_paired_reduction_percent": {
+        "credits": 16.066790695635945,
+        "input_tokens": 31.48571930386449,
+        "evidence_calls": 31.137724550898206
+      }
+    },
+    "index_scope": "Separate verified base/head snapshots; identical raw history in both arms. No indexed historical continuity claim.",
+    "index_available_tasks": 21,
+    "index_unavailable_tasks_retained": 4,
+    "independent_audit_verified_occurrences": 9009,
+    "extraction_gaps": 167,
+    "known_prior_reviewer_and_development_credits": 137.8672758,
+    "prior_unknown_reservation_bound": 90,
+    "all_reviewer_and_development_credit_bounds": {
+      "known_lower": 338.0983677,
+      "upper_with_all_unknown_reservations": 458.0983677
+    },
+    "native_plumbing_known_total_across_development_roots": 0.56435625,
+    "plumbing_note": "Top-level harness plumbing constant 0.422946 predates subsequent canaries; full cross-protocol accounting is supplied here, not added again to the totals.",
+    "quality_grading": "Not started; stopped-protocol unresolved-spend gate retained.",
+    "interpretation": "21-pair efficiency totals are conditional observations, not full-cohort savings or causal indexing evidence. Only two H sessions requested index tools; human-audited quality unknown."
+  }
+}

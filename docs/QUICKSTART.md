@@ -9,7 +9,7 @@ cd gita
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 .\.venv\Scripts\python.exe -m pip install -c constraints.txt -e .
-.\.venv\Scripts\python.exe -c "from tree_sitter_language_pack import download; download(['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown'])"
+.\.venv\Scripts\python.exe -c "from tree_sitter_language_pack import get_parser, downloaded_languages; names = ['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown']; [get_parser(name) for name in names]; assert set(names) <= set(downloaded_languages())"
 ```
 
 Grammar provisioning uses the network once. Indexed operations then use local
@@ -20,7 +20,7 @@ Git objects. On Linux/macOS, activate with `source .venv/bin/activate` and use
 For an existing installation, provision the new grammars explicitly:
 
 ```powershell
-.\.venv\Scripts\python.exe -c "from tree_sitter_language_pack import download; download(['csharp','cpp'])"
+.\.venv\Scripts\python.exe -c "from tree_sitter_language_pack import get_parser, downloaded_languages; [get_parser(name) for name in ['csharp','cpp']]; assert {'csharp','cpp'} <= set(downloaded_languages())"
 ```
 
 C# extensions are `.cs` and `.csx`. C++ extensions are `.cpp`, `.cc`, `.cxx`,
