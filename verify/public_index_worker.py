@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import ast
+import io
+import tokenize
 import cProfile
 from contextlib import contextmanager
 from dataclasses import asdict
@@ -110,6 +112,29 @@ def ast_spans(source):
     return result
 
 
+def matches_ast_span(source, expected, actual):
+    start, end = expected
+    actual_start, actual_end = actual
+    if actual_start != start or not end <= actual_end <= len(source):
+        return False
+    if actual_end == end:
+        return True
+    suffix = source[end:actual_end]
+    try:
+        tokens = list(tokenize.tokenize(io.BytesIO(suffix).readline))
+    except (tokenize.TokenError, IndentationError, SyntaxError, UnicodeError):
+        return False
+    allowed = {tokenize.ENCODING, tokenize.COMMENT, tokenize.NL, tokenize.NEWLINE,
+               tokenize.INDENT, tokenize.DEDENT, tokenize.ENDMARKER}
+    if any(token.type not in allowed for token in tokens):
+        return False
+    # Do not accept a span ending halfway through a comment.
+    if not suffix.endswith(b"\n") and suffix.rstrip().split(b"\n")[-1].lstrip().startswith(b"#"):
+        if source[actual_end:].split(b"\n", 1)[0].strip():
+            return False
+    return True
+
+
 def source_check(original, row, digest):
     assert sha1(b"blob " + str(len(original)).encode() + b"\0" + original).digest() == row["blob_digest"]
     start, end = row["start_byte"], row["end_byte"]
@@ -194,9 +219,9 @@ def verify_sources(root, store, generation, expected_commits):
             "WHERE binding.binding_set_id=? AND definition.parent_id IS NOT NULL",
             (file["binding_set_id"],),
         ):
-            if row["terminal_name"] in expected and tuple(expected[row["terminal_name"]]) == (
-                row["start_byte"], row["end_byte"],
-            ):
+            if row["terminal_name"] in expected and matches_ast_span(
+                    original, expected[row["terminal_name"]],
+                    (row["start_byte"], row["end_byte"])):
                 span_checks += 1
                 if len(reviewed) < 8:
                     reviewed.append({"path": file["path"].decode("utf-8"),
@@ -210,7 +235,10 @@ def verify_sources(root, store, generation, expected_commits):
                       "ON binding.definition_id=definition.id WHERE binding.binding_set_id=?",
                       (file["binding_set_id"],),
                   )}
-        assert all((name, *span) in actual for name, span in expected.items()), "Python AST span missing"
+        for name, span in expected.items():
+            candidates = [(start, end) for actual_name, start, end in actual if actual_name == name]
+            assert any(matches_ast_span(original, span, candidate) for candidate in candidates), (
+                f"Python AST span missing: {file['path']!r} {name} expected={span} indexed={candidates}")
     return {
         "stored_contracts": "passed", "sql_integrity": "passed", "sql_foreign_keys": "passed",
         "exact_member_scope": "passed", "git_blob_and_source_digest_checks": byte_checks,

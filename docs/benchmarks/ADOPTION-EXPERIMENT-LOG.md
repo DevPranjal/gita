@@ -319,3 +319,34 @@ is **not** silently reclassified as a verified connected index. The final paid
 25-task review run is blocked until those three cases are understood. Existing
 failure receipts/source oracles are being inspected under a bounded follow-up,
 without rerunning the whole preparation batch.
+
+### E5: independent oracle calibration, not an index-content fix
+
+Read-only Git/SQLite diagnostics found all three named definitions in
+**complete** files at the correct start offset. Their indexed ends include
+trailing comments that CPython AST excludes:
+
+- position7, `LayoutMode`: AST `[80,465)`, indexed `[80,487)`;
+- position14, `rewrite_property`: `[250,2036)` versus `[250,2092)`;
+- position18, `BacktestConfig`: `[1102,1299)` versus `[1102,1350)`.
+
+The independent verifier previously required exact CPython end equality, so
+these were false missing-definition failures. Corrected only the oracle:
+allow a longer end solely when Python's independent tokenizer proves the
+suffix is comments/whitespace, not executable code. Wrong starts, shortened
+bodies, out-of-range ends and partial comments still fail. Assertion diagnostics
+now report file/name/expected/indexed spans instead of only a generic failure.
+
+27 oracle/public-benchmark tests pass. Only verification/preflight/history checks
+on the three existing published generations are being rerun; no rebuild or
+old failure-receipt replacement. Index/parser/matcher fingerprints are unchanged.
+
+### Corrected profile canary status
+
+After the replay fix, both reviewers completed and the real prior receipt
+replayed successfully. H used `change_context` plus raw verification, but still
+did not request per-entity source/diff on this PR. Credits B/H 0.425992 /
+3.967533; input118,123 /25,291; GPT versus Claude routing again dominates the
+price comparison. Automatic matching/classification is unstable on this
+single broad regex finding across runs; retain each judgment and do not choose
+the most favorable classification. No all-metrics success gate is claimed.
