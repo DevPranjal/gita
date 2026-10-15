@@ -1,5 +1,6 @@
 """Offline fixed-reviewer configuration and provenance regressions."""
 from types import SimpleNamespace
+import time
 
 import pytest
 
@@ -87,6 +88,33 @@ def test_seal_freezes_fixed_settings_in_digest(tmp_path, protocol_inputs):
     assert frozen["digest"] == digest({k: v for k, v in frozen.items() if k != "digest"})
     with pytest.raises(ProtocolError, match="protocol mismatch"):
         campaign.seal(root, tmp_path / "run", scopes, parsers, seed=7)
+
+
+def test_judge_settings_are_frozen_independently(protocol_inputs):
+    frozen = campaign.protocol(*protocol_inputs, reviewer_model=MODEL, reviewer_reasoning="medium",
+                               judge_model=MODEL, judge_reasoning="medium")
+    assert frozen["judge_model"] == MODEL
+    assert frozen["judge_reasoning"] == "medium"
+    assert frozen["digest"] != campaign.protocol(
+        *protocol_inputs, reviewer_model=MODEL, reviewer_reasoning="medium")["digest"]
+
+
+def test_fixed_judge_uses_native_login_and_measured_usage(tmp_path, monkeypatch):
+    from gita.eval.reviewbench import judge
+    observed = {}
+    def invoke(directory, prompt, allowed, mcp, **kwargs):
+        observed.update(kwargs)
+        assert allowed == [] and mcp is None
+        return {"status": "runtime_complete", "usage": {"credits": 0.1}, "events": []}
+    monkeypatch.setattr(judge, "invoke", invoke)
+    monkeypatch.setattr(judge, "final_answer", lambda _: {"qualified": True})
+    ledger = runtime.CreditLedger(tmp_path / "judge-ledger.json", "protocol", 40)
+    answer = judge._judge_call(tmp_path / "judge", "JSON only", ledger, "qualification",
+                               time.time() + 60, model=MODEL, reasoning="medium")
+    assert answer == {"qualified": True}
+    assert observed["model"] == MODEL and observed["reasoning"] == "medium"
+    assert observed["streaming"] is False and observed["diagnostic_transport"] is True
+    assert ledger.snapshot()["spent"] == 0.1
 
 
 def test_defaults_and_legacy_identity_remain_auto(protocol_inputs):

@@ -442,3 +442,20 @@ Local Copilot CLI reviewer authentication works; that does not authenticate Pi.
 No new fixed25 reviewers have been launched before the judge route is usable.
 The Copilot provider registry reports zero prices, which is not proof of free
 judging or a substitute for measured credit accounting.
+
+### User clarified: reuse the previous Copilot judge
+
+The user explicitly chose the already-working native Copilot matcher/classifier
+plus pinned official arithmetic, rather than waiting for upstream Pi OAuth.
+Reviewers **and judges** are now frozen to GPT-5.6 Sol / medium. No new login
+or Gemini route is needed. Original custom prompts and consistent targeted
+context remain; scores will be named research agreement, not upstream/leaderboard
+scores. Model/reasoning are separately frozen for judges and passed through both
+matching and classification.
+
+The user was unavailable to approve a higher ceiling. Respect the original
+950-credit cumulative allowance: use new reviewer160 / judge80 caps (240
+maximum), with approximately703.014 already spent/reserved across previous
+protocols and the fixed-model qualification. The fixed25 membership stays
+unchanged; actual completion may be budget-limited, and no incomplete run will
+be called complete. All old protocols and missing-usage bounds remain separate.

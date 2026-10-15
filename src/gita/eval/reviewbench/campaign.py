@@ -69,8 +69,10 @@ def review_prompt(task: dict, *, arm: str | None = None, indexed_workflow: bool 
 def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261014,
              development_pilot: bool = False, indexed_workflow: bool = False,
              reviewer_credits: int = REVIEWER_CREDITS, judge_credits: int = JUDGE_CREDITS,
-             reviewer_model: str = "auto", reviewer_reasoning: str | None = None) -> dict:
+             reviewer_model: str = "auto", reviewer_reasoning: str | None = None,
+             judge_model: str = "auto", judge_reasoning: str | None = None) -> dict:
     validate_settings(reviewer_model, reviewer_reasoning)
+    validate_settings(judge_model, judge_reasoning)
     manifest = verify(root)
     package = Path(__file__).parent
     executable = __import__("shutil").which("copilot.exe") or __import__("shutil").which("copilot")
@@ -102,6 +104,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "source_git_head": git(package.parents[3], "rev-parse", "HEAD").decode().strip(),
             "seed": seed, "schedule": schedule, "model": reviewer_model, "cli_version": cli_version,
             "reviewer_model": reviewer_model, "reviewer_reasoning": reviewer_reasoning,
+            "judge_model": judge_model, "judge_reasoning": judge_reasoning,
             "reasoning_effort": reviewer_reasoning or "auto-provider-default", "context": "default",
             "product_policy_digest": policy_digest(), "parsers": parsers,
             "harness_sources": {path.name: file_digest(path)
@@ -135,7 +138,8 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
 def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed: int,
          development_pilot: bool = False, indexed_workflow: bool = False,
          reviewer_credits: int = REVIEWER_CREDITS, judge_credits: int = JUDGE_CREDITS,
-         reviewer_model: str = "auto", reviewer_reasoning: str | None = None) -> dict:
+         reviewer_model: str = "auto", reviewer_reasoning: str | None = None,
+         judge_model: str = "auto", judge_reasoning: str | None = None) -> dict:
     require(run_root.resolve() != root.resolve() and root.resolve() not in run_root.resolve().parents,
             "Run artifacts must live outside corpus root")
     for scope in scopes:
@@ -143,7 +147,8 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
     frozen = protocol(root, scopes, parsers, seed=seed, development_pilot=development_pilot,
                       indexed_workflow=indexed_workflow, reviewer_credits=reviewer_credits,
                       judge_credits=judge_credits, reviewer_model=reviewer_model,
-                      reviewer_reasoning=reviewer_reasoning)
+                      reviewer_reasoning=reviewer_reasoning,
+                      judge_model=judge_model, judge_reasoning=judge_reasoning)
     body = {k: v for k, v in frozen.items() if k != "digest"}
     body["run_root_digest"] = digest(str(run_root.resolve()))
     frozen = {**body, "digest": digest(body)}

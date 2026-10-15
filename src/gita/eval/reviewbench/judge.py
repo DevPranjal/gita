@@ -202,7 +202,7 @@ def source_context(scope: dict, candidates: list[dict], golden: list[dict], *,
 
 
 def _judge_call(directory: Path, prompt: str, ledger: CreditLedger, key: str,
-                deadline: float) -> dict:
+                deadline: float, *, model: str = "auto", reasoning: str | None = None) -> dict:
     require(time.time() < deadline, "Overall campaign deadline before judge")
     require(reconcile_judge_outcomes(ledger.path.parent, ledger.protocol) is None,
             "Prior judge outcomes block another model reservation")
@@ -213,7 +213,7 @@ def _judge_call(directory: Path, prompt: str, ledger: CreditLedger, key: str,
     try:
         directory.mkdir(parents=True, exist_ok=False)
         outcome = invoke(directory, prompt, [], None, timeout=min(900, deadline - time.time()),
-                         streaming=False, diagnostic_transport=True)
+                         streaming=False, diagnostic_transport=True, model=model, reasoning=reasoning)
         events = outcome.pop("events", [])
         integrity = bool(outcome.get("integrity_stop") or outcome.get("status") == "integrity_failed")
         if integrity:
@@ -367,7 +367,9 @@ def grade_pair(root: Path, grader: Path, dataset: dict, scope: dict,
     match_rows = []
     if candidates:
         answer = _judge_call(destination / "matcher", MATCH_PROMPT + json.dumps(match_payload),
-                             ledger, task["id"] + "-matcher", deadline)
+                             ledger, task["id"] + "-matcher", deadline,
+                             model=frozen.get("judge_model", "auto"),
+                             reasoning=frozen.get("judge_reasoning"))
         match_rows = validate_judgments(answer, len(candidates), len(golden), classify=False)
     write_json(destination / "correspondences.json", match_rows)
     arms, global_unmatched = {}, set()
@@ -388,7 +390,9 @@ def grade_pair(root: Path, grader: Path, dataset: dict, scope: dict,
                    "source_context": context}
         write_json(destination / "classification-input.json", payload)
         answer = _judge_call(destination / "classifier", CLASSIFY_PROMPT + json.dumps(payload),
-                             ledger, task["id"] + "-classifier", deadline)
+                             ledger, task["id"] + "-classifier", deadline,
+                             model=frozen.get("judge_model", "auto"),
+                             reasoning=frozen.get("judge_reasoning"))
         classifications = validate_judgments(
             answer, len(candidates), len(golden), classify=True, required_indices=global_unmatched)
     write_json(destination / "classifications.json", classifications)
