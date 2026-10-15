@@ -1,0 +1,1316 @@
+{
+  "accounting_complete": false,
+  "arms": {
+    "B": {
+      "campaign_credit_total": null,
+      "failed": 1,
+      "mean_input_per_fixed_slot": null,
+      "measured_attempts": 12,
+      "observed_credits": 69.794433,
+      "observed_input_tokens": 788863,
+      "scheduled_slots": 25,
+      "unfinished": 12,
+      "valid": 12
+    },
+    "H": {
+      "campaign_credit_total": null,
+      "failed": 0,
+      "mean_input_per_fixed_slot": null,
+      "measured_attempts": 12,
+      "observed_credits": 55.570238550000006,
+      "observed_input_tokens": 767498,
+      "scheduled_slots": 25,
+      "unfinished": 13,
+      "valid": 12
+    }
+  },
+  "campaign_credit_bounds": {
+    "observed_lower": 125.36467155000001,
+    "upper_with_unsettled_reservations": 155.36467155000003
+  },
+  "campaign_observed_credits": 125.36467155000001,
+  "cohort": "public development starter; one repeat; no automatic retries",
+  "conclusion": "Development measurements only. No efficacy claim; manual quality audit required.",
+  "evaluation_observed_credits_including_plumbing": 125.78761755000001,
+  "experiment": "agent+product-auto+tools; NOT fixed-model causal attribution",
+  "judge_observed_credits": 0,
+  "known_review_credits": 125.36467155,
+  "no_credit_or_quality_success_claim": true,
+  "pin": "c17b05be9c90b85a1fc012ce39e455e2d09a7255",
+  "protocol": "0a91605669a2d6e497ed576ce5fff635b37ad300b53fe689f803a0d0ba077eca",
+  "quality": null,
+  "reviewer_observed_credits": 125.36467155000001,
+  "scheduled_sessions": 50,
+  "scheduled_tasks": 25,
+  "separate_plumbing_overhead_credits": 0.422946,
+  "slots": [
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": 4.596975,
+      "findings_count": 1,
+      "repeat": 0,
+      "status": "valid",
+      "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 5,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 13.62,
+        "cache_read_tokens": 34055,
+        "cache_write_tokens": 13860,
+        "credits": 4.596975,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 48341,
+        "model_requests": 5,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 1217,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 34055,
+            "cache_write_tokens": 13860,
+            "input_tokens": 48341,
+            "model_requests": 5,
+            "native_model_nano_aiu": 4596975000,
+            "output_tokens": 1217,
+            "reasoning_tokens": 168
+          }
+        },
+        "reasoning_tokens": 168,
+        "total_nano_aiu": 4596975000,
+        "uncached_input_tokens": 426
+      },
+      "wall_seconds": 25.70300000021234
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": 11.785185,
+      "findings_count": 2,
+      "repeat": 0,
+      "status": "valid",
+      "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 10,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 29.564,
+        "cache_read_tokens": 97545,
+        "cache_write_tokens": 36412,
+        "credits": 11.785185,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 134813,
+        "model_requests": 10,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 2845,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 97545,
+            "cache_write_tokens": 36412,
+            "input_tokens": 134813,
+            "model_requests": 10,
+            "native_model_nano_aiu": 11785185000,
+            "output_tokens": 2845,
+            "reasoning_tokens": 627
+          }
+        },
+        "reasoning_tokens": 627,
+        "total_nano_aiu": 11785185000,
+        "uncached_input_tokens": 856
+      },
+      "wall_seconds": 38.95299999974668
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": 3.710961,
+      "findings_count": 0,
+      "repeat": 0,
+      "status": "valid",
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 6,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 12.981,
+        "cache_read_tokens": 44414,
+        "cache_write_tokens": 10955,
+        "credits": 3.710961,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 55881,
+        "model_requests": 6,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 838,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 44414,
+            "cache_write_tokens": 10955,
+            "input_tokens": 55881,
+            "model_requests": 6,
+            "native_model_nano_aiu": 3710961000,
+            "output_tokens": 838,
+            "reasoning_tokens": 208
+          }
+        },
+        "reasoning_tokens": 208,
+        "total_nano_aiu": 3710961000,
+        "uncached_input_tokens": 512
+      },
+      "wall_seconds": 22.45299999974668
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": 3.606048,
+      "findings_count": 0,
+      "repeat": 0,
+      "status": "valid",
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 5,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 12.94,
+        "cache_read_tokens": 40382,
+        "cache_write_tokens": 11178,
+        "credits": 3.606048,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 52072,
+        "model_requests": 6,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 706,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 40382,
+            "cache_write_tokens": 11178,
+            "input_tokens": 52072,
+            "model_requests": 6,
+            "native_model_nano_aiu": 3606048000,
+            "output_tokens": 706,
+            "reasoning_tokens": 201
+          }
+        },
+        "reasoning_tokens": 201,
+        "total_nano_aiu": 3606048000,
+        "uncached_input_tokens": 512
+      },
+      "wall_seconds": 22.405999999959022
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": 2.670975,
+      "findings_count": 3,
+      "repeat": 0,
+      "status": "valid",
+      "task": "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 3,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 11.24,
+        "cache_read_tokens": 13995,
+        "cache_write_tokens": 6892,
+        "credits": 2.670975,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 21141,
+        "model_requests": 3,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 1054,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 13995,
+            "cache_write_tokens": 6892,
+            "input_tokens": 21141,
+            "model_requests": 3,
+            "native_model_nano_aiu": 2670975000,
+            "output_tokens": 1054,
+            "reasoning_tokens": 0
+          }
+        },
+        "reasoning_tokens": 0,
+        "total_nano_aiu": 2670975000,
+        "uncached_input_tokens": 254
+      },
+      "wall_seconds": 19.82800000021234
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": 2.205369,
+      "findings_count": 3,
+      "repeat": 0,
+      "status": "valid",
+      "task": "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 2,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 10.502,
+        "cache_read_tokens": 16611,
+        "cache_write_tokens": 5266,
+        "credits": 2.205369,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 22131,
+        "model_requests": 3,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 917,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 16611,
+            "cache_write_tokens": 5266,
+            "input_tokens": 22131,
+            "model_requests": 3,
+            "native_model_nano_aiu": 2205369000,
+            "output_tokens": 917,
+            "reasoning_tokens": 0
+          }
+        },
+        "reasoning_tokens": 0,
+        "total_nano_aiu": 2205369000,
+        "uncached_input_tokens": 254
+      },
+      "wall_seconds": 18.79700000025332
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": 4.548582,
+      "findings_count": 4,
+      "repeat": 0,
+      "status": "valid",
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 6,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 16.339,
+        "cache_read_tokens": 52238,
+        "cache_write_tokens": 11648,
+        "credits": 4.548582,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 64484,
+        "model_requests": 7,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 1500,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 52238,
+            "cache_write_tokens": 11648,
+            "input_tokens": 64484,
+            "model_requests": 7,
+            "native_model_nano_aiu": 4548582000,
+            "output_tokens": 1500,
+            "reasoning_tokens": 0
+          }
+        },
+        "reasoning_tokens": 0,
+        "total_nano_aiu": 4548582000,
+        "uncached_input_tokens": 598
+      },
+      "wall_seconds": 25.561999999918044
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": 4.317156,
+      "findings_count": 4,
+      "repeat": 0,
+      "status": "valid",
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 7,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 15.545,
+        "cache_read_tokens": 55074,
+        "cache_write_tokens": 11354,
+        "credits": 4.317156,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 67026,
+        "model_requests": 7,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 1288,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 55074,
+            "cache_write_tokens": 11354,
+            "input_tokens": 67026,
+            "model_requests": 7,
+            "native_model_nano_aiu": 4317156000,
+            "output_tokens": 1288,
+            "reasoning_tokens": 0
+          }
+        },
+        "reasoning_tokens": 0,
+        "total_nano_aiu": 4317156000,
+        "uncached_input_tokens": 598
+      },
+      "wall_seconds": 24.233999999705702
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": 1.388934,
+      "findings_count": 2,
+      "repeat": 0,
+      "status": "valid",
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 1,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 6.165,
+        "cache_read_tokens": 7191,
+        "cache_write_tokens": 3463,
+        "credits": 1.388934,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 10822,
+        "model_requests": 2,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 572,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 7191,
+            "cache_write_tokens": 3463,
+            "input_tokens": 10822,
+            "model_requests": 2,
+            "native_model_nano_aiu": 1388934000,
+            "output_tokens": 572,
+            "reasoning_tokens": 0
+          }
+        },
+        "reasoning_tokens": 0,
+        "total_nano_aiu": 1388934000,
+        "uncached_input_tokens": 168
+      },
+      "wall_seconds": 14.984999999869615
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": 0.31967055,
+      "findings_count": 2,
+      "repeat": 0,
+      "status": "valid",
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "tool_audit": {
+        "errors": 3,
+        "evidence_calls": 19,
+        "indexed_calls": 3
+      },
+      "usage": {
+        "api_seconds": 28.727,
+        "cache_read_tokens": 48047,
+        "cache_write_tokens": 16961,
+        "credits": 0.31967055,
+        "current_model": "gpt-6-luna",
+        "input_tokens": 65026,
+        "model_requests": 6,
+        "models": [
+          "gpt-6-luna"
+        ],
+        "output_tokens": 1899,
+        "per_model": {
+          "gpt-6-luna": {
+            "cache_read_tokens": 48047,
+            "cache_write_tokens": 16961,
+            "input_tokens": 65026,
+            "model_requests": 6,
+            "native_model_nano_aiu": 319670550,
+            "output_tokens": 1899,
+            "reasoning_tokens": 1086
+          }
+        },
+        "reasoning_tokens": 1086,
+        "total_nano_aiu": 319670550,
+        "uncached_input_tokens": 18
+      },
+      "wall_seconds": 49.875
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": 5.645448,
+      "findings_count": 1,
+      "repeat": 0,
+      "status": "valid",
+      "task": "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 7,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 21.219,
+        "cache_read_tokens": 57462,
+        "cache_write_tokens": 15602,
+        "credits": 5.645448,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 73662,
+        "model_requests": 7,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 1678,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 57462,
+            "cache_write_tokens": 15602,
+            "input_tokens": 73662,
+            "model_requests": 7,
+            "native_model_nano_aiu": 5645448000,
+            "output_tokens": 1678,
+            "reasoning_tokens": 805
+          }
+        },
+        "reasoning_tokens": 805,
+        "total_nano_aiu": 5645448000,
+        "uncached_input_tokens": 598
+      },
+      "wall_seconds": 33.65599999995902
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": 6.067467,
+      "findings_count": 1,
+      "repeat": 0,
+      "status": "valid",
+      "task": "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 8,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 20.015,
+        "cache_read_tokens": 65578,
+        "cache_write_tokens": 17197,
+        "credits": 6.067467,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 83373,
+        "model_requests": 7,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 1667,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 65578,
+            "cache_write_tokens": 17197,
+            "input_tokens": 83373,
+            "model_requests": 7,
+            "native_model_nano_aiu": 6067467000,
+            "output_tokens": 1667,
+            "reasoning_tokens": 690
+          }
+        },
+        "reasoning_tokens": 690,
+        "total_nano_aiu": 6067467000,
+        "uncached_input_tokens": 598
+      },
+      "wall_seconds": 28.57800000021234
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": 4.17834,
+      "findings_count": 0,
+      "repeat": 0,
+      "status": "valid",
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 3,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 17.718,
+        "cache_read_tokens": 18385,
+        "cache_write_tokens": 11615,
+        "credits": 4.17834,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 30340,
+        "model_requests": 4,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 1487,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 18385,
+            "cache_write_tokens": 11615,
+            "input_tokens": 30340,
+            "model_requests": 4,
+            "native_model_nano_aiu": 4178340000,
+            "output_tokens": 1487,
+            "reasoning_tokens": 998
+          }
+        },
+        "reasoning_tokens": 998,
+        "total_nano_aiu": 4178340000,
+        "uncached_input_tokens": 340
+      },
+      "wall_seconds": 26.484000000171363
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": 5.667822,
+      "findings_count": 1,
+      "repeat": 0,
+      "status": "valid",
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 5,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 26.684,
+        "cache_read_tokens": 46168,
+        "cache_write_tokens": 13874,
+        "credits": 5.667822,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 60554,
+        "model_requests": 6,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 2265,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 46168,
+            "cache_write_tokens": 13874,
+            "input_tokens": 60554,
+            "model_requests": 6,
+            "native_model_nano_aiu": 5667822000,
+            "output_tokens": 2265,
+            "reasoning_tokens": 1391
+          }
+        },
+        "reasoning_tokens": 1391,
+        "total_nano_aiu": 5667822000,
+        "uncached_input_tokens": 512
+      },
+      "wall_seconds": 37.092999999877065
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": 6.791085,
+      "findings_count": 5,
+      "repeat": 0,
+      "status": "valid",
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 8,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 20.868,
+        "cache_read_tokens": 62380,
+        "cache_write_tokens": 18289,
+        "credits": 6.791085,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 81267,
+        "model_requests": 7,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 2230,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 62380,
+            "cache_write_tokens": 18289,
+            "input_tokens": 81267,
+            "model_requests": 7,
+            "native_model_nano_aiu": 6791085000,
+            "output_tokens": 2230,
+            "reasoning_tokens": 417
+          }
+        },
+        "reasoning_tokens": 417,
+        "total_nano_aiu": 6791085000,
+        "uncached_input_tokens": 598
+      },
+      "wall_seconds": 31.594000000040978
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": 7.327044,
+      "findings_count": 5,
+      "repeat": 0,
+      "status": "valid",
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 9,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 26.985,
+        "cache_read_tokens": 57581,
+        "cache_write_tokens": 18751,
+        "credits": 7.327044,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 76930,
+        "model_requests": 7,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 2758,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 57581,
+            "cache_write_tokens": 18751,
+            "input_tokens": 76930,
+            "model_requests": 7,
+            "native_model_nano_aiu": 7327044000,
+            "output_tokens": 2758,
+            "reasoning_tokens": 633
+          }
+        },
+        "reasoning_tokens": 633,
+        "total_nano_aiu": 7327044000,
+        "uncached_input_tokens": 598
+      },
+      "wall_seconds": 37.3589999997057
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": 10.062945,
+      "findings_count": 1,
+      "repeat": 0,
+      "status": "valid",
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 9,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 27.756,
+        "cache_read_tokens": 89255,
+        "cache_write_tokens": 29726,
+        "credits": 10.062945,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 119751,
+        "model_requests": 9,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 2703,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 89255,
+            "cache_write_tokens": 29726,
+            "input_tokens": 119751,
+            "model_requests": 9,
+            "native_model_nano_aiu": 10062945000,
+            "output_tokens": 2703,
+            "reasoning_tokens": 795
+          }
+        },
+        "reasoning_tokens": 795,
+        "total_nano_aiu": 10062945000,
+        "uncached_input_tokens": 770
+      },
+      "wall_seconds": 37.03099999995902
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": 4.990482,
+      "findings_count": 2,
+      "repeat": 0,
+      "status": "valid",
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 6,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 16.476,
+        "cache_read_tokens": 64553,
+        "cache_write_tokens": 13573,
+        "credits": 4.990482,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 78722,
+        "model_requests": 7,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 1387,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 64553,
+            "cache_write_tokens": 13573,
+            "input_tokens": 78722,
+            "model_requests": 7,
+            "native_model_nano_aiu": 4990482000,
+            "output_tokens": 1387,
+            "reasoning_tokens": 202
+          }
+        },
+        "reasoning_tokens": 202,
+        "total_nano_aiu": 4990482000,
+        "uncached_input_tokens": 596
+      },
+      "wall_seconds": 25.984999999869615
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": 1.79496,
+      "findings_count": 2,
+      "repeat": 0,
+      "status": "valid",
+      "task": "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 1,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 10.025,
+        "cache_read_tokens": 7205,
+        "cache_write_tokens": 3863,
+        "credits": 1.79496,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 11236,
+        "model_requests": 2,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 923,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 7205,
+            "cache_write_tokens": 3863,
+            "input_tokens": 11236,
+            "model_requests": 2,
+            "native_model_nano_aiu": 1794960000,
+            "output_tokens": 923,
+            "reasoning_tokens": 440
+          }
+        },
+        "reasoning_tokens": 440,
+        "total_nano_aiu": 1794960000,
+        "uncached_input_tokens": 168
+      },
+      "wall_seconds": 18.82799999974668
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": 1.842156,
+      "findings_count": 2,
+      "repeat": 0,
+      "status": "valid",
+      "task": "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 1,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 10.405,
+        "cache_read_tokens": 8949,
+        "cache_write_tokens": 3859,
+        "credits": 1.842156,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 12976,
+        "model_requests": 2,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 959,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 8949,
+            "cache_write_tokens": 3859,
+            "input_tokens": 12976,
+            "model_requests": 2,
+            "native_model_nano_aiu": 1842156000,
+            "output_tokens": 959,
+            "reasoning_tokens": 495
+          }
+        },
+        "reasoning_tokens": 495,
+        "total_nano_aiu": 1842156000,
+        "uncached_input_tokens": 168
+      },
+      "wall_seconds": 19.344000000040978
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": 10.102293,
+      "findings_count": 2,
+      "repeat": 0,
+      "status": "valid",
+      "task": "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 9,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 26.541,
+        "cache_read_tokens": 102682,
+        "cache_write_tokens": 31479,
+        "credits": 10.102293,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 135017,
+        "model_requests": 10,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 2157,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 102682,
+            "cache_write_tokens": 31479,
+            "input_tokens": 135017,
+            "model_requests": 10,
+            "native_model_nano_aiu": 10102293000,
+            "output_tokens": 2157,
+            "reasoning_tokens": 861
+          }
+        },
+        "reasoning_tokens": 861,
+        "total_nano_aiu": 10102293000,
+        "uncached_input_tokens": 856
+      },
+      "wall_seconds": 37.51599999982864
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": 8.651628,
+      "findings_count": 1,
+      "repeat": 0,
+      "status": "valid",
+      "task": "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 9,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 23.481,
+        "cache_read_tokens": 103892,
+        "cache_write_tokens": 25152,
+        "credits": 8.651628,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 129814,
+        "model_requests": 9,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 2132,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 103892,
+            "cache_write_tokens": 25152,
+            "input_tokens": 129814,
+            "model_requests": 9,
+            "native_model_nano_aiu": 8651628000,
+            "output_tokens": 2132,
+            "reasoning_tokens": 971
+          }
+        },
+        "reasoning_tokens": 971,
+        "total_nano_aiu": 8651628000,
+        "uncached_input_tokens": 770
+      },
+      "wall_seconds": 35.985000000335276
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": 6.683679,
+      "findings_count": 2,
+      "repeat": 0,
+      "status": "valid",
+      "task": "bc277c0372a2c410587b86f47527f69bc7e76ae468a962c7fe668b452af88905",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 7,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 23.595,
+        "cache_read_tokens": 39066,
+        "cache_write_tokens": 19017,
+        "credits": 6.683679,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 58595,
+        "model_requests": 6,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 2179,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 39066,
+            "cache_write_tokens": 19017,
+            "input_tokens": 58595,
+            "model_requests": 6,
+            "native_model_nano_aiu": 6683679000,
+            "output_tokens": 2179,
+            "reasoning_tokens": 712
+          }
+        },
+        "reasoning_tokens": 712,
+        "total_nano_aiu": 6683679000,
+        "uncached_input_tokens": 512
+      },
+      "wall_seconds": 33.625
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": 6.409467,
+      "findings_count": 3,
+      "repeat": 0,
+      "status": "valid",
+      "task": "bc277c0372a2c410587b86f47527f69bc7e76ae468a962c7fe668b452af88905",
+      "tool_audit": {
+        "errors": 0,
+        "evidence_calls": 7,
+        "indexed_calls": 0
+      },
+      "usage": {
+        "api_seconds": 23.925,
+        "cache_read_tokens": 44698,
+        "cache_write_tokens": 17177,
+        "credits": 6.409467,
+        "current_model": "claude-sonnet-5.5",
+        "input_tokens": 62387,
+        "model_requests": 6,
+        "models": [
+          "claude-sonnet-5.5"
+        ],
+        "output_tokens": 2278,
+        "per_model": {
+          "claude-sonnet-5.5": {
+            "cache_read_tokens": 44698,
+            "cache_write_tokens": 17177,
+            "input_tokens": 62387,
+            "model_requests": 6,
+            "native_model_nano_aiu": 6409467000,
+            "output_tokens": 2278,
+            "reasoning_tokens": 761
+          }
+        },
+        "reasoning_tokens": 761,
+        "total_nano_aiu": 6409467000,
+        "uncached_input_tokens": 512
+      },
+      "wall_seconds": 33.65599999995902
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "measurement_invalid",
+      "task": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+      "tool_audit": null,
+      "usage": null,
+      "wall_seconds": 116.06300000008196
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191"
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "91db148075d74d9bde541c1702d065e340acf96f90bc4258edb975c71f0f0e92"
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "91db148075d74d9bde541c1702d065e340acf96f90bc4258edb975c71f0f0e92"
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "7d1bf7158fd26470fa90ae3afa30ab61088ae3c62444c7c15a5001d978ec23a5"
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "7d1bf7158fd26470fa90ae3afa30ab61088ae3c62444c7c15a5001d978ec23a5"
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817"
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817"
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "0362dfe9422a542cde29b9a429b4baa39d301262a128fccb0910d6801f939a86"
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "0362dfe9422a542cde29b9a429b4baa39d301262a128fccb0910d6801f939a86"
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f"
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f"
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "ee7f15418560e783cdc668536f3c4d8692e231a7f231876ddc86a2fac069e9e2"
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "ee7f15418560e783cdc668536f3c4d8692e231a7f231876ddc86a2fac069e9e2"
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "82ec18705a16ae64998d181393c7f885543cc33b25921073d24ebecec40fbc15"
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "82ec18705a16ae64998d181393c7f885543cc33b25921073d24ebecec40fbc15"
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736"
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736"
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "3f4e836db70e52f2130f7c82f67af4af39f1091bb6d31a96258cb5d4add67a10"
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "3f4e836db70e52f2130f7c82f67af4af39f1091bb6d31a96258cb5d4add67a10"
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "d701ed5ae7001b5fe7c881acdda33cf7759293132014f6d71abcbc657eb36d27"
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "d701ed5ae7001b5fe7c881acdda33cf7759293132014f6d71abcbc657eb36d27"
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "435c173f24b18a1fd88ab29dc033bc2fc1e42502df2db9d7e9312711c7a1ea3c"
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "435c173f24b18a1fd88ab29dc033bc2fc1e42502df2db9d7e9312711c7a1ea3c"
+    },
+    {
+      "arm": "H",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "b673f3f386cf657bbc269b622ce6a14389e41cd0d0427b48254c43c2ccd38956"
+    },
+    {
+      "arm": "B",
+      "attempt": 0,
+      "credits": null,
+      "findings_count": null,
+      "repeat": 0,
+      "status": "unfinished",
+      "task": "b673f3f386cf657bbc269b622ce6a14389e41cd0d0427b48254c43c2ccd38956"
+    }
+  ],
+  "source_snapshot": {
+    "harness_sources": {
+      "__init__.py": "1e4d73b5d043849bb0390eaf9a6f89035eda1948646dd804d6d66a29e4771575",
+      "__main__.py": "366a97c8739a97b7c94e356fc51f3b13e92a9fab6abdfe5f0c634e6bc00606fd",
+      "campaign.py": "11f83fa6019a995339f6e7267447271ceea9f6e2aedbd8288b3fc6cc5fa8d4cf",
+      "common.py": "ae453be9451c2b0fe6ceb2ecddb0e2c4f9ea70848e3b5b633a8c78e5fe8aff59",
+      "dataset.py": "3c27f40b7183455662fd329e89e8c464994bf2a576d1d0d8f086bd18f94eea6e",
+      "evidence.py": "46784faa123f23cae70ce31df7cf3c1469e4ab557b159b20b387e10037fa9e21",
+      "judge.py": "6910d18c8ba6ac3deda1b164fe650d8cf95b2caa831c8d34084c85a96f787e0a",
+      "preparation.py": "f04ba0c44507ad050109fe4ded26ea4e001ece616801715ed14420c29ca142d2",
+      "report.py": "b8b77b29e24ea2ac70428841f535665e1507cdc215ec4e1e05e2693cc7b576e6",
+      "runtime.py": "1ec56c24c291a5a09511b79c36c6469322aa0800a7f507a7b5db8962dfe255fc",
+      "score_bridge.mjs": "c048897cbbded5d067c05495265f2baea13c185ec1392551674022b463607d31"
+    },
+    "product_policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f"
+  },
+  "stopped_reason": "Native usage was not flushed after enforcing the40call hard limit on the25th attempted session",
+  "study_status": "Stopped first-generation development pilot; NOT a completed25pair evaluation",
+  "unknown_review_credit_bound": [
+    0,
+    30
+  ],
+  "version": "reviewbench-auto-indexed-v1"
+}
