@@ -55,6 +55,20 @@ full-diff coverage or cross-revision alignment. Insufficient evidence remains an
 uncertainty, never default FP. The remaining judge cap is **146**, including all
 prior spend and unknown reservations within the original 200-credit allowance.
 All eleven targeted contexts passed the unchanged 180,000-character preflight.
+Two additional pairs completed before a malformed native input-echo record
+stopped that continuation. All **twelve unique completed judgments** remain
+unchanged. The transport compatibility continuation is capped at **115** credits
+after retaining every prior spent/unknown reservation.
+
+Only tool-free judges may opt into explicit diagnostic-frame quarantine.
+A malformed frame must begin with the observed input-echo/reasoning-delta
+envelope, contain the native redaction marker, and contain exactly one event
+prefix. Its payload is never repaired, interpreted as evidence, or used as an
+answer. The raw transcript remains intact; a hashed warning record is persisted.
+Final assistant messages, results, tool inventories, tool execution, usage and
+other corrupt frames remain strict failures. Reviewers retain strict parsing.
+Physical JSONL framing also waits for incomplete live records rather than
+mistaking a partial write for a completed malformed event.
 ([campaign.py:41](../../src/gita/eval/reviewbench/campaign.py),
 [judge.py:1](../../src/gita/eval/reviewbench/judge.py))
 

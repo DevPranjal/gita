@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 import math
+import hashlib
+import re
 import os
 from pathlib import Path
 import shutil
@@ -272,18 +274,31 @@ class ProcessTree:
             self.process.wait(timeout=30)
 
 
-def read_events(path: Path, *, partial: bool = False) -> list[dict]:
+def read_events(path: Path, *, partial: bool = False, diagnostic_transport: bool = False) -> list[dict]:
     import json
     events = []
-    lines = path.read_text(encoding="utf-8-sig").splitlines() if path.exists() else []
+    raw = path.read_bytes() if path.exists() else b""
+    if partial and raw and not raw.endswith(b"\n"):
+        raw = raw[:raw.rfind(b"\n") + 1]
+    try:
+        lines = raw.decode("utf-8-sig").split("\n")
+    except UnicodeDecodeError as error:
+        raise ProtocolError("Invalid UTF-8 runtime JSON stream") from error
     for i, line in enumerate(lines):
         if not line.strip():
             continue
         try:
             event = json.loads(line)
-        except ValueError as error:
-            if partial and i == len(lines) - 1:
-                break
+        except json.JSONDecodeError as error:
+            prefix = re.match(r'^\{"type":"(user\.message|assistant\.reasoning_delta)","data":\{', line)
+            if (diagnostic_transport and prefix and "******" in line
+                    and len(re.findall(r'\{"type"\s*:', line)) == 1):
+                events.append({"type": "transport.non_authoritative_frame", "data": {
+                    "kind": prefix.group(1), "line": i + 1,
+                    "sha256": hashlib.sha256(line.encode("utf8")).hexdigest(),
+                    "characters": len(line),
+                    "warning": "Malformed redacted diagnostic payload retained raw; not used as model evidence or final output"}})
+                continue
             raise ProtocolError("Malformed runtime JSON stream") from error
         require(type(event) is dict, "Nonobject runtime event")
         events.append(event)
@@ -349,21 +364,27 @@ def command(directory: Path, prompt: str, allowed: list[str], mcp: Path | None) 
 
 
 def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
-           *, timeout: float = MAX_SECONDS, streaming: bool = True) -> dict:
+           *, timeout: float = MAX_SECONDS, streaming: bool = True,
+           diagnostic_transport: bool = False) -> dict:
     require(0 < timeout <= MAX_SECONDS, "Invalid reviewer timeout")
     for name in ("workspace", "home", "logs"):
         (directory / name).mkdir(parents=True, exist_ok=False)
     args = command(directory, prompt, allowed, mcp)
     require(type(streaming) is bool, "Streaming selection must be boolean")
+    require(type(diagnostic_transport) is bool, "Diagnostic transport selection must be boolean")
+    require(not diagnostic_transport or (not allowed and mcp is None),
+            "Diagnostic transport is permitted only for tool-free judging")
     if not streaming:
         args += ["--stream", "off"]
     write_json(directory / "invocation.json", {
         "arguments_without_prompt": args, "prompt_digest": digest(prompt),
         "prompt_transport": "utf8-stdin", "requested_model": "auto",
+        "diagnostic_transport": diagnostic_transport,
         "native_credit_cap": SESSION_CREDITS})
     (directory / "prompt.txt").write_text(prompt, encoding="utf8", newline="")
     start = time.monotonic()
     outcome = {"status": "runtime_failed", "usage": None, "error": None}
+    events = []
     with (directory / "events.jsonl").open("w", encoding="utf8") as output, (
             directory / "stderr.txt").open("w", encoding="utf8") as errors, (
             directory / "prompt.txt").open("rb") as incoming:
@@ -377,7 +398,8 @@ def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
             write_json(directory / "process.json", {"pid": process.pid, "started": utc_now()})
             while process.poll() is None:
                 require(time.monotonic() - start < timeout, "Reviewer wall-time limit reached")
-                events = read_events(directory / "events.jsonl", partial=True)
+                events = read_events(directory / "events.jsonl", partial=True,
+                                     diagnostic_transport=diagnostic_transport)
                 inventories(events, set(allowed), final=False)
                 turns = sum(e.get("type") == "assistant.turn_start" for e in events)
                 require(turns <= MAX_TURNS + FINALIZATION_GRACE, "Reviewer finalization turn limit reached")
@@ -385,7 +407,7 @@ def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
                 require(calls <= EVIDENCE_CALL_LIMIT + FINALIZATION_GRACE, "Evidence finalization grace exceeded")
                 time.sleep(0.25)
             require(process.returncode == 0, "CLI exited unsuccessfully")
-            events = read_events(directory / "events.jsonl")
+            events = read_events(directory / "events.jsonl", diagnostic_transport=diagnostic_transport)
             inventories(events, set(allowed))
             outcome.update(status="runtime_complete", events=events)
         except IntegrityError as error:
@@ -403,6 +425,10 @@ def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
                 else:
                     os.killpg(process.pid, signal.SIGKILL)
                 process.wait(timeout=30)
+    warnings = [e["data"] for e in events if e.get("type") == "transport.non_authoritative_frame"]
+    if warnings:
+        outcome["transport_warnings"] = warnings
+        write_json(directory / "transport-warnings.json", warnings)
     try:
         outcome["usage"] = parse_usage(read_json(directory / "usage.json"))
     except (OSError, ValueError, ProtocolError) as error:

@@ -155,7 +155,11 @@ def inputs(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
                 and len(ids["B"]) == len(ids["H"]) == len(set(ids["B"])) == len(set(ids["H"]))
                 == quality["scored_pairs"], "Incomplete/duplicate prior quality population")
         for task in ids["B"]:
-            require(task in pairs and task not in carried, "Invalid/duplicated carried task")
+            require(task in pairs, "Invalid carried task")
+            if task in carried:
+                require_integrity(previous["binding"]["carried_scoring_receipts"].get(task)
+                                  == carried_hashes[task], "Conflicting prior completed judgments")
+                continue
             destination = grader / "judgments" / previous["digest"][:32] / task[:32]
             receipt = read_json(destination / "scoring.json")
             require_integrity(receipt["protocol"] == previous["digest"]
@@ -192,12 +196,13 @@ def inputs(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
 
 def seal(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
     captured = inputs(corpus, reviewer, grader, analysis)
-    body = {"kind": "authorized-partial-quality-v3", "binding": captured["binding"],
+    body = {"kind": "authorized-partial-quality-v4", "binding": captured["binding"],
             "source_git_head": git(Path(__file__).parent.parents[3], "rev-parse", "HEAD").decode().strip(),
             "seed": captured["seed"], "model": "auto", "native_streaming": "off",
             "judgment_directory_identity": "128-bit prefixes with full protocol/task collision bindings",
             "new_context_policy": "Merged exact HEAD candidate/reference windows +/-40 lines; no full PR patch",
             "prior_context_policy": "Every completed previous judgment retained without rejudging",
+            "diagnostic_transport": "Explicitly record redacted malformed input echoes/reasoning deltas; strict finals, controls and usage",
             "judge_credit_cap": captured["binding"]["remaining_judge_ceiling"],
             "fixed_tasks": 25, "eligible_pairs": 21,
             "reviewer_retries": 0, "judge_retries": 0,
@@ -224,7 +229,7 @@ def verify_analysis(corpus: Path, reviewer: Path, grader: Path, analysis: Path) 
     require_integrity(captured["binding"] == frozen["binding"],
                       "Immutable reviews, source ledger, labels or analysis code changed")
     require(frozen["judge_credit_cap"] == captured["binding"]["remaining_judge_ceiling"]
-            and frozen["kind"] == "authorized-partial-quality-v3", "Invalid analysis ceiling/kind")
+            and frozen["kind"] == "authorized-partial-quality-v4", "Invalid analysis ceiling/kind")
     return frozen, captured
 
 
@@ -233,6 +238,7 @@ def grade(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
     ledger = CreditLedger(analysis / "judge-ledger.json", frozen["digest"], frozen["judge_credit_cap"])
     deadline = datetime.fromisoformat(ledger.snapshot()["created"]).timestamp() + CAMPAIGN_SECONDS
     scores, pending = {"B": [], "H": []}, []
+    completed = set()
     with file_lock(analysis / "campaign.lock"):
         require(reconcile_judge_outcomes(analysis, frozen["digest"]) is None,
                 "Unresolved or integrity-failed analysis judge blocks further sessions")
@@ -244,6 +250,20 @@ def grade(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
                 "Nonstreaming zero-tool qualification failed")
         for scope in captured["scopes"]:
             task = scope["task"]
+            previous = captured["carried"].get(task["id"])
+            if previous is None:
+                continue
+            arms = grade_pair(corpus, grader, captured["dataset"], scope,
+                              captured["pairs"][task["id"]], previous, ledger, deadline)
+            for arm in ("B", "H"):
+                scores[arm].append(arms[arm])
+            completed.add(task["id"])
+        write_json(analysis / "quality.json", results(
+            corpus, grader, frozen, captured, scores, pending, ledger))
+        for scope in captured["scopes"]:
+            task = scope["task"]
+            if task["id"] in completed:
+                continue
             if task["id"] not in captured["pairs"]:
                 pending.append({"task": task["id"], "reason": "No valid complete primary pair"})
                 continue

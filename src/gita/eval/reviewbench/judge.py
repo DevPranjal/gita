@@ -213,7 +213,7 @@ def _judge_call(directory: Path, prompt: str, ledger: CreditLedger, key: str,
     try:
         directory.mkdir(parents=True, exist_ok=False)
         outcome = invoke(directory, prompt, [], None, timeout=min(900, deadline - time.time()),
-                         streaming=False)
+                         streaming=False, diagnostic_transport=True)
         events = outcome.pop("events", [])
         integrity = bool(outcome.get("integrity_stop") or outcome.get("status") == "integrity_failed")
         if integrity:
