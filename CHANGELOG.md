@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Advance committed inventories and complete identity populations using raw
+  first-parent tree deltas instead of rebuilding them at every commit. Preserve
+  global copy/ambiguity guards, unknown-file retries and atomic publication.
+- Replace quadratic active-identity overlap validation with a tested ordered
+  interval proof; retain the remaining publication and integrity checks.
+- Classify Rust named modules as namespaces in indexed byte evidence, reserving
+  module kind for synthetic file roots. Parser/matcher fingerprints change;
+  existing scopes require explicit rebuilds, not automatic migration.
+- Record pinned before/after indexing measurements and remaining reopen/storage
+  costs in the delta performance report; no arbitrary-repository scale guarantee.
+
 - Record pinned public Flask, Express and ripgrep indexing observations, retaining
   failures and partial coverage. Add reproducible public-corpus tooling and
   independently member-bound source rechecks; do not claim full-history scale.

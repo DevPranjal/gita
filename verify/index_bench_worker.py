@@ -56,6 +56,7 @@ def phases(timings):
     replacements = []
     for owner, method, label in (
         (builder, "_walk", "history_walk"), (builder, "_walk_suffix", "suffix_walk"),
+        (builder._Builder, "__init__", "frontier_hydration"),
         (builder._Builder, "_inventory", "inventory_parse_persist"),
         (builder._Builder, "_structural", "structural_matching"),
         (builder._Builder, "_modules", "module_matching"),
@@ -63,6 +64,8 @@ def phases(timings):
         (builder._Builder, "_links", "link_event_writes"),
         (builder._Builder, "_states", "interval_writes"),
         (IndexStore, "publish_generation", "publication_validation"),
+        (IndexStore, "begin_generation", "checkpoint_copy"),
+        (IndexStore, "_copy_rows", "checkpoint_row_copy"),
         (IndexSession, "_check_policy", "query_policy"),
     ):
         if not hasattr(owner, method):

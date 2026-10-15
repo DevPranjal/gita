@@ -377,6 +377,10 @@ def _build(root: Node, spec: LanguageSpec, source: bytes, parse_id: str,
         synthetic = parent_index is None
         parent = None if synthetic else definitions[parent_index]
         kind = "module" if synthetic else extractor._entity_kind(node, spec).value
+        # The index reserves module for a synthetic file root. Named Rust mod
+        # items (including out-of-line declarations) are real namespace bindings.
+        if not synthetic and kind == "module":
+            kind = "namespace"
         if synthetic:
             span = SourceSpan(0, len(source), 1, 1 + source[:-1].count(b"\n") if source else 1)
             names = ("<module>",)

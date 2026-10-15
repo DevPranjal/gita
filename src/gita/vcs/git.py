@@ -897,6 +897,21 @@ class CommittedRepo:
         else:
             self.commit(parent)
             revisions = (parent.digest.hex(), oid.digest.hex())
+        yield from self._tree_changes(revisions, page_size)
+
+    def tree_changes(self, parent: GitOid, tree: GitOid, *,
+                     page_size: int = 1000) -> Iterator[tuple[GitTreeChange, ...]]:
+        """Diff trees whose provenance the caller already validated from commits.
+
+        Git traverses changed tree branches; do not reread cached commit objects
+        through the batch reader merely to rediscover their tree IDs.
+        """
+        self._page_size(page_size)
+        self._validate_oid(parent)
+        self._validate_oid(tree)
+        yield from self._tree_changes((parent.digest.hex(), tree.digest.hex()), page_size)
+
+    def _tree_changes(self, revisions: tuple[str, ...], page_size: int) -> Iterator[tuple[GitTreeChange, ...]]:
         records = self._records((
             "diff-tree", "--raw", "-z", "--no-renames", "--no-commit-id", "-r",
             "--no-abbrev", "--no-ext-diff", "--no-textconv", "--ignore-submodules=none",

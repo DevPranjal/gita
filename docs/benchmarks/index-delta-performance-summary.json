@@ -1,0 +1,1452 @@
+{
+  "baseline_commit": "bcab3c13881fd9e921134093608a7a51f88fcbb9",
+  "exact_reopen": {
+    "reopen-after": {
+      "append_tip": "24d00302a5c8ffc837077c01719e8a75be495436",
+      "commits": 22,
+      "counters": {
+        "cached_files": 0,
+        "commits": 22,
+        "parsed_files": 1
+      },
+      "operation_seconds": 41.58871399983764,
+      "phase_timings": {
+        "_candidate_pairs": 10000,
+        "candidate_matching_seconds": 4.8203821000643075,
+        "checkpoint_copy_seconds": 0.787349599879235,
+        "checkpoint_row_copy_seconds": 0.7281724992208183,
+        "frontier_hydration_seconds": 20.677492999937385,
+        "interval_writes_seconds": 0.004678499884903431,
+        "inventory_parse_persist_seconds": 0.6077115000225604,
+        "link_event_writes_seconds": 0.012094700243324041,
+        "module_matching_seconds": 9.540002793073654e-05,
+        "publication_validation_seconds": 13.428421299904585,
+        "structural_matching_seconds": 0.07918010000139475,
+        "suffix_walk_seconds": 0.16196140041574836
+      },
+      "receipt_sha256": "3192d38efd4fd4f71af443a87e0970baa28f54382ba0cba56171f89e52050fdf",
+      "row_counts": {
+        "definition": 20042,
+        "event": 20063,
+        "lineage": 20021,
+        "lineage_link": 62,
+        "occurrence": 20061,
+        "version": 20042
+      },
+      "status": "passed",
+      "work_counters": {
+        "inventory_sql_row_changes": 19,
+        "metadata_definitions": 20002,
+        "tree_changes_calls": 1,
+        "tree_changes_entries": 1
+      }
+    },
+    "reopen-after-wall": {
+      "append_tip": "24d00302a5c8ffc837077c01719e8a75be495436",
+      "commits": 22,
+      "counters": {
+        "cached_files": 0,
+        "commits": 22,
+        "parsed_files": 1
+      },
+      "operation_seconds": 21.114997799973935,
+      "receipt_sha256": "3d30a9db1a79e7d651d241a814a4497bedf4f22c8b76e15ba50e38511957f122",
+      "row_counts": {
+        "definition": 20042,
+        "event": 20063,
+        "lineage": 20021,
+        "lineage_link": 62,
+        "occurrence": 20061,
+        "version": 20042
+      },
+      "status": "passed"
+    },
+    "reopen-before": {
+      "append_tip": "24d00302a5c8ffc837077c01719e8a75be495436",
+      "commits": 22,
+      "counters": {
+        "cached_files": 0,
+        "commits": 22,
+        "parsed_files": 1
+      },
+      "operation_seconds": 144.49696200015023,
+      "phase_timings": {
+        "_candidate_pairs": 10000,
+        "candidate_matching_seconds": 4.7732061999849975,
+        "checkpoint_copy_seconds": 0.8042544997297227,
+        "checkpoint_row_copy_seconds": 0.7453009001910686,
+        "frontier_hydration_seconds": 20.481448899954557,
+        "interval_writes_seconds": 0.00468709971755743,
+        "inventory_parse_persist_seconds": 0.6286068996414542,
+        "link_event_writes_seconds": 0.012337800115346909,
+        "module_matching_seconds": 8.889986202120781e-05,
+        "publication_validation_seconds": 116.56947149988264,
+        "structural_matching_seconds": 0.05526239983737469,
+        "suffix_walk_seconds": 0.15557909989729524
+      },
+      "receipt_sha256": "1312821ed137097ca0476bc1c44fcf696b908ff262b13a067747a6914efee045",
+      "row_counts": {
+        "definition": 20042,
+        "event": 20063,
+        "lineage": 20021,
+        "lineage_link": 62,
+        "occurrence": 20061,
+        "version": 20042
+      },
+      "status": "passed",
+      "work_counters": {
+        "inventory_sql_row_changes": 19,
+        "metadata_definitions": 20002,
+        "tree_changes_calls": 1,
+        "tree_changes_entries": 1
+      }
+    },
+    "reopen-before-wall": {
+      "append_tip": "24d00302a5c8ffc837077c01719e8a75be495436",
+      "commits": 22,
+      "counters": {
+        "cached_files": 0,
+        "commits": 22,
+        "parsed_files": 1
+      },
+      "operation_seconds": 120.7822397002019,
+      "receipt_sha256": "369f072dab5371575de267155995beaf7a2bb11721c630777ce7fbec5a9f3798",
+      "row_counts": {
+        "definition": 20042,
+        "event": 20063,
+        "lineage": 20021,
+        "lineage_link": 62,
+        "occurrence": 20061,
+        "version": 20042
+      },
+      "status": "passed"
+    }
+  },
+  "final_runtime": {
+    "builder_sha256": "dc70a75fd7e281e7e6bb977b8cdea3b8aa5dee7eff0e78bcb8033e77c7971689",
+    "index_runtime_sha256": "8be20d1030cd0aa7cedf827ac3b7a36f96095f975e7092a50f7325eafbc46067",
+    "match_fingerprint": "ec9c5e1ca9148a6bd6b3ae091613b4c44987fb03bebea381ded98df6fc3d5f45",
+    "parse_fingerprint": "884168068efce3b9e5bb1da3d172cc5024933143db9f766f437953fe26148120",
+    "store_sha256": "5c079d61d45c3eb45b86b744ad8156a0ec167c43fe6cac70983ae9fc36d00c39"
+  },
+  "generated": {
+    "100": {
+      "baseline": {
+        "append": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 1
+          },
+          "database_bytes": 2957312,
+          "receipt_sha256": "5859a659f355bbe95dbce0ad1a19847ed4903c3237854523d453675be37538a0",
+          "rss_peak_bytes": 105902080,
+          "seconds": 1.782922999933362,
+          "status": "passed"
+        },
+        "history": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 20,
+            "parsed_files": 119
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 119
+            }
+          ],
+          "database_bytes": 2736128,
+          "parse_statuses": {
+            "complete": 119
+          },
+          "receipt_sha256": "70ef1b89e10fc44eedfe8b78d122147c217d6aaec089369fa9266e33bc0aa1e2",
+          "row_counts": {
+            "definition": 238,
+            "event": 257,
+            "lineage": 219,
+            "lineage_link": 57,
+            "occurrence": 256,
+            "version": 238
+          },
+          "rss_peak_bytes": 225759232,
+          "seconds": 5.972626000177115,
+          "status": "passed"
+        },
+        "noop": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "database_bytes": 2957312,
+          "receipt_sha256": "e861942ada39463a6f2f05a8aa0f00786bc3f7a51da2467447c1b1cf7aaf2a4b",
+          "rss_peak_bytes": 60612608,
+          "seconds": 0.43026020005345345,
+          "status": "passed"
+        },
+        "snapshot": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 100
+          },
+          "database_bytes": 2093056,
+          "parse_statuses": {
+            "complete": 100
+          },
+          "receipt_sha256": "ff37fc1915c98d1b86cb51c006887451847f3c442280d3e26390ce4181dd5b3a",
+          "rss_peak_bytes": 208326656,
+          "seconds": 2.556051699910313,
+          "status": "passed"
+        }
+      },
+      "files": 100,
+      "final": {
+        "append": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 1
+          },
+          "database_bytes": 2953216,
+          "receipt_sha256": "939a100027c155dae1a3f0cc9d225068146049c81195331be6e8a774d8e4f889",
+          "rss_peak_bytes": 105472000,
+          "seconds": 1.5135397999547422,
+          "status": "passed"
+        },
+        "history": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 20,
+            "parsed_files": 119
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 119
+            }
+          ],
+          "database_bytes": 2732032,
+          "parse_statuses": {
+            "complete": 119
+          },
+          "receipt_sha256": "e51185cedc81389980ea21c3f155d356b0851e67e4bf69123c80940bb958c756",
+          "row_counts": {
+            "definition": 238,
+            "event": 257,
+            "lineage": 219,
+            "lineage_link": 57,
+            "occurrence": 256,
+            "version": 238
+          },
+          "rss_peak_bytes": 222691328,
+          "seconds": 4.769044800195843,
+          "status": "passed"
+        },
+        "noop": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "database_bytes": 2953216,
+          "receipt_sha256": "a851904217256af1f39cdd9ab4300a45115a8e26babc318af02a3c7d2d5b9d6f",
+          "rss_peak_bytes": 60301312,
+          "seconds": 0.35797199979424477,
+          "status": "passed"
+        },
+        "snapshot": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 100
+          },
+          "database_bytes": 2088960,
+          "parse_statuses": {
+            "complete": 100
+          },
+          "receipt_sha256": "7e6004846b3225916a3fdf05a7f9a1746c98a26b1f07dba33d6c7b45cd714fbb",
+          "rss_peak_bytes": 204517376,
+          "seconds": 2.9414113997481763,
+          "status": "passed"
+        }
+      },
+      "functions": 100,
+      "pins": {
+        "anchor": "a6cfec4621efa6ec63899f43fc4c4b5fe038cf11",
+        "append_tip": "0a6ce9887b38fc64fce206bb85fbc8e41fead2f6",
+        "commit_sequence_sha256": "c649766c16b67087b64271341fbf84e69f32a73bfb03705305270f09c559b43d",
+        "history_commits": 20,
+        "history_tip": "e4ef4387739beb6a6209161b7fce4b8203f01ca5"
+      },
+      "storage_limit_bytes": 1073741824
+    },
+    "1000": {
+      "baseline": {
+        "append": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 1
+          },
+          "database_bytes": 19922944,
+          "receipt_sha256": "2b7bc92284302dcfbede0e5fc4e741d92fcf9fec520af8ceb067f4b514bc0929",
+          "rss_peak_bytes": 134377472,
+          "seconds": 4.230552699882537,
+          "status": "passed"
+        },
+        "history": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 20,
+            "parsed_files": 1019
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 1019
+            }
+          ],
+          "database_bytes": 18378752,
+          "parse_statuses": {
+            "complete": 1019
+          },
+          "receipt_sha256": "8cf0109e7a1dc6c00a3ece81c71034a028d9c32fea5ea8c92aba69f02828f7f4",
+          "row_counts": {
+            "definition": 2038,
+            "event": 2057,
+            "lineage": 2019,
+            "lineage_link": 57,
+            "occurrence": 2056,
+            "version": 2038
+          },
+          "rss_peak_bytes": 263086080,
+          "seconds": 18.40295200003311,
+          "status": "passed"
+        },
+        "noop": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "database_bytes": 19922944,
+          "receipt_sha256": "16d5149c1d58a8805cd1ae5cebc9e0e91f639be55cda2c1706e061fba9364068",
+          "rss_peak_bytes": 86306816,
+          "seconds": 0.3499440001323819,
+          "status": "passed"
+        },
+        "snapshot": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 1000
+          },
+          "database_bytes": 17727488,
+          "parse_statuses": {
+            "complete": 1000
+          },
+          "receipt_sha256": "2fd5134ee8d5667db12f2e957e56466da2b5327fa2b0ea4233ddd27d5ceb6719",
+          "rss_peak_bytes": 240001024,
+          "seconds": 13.510783999692649,
+          "status": "passed"
+        }
+      },
+      "files": 1000,
+      "final": {
+        "append": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 1
+          },
+          "database_bytes": 19881984,
+          "receipt_sha256": "9d9119720e519f94516c406c3eeaeb6428b858a29497f3594abd88d2f5f76054",
+          "rss_peak_bytes": 140275712,
+          "seconds": 2.80163440015167,
+          "status": "passed"
+        },
+        "history": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 20,
+            "parsed_files": 1019
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 1019
+            }
+          ],
+          "database_bytes": 18345984,
+          "parse_statuses": {
+            "complete": 1019
+          },
+          "receipt_sha256": "dca2afc68bad27f23b7da4d61989cdcc7b50358b39be423f1062b5c0081c58fa",
+          "row_counts": {
+            "definition": 2038,
+            "event": 2057,
+            "lineage": 2019,
+            "lineage_link": 57,
+            "occurrence": 2056,
+            "version": 2038
+          },
+          "rss_peak_bytes": 261955584,
+          "seconds": 12.567970800213516,
+          "status": "passed"
+        },
+        "noop": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "database_bytes": 19881984,
+          "receipt_sha256": "432f6d0c41dfd7c7576a772bb376692e2ab17a781212ac9151472472b07a63d9",
+          "rss_peak_bytes": 92229632,
+          "seconds": 0.3556031002663076,
+          "status": "passed"
+        },
+        "snapshot": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 1000
+          },
+          "database_bytes": 17694720,
+          "parse_statuses": {
+            "complete": 1000
+          },
+          "receipt_sha256": "28485eb0c58e83facaca0679864f02e369dca1f6d6ce0428d9fd580458a8efe8",
+          "rss_peak_bytes": 236191744,
+          "seconds": 9.185906499624252,
+          "status": "passed"
+        }
+      },
+      "functions": 1000,
+      "pins": {
+        "anchor": "6ba25e7707284c7354b9d588f4b69cca2c3e981c",
+        "append_tip": "02630a40e0f25a0241f45b98ab0ac88d9a22fc41",
+        "commit_sequence_sha256": "02799bd367ca188d7179471ca11bf4351054e94a50281145a8fd06b738128ba8",
+        "history_commits": 20,
+        "history_tip": "471b3b6a7ca70c3efa7dc3e4f2951c44dd6d7b56"
+      },
+      "storage_limit_bytes": 1073741824
+    },
+    "10000": {
+      "baseline": {
+        "append": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 1
+          },
+          "database_bytes": 189366272,
+          "receipt_sha256": "9e1db69f2a49cb2658db25e568df8de8fce80dd872a604ee6c782fb4552b16d6",
+          "rss_peak_bytes": 266424320,
+          "seconds": 127.63109030015767,
+          "status": "passed"
+        },
+        "history": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 20,
+            "parsed_files": 10019
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 10019
+            }
+          ],
+          "database_bytes": 175034368,
+          "parse_statuses": {
+            "complete": 10019
+          },
+          "receipt_sha256": "379962432099e2d41fb35780ec1ae41c8243e0f1b78e7719d3067e46095a7b51",
+          "row_counts": {
+            "definition": 20038,
+            "event": 20057,
+            "lineage": 20019,
+            "lineage_link": 57,
+            "occurrence": 20056,
+            "version": 20038
+          },
+          "rss_peak_bytes": 401522688,
+          "seconds": 322.1389760999009,
+          "status": "passed"
+        },
+        "noop": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "database_bytes": 189366272,
+          "receipt_sha256": "7261b57ce9edc7af5e51ab997f466a239f3e05e59d4db1a01ca86241c2613629",
+          "rss_peak_bytes": 152289280,
+          "seconds": 0.3445876999758184,
+          "status": "passed"
+        },
+        "snapshot": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 10000
+          },
+          "database_bytes": 174399488,
+          "parse_statuses": {
+            "complete": 10000
+          },
+          "receipt_sha256": "09659c006c0912e62c41eda209ab01c98cf862b6f0a347f6f8aa31991f5a113f",
+          "rss_peak_bytes": 381050880,
+          "seconds": 234.47088690008968,
+          "status": "passed"
+        }
+      },
+      "files": 10000,
+      "final": {
+        "append": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 1
+          },
+          "database_bytes": 189534208,
+          "receipt_sha256": "e222885d13a422f932aa0bfaa48902a29932d0e54f8adc67da27fd476d337226",
+          "rss_peak_bytes": 281055232,
+          "seconds": 23.452992599923164,
+          "status": "passed"
+        },
+        "history": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 20,
+            "parsed_files": 10019
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 10019
+            }
+          ],
+          "database_bytes": 175177728,
+          "parse_statuses": {
+            "complete": 10019
+          },
+          "receipt_sha256": "08e1109f76d59ad33aab6ebaa115a88b9d16eff258ba2c766743b43395672eea",
+          "row_counts": {
+            "definition": 20038,
+            "event": 20057,
+            "lineage": 20019,
+            "lineage_link": 57,
+            "occurrence": 20056,
+            "version": 20038
+          },
+          "rss_peak_bytes": 411471872,
+          "seconds": 147.19318880001083,
+          "status": "passed"
+        },
+        "noop": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "database_bytes": 189534208,
+          "receipt_sha256": "12c6969879e08e06b2b47a49e36b555af33518d11b92df04a2b4b66f479ef00a",
+          "rss_peak_bytes": 165593088,
+          "seconds": 0.3945895000360906,
+          "status": "passed"
+        },
+        "snapshot": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 10000
+          },
+          "database_bytes": 174505984,
+          "parse_statuses": {
+            "complete": 10000
+          },
+          "receipt_sha256": "5731c831c8f9a7b38203a31dcd7c8241e790e231b3e75da0a0ebaaca380d7ac9",
+          "rss_peak_bytes": 376066048,
+          "seconds": 100.506101900246,
+          "status": "passed"
+        }
+      },
+      "functions": 10000,
+      "pins": {
+        "anchor": "1d599937f07d8e38fd62b2e0a85cd635e94ee799",
+        "append_tip": "409d37140826ab82f466b099cf25bdfb0ceb14d3",
+        "commit_sequence_sha256": "5798e6fa9d4301ce1abf1500130594390983de90d6549f902a0365bdbce6eb59",
+        "history_commits": 20,
+        "history_tip": "1b3473f821bfb6e029701603d411ae620b0f051c"
+      },
+      "storage_limit_bytes": 1073741824
+    }
+  },
+  "hardware": {
+    "cores": 8,
+    "cpu": "AMD EPYC 7763 64-Core Processor",
+    "logical_processors": 16,
+    "os": "Windows AMD64",
+    "python": "3.11.9",
+    "ram_gib_reported": 63.95,
+    "sqlite": "3.45.1"
+  },
+  "limitations": [
+    "Partial source coverage is explicit; unsupported classification is not indexed completeness.",
+    "C, CUDA and Cython extensions excluded; NumPy/PyTorch not qualified.",
+    "O(N) reopen hydration, retained checkpoint copying and broad publication remain.",
+    "Generated constant edits collide with retained bodies, exercising conservative copy/candidate guards.",
+    "Single uncontrolled samples are not universal throughput claims or independent real-lineage truth."
+  ],
+  "method": {
+    "cache_power_contention": "uncontrolled; shared host",
+    "child_deadline_seconds": 600,
+    "corpus_code_executed": false,
+    "parse_workers": 4,
+    "rss": "sampled child-tree peak; shared pages can be double counted",
+    "samples_per_case": 1
+  },
+  "overlap_vm_work": {
+    "before_approx_instructions": 3406900,
+    "distinct_eids": 512,
+    "final_approx_instructions": 32800,
+    "proof_tests": "nested/open/adjacent intervals and randomized independent-math parity passed"
+  },
+  "parity": {
+    "publication-final-express-parity": {
+      "categories": {
+        "coverage": {
+          "baseline_records": 2699,
+          "candidate_records": 2699,
+          "equal": true
+        },
+        "definitions": {
+          "baseline_records": 5431,
+          "candidate_records": 5431,
+          "equal": true
+        },
+        "departures": {
+          "baseline_records": 408,
+          "candidate_records": 408,
+          "equal": true
+        },
+        "events": {
+          "baseline_records": 4590,
+          "candidate_records": 4590,
+          "equal": true
+        },
+        "intervals": {
+          "baseline_records": 1469,
+          "candidate_records": 1469,
+          "equal": true
+        },
+        "lineages": {
+          "baseline_records": 4059,
+          "candidate_records": 4059,
+          "equal": true
+        },
+        "links": {
+          "baseline_records": 2630,
+          "candidate_records": 2630,
+          "equal": true
+        },
+        "occurrences": {
+          "baseline_records": 7234,
+          "candidate_records": 7234,
+          "equal": true
+        },
+        "versions": {
+          "baseline_records": 3286,
+          "candidate_records": 3286,
+          "equal": true
+        }
+      },
+      "interpretation_ids": "excluded deliberately; lineage compared by exact seed occurrence/reason, not similarity",
+      "passed": true,
+      "receipt_sha256": "7ce7a82ca442e6d09a007987b2cb17625f13c7180255e65efd40e575995c2a1a"
+    },
+    "publication-final-flask-parity": {
+      "categories": {
+        "coverage": {
+          "baseline_records": 5554,
+          "candidate_records": 5554,
+          "equal": true
+        },
+        "definitions": {
+          "baseline_records": 4929,
+          "candidate_records": 4929,
+          "equal": true
+        },
+        "departures": {
+          "baseline_records": 415,
+          "candidate_records": 415,
+          "equal": true
+        },
+        "events": {
+          "baseline_records": 3170,
+          "candidate_records": 3170,
+          "equal": true
+        },
+        "intervals": {
+          "baseline_records": 2923,
+          "candidate_records": 2923,
+          "equal": true
+        },
+        "lineages": {
+          "baseline_records": 2617,
+          "candidate_records": 2617,
+          "equal": true
+        },
+        "links": {
+          "baseline_records": 2923,
+          "candidate_records": 2923,
+          "equal": true
+        },
+        "occurrences": {
+          "baseline_records": 7613,
+          "candidate_records": 7613,
+          "equal": true
+        },
+        "versions": {
+          "baseline_records": 2129,
+          "candidate_records": 2129,
+          "equal": true
+        }
+      },
+      "interpretation_ids": "excluded deliberately; lineage compared by exact seed occurrence/reason, not similarity",
+      "passed": true,
+      "receipt_sha256": "e4910f930a49ab164a8079ca8930957df8f1e3374e30cfedfa9df2c17b3f5527"
+    },
+    "reopen-sql-fix-parity": {
+      "categories": {
+        "coverage": {
+          "baseline_records": 10021,
+          "candidate_records": 10021,
+          "equal": true
+        },
+        "definitions": {
+          "baseline_records": 20042,
+          "candidate_records": 20042,
+          "equal": true
+        },
+        "departures": {
+          "baseline_records": 21,
+          "candidate_records": 21,
+          "equal": true
+        },
+        "events": {
+          "baseline_records": 20063,
+          "candidate_records": 20063,
+          "equal": true
+        },
+        "intervals": {
+          "baseline_records": 10021,
+          "candidate_records": 10021,
+          "equal": true
+        },
+        "lineages": {
+          "baseline_records": 20021,
+          "candidate_records": 20021,
+          "equal": true
+        },
+        "links": {
+          "baseline_records": 62,
+          "candidate_records": 62,
+          "equal": true
+        },
+        "occurrences": {
+          "baseline_records": 20061,
+          "candidate_records": 20061,
+          "equal": true
+        },
+        "versions": {
+          "baseline_records": 20042,
+          "candidate_records": 20042,
+          "equal": true
+        }
+      },
+      "interpretation_ids": "excluded deliberately; lineage compared by exact seed occurrence/reason, not similarity",
+      "passed": true,
+      "receipt_sha256": "75bf58af23cef92ad89ed4adaab65b933956d8196f29317b96ba915ae3a59c0a"
+    }
+  },
+  "public": {
+    "express": {
+      "baseline": {
+        "append": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 65,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "database_bytes": 79818752,
+          "receipt_sha256": "b2d036ff8816c81c1b04ba9f15c06e37b9e36586236927032ee0f7ae3f470df1",
+          "rss_peak_bytes": 258891776,
+          "seconds": 19.061024900060147,
+          "status": "passed"
+        },
+        "history": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 1159,
+            "commits": 20,
+            "parsed_files": 245
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 184
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 1220
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 5
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 1159
+            }
+          ],
+          "database_bytes": 74543104,
+          "parse_statuses": {
+            "complete": 184,
+            "unsupported_language": 61
+          },
+          "receipt_sha256": "f46843e3ffd74e66007b6fbbd32972d5a1d840b1430812781b1cdf6321fdce2e",
+          "row_counts": {
+            "definition": 5431,
+            "event": 4528,
+            "lineage": 4039,
+            "lineage_link": 2356,
+            "occurrence": 6979,
+            "version": 3286
+          },
+          "rss_peak_bytes": 426688512,
+          "seconds": 65.98122230032459,
+          "status": "passed"
+        },
+        "noop": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "database_bytes": 79818752,
+          "receipt_sha256": "0ad60697bb3e644718f157c826ea9314de9452318b5ec4f4173d7f8d1892e852",
+          "rss_peak_bytes": 147005440,
+          "seconds": 0.3918608999811113,
+          "status": "passed"
+        },
+        "snapshot": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 214
+          },
+          "database_bytes": 46362624,
+          "parse_statuses": {
+            "complete": 153,
+            "unsupported_language": 61
+          },
+          "receipt_sha256": "e9031a9ae8fc4091a37c62f5bbfcc1ad70ad1ca49857ec4be382a4471a7dedaa",
+          "rss_peak_bytes": 345657344,
+          "seconds": 16.589562400244176,
+          "status": "passed"
+        }
+      },
+      "baseline_profiled": false,
+      "baseline_storage_limit_bytes": 268435456,
+      "final": {
+        "append": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 65,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "database_bytes": 79785984,
+          "receipt_sha256": "6eae1d855df46c1471857d57ff44cdb01c02a9100e96b59b1a9f6f8f9cdc88c7",
+          "rss_peak_bytes": 297074688,
+          "seconds": 12.963045299984515,
+          "status": "passed"
+        },
+        "history": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 1159,
+            "commits": 20,
+            "parsed_files": 245
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 184
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 1220
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 5
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 1159
+            }
+          ],
+          "database_bytes": 74493952,
+          "parse_statuses": {
+            "complete": 184,
+            "unsupported_language": 61
+          },
+          "receipt_sha256": "6a9c4807ae354af82492f73bb17f5743dcfbc08e063132f1d64d4b2e6fcabd07",
+          "row_counts": {
+            "definition": 5431,
+            "event": 4528,
+            "lineage": 4039,
+            "lineage_link": 2356,
+            "occurrence": 6979,
+            "version": 3286
+          },
+          "rss_peak_bytes": 451084288,
+          "seconds": 42.59158919984475,
+          "status": "passed"
+        },
+        "noop": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "database_bytes": 79785984,
+          "receipt_sha256": "5f24f1fe1cfc749bfabc24d814ab921911cc4015ac3ac7f3ce11d9a39ebe2b81",
+          "rss_peak_bytes": 183701504,
+          "seconds": 0.45489019993692636,
+          "status": "passed"
+        },
+        "snapshot": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 214
+          },
+          "database_bytes": 46374912,
+          "parse_statuses": {
+            "complete": 153,
+            "unsupported_language": 61
+          },
+          "receipt_sha256": "2ab33aabc968e0daf36a0d42bc84021481193408b364c1d63e9ab6b1fe75c6f8",
+          "rss_peak_bytes": 342700032,
+          "seconds": 16.437076500151306,
+          "status": "passed"
+        }
+      },
+      "final_storage_limit_bytes": 268435456,
+      "pins": {
+        "anchor": "91d333b4cfea158c9798d32e6665d36bd8e37c3d",
+        "append_tip": "a419aa7350389a275ab45fde2e849ed1f02449ef",
+        "commit_sequence_sha256": "098a3fb79a2e01d46337c5c39fa5d331e794ac11e2d4ddd90dfc580c748b7208",
+        "history_commits": 20,
+        "history_tip": "6d2df035a95f3d1002be3e29997b7a4bfe976b5f"
+      },
+      "upstream": "https://github.com/expressjs/express.git"
+    },
+    "flask": {
+      "baseline": {
+        "append": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 132,
+            "commits": 21,
+            "parsed_files": 1
+          },
+          "database_bytes": 67338240,
+          "receipt_sha256": "f4d4adf80d3344a468a389424b705040b233a02de6391ac89d692a30071579d7",
+          "rss_peak_bytes": 221413376,
+          "seconds": 12.94840529980138,
+          "status": "passed"
+        },
+        "history": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 2492,
+            "commits": 20,
+            "parsed_files": 298
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 150
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 2640
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 7
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 2492
+            }
+          ],
+          "database_bytes": 62083072,
+          "parse_statuses": {
+            "complete": 150,
+            "unsupported_language": 148
+          },
+          "receipt_sha256": "49fee562dfc1609b0ce127687d1465cab4c28e27a506311ae8478b385eb07a57",
+          "row_counts": {
+            "definition": 4888,
+            "event": 3166,
+            "lineage": 2616,
+            "lineage_link": 2881,
+            "occurrence": 7531,
+            "version": 2127
+          },
+          "rss_peak_bytes": 379547648,
+          "seconds": 73.05749349994585,
+          "status": "passed"
+        },
+        "noop": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "database_bytes": 67338240,
+          "receipt_sha256": "bf6d2b1efe72af7865752f5e860f129d83c940e5a4b2dc0f9a43e865ee87e458",
+          "rss_peak_bytes": 142979072,
+          "seconds": 0.3773028003051877,
+          "status": "passed"
+        },
+        "snapshot": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 236
+          },
+          "database_bytes": 26066944,
+          "parse_statuses": {
+            "complete": 104,
+            "unsupported_language": 132
+          },
+          "receipt_sha256": "609ffcd720e061e730339aa39cc80c5c2511a4e79a996b932c25825144a46cb7",
+          "rss_peak_bytes": 290234368,
+          "seconds": 10.513200000394136,
+          "status": "passed"
+        }
+      },
+      "baseline_profiled": false,
+      "baseline_storage_limit_bytes": 268435456,
+      "final": {
+        "append": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 132,
+            "commits": 21,
+            "parsed_files": 1
+          },
+          "database_bytes": 67231744,
+          "receipt_sha256": "09e0d1b704cbd32395571b81a9ed148bc8c97c2dd44d4f4c74365eec3828c983",
+          "rss_peak_bytes": 252489728,
+          "seconds": 7.342047200072557,
+          "status": "passed"
+        },
+        "history": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 2492,
+            "commits": 20,
+            "parsed_files": 298
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 150
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 2640
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 7
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 2492
+            }
+          ],
+          "database_bytes": 62107648,
+          "parse_statuses": {
+            "complete": 150,
+            "unsupported_language": 148
+          },
+          "receipt_sha256": "ed678eb9c705b9201ff178bfba9b39c88e982a9d7779aa749590645f8a87a015",
+          "row_counts": {
+            "definition": 4888,
+            "event": 3166,
+            "lineage": 2616,
+            "lineage_link": 2881,
+            "occurrence": 7531,
+            "version": 2127
+          },
+          "rss_peak_bytes": 404668416,
+          "seconds": 39.42284950008616,
+          "status": "passed"
+        },
+        "noop": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "database_bytes": 67231744,
+          "receipt_sha256": "376b9779ae67274cffd92d5daa4684d8f8523e1f7953f22cc5fbc94667f68161",
+          "rss_peak_bytes": 177528832,
+          "seconds": 0.39513800013810396,
+          "status": "passed"
+        },
+        "snapshot": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 236
+          },
+          "database_bytes": 26091520,
+          "parse_statuses": {
+            "complete": 104,
+            "unsupported_language": 132
+          },
+          "receipt_sha256": "44238d10c7bae0bb01e071298623d551c34fd9e29f8986a85ee9d479dd639b82",
+          "rss_peak_bytes": 284979200,
+          "seconds": 9.312010300345719,
+          "status": "passed"
+        }
+      },
+      "final_storage_limit_bytes": 268435456,
+      "pins": {
+        "anchor": "258d68b6ff5e2244386540f48b48bab90d6ab827",
+        "append_tip": "d086db856be187255b8ec61ef409357393020f32",
+        "commit_sequence_sha256": "9db3a6c3fb2ceb452e6e5d5696e4a7448a1bd0f46b0a77a968fa515fffbe7cd9",
+        "history_commits": 20,
+        "history_tip": "329c32b916938d33fec41f40eb7ed854bf0b3e2b"
+      },
+      "upstream": "https://github.com/pallets/flask.git"
+    },
+    "ripgrep": {
+      "baseline": {
+        "history": {
+          "cleanup_complete": true,
+          "counters": null,
+          "coverage": null,
+          "database_bytes": null,
+          "error": {
+            "code": "invalid_record",
+            "type": "IndexContractError"
+          },
+          "parse_statuses": null,
+          "receipt_sha256": "a557a4ab70e41960d968a7417fb279e989af8c2923c1adc79a6e736db2e43c92",
+          "row_counts": null,
+          "rss_peak_bytes": 440225792,
+          "seconds": null,
+          "status": "error"
+        },
+        "snapshot": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 236
+          },
+          "database_bytes": 71163904,
+          "parse_statuses": {
+            "complete": 152,
+            "unsupported_language": 84
+          },
+          "receipt_sha256": "3ff08266919037072166cba736410cea84d6d2c272b83f3a7ba163a98df6abbe",
+          "rss_peak_bytes": 427671552,
+          "seconds": 48.03575839987025,
+          "status": "passed"
+        }
+      },
+      "baseline_profiled": true,
+      "baseline_storage_limit_bytes": 268435456,
+      "final": {
+        "append": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 83,
+            "commits": 21,
+            "parsed_files": 2
+          },
+          "database_bytes": 135434240,
+          "receipt_sha256": "be00cf9693093538959fb7f2b91dab921e0d76c20cf45b64e8eb924f684286ab",
+          "rss_peak_bytes": 299921408,
+          "seconds": 15.81920350017026,
+          "status": "passed"
+        },
+        "history": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 1563,
+            "commits": 20,
+            "parsed_files": 294
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 199
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "non_source_object",
+              "records": 20
+            },
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "removed",
+              "records": 1
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 1658
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 10
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 1563
+            }
+          ],
+          "database_bytes": 129110016,
+          "parse_statuses": {
+            "complete": 199,
+            "unsupported_language": 95
+          },
+          "receipt_sha256": "4899d62ba593e6d4cdfdae85a6ad6292b35b8ff578179fd621b65a25f548d6ca",
+          "row_counts": {
+            "definition": 9580,
+            "event": 7092,
+            "lineage": 6067,
+            "lineage_link": 5375,
+            "occurrence": 14081,
+            "version": 4677
+          },
+          "rss_peak_bytes": 504659968,
+          "seconds": 122.36296389997005,
+          "status": "passed"
+        },
+        "noop": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "database_bytes": 135434240,
+          "receipt_sha256": "3d05c67691173f149e746763a8289c9a90fb4b753532c23d002e6426e80e05e5",
+          "rss_peak_bytes": 186040320,
+          "seconds": 0.3824728997424245,
+          "status": "passed"
+        },
+        "snapshot": {
+          "cleanup_complete": true,
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 236
+          },
+          "database_bytes": 71159808,
+          "parse_statuses": {
+            "complete": 152,
+            "unsupported_language": 84
+          },
+          "receipt_sha256": "f52fe0d82c527788ea54e190903dcb820a7f6f24a2b371bd4b95538ad7ff9c12",
+          "rss_peak_bytes": 423178240,
+          "seconds": 21.86538380011916,
+          "status": "passed"
+        }
+      },
+      "final_storage_limit_bytes": 536870912,
+      "initial_candidate_256m_failure": {
+        "cleanup_complete": true,
+        "counters": null,
+        "coverage": null,
+        "database_bytes": null,
+        "error": {
+          "code": "resource_limit",
+          "type": "IndexStoreError"
+        },
+        "parse_statuses": null,
+        "receipt_sha256": "b5e1875049515f4c61971f16e9d1e7c61390cea1624f3eee5a99ce73227ce26f",
+        "row_counts": null,
+        "rss_peak_bytes": 507351040,
+        "seconds": null,
+        "status": "error"
+      },
+      "pins": {
+        "anchor": "626b8951acbced7ff710f4e01624a05f219eec38",
+        "append_tip": "3fce3b5bb0236da2df6d99672afb8a719642eca7",
+        "commit_sequence_sha256": "c097e84596675fcd9455a5e4aff9742bfe7a4d75bea6fcd596adf17eafe65ae8",
+        "history_commits": 20,
+        "history_tip": "5055264ae021b5d0e01e55f723622d638ea877f0"
+      },
+      "upstream": "https://github.com/BurntSushi/ripgrep.git"
+    }
+  },
+  "raw_artifacts": {
+    "distributed": false,
+    "excluded": [
+      "absolute paths",
+      "SQLite stores",
+      "profiles",
+      "source archives",
+      "raw requests"
+    ],
+    "retained_locally": true
+  },
+  "schema_version": 1,
+  "study": "index-delta-performance-2026-10-15",
+  "validation": {
+    "constraints": {
+      "all_suite_green_claimed": false,
+      "diagnosed_git_max_path_failures": 14,
+      "excluded_cases": 27,
+      "initial_long_paths_failed": 18,
+      "initial_long_paths_passed": 9,
+      "legacy_disabled_failures": 4,
+      "separate_inside_source_output_refusals": 2,
+      "short_paths_passed": 23
+    },
+    "core": {
+      "outcome": "746 passed, 27 deselected in 811.84s (0:13:31)",
+      "receipt_sha256": "9e09bed6921c5f697718f9e78ce0f54a710f5401a06b6e1add97cc5e9ff6f002"
+    },
+    "excluded_cohort": {
+      "outcome": "4 failed, 23 passed, 394 deselected in 138.96s (0:02:18)",
+      "receipt_sha256": "67c9338153329511f7b2d04b90de156c15bd53e051bd3b91e5cd944ada76e087"
+    },
+    "legacy_explicit_opt_in": {
+      "environment": {
+        "GITA_ENABLE_LEGACY": "1"
+      },
+      "evidence": "parent-reported execution; raw receipt not supplied to this exporter",
+      "failed": 0,
+      "passed": 4,
+      "receipt_sha256": null,
+      "seconds": 7.86,
+      "scope": "CI-compatible explicitly gated compatibility; default-disabled outcomes remain recorded separately",
+      "tests": [
+        "TestIndexedDiffRefusesRatherThanGuesses.test_worktree_mode_is_refused",
+        "TestIndexedDiffRefusesRatherThanGuesses.test_missing_index_names_the_command_that_fixes_it",
+        "TestIndexedDiffRefusesRatherThanGuesses.test_the_legacy_engine_still_answers_without_an_index",
+        "TestIndexedDiffRefusesRatherThanGuesses.test_indexed_diff_preserves_intent_and_engine_metadata"
+      ]
+    },
+    "storage": {
+      "outcome": "342 passed, 18 deselected in 26.70s",
+      "receipt_sha256": "08140f0decbca5ffe149ece0e3ceb05441bf883c1327b7b8bb2878d28fbda96a"
+    }
+  }
+}

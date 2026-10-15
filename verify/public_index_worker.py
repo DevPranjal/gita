@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import ast
+import cProfile
+from contextlib import contextmanager
 from dataclasses import asdict
 from hashlib import blake2b, sha1, sha256
 from importlib.metadata import version
@@ -24,6 +26,62 @@ from gita.index.query import IndexSession
 from gita.index.store import IndexStore
 from gita.vcs.git import CommittedRepo, Repo
 from verify.index_oracle import canonical_digest, validate_records
+
+
+@contextmanager
+def profile_build(result, output, enabled):
+    """Identical bounded instrumentation for pinned baseline and candidate."""
+    if not enabled:
+        yield
+        return
+    from verify.index_bench_worker import phases
+
+    counters = result.setdefault("work_counters", {})
+    replacements = []
+    for name in ("iter_tree", "changes", "tree_changes"):
+        if not hasattr(CommittedRepo, name):
+            continue
+        original = getattr(CommittedRepo, name)
+
+        def counted(*args, _original=original, _name=name, **kwargs):
+            counters[_name + "_calls"] = counters.get(_name + "_calls", 0) + 1
+            for page in _original(*args, **kwargs):
+                counters[_name + "_entries"] = counters.get(_name + "_entries", 0) + len(page)
+                yield page
+
+        replacements.append((CommittedRepo, name, original))
+        setattr(CommittedRepo, name, counted)
+    original = builder._Builder._metadata
+
+    def metadata(*args, **kwargs):
+        counters["metadata_definitions"] = counters.get("metadata_definitions", 0) + len(args[1].definitions)
+        return original(*args, **kwargs)
+
+    replacements.append((builder._Builder, "_metadata", original))
+    builder._Builder._metadata = metadata
+    original_inventory = builder._Builder._inventory
+
+    def inventory(instance, *args, **kwargs):
+        before = instance.db.total_changes
+        try:
+            return original_inventory(instance, *args, **kwargs)
+        finally:
+            counters["inventory_sql_row_changes"] = (
+                counters.get("inventory_sql_row_changes", 0) + instance.db.total_changes - before
+            )
+
+    replacements.append((builder._Builder, "_inventory", original_inventory))
+    builder._Builder._inventory = inventory
+    profiler = cProfile.Profile()
+    try:
+        with phases(result.setdefault("phase_timings", {})):
+            profiler.enable()
+            yield
+    finally:
+        profiler.disable()
+        profiler.dump_stats(str(output.with_suffix(".prof")))
+        for owner, name, original in replacements:
+            setattr(owner, name, original)
 
 
 def git(root, *args):
@@ -248,7 +306,8 @@ def run(config, output):
                 result["publication"] = "unchanged"
             else:
                 start = perf_counter()
-                built = build(repository, store, ref=config["ref"], since=config["anchor"], limits=limits)
+                with profile_build(result, output, config.get("profile", False)):
+                    built = build(repository, store, ref=config["ref"], since=config["anchor"], limits=limits)
                 result["operation_seconds"] = perf_counter() - start
                 generation = built.generation
                 result.update(
