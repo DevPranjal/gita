@@ -29,6 +29,15 @@ or repair of the stopped cohort. Cohorts must not be pooled.
 The [second cohort](reviewbench-auto-pilot2-stopped.md) stopped at 21 complete
 pairs when native Copilot emitted malformed JSON in a reasoning-delta frame.
 Its unknown 30-credit reservation remains; no quality judges have run.
+The user subsequently authorized a **separate partial-cohort quality analysis**,
+not resumption of this stopped reviewer protocol. Its implementation binds the
+21 valid paired receipts, original ledger, labels and exact archived reviewer
+source bytes; a new 200-credit judge ledger retains the source cost upper bound.
+All 25 task slots remain in missing-delivery bounds. Judges use native
+`--stream off`, still requiring strict complete JSON and authoritative usage.
+Malformed events are never repaired or silently discarded. A zero-tool
+qualification call is charged inside that same judge ceiling.
+See [partial.py](../../src/gita/eval/reviewbench/partial.py).
 ([campaign.py:41](../../src/gita/eval/reviewbench/campaign.py),
 [judge.py:1](../../src/gita/eval/reviewbench/judge.py))
 
@@ -266,6 +275,28 @@ All raw correspondence edges, classifier evidence and the private blinding map
 are retained. Human source-supported audit remains required before efficacy
 claims. Automatic novel TP/FP classification is not verified defect precision.
 ([judge.py:19](../../src/gita/eval/reviewbench/judge.py))
+
+### Separately authorized partial analysis
+
+This is not an automatic fallback after a failed campaign. It requires explicit
+authorization, an immutable copy of the original frozen harness, and a fresh
+analysis root. The old reviewer ledger is read-only and retains unknown usage;
+no failed review is retried or converted to an empty successful review.
+Source integrity failures and active/unbounded source reservations are rejected.
+Native judge failures retain reservations and block further calls.
+
+Matching, classification, fixed context and official arithmetic are shared with
+ordinary grading rather than replaced by a relaxed scorer. Original-protocol
+`grade` still rejects unresolved reviewer usage. The new analysis records its
+different population and protocol; conditional scores and worst/best delivered
+recall bounds must be reported separately from confidence intervals.
+
+```powershell
+& $py -m gita.eval.reviewbench.partial seal --corpus $corpus --reviewer $run `
+  --grader $grader --analysis $analysis
+& $py -m gita.eval.reviewbench.partial grade --corpus $corpus --reviewer $run `
+  --grader $grader --analysis $analysis
+```
 
 ## Offline validation and raw artifacts
 

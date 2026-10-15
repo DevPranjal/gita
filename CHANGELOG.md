@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add explicitly authorized, separately sealed partial-cohort quality analysis.
+  Bind original source bytes, receipts, labels and unresolved cost bounds;
+  preserve the stopped reviewer ledger and all fixed task denominators. Share
+  ordinary blinded judging/scoring and use nonstreaming native judge output
+  without relaxing strict JSON or usage validation.
+
 - Preserve a second stopped indexed ReviewBench cohort: 21 complete valid pairs,
   one valid unpaired review, one malformed native JSON/unknown-usage failure,
   and six unstarted slots. Publish conditional metrics, low tool adoption and

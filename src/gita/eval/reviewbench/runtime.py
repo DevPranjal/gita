@@ -346,11 +346,14 @@ def command(directory: Path, prompt: str, allowed: list[str], mcp: Path | None) 
 
 
 def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
-           *, timeout: float = MAX_SECONDS) -> dict:
+           *, timeout: float = MAX_SECONDS, streaming: bool = True) -> dict:
     require(0 < timeout <= MAX_SECONDS, "Invalid reviewer timeout")
     for name in ("workspace", "home", "logs"):
         (directory / name).mkdir(parents=True, exist_ok=False)
     args = command(directory, prompt, allowed, mcp)
+    require(type(streaming) is bool, "Streaming selection must be boolean")
+    if not streaming:
+        args += ["--stream", "off"]
     write_json(directory / "invocation.json", {
         "arguments_without_prompt": args, "prompt_digest": digest(prompt),
         "prompt_transport": "utf8-stdin", "requested_model": "auto",

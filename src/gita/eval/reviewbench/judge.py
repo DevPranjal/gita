@@ -194,7 +194,8 @@ def _judge_call(directory: Path, prompt: str, ledger: CreditLedger, key: str,
     durable_stop = False
     try:
         directory.mkdir(parents=True, exist_ok=False)
-        outcome = invoke(directory, prompt, [], None, timeout=min(900, deadline - time.time()))
+        outcome = invoke(directory, prompt, [], None, timeout=min(900, deadline - time.time()),
+                         streaming=False)
         events = outcome.pop("events", [])
         integrity = bool(outcome.get("integrity_stop") or outcome.get("status") == "integrity_failed")
         if integrity:
@@ -256,80 +257,10 @@ def grade(root: Path, run_root: Path, grader: Path) -> dict:
             if len(rows) != 2:
                 pending.append({"task": task["id"], "reason": "Incomplete/invalid primary pair"})
                 continue
-            destination = grader / "judgments" / frozen["digest"] / task["id"]
-            if (destination / "scoring.json").exists():
-                receipt = read_json(destination / "scoring.json")
-                require(receipt["protocol"] == frozen["digest"] and
-                        receipt["reviews_digest"] == digest(rows), "Stale/swapped judge receipt")
-                require(receipt["digest"] == digest({k: v for k, v in receipt.items() if k != "digest"}),
-                        "Judge scoring receipt tampered")
-                for name, expected in receipt["artifacts"].items():
-                    require(file_digest(destination / name) == expected, "Raw judgment artifact tampered")
-                golden = labels_for(grader, dataset, task)
-                for arm in ("B", "H"):
-                    require(receipt["arms"][arm]["golden"] == golden, "Cached scorer labels changed")
-                    official(root, [receipt["arms"][arm]])
-                    scores[arm].append(receipt["arms"][arm])
-                continue
             try:
-                golden = labels_for(grader, dataset, task)
-                blinded = [(arm, i, {k: value for k, value in finding.items() if k != "producer"})
-                           for arm, row in rows for i, finding in enumerate(row["findings"])]
-                random.Random(frozen["seed"] + int(task["id"][:8], 16)).shuffle(blinded)
-                candidates = [{"candidate_index": i, **row[2]} for i, row in enumerate(blinded)]
-                context = source_context(scope, candidates, golden)
-                refs = [{"golden_index": i, **{k: r[k] for k in (
-                    "file", "start_line", "end_line", "message")}} for i, r in enumerate(golden)]
-                destination.mkdir(parents=True, exist_ok=True)
-                write_json(destination / "blind-map.json", [{"arm": a, "local_index": i} for a, i, _ in blinded])
-                match_payload = {"candidates": candidates, "references": refs, "source_context": context}
-                write_json(destination / "match-input.json", match_payload)
-                match_rows = []
-                if candidates:
-                    answer = _judge_call(destination / "matcher", MATCH_PROMPT + json.dumps(match_payload),
-                                         ledger, task["id"] + "-matcher", deadline)
-                    match_rows = validate_judgments(answer, len(candidates), len(golden), classify=False)
-                write_json(destination / "correspondences.json", match_rows)
-                arms = {}
-                global_unmatched = set()
-                for arm, review in rows:
-                    global_to_local = {i: local for i, (a, local, _) in enumerate(blinded) if a == arm}
-                    correspondences = [{"candidate_index": global_to_local[r["candidate_index"]],
-                                        "matched_golden_indices": r["matched_golden_indices"]}
-                                       for r in match_rows if r["candidate_index"] in global_to_local]
-                    correspondences.sort(key=lambda row: row["candidate_index"])
-                    resolved = resolve(correspondences, len(golden), len(review["findings"]))
-                    global_unmatched.update(i for i, local in global_to_local.items()
-                                            if local in resolved["unmatched"])
-                    arms[arm] = {"pr_key": task["id"], "golden": golden,
-                                 "candidate_count": len(review["findings"]),
-                                 "correspondences": correspondences, "classifications": []}
-                classifications = []
-                if global_unmatched:
-                    payload = {"candidates": [c for c in candidates if c["candidate_index"] in global_unmatched],
-                               "source_context": context}
-                    write_json(destination / "classification-input.json", payload)
-                    answer = _judge_call(destination / "classifier", CLASSIFY_PROMPT + json.dumps(payload),
-                                         ledger, task["id"] + "-classifier", deadline)
-                    classifications = validate_judgments(
-                        answer, len(candidates), len(golden), classify=True,
-                        required_indices=global_unmatched)
-                write_json(destination / "classifications.json", classifications)
-                for classification in classifications:
-                    arm, local, _ = blinded[classification["candidate_index"]]
-                    arms[arm]["classifications"].append({**classification, "candidate_index": local})
-                # Re-run pinned resolver and scorer now, rejecting missing rows in the bridge.
+                arms = grade_pair(root, grader, dataset, scope, rows, frozen, ledger, deadline)
                 for arm in ("B", "H"):
-                    official(root, [arms[arm]])
                     scores[arm].append(arms[arm])
-                receipt = {"protocol": frozen["digest"],
-                           "reviews_digest": digest(rows), "arms": arms,
-                           "name": SCORE_NAME, "deviations": DEVIATIONS,
-                           "manual_audit": "pending",
-                           "artifacts": {str(p.relative_to(destination)): file_digest(p)
-                                         for p in destination.rglob("*") if p.is_file()}}
-                receipt["digest"] = digest(receipt)
-                write_json(destination / "scoring.json", receipt)
             except IntegrityError as error:
                 reason = "Judge campaign integrity gate: " + str(error)
                 ledger.halt_integrity(task["id"] + "-judge", reason)
@@ -366,3 +297,79 @@ def grade(root: Path, run_root: Path, grader: Path) -> dict:
                   "bounds_interpretation": "Worst/best missing-outcome bounds, NOT confidence intervals"}
         write_json(run_root / "quality.json", output)
         return output
+
+
+def grade_pair(root: Path, grader: Path, dataset: dict, scope: dict,
+               rows: list[tuple[str, dict]], frozen: dict, ledger: CreditLedger,
+               deadline: float) -> dict:
+    """Shared blinded judging; campaign authorization and missingness stay with callers."""
+    task = scope["task"]
+    require(len(rows) == 2 and {arm for arm, _ in rows} == {"B", "H"},
+            "Judging requires one valid receipt from each arm")
+    require(all(row["status"] == "valid" and row.get("usage") is not None for _, row in rows),
+            "Invalid/unknown review cannot enter quality analysis")
+    destination = grader / "judgments" / frozen["digest"] / task["id"]
+    golden = labels_for(grader, dataset, task)
+    if (destination / "scoring.json").exists():
+        receipt = read_json(destination / "scoring.json")
+        require(receipt["protocol"] == frozen["digest"] and receipt["reviews_digest"] == digest(rows),
+                "Stale/swapped judge receipt")
+        require(receipt["digest"] == digest({k: v for k, v in receipt.items() if k != "digest"}),
+                "Judge scoring receipt tampered")
+        for name, expected in receipt["artifacts"].items():
+            require(file_digest(destination / name) == expected, "Raw judgment artifact tampered")
+        for arm in ("B", "H"):
+            require(receipt["arms"][arm]["golden"] == golden, "Cached scorer labels changed")
+            official(root, [receipt["arms"][arm]])
+        return receipt["arms"]
+    blinded = [(arm, i, {k: value for k, value in finding.items() if k != "producer"})
+               for arm, row in rows for i, finding in enumerate(row["findings"])]
+    random.Random(frozen["seed"] + int(task["id"][:8], 16)).shuffle(blinded)
+    candidates = [{"candidate_index": i, **row[2]} for i, row in enumerate(blinded)]
+    context = source_context(scope, candidates, golden)
+    refs = [{"golden_index": i, **{k: r[k] for k in (
+        "file", "start_line", "end_line", "message")}} for i, r in enumerate(golden)]
+    destination.mkdir(parents=True, exist_ok=True)
+    write_json(destination / "blind-map.json", [{"arm": a, "local_index": i} for a, i, _ in blinded])
+    match_payload = {"candidates": candidates, "references": refs, "source_context": context}
+    write_json(destination / "match-input.json", match_payload)
+    match_rows = []
+    if candidates:
+        answer = _judge_call(destination / "matcher", MATCH_PROMPT + json.dumps(match_payload),
+                             ledger, task["id"] + "-matcher", deadline)
+        match_rows = validate_judgments(answer, len(candidates), len(golden), classify=False)
+    write_json(destination / "correspondences.json", match_rows)
+    arms, global_unmatched = {}, set()
+    for arm, review in rows:
+        mapping = {i: local for i, (a, local, _) in enumerate(blinded) if a == arm}
+        correspondences = [{"candidate_index": mapping[r["candidate_index"]],
+                            "matched_golden_indices": r["matched_golden_indices"]}
+                           for r in match_rows if r["candidate_index"] in mapping]
+        correspondences.sort(key=lambda row: row["candidate_index"])
+        resolved = resolve(correspondences, len(golden), len(review["findings"]))
+        global_unmatched.update(i for i, local in mapping.items() if local in resolved["unmatched"])
+        arms[arm] = {"pr_key": task["id"], "golden": golden,
+                     "candidate_count": len(review["findings"]),
+                     "correspondences": correspondences, "classifications": []}
+    classifications = []
+    if global_unmatched:
+        payload = {"candidates": [c for c in candidates if c["candidate_index"] in global_unmatched],
+                   "source_context": context}
+        write_json(destination / "classification-input.json", payload)
+        answer = _judge_call(destination / "classifier", CLASSIFY_PROMPT + json.dumps(payload),
+                             ledger, task["id"] + "-classifier", deadline)
+        classifications = validate_judgments(
+            answer, len(candidates), len(golden), classify=True, required_indices=global_unmatched)
+    write_json(destination / "classifications.json", classifications)
+    for classification in classifications:
+        arm, local, _ = blinded[classification["candidate_index"]]
+        arms[arm]["classifications"].append({**classification, "candidate_index": local})
+    for arm in ("B", "H"):
+        official(root, [arms[arm]])
+    receipt = {"protocol": frozen["digest"], "reviews_digest": digest(rows), "arms": arms,
+               "name": SCORE_NAME, "deviations": DEVIATIONS, "manual_audit": "pending",
+               "artifacts": {str(p.relative_to(destination)): file_digest(p)
+                             for p in destination.rglob("*") if p.is_file()}}
+    receipt["digest"] = digest(receipt)
+    write_json(destination / "scoring.json", receipt)
+    return arms

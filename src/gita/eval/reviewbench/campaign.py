@@ -113,15 +113,17 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
     return frozen
 
 
-def verify_protocol(run_root: Path) -> dict:
+def verify_protocol(run_root: Path, *, harness_root: Path | None = None) -> dict:
     frozen = read_json(run_root / "protocol.json")
     require(frozen["digest"] == digest({k: v for k, v in frozen.items() if k != "digest"}),
             "Protocol document tampered")
     require_integrity(frozen.get("run_root_digest") == digest(str(run_root.resolve())),
                       "Protocol belongs to a different run root; reseal a new protocol")
     require(frozen["product_policy_digest"] == policy_digest(), "Production policy changed; use new run root")
+    source_root = Path(__file__).parent if harness_root is None else harness_root
     for name, expected in frozen["harness_sources"].items():
-        require(file_digest(Path(__file__).parent / name) == expected,
+        require(Path(name).name == name, "Invalid frozen harness source path")
+        require(file_digest(source_root / name) == expected,
                 "Harness changed; new protocol required")
     scopes = read_json(run_root / "scopes.json")
     require(frozen["scope_digests"] == {s["task"]["id"]: digest(s) for s in scopes},
