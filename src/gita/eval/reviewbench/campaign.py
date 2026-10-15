@@ -48,7 +48,7 @@ PR_IDENTITY = """
 
 WORKFLOW_GUIDANCE = {
     "B": "Evidence workflow: use raw_diff for changed-line anchors and read_file/search for relevant source and callers. Use raw history when it helps resolve a concrete concern.",
-    "H": "Evidence workflow: inspect index_status. Use raw_diff for changed-line anchors (events is not an endpoint diff), then entity_context(path,line) for the containing function/class source. Use id and history for a concrete question about how a named entity changed. Use read_file/search for imports, callers, uncovered files or genuinely missing context. Coverage gaps are not evidence of absence. Do not make irrelevant calls to meet a quota.",
+    "H": "Evidence workflow: start with change_context for the changed-code map, then entity_context(path,line) for relevant enclosing source. Use raw_diff to inspect actual edits where necessary (neither the map nor events is a semantic endpoint diff). Inspect index_status for gaps. Use id and history for a concrete question about how a named entity changed. Use read_file/search for imports, callers and uncovered source. Coverage gaps are not evidence of absence. Do not make irrelevant calls to meet a quota.",
 }
 
 

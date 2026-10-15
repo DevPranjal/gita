@@ -27,6 +27,7 @@ def test_index_pages_shrink_and_continue_without_losing_rows(monkeypatch):
     broker = object.__new__(evidence.Evidence)
     broker.config = {"scope_digest": "task"}
     broker.secret = b"secret"
+    broker.cursor_values = {}
     broker.commit = lambda value: value
     broker._index = lambda commit: session
     broker.provenance = lambda commit: {"commit": commit}
@@ -88,6 +89,7 @@ def test_unicode_raw_pages_fit_serialized_sdk_budget():
     broker = object.__new__(evidence.Evidence)
     broker.config = {"scope_digest": "task"}
     broker.secret = b"secret"
+    broker.cursor_values = {}
     text, cursor, returned = "\u6f22\u5b57" * 10000, "", []
     while True:
         page = broker.page(text, "raw_diff", {}, cursor)

@@ -58,6 +58,9 @@ def test_entity_context_returns_exact_named_source_without_copying_references(fi
         assert result["provenance"]["source"] == "indexed_verified_against_git"
         assert len(json.dumps(result, ensure_ascii=True)) <= 8000
         assert evidence.execute("entity_context", {"path": "code.py", "line": 0})["error"]
+        changed = evidence.execute("change_context", {})
+        assert "divide" in changed["text"] and "code.py:2" in changed["text"]
+        assert changed["semantic_endpoint_diff"] is False
     finally:
         evidence.close()
 
@@ -73,6 +76,24 @@ def test_entity_context_stays_out_of_baseline_and_does_not_build(fixture_repo):
         assert not scope["indexes"]
     finally:
         evidence.close()
+
+
+def test_cursor_handles_are_short_session_owned_and_query_bound(fixture_repo):
+    _, scope, _ = fixture_repo
+    a, b = Evidence(config(scope)), Evidence(config(scope))
+    try:
+        page = a.page("x" * 25000, "query", {"path": "code.py"})
+        cursor = page["next_cursor"]
+        assert len(cursor) == 28
+        assert a.page("x" * 25000, "query", {"path": "code.py"}, cursor)["text"]
+        for broker, arguments in ((b, {"path": "code.py"}), (a, {"path": "other.py"})):
+            with pytest.raises(ProtocolError):
+                broker.page("x" * 25000, "query", arguments, cursor)
+        with pytest.raises(ProtocolError):
+            a.page("x" * 25000, "query", {"path": "code.py"}, cursor + "x")
+    finally:
+        a.close()
+        b.close()
 
 
 def test_common_inventory_and_evidence_are_identical(fixture_repo):

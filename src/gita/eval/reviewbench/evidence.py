@@ -7,6 +7,7 @@ import fnmatch
 import hashlib
 import hmac
 import json
+import re
 from pathlib import Path
 import time
 from typing import Any
@@ -18,7 +19,7 @@ from .common import (EVIDENCE_CALL_LIMIT, EvidenceBudgetError, IntegrityError, P
 PAGE_CHARS = 6000
 MAX_RESPONSE_CHARS = 8000
 COMMON_TOOLS = ("raw_diff", "read_file", "search", "list_files", "commit_log", "file_history")
-INDEX_TOOLS = ("index_status", "entities", "entity_context", "id", "state", "source", "history", "events")
+INDEX_TOOLS = ("change_context", "index_status", "entities", "entity_context", "id", "state", "source", "history", "events")
 
 
 def schema(properties: dict, required: tuple[str, ...] = ()) -> dict:
@@ -39,6 +40,7 @@ SCHEMAS = {
     "commit_log": schema({"cursor": CURSOR}),
     "file_history": schema({"path": STRING, "cursor": CURSOR}, ("path",)),
     "index_status": schema({}),
+    "change_context": schema({"path": STRING, "cursor": CURSOR}),
     "entities": schema({"path": STRING, "commit": STRING, "cursor": CURSOR}, ("path",)),
     "entity_context": schema({"path": STRING, "line": INTEGER, "commit": STRING, "cursor": CURSOR},
                              ("path", "line")),
@@ -56,8 +58,9 @@ DESCRIPTIONS = {
     "commit_log": "Ordered allowed commits only, with subjects and parents qualified at the scope boundary.",
     "file_history": "Raw Git changes for a member path over the same declared allowed commit graph.",
     "index_status": "Optional: inspect prebuilt index readiness and gaps. For named-function context, entities(path) or id(name) -> state/source can retrieve exact entity evidence instead of whole files. Raw Git fallback is valid. No build or mutation.",
+    "change_context": "Review starting point: map actual Git changed-line anchors to prebuilt indexed entities at HEAD. Returns paths, locations, names and coverage gaps; use entity_context for bodies and raw_diff to verify edits. Not a semantic endpoint diff.",
     "entities": "Indexed file entities with exact occurrence references, coverage and opaque continuation.",
-    "entity_context": "Read the smallest indexed entity containing a file line (e.g. a changed function), with exact Git-verified source in one call. Supports paged large entities. Use raw read_file if coverage is unavailable.",
+    "entity_context": "Read bounded enclosing indexed source at a file line, including parent function context rather than only a tiny nested callback. Exact Git-verified bytes; pages large entities. Use raw read_file if coverage is unavailable.",
     "id": "Resolve an indexed EID or entity name at an allowed revision, preserving ambiguity.",
     "state": "Generation-qualified indexed entity state at an allowed revision.",
     "source": "Exact source of a complete previously issued occurrence reference. Over-budget is an error.",
@@ -90,10 +93,12 @@ class Evidence:
         self.log = Path(config["tool_log"]) if config.get("tool_log") else None
         self.secret = config["cursor_secret"].encode()
         self.issued: dict[str, dict] = {}
+        self.cursor_values: dict[str, dict] = {}
         self.sessions: dict[str, Any] = {}
         self.repository = None
         self._paths: dict[str, dict[str, tuple[str, str]]] = {}
         self._blobs: dict[tuple[str, str], bytes] = {}
+        self._change_context: dict[str, str] = {}
         # Check task scope against actual Git ancestry, not a self-consistent manifest hash.
         reachable = set(git(self.repo, "rev-list", self.head, config["task"]["base"])
                         .decode().splitlines())
@@ -170,16 +175,14 @@ class Evidence:
 
     def _encode(self, value: dict) -> str:
         payload = json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
-        return base64.urlsafe_b64encode(payload).decode() + "." + hmac.new(
-            self.secret, payload, "sha256").hexdigest()
+        token = "cur_" + hmac.new(self.secret, payload, "sha256").hexdigest()[:24]
+        self.cursor_values[token] = json.loads(payload)
+        return token
 
     def _decode(self, token: str, binding: str) -> dict:
         try:
-            encoded, signature = token.split(".")
-            payload = base64.b64decode(encoded, altchars=b"-_", validate=True)
-            require(hmac.compare_digest(signature, hmac.new(self.secret, payload, "sha256").hexdigest()),
-                    "Tampered cursor")
-            value = json.loads(payload)
+            require(token in self.cursor_values, "Unissued or tampered cursor")
+            value = self.cursor_values[token]
             require(value["binding"] == binding, "Cursor belongs to a different query/scope")
             return value
         except (ValueError, KeyError, TypeError) as error:
@@ -294,6 +297,67 @@ class Evidence:
                 "coverage": {"status": "available" if self.config.get("indexes") else "unavailable"},
                 "omitted": {"history": not self.config.get("history_ready", False)},
                 "next_cursor": None, "provenance": self.provenance()}
+
+    def change_context(self, path: str = "", cursor: str = "") -> dict:
+        if path:
+            checked_path(path)
+            require(path in set(self.paths(self.base)) | set(self.paths(self.head)),
+                    "Nonmember change-context path")
+        if path not in self._change_context:
+            paths = [p.decode("utf8", "strict") for p in git(
+                self.repo, "diff", "--no-ext-diff", "--name-only", "-z",
+                self.base, self.head, "--", *([":(literal)" + path] if path else [])).split(b"\0") if p]
+            lines = ["Indexed changed-code map; anchors are Git lines, not identity/semantic diff claims."]
+            for member in paths:
+                if member not in self.members(self.head):
+                    lines.append(f"{member}: deleted at HEAD; use base raw/source evidence.")
+                    continue
+                patch = git(self.repo, "diff", "--no-ext-diff", "--no-textconv", "--unified=0",
+                            self.base, self.head, "--", ":(literal)" + member).decode("utf8", "replace")
+                anchors = [(int(m.group(1)), int(m.group(2) or "1")) for m in re.finditer(
+                    r"(?m)^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@", patch)]
+                session = self._index(self.head)
+                refs, native_cursor = [], None
+                while True:
+                    page = session.entities_in(member.encode("utf8"), at=GitOid.from_hex("sha1", self.head),
+                                               limit=1000, cursor=native_cursor)
+                    refs.extend(page["results"])
+                    native_cursor = page["page"]["next_cursor"]
+                    if not native_cursor:
+                        break
+                shown = set()
+                for start, count in anchors:
+                    candidates = [ref for ref in refs if count
+                                  and ref["span"]["start_line"] <= start + count - 1
+                                  and ref["span"]["end_line"] >= start]
+                    named = [r for r in candidates if r["names"] != ["<module>"]]
+                    selected = named or candidates
+                    bounded = [r for r in selected
+                               if r["span"]["end_byte"] - r["span"]["start_byte"] <= 4000]
+                    if bounded:
+                        selected = [r for r in bounded if not any(
+                            other["span"]["start_byte"] <= r["span"]["start_byte"]
+                            and other["span"]["end_byte"] >= r["span"]["end_byte"]
+                            and other["span"]["end_byte"] - other["span"]["start_byte"]
+                            > r["span"]["end_byte"] - r["span"]["start_byte"]
+                            for other in bounded)]
+                    if not selected:
+                        lines.append(f"{member}:{start} (+{count} lines): no indexed entity; raw fallback required.")
+                    for ref in selected:
+                        if ref["id"] in shown:
+                            continue
+                        self._occurrences(ref, session)
+                        shown.add(ref["id"])
+                        span = ref["span"]
+                        lines.append(f"{member}:{max(start, span['start_line'])} "
+                                     f"[{span['start_line']}-{span['end_line']}] "
+                                     + ".".join(ref["names"]))
+                if not anchors:
+                    lines.append(f"{member}: non-text/mode-only or no textual anchor; raw fallback required.")
+            self._change_context[path] = "\n".join(lines)
+        return {**self.page(self._change_context[path], "change_context", {"path": path}, cursor),
+                "provenance": {**self.provenance(), "source": "git_anchors_with_verified_indexed_entities"},
+                "semantic_endpoint_diff": False}
 
     def _index(self, commit: str):
         from ...index.query import open_index
@@ -440,9 +504,14 @@ class Evidence:
                 break
         require(bool(candidates),
                 "No indexed entity at this line; inspect coverage and use raw read_file")
-        reference = min(candidates, key=lambda ref: (
-            ref["names"] == ["<module>"],
-            ref["span"]["end_byte"] - ref["span"]["start_byte"], ref["id"]))
+        named = [ref for ref in candidates if ref["names"] != ["<module>"]]
+        choices = named or candidates
+        bounded = [ref for ref in choices
+                   if ref["span"]["end_byte"] - ref["span"]["start_byte"] <= 4000]
+        reference = (max(bounded, key=lambda ref: (
+            ref["span"]["end_byte"] - ref["span"]["start_byte"], ref["id"])) if bounded else
+            min(choices, key=lambda ref: (
+                ref["span"]["end_byte"] - ref["span"]["start_byte"], ref["id"])))
         source = session.source(reference)
         text = source.decode("utf8", "strict")
         result = self.page(text, "entity_context", {

@@ -193,3 +193,57 @@ remaining ceilings before the final 25-task run.
 **Readiness validation:** 125 offline evaluator tests pass. Small pilot/task
 limits and budgets are frozen explicitly; the ordinary 25-task membership gate
 is unchanged. All reviewer/judge ledger consumers use the declared frozen caps.
+
+### E2 result: adoption/quality signal, but cost gate fails
+
+[Complete two-task pilot summary](adoption-pilot1-summary.json). All four
+reviews and both judgments valid; reviewer spend 6.167295 / judge 10.441809.
+
+| Metric | B | H |
+| --- | ---: | ---: |
+| Credits | 1.088083 | 5.079211 |
+| Input tokens including cache | 259,143 | 246,490 |
+| Macro grounded precision | 50.0% | 83.3% |
+| Macro grounded recall | 10.1% | 21.2% |
+
+Tiny development sample, not a win: H routed once to Claude/once GPT; B routed
+twice to GPT. On the same-routed node-postgres pair, H used 210,877 input tokens
+versus B's 112,751, and cost 0.674926 versus 0.530928.
+
+H used five `entity_context` calls, an indexed `events` call and index status
+on node-postgres, but no indexed tools on the first PR (whose raw patch already
+contained useful source). Thus meaningful source uptake rose to 1/2 sessions,
+not universal. History was actually available and events succeeded.
+
+Two concrete UX failures explain why usage alone is not success:
+
+1. Smallest-entity selection returned a **19-character filter callback** at one
+   relevant line, requiring raw reads for its enclosing removal method.
+2. A raw-diff continuation copied by the model failed HMAC validation. Existing
+   continuation strings ranged from 189 to over 1,000 characters.
+
+## E3: review entry map, enclosing source and short continuation handles
+
+- Add `change_context`: Git changed-line anchors mapped to existing indexed
+  spans, with compact locations/names and explicit gaps. It is **not** a semantic
+  endpoint diff, does not extract entities from a patch, and does not imply
+  identity equivalence across separate contexts.
+- Enclosing source selection supplies the widest non-module containing entity
+  within a 4,000-byte source budget, with existing pagination for larger bodies.
+  This is bounded enclosing context, not a claim to infer the semantically
+  correct scope in every case.
+- Session-owned 28-character HMAC-derived cursor handles replace long serialized
+  cursor payloads. Scope/query binding and tamper rejection remain enforced;
+  underlying native cursor data never needs to be copied by the model.
+- H onboarding now starts with the indexed change map; raw patch verification
+  and raw fallback remain available. No call quota is added.
+
+Actual node-postgres checks: the 19-character callback now yields its enclosing
+`Pool._remove` (540 characters); another tiny verification callback now yields
+`Pool._acquireClient` (842 characters). The indexed map starts with named changed
+locations and has 28-character continuations.
+
+Do not scale to 25 on E2's quality-only improvement. Test E3 contemporaneously
+against B, retain the negative E2 cost result, and report routing explicitly.
+Offline full-set PR-range index preparation is proceeding separately, bounded
+per repository and without models or excluding failed tasks.

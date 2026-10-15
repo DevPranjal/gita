@@ -1,0 +1,69 @@
+{
+  "stage": "two-task development pilot; not confirmation",
+  "protocol": "f19c56a26f16695e4a3cc4bb766ecf081f2bbaa60f36f5ecfccf3d48ca517183",
+  "source_git_head": "e7898755efb411149c8c4390724f9ff622b1439f",
+  "tasks": 2,
+  "valid_reviews": 4,
+  "metrics": {
+    "B": {
+      "credits": 1.08808335,
+      "input_tokens": 259143,
+      "findings": 2,
+      "model_session_counts": {
+        "gpt-6-luna": 2
+      },
+      "quality_macro": {
+        "grounded_precision": 0.5,
+        "grounded_recall": 0.10101010101010101,
+        "augmented_precision": 0.5,
+        "augmented_recall": 0.10101010101010101,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 2,
+        "golden_tp_count": 20,
+        "matched_count": 2,
+        "matched_tp_count": 1,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 2
+      }
+    },
+    "H": {
+      "credits": 5.0792112,
+      "input_tokens": 246490,
+      "findings": 4,
+      "model_session_counts": {
+        "gpt-6-luna": 1,
+        "claude-sonnet-5.5": 1
+      },
+      "quality_macro": {
+        "grounded_precision": 0.8333333333333333,
+        "grounded_recall": 0.2121212121212121,
+        "augmented_precision": 0.8333333333333333,
+        "augmented_recall": 0.2121212121212121,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 4,
+        "golden_tp_count": 20,
+        "matched_count": 4,
+        "matched_tp_count": 3,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 4
+      }
+    }
+  },
+  "reviewer_credits": 6.16729455,
+  "judge_credits": 10.441809,
+  "meaningful_entity_use_sessions": 1,
+  "entity_context_calls": 5,
+  "events_calls": 1,
+  "cursor_copy_refusals": 1,
+  "interpretation": "Quality/adoption improve in this tiny sample, credits do not; auto routes differ and smallest callback context caused unnecessary raw reads. Do not scale yet.",
+  "source_digests": {
+    "protocol": "a422858f1d97946bd1f21e60cef4884d559a230b65046bb2ee10d7aafb069b0d",
+    "quality": "427157ef6da464bd1c5593f77c433e32ae15dfa0c78fcd3dd4fe01f83411f745"
+  }
+}

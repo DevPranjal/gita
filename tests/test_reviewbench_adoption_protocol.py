@@ -48,4 +48,4 @@ def test_default_prompts_remain_identical_and_workflow_is_explicit():
     b = campaign.review_prompt(task, arm="B", indexed_workflow=True)
     h = campaign.review_prompt(task, arm="H", indexed_workflow=True)
     assert "entity_context(path,line)" in h and "entity_context(path,line)" not in b
-    assert "events is not an endpoint diff" in h
+    assert "semantic endpoint diff" in h and "start with change_context" in h
