@@ -376,6 +376,10 @@ The generated 10,000-file measurements are a scaling observation, not NumPy or
 PyTorch qualification. Those projects require actual snapshots and bounded
 history runs with their mixed-language/file-size distributions; no such
 production readiness claim is made here.
+A subsequent [actual NumPy snapshot observation](benchmarks/numpy-snapshot-20261015.md)
+records a partial publication in 123.433 seconds with a 495 MB store, plus a
+retained lower-storage-bound refusal. Its substantial unsupported/parse-error
+coverage is explicit; it does not establish complete NumPy or history support.
 (`src/gita/index/builder.py:_Builder.__init__`, `_metadata`, `_suggestions`;
 `src/gita/index/store.py:begin_generation`, `publish_generation`, `_configure`)
 

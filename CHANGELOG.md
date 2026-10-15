@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Record an actual pinned NumPy snapshot, including the one-GiB reservation
+  refusal, fresh two-GiB retry and explicit unsupported/parse-error coverage.
+
 - Advance committed inventories and complete identity populations using raw
   first-parent tree deltas instead of rebuilding them at every commit. Preserve
   global copy/ambiguity guards, unknown-file retries and atomic publication.

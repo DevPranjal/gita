@@ -1,0 +1,240 @@
+{
+  "attempts": [
+    {
+      "coverage_limits": "C/Cython/CUDA remain unsupported; Python/C++ and document evidence coverage explicit.",
+      "git_state_unchanged": true,
+      "history_scope": "single shallow pinned snapshot, not full history",
+      "license_file": "LICENSE.txt",
+      "license_sha256": "1be1df33863f97a7bc1c4d67980bd6c69c9a6fef0a5ee76e6ad6cb91e56e8491",
+      "observation": {
+        "completed_seconds": null,
+        "correctness": null,
+        "error": {
+          "code": "resource_limit",
+          "message": "Index commit storage reservation requires 1433951336 bytes (limit 1073741824); run explicit generation gc to reduce retention",
+          "type": "IndexStoreError"
+        },
+        "operation_seconds": null,
+        "publication": "not_attempted",
+        "resources": {
+          "cleanup_complete": true,
+          "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+          "main_sampled_peak_bytes": 319488,
+          "observed_tree_cpu_seconds": 142.21875,
+          "owned_identities": 19,
+          "rss_tree_sampled_peak_bytes": 594731008,
+          "sample_interval_seconds": 0.05,
+          "samples": 1597,
+          "temp_spool_bytes": null,
+          "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+          "unavailable": [],
+          "wal_sampled_peak_bytes": 440209672
+        },
+        "returncode": 1,
+        "scenario": "snapshot",
+        "status": "error",
+        "supervised_seconds": 122.12107279989868
+      },
+      "repository": "https://github.com/numpy/numpy",
+      "resource_bounds": {
+        "storage_bytes": 1073741824,
+        "supervisor_seconds": 600,
+        "workers": 4
+      },
+      "schema_version": 1,
+      "timing_limits": "Single observation on shared host, concurrent preparation possible; no speedup/SLA claim.",
+      "tip": "741b1a0a89485ac3310ef82f8b4edc08bdfd6a5d",
+      "tree_entries": 2425
+    },
+    {
+      "coverage_limits": "C/Cython/CUDA remain unsupported; Python/C++ and document evidence coverage explicit.",
+      "git_state_unchanged": true,
+      "history_scope": "single shallow pinned snapshot, not full history",
+      "license_file": "LICENSE.txt",
+      "license_sha256": "1be1df33863f97a7bc1c4d67980bd6c69c9a6fef0a5ee76e6ad6cb91e56e8491",
+      "observation": {
+        "build_status": "partial",
+        "completed_seconds": 123.43267819983885,
+        "correctness": {
+          "canonical_digest": "bde3888f84f9a1c61e62d1ae47d509d27bac351eeb83c069adfef448a83762f0",
+          "exact_member_scope": "passed",
+          "git_blob_and_source_digest_checks": 8,
+          "git_member_tree_entry_checks": 16,
+          "independent_python_ast_span_checks": 40,
+          "inventory_completeness": "not independently established",
+          "lineage_truth": "not independently established for these real repositories",
+          "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+          "python_span_examples": [
+            {
+              "end_byte": 15876,
+              "name": "pyrefly",
+              "path": ".spin/cmds.py",
+              "start_byte": 15760
+            },
+            {
+              "end_byte": 14236,
+              "name": "bench",
+              "path": ".spin/cmds.py",
+              "start_byte": 11724
+            },
+            {
+              "end_byte": 9225,
+              "name": "_commit_to_sha",
+              "path": ".spin/cmds.py",
+              "start_byte": 8910
+            },
+            {
+              "end_byte": 8907,
+              "name": "_set_mem_rlimit",
+              "path": ".spin/cmds.py",
+              "start_byte": 8381
+            },
+            {
+              "end_byte": 15740,
+              "name": "mypy",
+              "path": ".spin/cmds.py",
+              "start_byte": 15471
+            },
+            {
+              "end_byte": 20041,
+              "name": "notes",
+              "path": ".spin/cmds.py",
+              "start_byte": 18286
+            },
+            {
+              "end_byte": 14433,
+              "name": "python",
+              "path": ".spin/cmds.py",
+              "start_byte": 14279
+            },
+            {
+              "end_byte": 3799,
+              "name": "docs",
+              "path": ".spin/cmds.py",
+              "start_byte": 2572
+            }
+          ],
+          "sql_foreign_keys": "passed",
+          "sql_integrity": "passed",
+          "stored_contracts": "passed"
+        },
+        "counters": {
+          "cached_files": 0,
+          "commits": 1,
+          "parsed_files": 2418
+        },
+        "coverage": [
+          {
+            "category": "extraction",
+            "omitted": 0,
+            "reason": "complete",
+            "records": 913
+          },
+          {
+            "category": "extraction",
+            "omitted": null,
+            "reason": "non_source_object",
+            "records": 7
+          },
+          {
+            "category": "extraction",
+            "omitted": null,
+            "reason": "parse_error",
+            "records": 221
+          },
+          {
+            "category": "extraction",
+            "omitted": null,
+            "reason": "unsupported_language",
+            "records": 1284
+          }
+        ],
+        "database_bytes": 495419392,
+        "operation_seconds": 123.43267819983885,
+        "operational_settings": {
+          "max_candidates": 64,
+          "max_pairs": 10000,
+          "max_storage_bytes": 2147483648,
+          "page_size": 1000,
+          "parse_limits": {
+            "max_blob_bytes": 5242880,
+            "max_definitions": 50000,
+            "max_representation_bytes": 33554432
+          },
+          "parse_timeout_seconds": 5.0,
+          "workers": 4
+        },
+        "parse_statuses": {
+          "complete": 913,
+          "parse_error": 221,
+          "unsupported_language": 1284
+        },
+        "policy": {
+          "limits": {
+            "max_blob_bytes": 5242880,
+            "max_candidates": 64,
+            "max_definitions": 50000,
+            "max_pairs": 10000,
+            "max_representation_bytes": 33554432
+          },
+          "match_fingerprint": "ec9c5e1ca9148a6bd6b3ae091613b4c44987fb03bebea381ded98df6fc3d5f45",
+          "parse_fingerprint": "884168068efce3b9e5bb1da3d172cc5024933143db9f766f437953fe26148120"
+        },
+        "publication": "published",
+        "resources": {
+          "cleanup_complete": true,
+          "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+          "main_sampled_peak_bytes": 495419392,
+          "observed_tree_cpu_seconds": 203.984375,
+          "owned_identities": 37,
+          "rss_tree_sampled_peak_bytes": 596156416,
+          "sample_interval_seconds": 0.05,
+          "samples": 2494,
+          "temp_spool_bytes": null,
+          "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+          "unavailable": [],
+          "wal_sampled_peak_bytes": 498548872
+        },
+        "returncode": 0,
+        "row_counts": {
+          "definition": 33653,
+          "event": 33653,
+          "lineage": 33653,
+          "lineage_link": 0,
+          "occurrence": 33653,
+          "version": 30967
+        },
+        "scenario": "snapshot",
+        "status": "passed",
+        "supervised_seconds": 186.64201619988307,
+        "verification_seconds": 62.16700780019164
+      },
+      "repository": "https://github.com/numpy/numpy",
+      "resource_bounds": {
+        "storage_bytes": 2147483648,
+        "supervisor_seconds": 600,
+        "workers": 4
+      },
+      "retry": "Fresh store, explicit 2GiB bound after retained 1GiB reservation refusal; no relaxed evidence checks.",
+      "schema_version": 1,
+      "timing_limits": "Single observation on shared host, concurrent preparation possible; no speedup/SLA claim.",
+      "tip": "741b1a0a89485ac3310ef82f8b4edc08bdfd6a5d",
+      "tree_entries": 2425
+    }
+  ],
+  "environment": {
+    "contention": "shared machine; preparation may overlap",
+    "git": "git version 2.55.0.windows.5",
+    "logical_cpus": 16,
+    "platform": "Windows-10-10.0.26100-SP0",
+    "power": "uncontrolled",
+    "processor": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+    "python": "3.11.9",
+    "ram_bytes": 68665831424,
+    "sqlite": "3.45.1"
+  },
+  "index_commit": "94aa46e884a58da113827a7f6b4843dd59326cc6",
+  "index_runtime_sha256": "8be20d1030cd0aa7cedf827ac3b7a36f96095f975e7092a50f7325eafbc46067",
+  "purpose": "actual NumPy single-snapshot observation, not full-code/history qualification",
+  "schema_version": 1
+}
