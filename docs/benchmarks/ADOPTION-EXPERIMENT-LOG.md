@@ -459,3 +459,34 @@ maximum), with approximately703.014 already spent/reserved across previous
 protocols and the fixed-model qualification. The fixed25 membership stays
 unchanged; actual completion may be budget-limited, and no incomplete run will
 be called complete. All old protocols and missing-usage bounds remain separate.
+
+### Fixed Sol/medium first pair completed and judged
+
+[Actual measurements](reviewbench-solmedium-first-pair.json). New protocol
+`30ad9e3dcaccbe96756844afada9c3aecde1b3614ee95c71b632ea276f9f3e02`.
+Both reviewers and the matcher/classifier realized GPT-5.6 Sol with medium
+requested reasoning; no fallback or extra login.154 offline tests passed,
+plus28 focused tests including fixed judge propagation.
+
+| First-pair metric | B | H |
+| --- | ---: | ---: |
+| Credits | 24.126660 | 21.008640 |
+| Input tokens including cache | 147,714 | 72,215 |
+| Output tokens | 2,259 | 3,127 |
+| Grounded precision | 0% | 0% |
+| Grounded recall | 11.11% | 11.11% |
+| Augmented precision | 0% | 33.33% |
+| Augmented recall | 11.11% | 20% |
+
+H used the indexed change packet, status and three entity-context calls.
+Native judging cost16.997900 credits; total first review pair plus judging
+**62.133200**. These are research agreement metrics, not official judging or
+one-PR efficacy evidence. Official multiple-reference resolution can produce
+nonzero recall and zero precision; do not replace its arithmetic.
+
+This confirms fixed-model costs are materially higher than `auto`. At this
+observed first-pair rate the remaining original authorization cannot fund the
+full25 run. Requested a new total-run cap using the actual costs; the user was
+unavailable. Do not assume the proposed1,500-credit ceiling was approved.
+The remaining24 tasks have not started; preserve the scored first pair while
+waiting for spending approval. This is a budget gate, not an authentication gate.
