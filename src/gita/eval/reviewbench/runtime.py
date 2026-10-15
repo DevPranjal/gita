@@ -158,12 +158,17 @@ class CreditLedger:
             state = self._load()
             row = state["slots"][slot]
             require(row["state"] == "reserved", "Slot already settled")
-            valid = (type(credits) in (int, float) and math.isfinite(credits)
-                     and 0 <= credits <= SESSION_CREDITS)
-            row.update(state="settled" if valid else "unknown",
+            measured = (type(credits) in (int, float) and math.isfinite(credits) and credits >= 0)
+            valid = measured and credits <= row["cap"]
+            row.update(state="settled" if valid else "overrun" if measured else "unknown",
                        credits=credits, ended=utc_now())
-            if valid:
+            if measured:
                 state["spent"] += credits
+            if measured and not valid and state.get("terminal_stop") is None:
+                state["terminal_stop"] = {
+                    "protocol": self.protocol, "kind": "integrity", "slot": slot,
+                    "reason": "Native spend exceeded reservation; actual measured spend retained",
+                    "at": utc_now()}
             write_json(self.path, state)
             require(credits is None or valid, "Native spend exceeded reservation; campaign stopped")
 

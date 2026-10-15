@@ -1,0 +1,46 @@
+{
+  "status": "stopped on measured native per-session cap overrun",
+  "protocol": "30ad9e3dcaccbe96756844afada9c3aecde1b3614ee95c71b632ea276f9f3e02",
+  "fixed_tasks": 25,
+  "valid_complete_pairs": 2,
+  "valid_reviews": 4,
+  "unstarted_sessions": 46,
+  "arms": {
+    "B": {
+      "valid_reviews": 2,
+      "credits": 56.65682,
+      "input_tokens": 421944,
+      "output_tokens": 4427,
+      "model": "gpt-5.6-sol",
+      "reasoning": "medium",
+      "indexed_calls": 0,
+      "errors": 2
+    },
+    "H": {
+      "valid_reviews": 2,
+      "credits": 49.38158,
+      "input_tokens": 280152,
+      "output_tokens": 5794,
+      "model": "gpt-5.6-sol",
+      "reasoning": "medium",
+      "indexed_calls": 7,
+      "errors": 16
+    }
+  },
+  "native_cap": 30,
+  "overrun_actual_credits": 32.53016,
+  "actual_review_credits": 106.03840000000001,
+  "judge_credits": 16.9979,
+  "quality_scored_pairs": 1,
+  "quality_report": "reviewbench-solmedium-first-pair.json",
+  "original_ledger_preserved": true,
+  "original_ledger_known_spend": 73.50824,
+  "accounting_correction": "The original ledger calls the overrun unknown, but its32.53016credits are measured and included in this derived actual total, not bounded by30. Newledger logic records measuredoverrun and permanently stops.",
+  "receipt_digests": {
+    "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3-B-r0-a0": "11144b868e0cbcc16f27d5e1813ad8ed50822f8060e9176bdbfa83ea96634c76",
+    "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3-H-r0-a0": "e5d799bedb94d824441b8e761c9f36ee861e4a4cc8e50d6966460f9bd5995848",
+    "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942-B-r0-a0": "db57ea3ab2c42964d5683bc26e3e7b7d8551a3c6d56039a0eb82ad9f922ae443",
+    "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942-H-r0-a0": "bf5139211b3a1145e5fa2d776a968bda09866bbae567080f61154921cae4bb52"
+  },
+  "conclusion": "Two-pair conditional metrics only; secondpairnotqualityscored. No25taskcompletion,costsavingsorqualityclaim."
+}

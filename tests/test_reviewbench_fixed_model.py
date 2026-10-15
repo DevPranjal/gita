@@ -117,6 +117,20 @@ def test_fixed_judge_uses_native_login_and_measured_usage(tmp_path, monkeypatch)
     assert ledger.snapshot()["spent"] == 0.1
 
 
+def test_measured_native_overrun_is_counted_and_permanently_stops_ledger(tmp_path):
+    ledger = runtime.CreditLedger(tmp_path / "ledger.json", "protocol", 160)
+    ledger.reserve("review")
+    with pytest.raises(ProtocolError, match="exceeded"):
+        ledger.settle("review", 32.53016)
+    state = ledger.snapshot()
+    assert state["spent"] == 32.53016
+    assert state["slots"]["review"]["state"] == "overrun"
+    assert state["slots"]["review"]["credits"] == 32.53016
+    assert state["terminal_stop"]["kind"] == "integrity"
+    with pytest.raises(ProtocolError, match="terminal"):
+        ledger.reserve("next")
+
+
 def test_defaults_and_legacy_identity_remain_auto(protocol_inputs):
     frozen = campaign.protocol(*protocol_inputs)
     assert campaign.reviewer_settings(frozen) == ("auto", None)

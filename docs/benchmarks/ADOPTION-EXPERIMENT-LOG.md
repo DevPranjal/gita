@@ -490,3 +490,24 @@ full25 run. Requested a new total-run cap using the actual costs; the user was
 unavailable. Do not assume the proposed1,500-credit ceiling was approved.
 The remaining24 tasks have not started; preserve the scored first pair while
 waiting for spending approval. This is a budget gate, not an authentication gate.
+
+### Bounded continuation and native-cap overrun
+
+The user directed continued autonomous work; no higher cap was approved.
+Continued under existing160/80 caps, without changing the frozen protocol.
+Two complete review pairs produced valid outputs, then native Copilot exported
+**32.530160 credits despite its30-credit session cap**. The ledger stopped.
+
+[Stopped projection](reviewbench-solmedium-stopped.json) preserves all four
+raw receipts and46 unstarted sessions. Actual measured reviewer spending is
+**106.038400**, not the original ledger's73.508240 plus an assumed30 upper bound.
+All106.038400 are exported measured credits. The historical ledger is retained
+unchanged; derived accounting explicitly corrects its overrun misclassification.
+One pair is quality-scored (judge16.997900); the second is not scored.
+
+New ledger handling now counts valid measured overspend, labels it `overrun`
+instead of unknown, and writes a permanent stop before raising.33 focused
+runtime/fixed-model tests pass. Missing usage still remains unknown. No further
+paid calls, retry or old-ledger clearing followed this stop. The native limit
+is demonstrably not a strict upper bound; future campaign budgeting must
+allow a documented overrun reserve rather than promise a hard provider cap.
