@@ -142,3 +142,63 @@ def test_fixed_recall_bounds_handle_tp_free_tasks(tmp_path, monkeypatch):
     assert result["fixed_delivered_grounded_recall_bounds"]["B"] == {
         "tp_bearing_fixed_tasks": 2, "lower": 0.25, "upper": 0.25}
     assert result["fixed_delivered_grounded_recall_bounds"]["H"]["upper"] == 0.75
+
+
+def test_compact_judge_paths_keep_full_identity_and_reject_collisions(tmp_path, monkeypatch):
+    monkeypatch.setattr(judge, "labels_for", lambda *args: [])
+    def stop(*args):
+        raise ProtocolError("before paid calls")
+    monkeypatch.setattr(judge, "source_context", stop)
+    task, protocol = "a" * 64, "b" * 64
+    rows = [(arm, {"status": "valid", "usage": {"credits": 1}, "findings": []})
+            for arm in ("B", "H")]
+    ledger = runtime.CreditLedger(tmp_path / "judge-ledger.json", "analysis", 200)
+    with pytest.raises(ProtocolError, match="before paid"):
+        judge.grade_pair(tmp_path, tmp_path, {}, {"task": {"id": task}},
+                         rows, {"digest": protocol, "seed": 7}, ledger, 0)
+    destination = tmp_path / "judgments" / protocol[:32] / task[:32]
+    assert read_json(destination / "binding.json") == {"protocol": protocol, "task": task}
+    assert len(str(destination / "matcher" / "workspace")) < 240
+    with pytest.raises(IntegrityError, match="collision"):
+        judge.grade_pair(tmp_path, tmp_path, {}, {"task": {"id": task[:32] + "c" * 32}},
+                         rows, {"digest": protocol, "seed": 7}, ledger, 0)
+
+
+def test_smaller_judge_ceiling_reconciles_without_reset(tmp_path):
+    ledger = runtime.CreditLedger(tmp_path / "judge-ledger.json", "analysis", 169)
+    assert runtime.reconcile_judge_outcomes(tmp_path, "analysis") is None
+    assert ledger.snapshot()["ceiling"] == 169
+
+
+def test_prior_failed_judge_reservation_reduces_next_cap(study):
+    prior = study[3].parent / "prior-quality"
+    prior.mkdir()
+    body = {"binding": {"reviewer_protocol": "review", "analysis_sources": {}},
+            "judge_credit_cap": 200}
+    frozen = {**body, "digest": digest(body)}
+    write_json(prior / "protocol.json", frozen)
+    known = prior / "qualification.json"
+    unknown = prior / "failed.json"
+    write_json(known, {"status": "runtime_complete", "usage": {"credits": 0.5}})
+    write_json(unknown, {"status": "measurement_invalid", "usage": None})
+    ledger = {"protocol": frozen["digest"], "ceiling": 200, "terminal_stop": None, "spent": 0.5,
+              "slots": {"known": {"state": "settled", "cap": 30, "credits": 0.5,
+                                  "receipt_path": str(known)},
+                        "unknown": {"state": "unknown", "cap": 30, "credits": None,
+                                    "receipt_path": str(unknown)}}}
+    write_json(prior / "judge-ledger.json", ledger)
+    write_json(prior / "quality.json", {"protocol": frozen["digest"], "scored_pairs": 0})
+    entries = [{"root": str(prior), "protocol_sha256": file_digest(prior / "protocol.json"),
+                "ledger_sha256": file_digest(prior / "judge-ledger.json"),
+                "quality_sha256": file_digest(prior / "quality.json"),
+                "source_archive": str(prior / "archive")}]
+    write_json(study[3] / "prior-judges.json", entries)
+    frozen = partial.seal(*study)
+    assert frozen["judge_credit_cap"] == 169
+    assert frozen["binding"]["prior_judge_cost_upper"] == 30.5
+    assert frozen["judge_credit_cap"] + 30.5 <= 200
+    ledger["slots"]["unknown"]["state"] = "settled"
+    ledger["slots"]["unknown"]["credits"] = 0
+    write_json(prior / "judge-ledger.json", ledger)
+    with pytest.raises(ProtocolError, match="changed"):
+        partial.verify_analysis(*study)

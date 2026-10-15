@@ -308,7 +308,15 @@ def grade_pair(root: Path, grader: Path, dataset: dict, scope: dict,
             "Judging requires one valid receipt from each arm")
     require(all(row["status"] == "valid" and row.get("usage") is not None for _, row in rows),
             "Invalid/unknown review cannot enter quality analysis")
-    destination = grader / "judgments" / frozen["digest"] / task["id"]
+    destination = grader / "judgments" / frozen["digest"][:32] / task["id"][:32]
+    binding = {"protocol": frozen["digest"], "task": task["id"]}
+    binding_path = destination / "binding.json"
+    if binding_path.exists():
+        require_integrity(read_json(binding_path) == binding, "Judgment directory identity collision")
+    else:
+        require(not destination.exists(), "Existing judgment directory lacks identity binding")
+        destination.mkdir(parents=True)
+        write_json(binding_path, binding)
     golden = labels_for(grader, dataset, task)
     if (destination / "scoring.json").exists():
         receipt = read_json(destination / "scoring.json")

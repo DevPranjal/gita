@@ -38,6 +38,14 @@ All 25 task slots remain in missing-delivery bounds. Judges use native
 Malformed events are never repaired or silently discarded. A zero-tool
 qualification call is charged inside that same judge ceiling.
 See [partial.py](../../src/gita/eval/reviewbench/partial.py).
+The first analysis passed qualification but its first matcher exited before
+working-directory initialization because the nested Windows path exceeded the
+native limit. Its unknown reservation is preserved. A compatibility follow-up
+uses 128-bit directory prefixes with full identity/collision bindings and a
+short-root preflight. Its remaining judge ceiling is **169**, retaining the
+prior 0.034632 known credits and 30-credit unknown reservation within the total
+200-credit judging authorization. Prior protocols, source archives and ledgers
+are hash-bound; no prior successful quality outcome is selected or replaced.
 ([campaign.py:41](../../src/gita/eval/reviewbench/campaign.py),
 [judge.py:1](../../src/gita/eval/reviewbench/judge.py))
 

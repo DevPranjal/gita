@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 import json
 import math
+import os
 
 from .campaign import slot_id, validate_receipt, verify_protocol
 from .common import (IntegrityError, ProtocolError, digest, file_digest, git, read_json,
@@ -17,6 +18,60 @@ from .runtime import (CAMPAIGN_SECONDS, CreditLedger, JUDGE_CREDITS, file_lock,
 
 PRIOR_REVIEWER_BOUND = 227.8672758
 TOTAL_AUTHORIZED_CREDITS = 950
+
+
+def prior_judges(analysis: Path, reviewer_protocol: str) -> tuple[float, dict]:
+    path = analysis / "prior-judges.json"
+    if not path.exists():
+        return 0.0, {}
+    entries = read_json(path)
+    require(type(entries) is list, "Invalid prior-judge provenance")
+    upper, bindings, seen = 0.0, {}, set()
+    for entry in entries:
+        root = Path(entry["root"]).resolve()
+        require(root not in seen and root != analysis.resolve(), "Duplicate/cyclic prior judge root")
+        seen.add(root)
+        require(file_digest(root / "protocol.json") == entry["protocol_sha256"]
+                and file_digest(root / "judge-ledger.json") == entry["ledger_sha256"]
+                and file_digest(root / "quality.json") == entry["quality_sha256"],
+                "Prior judge protocol or unresolved spend changed")
+        frozen = read_json(root / "protocol.json")
+        require(frozen["digest"] == digest({k: v for k, v in frozen.items() if k != "digest"})
+                and frozen["binding"]["reviewer_protocol"] == reviewer_protocol,
+                "Prior judge provenance mismatch")
+        for name, expected in frozen["binding"]["analysis_sources"].items():
+            require(Path(name).name == name
+                    and file_digest(Path(entry["source_archive"]) / name) == expected,
+                    "Prior judge source archive mismatch")
+        state = read_json(root / "judge-ledger.json")
+        require_integrity(state["terminal_stop"] is None, "Prior judge integrity stop is permanent")
+        require(state["protocol"] == frozen["digest"]
+                and state["ceiling"] == frozen["judge_credit_cap"], "Prior judge ceiling mismatch")
+        require(all(s["state"] in ("settled", "unknown") and s["cap"] == 30
+                    for s in state["slots"].values()), "Active/unbounded prior judge reservation")
+        for slot in state["slots"].values():
+            outcome = read_json(Path(slot["receipt_path"]))
+            require_integrity(not outcome.get("integrity_stop")
+                              and outcome.get("status") != "integrity_failed"
+                              and outcome.get("error_code") != IntegrityError.code,
+                              "Prior judge integrity receipt blocks a new analysis")
+            if slot["state"] == "settled":
+                require(type(slot["credits"]) in (int, float) and math.isfinite(slot["credits"])
+                        and 0 <= slot["credits"] <= 30 and outcome.get("usage") is not None
+                        and outcome["usage"]["credits"] == slot["credits"], "Prior judge spend mismatch")
+            else:
+                require(slot["credits"] is None and outcome.get("usage") is None,
+                        "Unknown prior judge usage must remain unknown")
+        require(abs(state["spent"] - sum(s["credits"] for s in state["slots"].values()
+                                        if s["state"] == "settled")) < 1e-6,
+                "Prior judge total differs from receipts")
+        quality = read_json(root / "quality.json")
+        require(quality["protocol"] == frozen["digest"] and quality["scored_pairs"] == 0,
+                "Compatibility follow-up must not select among previous quality outcomes")
+        upper += state["spent"] + sum(s["cap"] for s in state["slots"].values()
+                                       if s["state"] == "unknown")
+        bindings[frozen["digest"]] = entry["ledger_sha256"]
+    return upper, {"provenance_digest": file_digest(path), "ledger_digests": bindings}
 
 
 def inputs(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
@@ -34,6 +89,9 @@ def inputs(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
                 and analysis.resolve() not in other.resolve().parents
                 and other.resolve() not in analysis.resolve().parents,
                 "Analysis, source, reviewer and grader roots must remain separate")
+    if os.name == "nt":
+        longest = grader.resolve() / "judgments" / ("0" * 32) / ("0" * 32) / "classifier" / "workspace"
+        require(len(str(longest)) < 240, "Use a shorter grader root for native Windows working directories")
     ledger = read_json(reviewer / "reviewer-ledger.json")
     require_integrity(ledger["protocol"] == frozen["digest"] and ledger["terminal_stop"] is None,
                       "Reviewer integrity failure cannot enter a separate analysis")
@@ -45,6 +103,9 @@ def inputs(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
     require(all(s["state"] in ("settled", "unknown") for s in slots.values()),
             "Unexpected source ledger state")
     unknown = sum(s["cap"] for s in slots.values() if s["state"] == "unknown")
+    prior_upper, prior_binding = prior_judges(analysis, frozen["digest"])
+    judge_ceiling = math.floor(JUDGE_CREDITS - prior_upper)
+    require(judge_ceiling >= 30, "Remaining authorized judge budget cannot reserve a session")
     require(all(type(s["cap"]) is int and s["cap"] == 30 for s in slots.values()),
             "Unbounded source reservation")
     require(all(type(s["credits"]) in (int, float) and math.isfinite(s["credits"])
@@ -53,7 +114,7 @@ def inputs(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
             "Invalid settled source spend")
     require(abs(sum(s["credits"] for s in slots.values() if s["state"] == "settled")
                 - ledger["spent"]) < 1e-6, "Source ledger spend mismatch")
-    require(PRIOR_REVIEWER_BOUND + ledger["spent"] + unknown + JUDGE_CREDITS
+    require(PRIOR_REVIEWER_BOUND + ledger["spent"] + unknown + prior_upper + judge_ceiling
             <= TOTAL_AUTHORIZED_CREDITS, "Combined study bound exceeds authorization")
     scopes = read_json(reviewer / "scopes.json")
     receipts, fingerprints, delivery = {}, {}, {"B": {}, "H": {}}
@@ -94,6 +155,8 @@ def inputs(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
         "source_reviewer_cost_upper": ledger["spent"] + unknown,
         "retained_source_unknown_reservations": unknown,
         "all_prior_reviewer_cost_upper": PRIOR_REVIEWER_BOUND + ledger["spent"] + unknown,
+        "prior_judge_cost_upper": prior_upper, "prior_judge_binding": prior_binding,
+        "remaining_judge_ceiling": judge_ceiling,
     }
     return {"binding": binding, "dataset": dataset, "scopes": scopes,
             "pairs": pairs, "delivery": delivery, "seed": frozen["seed"]}
@@ -101,10 +164,12 @@ def inputs(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
 
 def seal(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
     captured = inputs(corpus, reviewer, grader, analysis)
-    body = {"kind": "authorized-partial-quality-v1", "binding": captured["binding"],
+    body = {"kind": "authorized-partial-quality-v2", "binding": captured["binding"],
             "source_git_head": git(Path(__file__).parent.parents[3], "rev-parse", "HEAD").decode().strip(),
             "seed": captured["seed"], "model": "auto", "native_streaming": "off",
-            "judge_credit_cap": JUDGE_CREDITS, "fixed_tasks": 25, "eligible_pairs": 21,
+            "judgment_directory_identity": "128-bit prefixes with full protocol/task collision bindings",
+            "judge_credit_cap": captured["binding"]["remaining_judge_ceiling"],
+            "fixed_tasks": 25, "eligible_pairs": 21,
             "reviewer_retries": 0, "judge_retries": 0,
             "deadline_seconds": CAMPAIGN_SECONDS, "score_name": SCORE_NAME,
             "deviations": DEVIATIONS + [
@@ -128,14 +193,14 @@ def verify_analysis(corpus: Path, reviewer: Path, grader: Path, analysis: Path) 
     captured = inputs(corpus, reviewer, grader, analysis)
     require_integrity(captured["binding"] == frozen["binding"],
                       "Immutable reviews, source ledger, labels or analysis code changed")
-    require(frozen["judge_credit_cap"] == JUDGE_CREDITS
-            and frozen["kind"] == "authorized-partial-quality-v1", "Invalid analysis ceiling/kind")
+    require(frozen["judge_credit_cap"] == captured["binding"]["remaining_judge_ceiling"]
+            and frozen["kind"] == "authorized-partial-quality-v2", "Invalid analysis ceiling/kind")
     return frozen, captured
 
 
 def grade(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
     frozen, captured = verify_analysis(corpus, reviewer, grader, analysis)
-    ledger = CreditLedger(analysis / "judge-ledger.json", frozen["digest"], JUDGE_CREDITS)
+    ledger = CreditLedger(analysis / "judge-ledger.json", frozen["digest"], frozen["judge_credit_cap"])
     deadline = datetime.fromisoformat(ledger.snapshot()["created"]).timestamp() + CAMPAIGN_SECONDS
     scores, pending = {"B": [], "H": []}, []
     with file_lock(analysis / "campaign.lock"):
@@ -168,7 +233,7 @@ def grade(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
             except (ProtocolError, OSError, ValueError) as error:
                 pending.append({"task": task["id"], "reason": str(error)})
                 if (reconcile_judge_outcomes(analysis, frozen["digest"]) is not None
-                        or ledger.snapshot()["spent"] + 30 > JUDGE_CREDITS):
+                        or ledger.snapshot()["spent"] + 30 > frozen["judge_credit_cap"]):
                     break
             output = results(corpus, grader, frozen, captured, scores, pending, ledger)
             write_json(analysis / "quality.json", output)

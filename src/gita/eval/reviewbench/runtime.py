@@ -179,7 +179,10 @@ def reconcile_judge_outcomes(run_root: Path, protocol: str) -> dict | None:
     path = run_root / "judge-ledger.json"
     if not path.exists():
         return None
-    ledger = CreditLedger(path, protocol, JUDGE_CREDITS)
+    ceiling = read_json(path)["ceiling"]
+    require_integrity(type(ceiling) is int and 0 < ceiling <= JUDGE_CREDITS,
+                      "Judge ledger exceeds its authorized maximum")
+    ledger = CreditLedger(path, protocol, ceiling)
     state = ledger.snapshot()
     if state.get("terminal_stop") is not None:
         return state["terminal_stop"]
