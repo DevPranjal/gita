@@ -28,6 +28,24 @@ It did **not** establish lower input-token use or equal quality: PRs with a
 reference match fell from 64 to 57, and cache behavior affected credit results.
 See [methodology, uncertainty and negative results](evals/RESULTS.md).
 
+Current index measurements are separate from those legacy review results:
+
+| Indexed workload | Before / after |
+| --- | --- |
+| Generated 10,000-file snapshot | 234 / 101 seconds |
+| Generated bounded history | 322 / 147 seconds |
+| Generated incremental append | 128 / 23 seconds |
+| Actual NumPy snapshot | 123 seconds; partial coverage, explicit 2 GiB storage budget |
+
+These are recorded observations, not whole-history or arbitrary-size guarantees.
+See [delta measurements and remaining costs](docs/index-delta-performance.md)
+and [NumPy coverage and failed first attempt](docs/benchmarks/numpy-snapshot-20261015.md).
+The [indexed ReviewBench experiment](docs/benchmarks/reviewbench-indexed.md)
+uses `auto`, frozen paired tools and native accounting; both development cohorts
+stopped with unknown usage. The [second cohort's 21 valid pairs](docs/benchmarks/reviewbench-auto-pilot2-stopped.md)
+remain conditional, ungraded observations. No current indexed-review quality or
+savings claim is established.
+
 ## Install
 
 Requires **Git and Python 3.11+**. Install from source:
@@ -94,9 +112,11 @@ This is the first feature-flag increment, not complete retirement. Legacy code
 still ships; query parity, independent verification, endpoint comparison and
 full index qualification remain follow-up work. The first S2 increment adds an
 [offline correctness-gated benchmark](verify/README.md#offline-s2-qualification)
-and publication recovery/equivalence campaigns. A bounded matching-token cache
-reduces repeated validated version decoding; it does not change matching rules or
-storage schema. The builder artifact fingerprint **does change**, so previously
+and publication recovery/equivalence campaigns. First-parent tree deltas carry
+complete inventories and identity populations forward; bounded decoding caches
+and ordered overlap validation reduce repeated work. Global copy/ambiguity guards
+and atomic publication remain enforced. Reopen hydration and checkpoint copying
+still have whole-population costs. The parser/builder fingerprints **change**, so previously
 built indexes require an explicit rebuild under this interpretation. No arbitrary
 repository size, independent product F4 verification, or complete S2 delivery is claimed.
 

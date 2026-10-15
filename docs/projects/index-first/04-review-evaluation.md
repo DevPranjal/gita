@@ -6,6 +6,15 @@
 **Companions:** [Index qualification](02-index-qualification.md),
 [product contracts](03-indexed-product.md), [public-repository measurements](../../../verify/README.md).
 
+**Implementation note:** the [indexed ReviewBench harness](../../benchmarks/reviewbench-indexed.md)
+implements a development subset of this specification. It uses product-auto
+routing, 25 official starter tasks, separate verified endpoint publications and
+common raw history; it does not test persistent indexed historical continuity,
+the S ablation, confirmation or human-judge agreement. The
+[first stopped cohort](../../benchmarks/reviewbench-auto-pilot1-stopped.json)
+is retained without an efficacy claim. Later execution revisions require fresh
+protocols and must remain separate from that cohort.
+
 ## 1. Purpose, claims, and decision
 
 Determine whether persistent entity evidence helps a fixed agent review code

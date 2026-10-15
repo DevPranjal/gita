@@ -26,6 +26,9 @@ quality or savings result.
 Execution revision v2 corrects prompt transport, denied-call finalization and
 judge diff pagination. It uses a fresh protocol and run directory, not a retry
 or repair of the stopped cohort. Cohorts must not be pooled.
+The [second cohort](reviewbench-auto-pilot2-stopped.md) stopped at 21 complete
+pairs when native Copilot emitted malformed JSON in a reasoning-delta frame.
+Its unknown 30-credit reservation remains; no quality judges have run.
 ([campaign.py:41](../../src/gita/eval/reviewbench/campaign.py),
 [judge.py:1](../../src/gita/eval/reviewbench/judge.py))
 

@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- Preserve a second stopped indexed ReviewBench cohort: 21 complete valid pairs,
+  one valid unpaired review, one malformed native JSON/unknown-usage failure,
+  and six unstarted slots. Publish conditional metrics, low tool adoption and
+  all cost bounds separately; judging remains blocked and no efficacy is claimed.
+
+- Add an indexed-only ReviewBench experiment with pinned source/labels, common
+  Git versus optional indexed evidence, `auto` routing, native spend reservations,
+  strict integrity stops and blinded research judging with official arithmetic.
+  Preserve the first live cohort's hard-limit failure and unknown usage; no
+  indexed-review efficacy or savings claim is established.
+- Qualify a separate execution revision with exact UTF-8 stdin prompts,
+  denied-only finalization after 40 evidence attempts, a 400-credit reviewer
+  ceiling, complete bounded judge diff pagination, and offline CI tests.
+- Resolve historical source through bounded immutable literal-path bindings,
+  while freshly validating commit and blob bytes on every request. Preserve
+  raw-byte fallback paths and rejection of wrong modes, IDs and missing blobs.
+
 - Record an actual pinned NumPy snapshot, including the one-GiB reservation
   refusal, fresh two-GiB retry and explicit unsupported/parse-error coverage.
 
@@ -20,7 +37,8 @@
   failures and partial coverage. Add reproducible public-corpus tooling and
   independently member-bound source rechecks; do not claim full-history scale.
 - Specify indexed AACR/ReviewBench evaluation, harness audit, leakage/scoring
-  safeguards, accounting and proposed success gates; no new model review run.
+  safeguards, accounting and proposed success gates. Historical AACR results
+  remain separate from current indexed-product measurements.
 - Materialize and verify native grammars before CI measurements, and use an
   absolute runner-temp path for qualification artifact upload.
 
