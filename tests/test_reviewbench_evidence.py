@@ -41,6 +41,40 @@ def config(scope, arm="H"):
     return {**scope, "arm": arm, "cursor_secret": secrets.token_hex(32)}
 
 
+def test_entity_context_returns_exact_named_source_without_copying_references(fixture_repo):
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    assert indexed["indexes"], indexed["index_preparation"]
+    evidence = Evidence(config(indexed))
+    try:
+        result = evidence.execute("entity_context", {"path": "code.py", "line": 2})
+        assert "error" not in result, result
+        span = result["entity"]["span"]
+        expected = evidence.blob("code.py", scope["task"]["head"])[
+            span["start_byte"]:span["end_byte"]].decode("utf8")
+        assert result["text"] == expected and "return 20 / value" in expected
+        assert result["entity"]["names"] != ["<module>"]
+        assert result["coverage"]["complete_entity"] is True
+        assert result["provenance"]["source"] == "indexed_verified_against_git"
+        assert len(json.dumps(result, ensure_ascii=True)) <= 8000
+        assert evidence.execute("entity_context", {"path": "code.py", "line": 0})["error"]
+    finally:
+        evidence.close()
+
+
+def test_entity_context_stays_out_of_baseline_and_does_not_build(fixture_repo):
+    _, scope, _ = fixture_repo
+    assert "entity_context" not in {t["name"] for t in inventory("B")}
+    assert "entity_context" in {t["name"] for t in inventory("H")}
+    evidence = Evidence(config(scope))
+    try:
+        result = evidence.execute("entity_context", {"path": "code.py", "line": 2})
+        assert result["error"] and "unavailable" in result["error"]["message"]
+        assert not scope["indexes"]
+    finally:
+        evidence.close()
+
+
 def test_common_inventory_and_evidence_are_identical(fixture_repo):
     _, scope, _ = fixture_repo
     baseline, indexed = Evidence(config(scope, "B")), Evidence(config(scope))

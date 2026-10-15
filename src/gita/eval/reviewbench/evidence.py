@@ -18,7 +18,7 @@ from .common import (EVIDENCE_CALL_LIMIT, EvidenceBudgetError, IntegrityError, P
 PAGE_CHARS = 6000
 MAX_RESPONSE_CHARS = 8000
 COMMON_TOOLS = ("raw_diff", "read_file", "search", "list_files", "commit_log", "file_history")
-INDEX_TOOLS = ("index_status", "entities", "id", "state", "source", "history", "events")
+INDEX_TOOLS = ("index_status", "entities", "entity_context", "id", "state", "source", "history", "events")
 
 
 def schema(properties: dict, required: tuple[str, ...] = ()) -> dict:
@@ -40,6 +40,8 @@ SCHEMAS = {
     "file_history": schema({"path": STRING, "cursor": CURSOR}, ("path",)),
     "index_status": schema({}),
     "entities": schema({"path": STRING, "commit": STRING, "cursor": CURSOR}, ("path",)),
+    "entity_context": schema({"path": STRING, "line": INTEGER, "commit": STRING, "cursor": CURSOR},
+                             ("path", "line")),
     "id": schema({"token": STRING, "commit": STRING, "cursor": CURSOR}, ("token",)),
     "state": schema({"eid": STRING, "commit": STRING}, ("eid",)),
     "source": schema({"reference": {"type": "object"}}, ("reference",)),
@@ -55,6 +57,7 @@ DESCRIPTIONS = {
     "file_history": "Raw Git changes for a member path over the same declared allowed commit graph.",
     "index_status": "Optional: inspect prebuilt index readiness and gaps. For named-function context, entities(path) or id(name) -> state/source can retrieve exact entity evidence instead of whole files. Raw Git fallback is valid. No build or mutation.",
     "entities": "Indexed file entities with exact occurrence references, coverage and opaque continuation.",
+    "entity_context": "Read the smallest indexed entity containing a file line (e.g. a changed function), with exact Git-verified source in one call. Supports paged large entities. Use raw read_file if coverage is unavailable.",
     "id": "Resolve an indexed EID or entity name at an allowed revision, preserving ambiguity.",
     "state": "Generation-qualified indexed entity state at an allowed revision.",
     "source": "Exact source of a complete previously issued occurrence reference. Over-budget is an error.",
@@ -414,6 +417,45 @@ class Evidence:
 
     def id(self, token: str, commit: str | None = None, cursor: str = "") -> dict:
         return self._query("id", self.commit(commit), {"token": token}, cursor)
+
+    def entity_context(self, path: str, line: int, commit: str | None = None,
+                       cursor: str = "") -> dict:
+        checked_path(path)
+        commit = self.commit(commit)
+        require(type(line) is int and line >= 1, "Entity line must be a positive integer")
+        session = self._index(commit)
+        selected = GitOid.from_hex("sha1", commit)
+        candidates, native_cursor = [], None
+        while True:
+            page = session.entities_in(path.encode("utf8"), at=selected,
+                                       limit=1000, cursor=native_cursor)
+            require_integrity(type(page.get("results")) is list, "Malformed entity context page")
+            for ref in page["results"]:
+                self._occurrences(ref, session)
+                span = ref["span"]
+                if span["start_line"] <= line <= span["end_line"]:
+                    candidates.append(ref)
+            native_cursor = page["page"]["next_cursor"]
+            if not native_cursor:
+                break
+        require(bool(candidates),
+                "No indexed entity at this line; inspect coverage and use raw read_file")
+        reference = min(candidates, key=lambda ref: (
+            ref["names"] == ["<module>"],
+            ref["span"]["end_byte"] - ref["span"]["start_byte"], ref["id"]))
+        source = session.source(reference)
+        text = source.decode("utf8", "strict")
+        result = self.page(text, "entity_context", {
+            "path": path, "line": line, "commit": commit, "occurrence": reference["id"]}, cursor)
+        result.update(entity={"occurrence": reference["id"], "names": reference["names"],
+                              "path": path, "span": reference["span"]},
+                      provenance={**self.provenance(commit), "generation": session.generation,
+                                  "identity_context": session.context.id,
+                                  "source": "indexed_verified_against_git"},
+                      history_available=self.config.get("history_ready", False))
+        result["coverage"].update(source="indexed", exact_entity_source=True,
+                                  complete_entity=not cursor and not result["truncated"])
+        return result
 
     def state(self, eid: str, commit: str | None = None) -> dict:
         return self._query("state", self.commit(commit), {"eid": eid})

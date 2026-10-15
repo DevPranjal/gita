@@ -1,0 +1,2949 @@
+{
+  "scope": "offline changed-file probes; no models",
+  "rows": [
+    {
+      "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+      "repo": "https://github.com/PierreJanineh/TechDebtMCP",
+      "changed_extensions": {
+        ".md": 3,
+        ".ts": 7
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 36.03099999995902,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "src/core/__tests__/customRulesEngine.test.ts",
+          "native_count": 43,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 190,
+            "gaps": 0,
+            "uncovered": 95,
+            "excluded": 5
+          },
+          "native_bytes": 33845,
+          "public_count": 3,
+          "public_bytes": 5397,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_3ce6ba4aaeb94b6df91faaeeebf4c6e8a5faa19a37a5f9c5364bec5fa148d917",
+            "generation": "gen1_a97ad204370c4531b42acff13e911db4",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "16a54f0f85a9091f220418850eac6b4122782be5"
+            },
+            "path_bytes_b64": "c3JjL2NvcmUvX190ZXN0c19fL2N1c3RvbVJ1bGVzRW5naW5lLnRlc3QudHM=",
+            "path": "src/core/__tests__/customRulesEngine.test.ts",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "5ffbc5c8a430cd9b343ffdc20afa9a34c5aa776e"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_dffc3f4dd14bb5da5005e6a4413fc25d6369f1d31a5ff0f4d048aa5538b06788",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 14475,
+              "start_line": 1,
+              "end_line": 479
+            }
+          }
+        },
+        {
+          "path": "src/core/customRulesEngine.ts",
+          "native_count": 23,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 190,
+            "gaps": 0,
+            "uncovered": 95,
+            "excluded": 5
+          },
+          "native_bytes": 15919,
+          "public_count": 7,
+          "public_bytes": 7748,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_2cf0aeeb1a07fe5085f809129a7c2509ddbabdfa338fe6eae2934906fd4aa485",
+            "generation": "gen1_a97ad204370c4531b42acff13e911db4",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "16a54f0f85a9091f220418850eac6b4122782be5"
+            },
+            "path_bytes_b64": "c3JjL2NvcmUvY3VzdG9tUnVsZXNFbmdpbmUudHM=",
+            "path": "src/core/customRulesEngine.ts",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "ea68977e2e7d87187f81711ac74216e55f969911"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_82834b1310f44eafe52e5106cf1ca649a9a7c31add7c4a6d00cc57b1ceecfaef",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 9442,
+              "start_line": 1,
+              "end_line": 346
+            }
+          }
+        },
+        {
+          "path": "src/server/__tests__/handlers.test.ts",
+          "native_count": 24,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 190,
+            "gaps": 0,
+            "uncovered": 95,
+            "excluded": 5
+          },
+          "native_bytes": 17912,
+          "public_count": 3,
+          "public_bytes": 5274,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_20d5dc420028b938add4aa443e392fe06e77404bb0aec5d739eb5f4845186e2e",
+            "generation": "gen1_a97ad204370c4531b42acff13e911db4",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "16a54f0f85a9091f220418850eac6b4122782be5"
+            },
+            "path_bytes_b64": "c3JjL3NlcnZlci9fX3Rlc3RzX18vaGFuZGxlcnMudGVzdC50cw==",
+            "path": "src/server/__tests__/handlers.test.ts",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "0663ef170cf7922a10d36061672955b9c743e254"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_8a1d72a7c91621325533d140d9a2381ce4c2cec1078985377c54256acf854933",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 5156,
+              "start_line": 1,
+              "end_line": 150
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "repo": "https://github.com/simnaut/emdash",
+      "changed_extensions": {
+        "": 6,
+        ".md": 78,
+        ".json": 22,
+        ".yml": 12,
+        ".ts": 204,
+        ".astro": 29,
+        ".mjs": 1,
+        ".mdx": 4,
+        ".jsonc": 1,
+        ".js": 1,
+        ".tsx": 43,
+        ".po": 2,
+        ".css": 1,
+        ".xml": 1,
+        ".sql": 1,
+        ".yaml": 2
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 0,
+      "preparation": {
+        "status": "failed",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "failed",
+          "error": "IndexStoreError: Index commit storage reservation requires 1313675024 bytes (limit 536870912); run explicit generation gc to reduce retention",
+          "seconds": 135.35999999986961,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888"
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": []
+    },
+    {
+      "task": "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+      "repo": "https://github.com/konturio/disaster-ninja-fe",
+      "changed_extensions": {
+        ".ts": 2
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 0,
+      "preparation": {
+        "status": "failed",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "failed",
+          "error": "IndexStoreError: Index commit storage reservation requires 553225944 bytes (limit 536870912); run explicit generation gc to reduce retention",
+          "seconds": 55.686999999918044,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888"
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": []
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "repo": "https://github.com/cmik/apilix",
+      "changed_extensions": {
+        ".md": 2,
+        ".tsx": 6,
+        ".css": 1,
+        ".ts": 8,
+        ".js": 3,
+        ".json": 2
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "integrity_failed",
+          "error": "ProtocolError: Indexed evidence output limit; narrow request",
+          "seconds": 77.76499999966472,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888"
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "client/src/components/ActivityBar.tsx",
+          "native_count": 7,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 156,
+            "gaps": 2,
+            "uncovered": 97,
+            "excluded": 28
+          },
+          "native_bytes": 5083,
+          "public_count": 7,
+          "public_bytes": 5588,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_8a31bde51e31471022e8c78c9502c88e74aa41db4308ad6c8e1e8c23a9cf631f",
+            "generation": "gen1_556a8389698f47ca8e287cd1189043da",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "0c34439aeebedc646d76d90db6b79a5c54b4cb8f"
+            },
+            "path_bytes_b64": "Y2xpZW50L3NyYy9jb21wb25lbnRzL0FjdGl2aXR5QmFyLnRzeA==",
+            "path": "client/src/components/ActivityBar.tsx",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "e671987810351e92aa06aed01080cbf4845ca8c1"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_7ab68693006b4f22688c7491d5da61275cd9f7c81167227a761e4002da4bca70",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 3448,
+              "start_line": 1,
+              "end_line": 81
+            }
+          }
+        },
+        {
+          "path": "client/src/components/RequestBuilder.tsx",
+          "native_count": 229,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 156,
+            "gaps": 2,
+            "uncovered": 97,
+            "excluded": 28
+          },
+          "native_bytes": 242644,
+          "public_count": 3,
+          "public_bytes": 5270,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_e1af2cbb27f4c5e4eb924974ad69d26f3dce5975e1203a863946bf9d6d3b771f",
+            "generation": "gen1_556a8389698f47ca8e287cd1189043da",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "0c34439aeebedc646d76d90db6b79a5c54b4cb8f"
+            },
+            "path_bytes_b64": "Y2xpZW50L3NyYy9jb21wb25lbnRzL1JlcXVlc3RCdWlsZGVyLnRzeA==",
+            "path": "client/src/components/RequestBuilder.tsx",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "96f4862b83a599fb377bbc256a4996deb5f37583"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_4516ed2520d2060750cbfa1795ae36ac7dc75b817f51cceb7cc80f971db8a392",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 82829,
+              "start_line": 1,
+              "end_line": 1855
+            }
+          }
+        },
+        {
+          "path": "client/src/components/Sidebar.tsx",
+          "native_count": 18,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 156,
+            "gaps": 2,
+            "uncovered": 97,
+            "excluded": 28
+          },
+          "native_bytes": 12423,
+          "public_count": 7,
+          "public_bytes": 7791,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_bc8238f4e9f7186159421f7ddcd2cc7e268c55387f6bbf48af85932ca087fb2f",
+            "generation": "gen1_556a8389698f47ca8e287cd1189043da",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "0c34439aeebedc646d76d90db6b79a5c54b4cb8f"
+            },
+            "path_bytes_b64": "Y2xpZW50L3NyYy9jb21wb25lbnRzL1NpZGViYXIudHN4",
+            "path": "client/src/components/Sidebar.tsx",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "6094b76f984edf50d878ca280dcd2fb9186da888"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_c7d5b545fbbfd2c1a24c19e7cc5a9a708eb287eb689751a54b404f38827ed429",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 5733,
+              "start_line": 1,
+              "end_line": 120
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "repo": "https://github.com/AA-Factory/aafactory-prototype",
+      "changed_extensions": {
+        ".py": 1
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 4.905999999959022,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "aafactory/src/tests/test_chat/test_mock_chat.py",
+          "native_count": 3,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 77,
+            "gaps": 0,
+            "uncovered": 47,
+            "excluded": 9
+          },
+          "native_bytes": 2460,
+          "public_count": 3,
+          "public_bytes": 2965,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_8428f640340140139330a93d47a521b963aeb971b8f2c913fcfd9c077a113a4a",
+            "generation": "gen1_cd5e060ff3b94fa094cc1fd4830affab",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "a1978cb75950a879df8805e4a5f373eb6678f6f9"
+            },
+            "path_bytes_b64": "YWFmYWN0b3J5L3NyYy90ZXN0cy90ZXN0X2NoYXQvdGVzdF9tb2NrX2NoYXQucHk=",
+            "path": "aafactory/src/tests/test_chat/test_mock_chat.py",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "1b799a57555f6809c5154ebd1a016e8e0745dbdf"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_54776e9e8527046e146a6bc40de0ecaef9dbece0cdb7af539f7443ec10a7b3b1",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 1691,
+              "start_line": 1,
+              "end_line": 45
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+      "repo": "https://github.com/DisciplinedSoftware/Codebase-Conversion",
+      "changed_extensions": {
+        "": 2,
+        ".json": 1,
+        ".example": 1,
+        ".md": 1,
+        ".py": 17,
+        ".txt": 1
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 3.5470000002533197,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "convert.py",
+          "native_count": 6,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 25,
+            "gaps": 0,
+            "uncovered": 6,
+            "excluded": 5
+          },
+          "native_bytes": 4030,
+          "public_count": 6,
+          "public_bytes": 4535,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_bddd13ad3ebaf615fe75c72672216ef6ff7df11e7984a8de1d45929a5a65224f",
+            "generation": "gen1_4c3526d9155940a7a94d68088dcbc92d",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "4b46d68c215dd2448a62f751e81218a0da789165"
+            },
+            "path_bytes_b64": "Y29udmVydC5weQ==",
+            "path": "convert.py",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "3cc773d87a24c47a65bf8e29b4d847c2b12ec820"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_2d6e396fb4ae4cf42823b2f09ded380027e0169721ed0ef62693340a835c0619",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 9950,
+              "start_line": 1,
+              "end_line": 271
+            }
+          }
+        },
+        {
+          "path": "fortran_to_rust/__init__.py",
+          "native_count": 1,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 25,
+            "gaps": 0,
+            "uncovered": 6,
+            "excluded": 5
+          },
+          "native_bytes": 985,
+          "public_count": 1,
+          "public_bytes": 1490,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_64fa56a351f128e0401590e378b7251b74338383c3e4d861fc18fe1e1e91d7de",
+            "generation": "gen1_4c3526d9155940a7a94d68088dcbc92d",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "4b46d68c215dd2448a62f751e81218a0da789165"
+            },
+            "path_bytes_b64": "Zm9ydHJhbl90b19ydXN0L19faW5pdF9fLnB5",
+            "path": "fortran_to_rust/__init__.py",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "a5b347006dd09299155c85d8a8b004f3b9b0e380"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_e50445634d329a425378ab7d81528678b17db311c5a6ac07c276c7fff7612953",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 66,
+              "start_line": 1,
+              "end_line": 3
+            }
+          }
+        },
+        {
+          "path": "fortran_to_rust/benchmarker.py",
+          "native_count": 8,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 25,
+            "gaps": 0,
+            "uncovered": 6,
+            "excluded": 5
+          },
+          "native_bytes": 5602,
+          "public_count": 8,
+          "public_bytes": 6107,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_da023819538582aa62381f801b20b9f6d522cf231c0e0e50574953beff15634c",
+            "generation": "gen1_4c3526d9155940a7a94d68088dcbc92d",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "4b46d68c215dd2448a62f751e81218a0da789165"
+            },
+            "path_bytes_b64": "Zm9ydHJhbl90b19ydXN0L2JlbmNobWFya2VyLnB5",
+            "path": "fortran_to_rust/benchmarker.py",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "c4e9af2a8999a3133a7a799b213d1249bbe99679"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_522819c0c769deffec857bdeefd46366097ce4542120207317bfb9a791d2c88a",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 11840,
+              "start_line": 1,
+              "end_line": 335
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "repo": "https://github.com/brianc/node-postgres",
+      "changed_extensions": {
+        ".js": 6
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 24.25,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "packages/pg-pool/diagnostics.js",
+          "native_count": 2,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 718,
+            "gaps": 0,
+            "uncovered": 389,
+            "excluded": 33
+          },
+          "native_bytes": 1658,
+          "public_count": 2,
+          "public_bytes": 2164,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_68d36f8e0ff6752d52790cf5ad5b8b538ca8e71feefad4efec790d5a86eedc17",
+            "generation": "gen1_8f2af446893a4518b3fdd6a28bdbd2f4",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "b922f0ddfa3914cc7b05387cd12fc606bc658dc4"
+            },
+            "path_bytes_b64": "cGFja2FnZXMvcGctcG9vbC9kaWFnbm9zdGljcy5qcw==",
+            "path": "packages/pg-pool/diagnostics.js",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "15adc414dd03d5fa1a3f59965c245779136f5bdf"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_8f79ae5ee434e4f45180a2cf0e2fa01ad20b36476544129bf730fdef97673c8d",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 1161,
+              "start_line": 1,
+              "end_line": 35
+            }
+          }
+        },
+        {
+          "path": "packages/pg-pool/index.js",
+          "native_count": 66,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 718,
+            "gaps": 0,
+            "uncovered": 389,
+            "excluded": 33
+          },
+          "native_bytes": 44416,
+          "public_count": 7,
+          "public_bytes": 7506,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_153c528cec0c7635d5deddef1fbec21ca243cf7a4001a75760741f91890eb4b0",
+            "generation": "gen1_8f2af446893a4518b3fdd6a28bdbd2f4",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "b922f0ddfa3914cc7b05387cd12fc606bc658dc4"
+            },
+            "path_bytes_b64": "cGFja2FnZXMvcGctcG9vbC9pbmRleC5qcw==",
+            "path": "packages/pg-pool/index.js",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "5239a19b16055bb214498074310e835dd15c78dd"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_b2913cd1b451187a04f291a4bf75307bf75d29115f6e6f51fe360fa3bec7bc53",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 15520,
+              "start_line": 1,
+              "end_line": 551
+            }
+          }
+        },
+        {
+          "path": "packages/pg-pool/test/diagnostics.js",
+          "native_count": 45,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 718,
+            "gaps": 0,
+            "uncovered": 389,
+            "excluded": 33
+          },
+          "native_bytes": 35603,
+          "public_count": 3,
+          "public_bytes": 5177,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_eed3e45e8b0be4a53ea4c36bf65a3a6325fa4950380286ae08295d83daea639d",
+            "generation": "gen1_8f2af446893a4518b3fdd6a28bdbd2f4",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "b922f0ddfa3914cc7b05387cd12fc606bc658dc4"
+            },
+            "path_bytes_b64": "cGFja2FnZXMvcGctcG9vbC90ZXN0L2RpYWdub3N0aWNzLmpz",
+            "path": "packages/pg-pool/test/diagnostics.js",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "1038a13000ced15b71ec6a3e552e3b2607908d69"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_053f2e05c36869e9f3a0e1e82734241a04d87d1d33e5b133c01e6b05d004633f",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 5490,
+              "start_line": 1,
+              "end_line": 197
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "repo": "https://github.com/PaulStSmith/figlet-comment-generator",
+      "changed_extensions": {
+        ".yml": 7,
+        ".md": 4,
+        ".json": 2,
+        ".ts": 7,
+        ".tsx": 1
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "integrity_failed",
+          "error": "IntegrityError: Malformed or out-of-scope returned indexed provenance",
+          "seconds": 179.46900000004098,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888"
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "FIGLet.VSCodeExtension/src/BannerUtils.ts",
+          "native_count": 10,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 379,
+            "gaps": 1,
+            "uncovered": 251,
+            "excluded": 71
+          },
+          "native_bytes": 7456,
+          "public_count": 10,
+          "public_bytes": 7962,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_b0979dc34bb0de14d40febdae6e7973752db35868bbcdae6190ffd5fd6f66a02",
+            "generation": "gen1_504bdcbd63854adfaf6a65fa7732dab3",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "1d0b6642fcf5ca31fc308c3d603b19ab02ea249e"
+            },
+            "path_bytes_b64": "RklHTGV0LlZTQ29kZUV4dGVuc2lvbi9zcmMvQmFubmVyVXRpbHMudHM=",
+            "path": "FIGLet.VSCodeExtension/src/BannerUtils.ts",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "b9a94ba5034ba170ca2391dd8dcc25f4e3acda27"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_a7eedd15524206c2a1c275797f9359f4816a65f180cf3dcad5b773dfbd168357",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 3069,
+              "start_line": 1,
+              "end_line": 78
+            }
+          }
+        },
+        {
+          "path": "FIGLet.VSCodeExtension/src/FIGLet/FIGFont.ts",
+          "native_count": 10,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 379,
+            "gaps": 1,
+            "uncovered": 251,
+            "excluded": 71
+          },
+          "native_bytes": 7297,
+          "public_count": 10,
+          "public_bytes": 7803,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_fb5327ac2a4ae0ce63ce98af52fafa371c8c13b4ee36719c8e1f4cafcb2228d6",
+            "generation": "gen1_504bdcbd63854adfaf6a65fa7732dab3",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "1d0b6642fcf5ca31fc308c3d603b19ab02ea249e"
+            },
+            "path_bytes_b64": "RklHTGV0LlZTQ29kZUV4dGVuc2lvbi9zcmMvRklHTGV0L0ZJR0ZvbnQudHM=",
+            "path": "FIGLet.VSCodeExtension/src/FIGLet/FIGFont.ts",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "6792ba558cb18948af3a48dd46534d707121ebfa"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_55ea1e5f2e044387acef79b14d2d6c9c0faba7fcd82625aecaaf1b4275cf5f6c",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 8827,
+              "start_line": 1,
+              "end_line": 274
+            }
+          }
+        },
+        {
+          "path": "FIGLet.VSCodeExtension/src/FigletPanel.ts",
+          "native_count": 23,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 379,
+            "gaps": 1,
+            "uncovered": 251,
+            "excluded": 71
+          },
+          "native_bytes": 16327,
+          "public_count": 3,
+          "public_bytes": 5283,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_e7126098b3e5b9cfc5ac288653686dfc645dee53562e9142d38856777123c404",
+            "generation": "gen1_504bdcbd63854adfaf6a65fa7732dab3",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "1d0b6642fcf5ca31fc308c3d603b19ab02ea249e"
+            },
+            "path_bytes_b64": "RklHTGV0LlZTQ29kZUV4dGVuc2lvbi9zcmMvRmlnbGV0UGFuZWwudHM=",
+            "path": "FIGLet.VSCodeExtension/src/FigletPanel.ts",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "9381611bb6723d6251d09d13625d3e6f90706cf3"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_b3737f47e076c3bd9d39a145ff7d19083d9870efeefb8f6e5d16e2e490fc836c",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 13157,
+              "start_line": 1,
+              "end_line": 294
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "repo": "https://github.com/brexhq/CrabTrap",
+      "changed_extensions": {
+        ".go": 4,
+        ".ts": 1,
+        ".tsx": 1
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 16.438000000081956,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "internal/admin/api.go",
+          "native_count": 39,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 262,
+            "gaps": 1,
+            "uncovered": 145,
+            "excluded": 16
+          },
+          "native_bytes": 26895,
+          "public_count": 7,
+          "public_bytes": 7362,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_fc67ea9a3ba4d11146cb8c28182e2834e0b0d1406dae65be9d77243bdfe5dd81",
+            "generation": "gen1_e07f9471cf4d47d9ae260a054ee5c9f9",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "5ef0884c59b3ee1d5a986dd02686a8232570c80f"
+            },
+            "path_bytes_b64": "aW50ZXJuYWwvYWRtaW4vYXBpLmdv",
+            "path": "internal/admin/api.go",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "8be3eee0774cba159f0e5b01b037cc9845001d6d"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_4445a7bacb6af04586e8a1920e78783f4a25e5469acbe0835973c7a5724cd6b8",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 36210,
+              "start_line": 1,
+              "end_line": 1217
+            }
+          }
+        },
+        {
+          "path": "internal/admin/api_auth_test.go",
+          "native_count": 60,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 262,
+            "gaps": 1,
+            "uncovered": 145,
+            "excluded": 16
+          },
+          "native_bytes": 40435,
+          "public_count": 7,
+          "public_bytes": 7671,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_9bb6751266f222cf39d478ced80907581dac6e5933275277eecfe60ec9d17885",
+            "generation": "gen1_e07f9471cf4d47d9ae260a054ee5c9f9",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "5ef0884c59b3ee1d5a986dd02686a8232570c80f"
+            },
+            "path_bytes_b64": "aW50ZXJuYWwvYWRtaW4vYXBpX2F1dGhfdGVzdC5nbw==",
+            "path": "internal/admin/api_auth_test.go",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "a307323c21de8fc603d3b6ed24e65581c75a0afe"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_d301525da2f55233fbfc895463505926c411366c55b6cc14df378338eb600058",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 15386,
+              "start_line": 1,
+              "end_line": 494
+            }
+          }
+        },
+        {
+          "path": "internal/admin/audit_integration_test.go",
+          "native_count": 14,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 262,
+            "gaps": 1,
+            "uncovered": 145,
+            "excluded": 16
+          },
+          "native_bytes": 10056,
+          "public_count": 3,
+          "public_bytes": 5267,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_55a7b52c71e35ee778bf40dfbc7bdc09413c9742766cdd0b9c5bfe92f0539f6e",
+            "generation": "gen1_e07f9471cf4d47d9ae260a054ee5c9f9",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "5ef0884c59b3ee1d5a986dd02686a8232570c80f"
+            },
+            "path_bytes_b64": "aW50ZXJuYWwvYWRtaW4vYXVkaXRfaW50ZWdyYXRpb25fdGVzdC5nbw==",
+            "path": "internal/admin/audit_integration_test.go",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "363e1029fb47c5bb7d08a41ac9e5fc3730356093"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_4ff4edb48da6357c05584ecc1a6fe0bbd9ff66cc816656c794650e08436905ad",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 17693,
+              "start_line": 1,
+              "end_line": 473
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+      "repo": "https://github.com/k1LoW/gh-copilot-review",
+      "changed_extensions": {
+        ".go": 2
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 4.25,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "cmd/root.go",
+          "native_count": 5,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 36,
+            "gaps": 0,
+            "uncovered": 23,
+            "excluded": 6
+          },
+          "native_bytes": 3376,
+          "public_count": 5,
+          "public_bytes": 3881,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_e35d20b5b83cb1b26330128143a48bacb150e070d360e99f1732ad1864538f91",
+            "generation": "gen1_95979fe1b65c439492f2122658d29c33",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "f98281938e63acd1d2df9b89d6af98dcf58c9fa8"
+            },
+            "path_bytes_b64": "Y21kL3Jvb3QuZ28=",
+            "path": "cmd/root.go",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "4fdf24ce38768c4b8a3114f5bc52f78788dba4d8"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_0504e58310c17db99dbb06f03f9584a8397bab67733d4feb729a0624a7f49c7d",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 3374,
+              "start_line": 1,
+              "end_line": 143
+            }
+          }
+        },
+        {
+          "path": "internal/github/github.go",
+          "native_count": 9,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 36,
+            "gaps": 0,
+            "uncovered": 23,
+            "excluded": 6
+          },
+          "native_bytes": 6164,
+          "public_count": 9,
+          "public_bytes": 6669,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_8a94482d59be45184d099f6f205873163ee2e40c77046723d72546dd297ca400",
+            "generation": "gen1_95979fe1b65c439492f2122658d29c33",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "f98281938e63acd1d2df9b89d6af98dcf58c9fa8"
+            },
+            "path_bytes_b64": "aW50ZXJuYWwvZ2l0aHViL2dpdGh1Yi5nbw==",
+            "path": "internal/github/github.go",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "42ee518e9f3a3cb8377fcfbdf5f6fc36e61ad0a9"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_88078b49b6b76021425b164fc8b3dd442a86bddd9695472cf3a5583cc3cbef93",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 4872,
+              "start_line": 1,
+              "end_line": 187
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+      "repo": "https://github.com/scotthamilton77/agents-config",
+      "changed_extensions": {
+        ".md": 26,
+        ".sh": 2,
+        ".template": 9,
+        ".ts": 1
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 7.4219999997876585,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "src/user/.agents/skills/condition-based-waiting/example.ts",
+          "native_count": 12,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 70,
+            "gaps": 0,
+            "uncovered": 30,
+            "excluded": 14
+          },
+          "native_bytes": 9220,
+          "public_count": 3,
+          "public_bytes": 5661,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_a4f9e12560fb1fa180a79c7a00dc728cd7d7fc65571e70ef7e24fb94050dcfed",
+            "generation": "gen1_3718f2fd19484b1cabb0472431412857",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "1fc789709ae044579908fed58c8c14638d0db095"
+            },
+            "path_bytes_b64": "c3JjL3VzZXIvLmFnZW50cy9za2lsbHMvY29uZGl0aW9uLWJhc2VkLXdhaXRpbmcvZXhhbXBsZS50cw==",
+            "path": "src/user/.agents/skills/condition-based-waiting/example.ts",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "703a06b653160d060bbf46ab5c6e0cd7446bd592"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_9c13676ecbb8dd1e62906a95e7a43526debe0157631f2a24cdfd324bc8295c57",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 5054,
+              "start_line": 1,
+              "end_line": 158
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "bc277c0372a2c410587b86f47527f69bc7e76ae468a962c7fe668b452af88905",
+      "repo": "https://github.com/ardevd/jadx-collaboration",
+      "changed_extensions": {
+        ".kt": 3
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 2.9220000002533197,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": []
+    },
+    {
+      "task": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+      "repo": "https://github.com/AY2526S2-CS2103T-W14-3/tp",
+      "changed_extensions": {
+        ".md": 1,
+        ".java": 18
+      },
+      "same_first_parent_chain": false,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 5.639999999664724,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "src/main/java/seedu/address/logic/Logic.java",
+          "native_count": 0,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 705,
+            "gaps": 5,
+            "uncovered": 675,
+            "excluded": 327
+          },
+          "native_bytes": 366,
+          "public_count": 0,
+          "public_bytes": 872,
+          "continuation": false
+        },
+        {
+          "path": "src/main/java/seedu/address/logic/LogicManager.java",
+          "native_count": 0,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 705,
+            "gaps": 5,
+            "uncovered": 675,
+            "excluded": 327
+          },
+          "native_bytes": 366,
+          "public_count": 0,
+          "public_bytes": 872,
+          "continuation": false
+        },
+        {
+          "path": "src/main/java/seedu/address/logic/commands/NoteCommand.java",
+          "native_count": 0,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 705,
+            "gaps": 5,
+            "uncovered": 675,
+            "excluded": 327
+          },
+          "native_bytes": 366,
+          "public_count": 0,
+          "public_bytes": 872,
+          "continuation": false
+        }
+      ]
+    },
+    {
+      "task": "91db148075d74d9bde541c1702d065e340acf96f90bc4258edb975c71f0f0e92",
+      "repo": "https://github.com/vanyastaff/nebula",
+      "changed_extensions": {
+        ".md": 3,
+        ".yml": 1,
+        ".rs": 65
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 0,
+      "preparation": {
+        "status": "failed",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "failed",
+          "error": "IndexStoreError: Index commit storage reservation requires 1433633976 bytes (limit 536870912); run explicit generation gc to reduce retention",
+          "seconds": 123.81300000008196,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888"
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": []
+    },
+    {
+      "task": "7d1bf7158fd26470fa90ae3afa30ab61088ae3c62444c7c15a5001d978ec23a5",
+      "repo": "https://github.com/NCATSTranslator/translator-ingests",
+      "changed_extensions": {
+        ".py": 1,
+        ".yaml": 1
+      },
+      "same_first_parent_chain": false,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 59.73400000017136,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "src/translator_ingest/ingests/gtopdb/gtopdb.py",
+          "native_count": 4,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 630,
+            "gaps": 3,
+            "uncovered": 344,
+            "excluded": 27
+          },
+          "native_bytes": 3128,
+          "public_count": 4,
+          "public_bytes": 3634,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_ef2a9b9a7e1d55d9e11ce2c7aafd6ac8fbb3099506095e90091def8d36d962ec",
+            "generation": "gen1_67342ed2dd634e428bc3230a53958b4e",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "efb31e9c764865f416230073c6d0b1686a0f44b7"
+            },
+            "path_bytes_b64": "c3JjL3RyYW5zbGF0b3JfaW5nZXN0L2luZ2VzdHMvZ3RvcGRiL2d0b3BkYi5weQ==",
+            "path": "src/translator_ingest/ingests/gtopdb/gtopdb.py",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "7bef1092f127a808c124f07c35810b2ed124930c"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_a5c27e0f8da9681f38fb5cffd0d54c9ead441612118355c0da644c9aeb163b97",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 59234,
+              "start_line": 1,
+              "end_line": 1094
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "repo": "https://github.com/mheuss/chronicle",
+      "changed_extensions": {
+        ".lock": 1,
+        ".toml": 1,
+        ".rs": 12
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 7.75,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "chronicle-daemon/crates/storage/src/audio.rs",
+          "native_count": 15,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 120,
+            "gaps": 0,
+            "uncovered": 64,
+            "excluded": 11
+          },
+          "native_bytes": 10854,
+          "public_count": 3,
+          "public_bytes": 5346,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_a78c488c8622a07ea772de15cd0d3563febbf4938de8c719670fefeb43de6a51",
+            "generation": "gen1_a63ce6bdf2644e85877f0f7cb1f02363",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "04ac4c02d48083676c14dd3fa70d26ca102bd50e"
+            },
+            "path_bytes_b64": "Y2hyb25pY2xlLWRhZW1vbi9jcmF0ZXMvc3RvcmFnZS9zcmMvYXVkaW8ucnM=",
+            "path": "chronicle-daemon/crates/storage/src/audio.rs",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "a082d0925c116048437dcc292b4b23124552fcdc"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_0a983efaf35aed9e43ca87d5b3be2772f0138caff03bf2a1c0ba6100f776f054",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 5861,
+              "start_line": 1,
+              "end_line": 189
+            }
+          }
+        },
+        {
+          "path": "chronicle-daemon/crates/storage/src/files.rs",
+          "native_count": 10,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 120,
+            "gaps": 0,
+            "uncovered": 64,
+            "excluded": 11
+          },
+          "native_bytes": 7312,
+          "public_count": 10,
+          "public_bytes": 7817,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_92a82d6e4f997cc6961c7df63f915f7bd03d755cfad8a3c55c9c64e7076f28f5",
+            "generation": "gen1_a63ce6bdf2644e85877f0f7cb1f02363",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "04ac4c02d48083676c14dd3fa70d26ca102bd50e"
+            },
+            "path_bytes_b64": "Y2hyb25pY2xlLWRhZW1vbi9jcmF0ZXMvc3RvcmFnZS9zcmMvZmlsZXMucnM=",
+            "path": "chronicle-daemon/crates/storage/src/files.rs",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "d5ddca3ac2d98a92b66028367886d9f2dc27a926"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_750fd37fc326e70565af1cce29df06f28cbed2d34036a95a2bbd8665950b266c",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 2940,
+              "start_line": 1,
+              "end_line": 90
+            }
+          }
+        },
+        {
+          "path": "chronicle-daemon/crates/storage/src/lib.rs",
+          "native_count": 46,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 120,
+            "gaps": 0,
+            "uncovered": 64,
+            "excluded": 11
+          },
+          "native_bytes": 32315,
+          "public_count": 7,
+          "public_bytes": 7974,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_69354bd27c61a6e76509345172082b1a598fb003ad51f57d571580c8ed0ade4d",
+            "generation": "gen1_a63ce6bdf2644e85877f0f7cb1f02363",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "04ac4c02d48083676c14dd3fa70d26ca102bd50e"
+            },
+            "path_bytes_b64": "Y2hyb25pY2xlLWRhZW1vbi9jcmF0ZXMvc3RvcmFnZS9zcmMvbGliLnJz",
+            "path": "chronicle-daemon/crates/storage/src/lib.rs",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "ad1cb50a9ccf5e86de83d2c7a0d87505b6221bfc"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_51cf6df1d7c037dc47be74e7bcdc1f5361dc89c542d8ccca3a741630e15ecd0f",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 21450,
+              "start_line": 1,
+              "end_line": 618
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "0362dfe9422a542cde29b9a429b4baa39d301262a128fccb0910d6801f939a86",
+      "repo": "https://github.com/superhighfives/pika",
+      "changed_extensions": {
+        ".swift": 15,
+        ".strings": 1
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 43.686999999918044,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": []
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "repo": "https://github.com/gagneurlab/PROTRIDER",
+      "changed_extensions": {
+        "": 1,
+        ".md": 1,
+        ".yaml": 1,
+        ".toml": 1,
+        ".py": 17,
+        ".lock": 1
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 5.765999999828637,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "src/protrider/cli.py",
+          "native_count": 12,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 42,
+            "gaps": 0,
+            "uncovered": 15,
+            "excluded": 4
+          },
+          "native_bytes": 7919,
+          "public_count": 7,
+          "public_bytes": 7345,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_205d6af6d4c1f6559e675a1ffb77886bd5a132de73f34e5a88a84517c9eb48e1",
+            "generation": "gen1_84d604d39420419ab3d6192e02cb6b47",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "b462b109b630dd1e1a9a78088b18429d2baaae9b"
+            },
+            "path_bytes_b64": "c3JjL3Byb3RyaWRlci9jbGkucHk=",
+            "path": "src/protrider/cli.py",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "1d4a7e8a8b56269d69bf11c382610d3e41e80eda"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_e4233c92771827a52b3185442a723731725b4cdca45b56ae9a445f819ea940e6",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 7615,
+              "start_line": 1,
+              "end_line": 265
+            }
+          }
+        },
+        {
+          "path": "src/protrider/config.py",
+          "native_count": 6,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 42,
+            "gaps": 0,
+            "uncovered": 15,
+            "excluded": 4
+          },
+          "native_bytes": 4216,
+          "public_count": 6,
+          "public_bytes": 4721,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_da6eff25a0d0884cfc5af41203121f8d7f0cde2008e9477dc6c3196f3df2018f",
+            "generation": "gen1_84d604d39420419ab3d6192e02cb6b47",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "b462b109b630dd1e1a9a78088b18429d2baaae9b"
+            },
+            "path_bytes_b64": "c3JjL3Byb3RyaWRlci9jb25maWcucHk=",
+            "path": "src/protrider/config.py",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "6790d29758c1584d3b235affd76ac19fbd8b25e6"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_47dda93e4fdcbf74f48ca11a82084cf5bf5104096af091950e78cb720c32cef0",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 7553,
+              "start_line": 1,
+              "end_line": 216
+            }
+          }
+        },
+        {
+          "path": "src/protrider/datasets/__init__.py",
+          "native_count": 1,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 42,
+            "gaps": 0,
+            "uncovered": 15,
+            "excluded": 4
+          },
+          "native_bytes": 1005,
+          "public_count": 1,
+          "public_bytes": 1510,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_adf4636a62e864c491ce491729e4857a6f7953ad53cef0fc7d80e987d7f73975",
+            "generation": "gen1_84d604d39420419ab3d6192e02cb6b47",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "b462b109b630dd1e1a9a78088b18429d2baaae9b"
+            },
+            "path_bytes_b64": "c3JjL3Byb3RyaWRlci9kYXRhc2V0cy9fX2luaXRfXy5weQ==",
+            "path": "src/protrider/datasets/__init__.py",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "808994aa74159f87ca8118ca6d1302c8d927c62a"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_fc19d1d0b996bde3a806032cbc9ced65e598c18ae29c7f8c641f270c2d0307c8",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 67,
+              "start_line": 1,
+              "end_line": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "ee7f15418560e783cdc668536f3c4d8692e231a7f231876ddc86a2fac069e9e2",
+      "repo": "https://github.com/allan-mobley-jr/gimmes",
+      "changed_extensions": {
+        ".py": 4
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 18.20299999974668,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "src/gimmes/cli.py",
+          "native_count": 103,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 276,
+            "gaps": 0,
+            "uncovered": 145,
+            "excluded": 9
+          },
+          "native_bytes": 65370,
+          "public_count": 7,
+          "public_bytes": 7299,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_3cd311f2120198bd928551a2ea3e2ddb9e7e0f4f1c9ba34456fa3ce8868bb5c7",
+            "generation": "gen1_b3d87d06d7bb4b99b56169b0c0370575",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "e1477f8b3f18c1de6ff87dbca9465a7b106dc193"
+            },
+            "path_bytes_b64": "c3JjL2dpbW1lcy9jbGkucHk=",
+            "path": "src/gimmes/cli.py",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "f578dde0d205dda0e3741a7f7f629b2d1f4c101b"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_de1b57a69870857b7a5102b12fcac6325d2fbd5ad947a2584037632c44843f63",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 132042,
+              "start_line": 1,
+              "end_line": 3439
+            }
+          }
+        },
+        {
+          "path": "src/gimmes/config.py",
+          "native_count": 21,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 276,
+            "gaps": 0,
+            "uncovered": 145,
+            "excluded": 9
+          },
+          "native_bytes": 13734,
+          "public_count": 7,
+          "public_bytes": 7368,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_23fa819ebed5e4481a9b1f3772666d1139a9bea05361a740844e3ac5d9bfac06",
+            "generation": "gen1_b3d87d06d7bb4b99b56169b0c0370575",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "e1477f8b3f18c1de6ff87dbca9465a7b106dc193"
+            },
+            "path_bytes_b64": "c3JjL2dpbW1lcy9jb25maWcucHk=",
+            "path": "src/gimmes/config.py",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "d6662d075a135198aacdf4cd6de70b495a6fed56"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_47de8de5d456ebbeca5f69253e3b94d5fff084a80a83f9dcd30c14f94c30fe87",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 38157,
+              "start_line": 1,
+              "end_line": 920
+            }
+          }
+        },
+        {
+          "path": "src/gimmes/strategy/staleness.py",
+          "native_count": 5,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 276,
+            "gaps": 0,
+            "uncovered": 145,
+            "excluded": 9
+          },
+          "native_bytes": 3638,
+          "public_count": 5,
+          "public_bytes": 4144,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_e8d556c7d2bbdb417fa7913f5ee673ef46fa148369b21746edda9d5b8207b7a9",
+            "generation": "gen1_b3d87d06d7bb4b99b56169b0c0370575",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "e1477f8b3f18c1de6ff87dbca9465a7b106dc193"
+            },
+            "path_bytes_b64": "c3JjL2dpbW1lcy9zdHJhdGVneS9zdGFsZW5lc3MucHk=",
+            "path": "src/gimmes/strategy/staleness.py",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "c5ff1ff74f578b9ab3520d43f9a4aefc94692b7b"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_1ef4c1c850b29497ef9b8752c06a73a15f0bc99595877f090592c7de98be51e5",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 3515,
+              "start_line": 1,
+              "end_line": 114
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "82ec18705a16ae64998d181393c7f885543cc33b25921073d24ebecec40fbc15",
+      "repo": "https://github.com/superyyrrzz/ForgeMap",
+      "changed_extensions": {
+        ".yml": 1,
+        ".css": 1
+      },
+      "same_first_parent_chain": false,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 15.75,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": []
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "repo": "https://github.com/renedierking/LANdalf",
+      "changed_extensions": {
+        "": 1,
+        ".cs": 1
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 26.671000000089407,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "src/API/Services/DeviceMonitoringService.cs",
+          "native_count": 11,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 308,
+            "gaps": 0,
+            "uncovered": 225,
+            "excluded": 72
+          },
+          "native_bytes": 8274,
+          "public_count": 3,
+          "public_bytes": 5346,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_03cb944bf9d280414fb0c85d15f22c7dbda9ebf3177611a12f0616b715f99cc1",
+            "generation": "gen1_2db1f2ec72004ac28b94f5b896e85608",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "bc1698f4dbc3a99dee0a6dcf7629813f2027682a"
+            },
+            "path_bytes_b64": "c3JjL0FQSS9TZXJ2aWNlcy9EZXZpY2VNb25pdG9yaW5nU2VydmljZS5jcw==",
+            "path": "src/API/Services/DeviceMonitoringService.cs",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "221fd3c01f89da99ddbd99c0265adc4ee55dca93"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_6ff8df17a7947d3a7b8d7e33f25b81601354e52029f48885f5e90bbe2908e792",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 8943,
+              "start_line": 1,
+              "end_line": 190
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "3f4e836db70e52f2130f7c82f67af4af39f1091bb6d31a96258cb5d4add67a10",
+      "repo": "https://github.com/scottlz0310/Mcp-Docker",
+      "changed_extensions": {
+        ".yml": 1,
+        "": 1,
+        ".go": 4,
+        ".mod": 1,
+        ".sum": 1
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 8.469000000040978,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": [
+        {
+          "path": "services/copilot-review-mcp/cmd/server/main.go",
+          "native_count": 10,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 118,
+            "gaps": 0,
+            "uncovered": 77,
+            "excluded": 22
+          },
+          "native_bytes": 7251,
+          "public_count": 10,
+          "public_bytes": 7757,
+          "continuation": false,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_421482a0eb989cb075d427a0d13a96b7774fff9b6baee684fd629684b1b5b165",
+            "generation": "gen1_752fae034477472f8b6b4761b188528d",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "e7705d269ea374d49e7999bdb8bc42e9480a6b37"
+            },
+            "path_bytes_b64": "c2VydmljZXMvY29waWxvdC1yZXZpZXctbWNwL2NtZC9zZXJ2ZXIvbWFpbi5nbw==",
+            "path": "services/copilot-review-mcp/cmd/server/main.go",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "08e3afe76568b985193483e33a6a660b162f43d8"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_87a5572dea23d5c98e1c48cdeaabbedb9244f7f10f1940612b2bea04063a5073",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 3616,
+              "start_line": 1,
+              "end_line": 133
+            }
+          }
+        },
+        {
+          "path": "services/copilot-review-mcp/internal/auth/handler.go",
+          "native_count": 17,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 118,
+            "gaps": 0,
+            "uncovered": 77,
+            "excluded": 22
+          },
+          "native_bytes": 12326,
+          "public_count": 3,
+          "public_bytes": 5497,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_810f49ff3af43fe351925df774488f8b6190deffa21a299f0f1a471a7357a24e",
+            "generation": "gen1_752fae034477472f8b6b4761b188528d",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "e7705d269ea374d49e7999bdb8bc42e9480a6b37"
+            },
+            "path_bytes_b64": "c2VydmljZXMvY29waWxvdC1yZXZpZXctbWNwL2ludGVybmFsL2F1dGgvaGFuZGxlci5nbw==",
+            "path": "services/copilot-review-mcp/internal/auth/handler.go",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "9f5fb1573be7a6601ef4074c512457659acfb1f3"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_8696ac45636abf00d43db7c50515bec5d72c9cc95d136dd83e7310950f805e95",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 10962,
+              "start_line": 1,
+              "end_line": 323
+            }
+          }
+        },
+        {
+          "path": "services/copilot-review-mcp/internal/auth/session.go",
+          "native_count": 16,
+          "coverage": {
+            "working_tree": "out_of_scope",
+            "source_availability": "unchecked",
+            "population": "indexed_evidence",
+            "boundary": "bounded",
+            "status": "partial",
+            "records": 118,
+            "gaps": 0,
+            "uncovered": 77,
+            "excluded": 22
+          },
+          "native_bytes": 11612,
+          "public_count": 3,
+          "public_bytes": 5494,
+          "continuation": true,
+          "result_keys": [
+            "id",
+            "generation",
+            "commit",
+            "path_bytes_b64",
+            "path",
+            "blob",
+            "object_type",
+            "mode",
+            "definition_id",
+            "names",
+            "span"
+          ],
+          "first_result": {
+            "id": "occ1_eface058f13aa373d5ff037bcd75f80d08700b539e478c09070270ef6a00c933",
+            "generation": "gen1_752fae034477472f8b6b4761b188528d",
+            "commit": {
+              "object_format": "sha1",
+              "hex": "e7705d269ea374d49e7999bdb8bc42e9480a6b37"
+            },
+            "path_bytes_b64": "c2VydmljZXMvY29waWxvdC1yZXZpZXctbWNwL2ludGVybmFsL2F1dGgvc2Vzc2lvbi5nbw==",
+            "path": "services/copilot-review-mcp/internal/auth/session.go",
+            "blob": {
+              "object_format": "sha1",
+              "hex": "7fa32e3e1cc2624ccb253af5126de34ec4215b9e"
+            },
+            "object_type": "blob",
+            "mode": 33188,
+            "definition_id": "def1_0b17970f592910b94b3dd67e2efd0730e2ce3bc9132eeacc50f501e6655db2bb",
+            "names": [
+              "<module>"
+            ],
+            "span": {
+              "start_byte": 0,
+              "end_byte": 5124,
+              "start_line": 1,
+              "end_line": 206
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "d701ed5ae7001b5fe7c881acdda33cf7759293132014f6d71abcbc657eb36d27",
+      "repo": "https://github.com/wirechat/wirechat",
+      "changed_extensions": {
+        "": 7,
+        ".php": 13
+      },
+      "same_first_parent_chain": false,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 4.625,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": []
+    },
+    {
+      "task": "435c173f24b18a1fd88ab29dc033bc2fc1e42502df2db9d7e9312711c7a1ea3c",
+      "repo": "https://github.com/sdsykes/fastimage",
+      "changed_extensions": {
+        "": 1,
+        ".md": 1,
+        ".rb": 8,
+        ".png": 2
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 2,
+      "preparation": {
+        "status": "endpoint_navigation_rechecked",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "endpoint_navigation_built",
+          "seconds": 4.061999999918044,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888",
+          "history_unavailable": true,
+          "identity_continuity_across_contexts": false,
+          "study": "prospective endpoint-navigation development pilot",
+          "raw_history_unchanged": true,
+          "max_storage_bytes": 536870912
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": []
+    },
+    {
+      "task": "b673f3f386cf657bbc269b622ce6a14389e41cd0d0427b48254c43c2ccd38956",
+      "repo": "https://github.com/Marvell-Consulting/statswales-frontend",
+      "changed_extensions": {
+        ".ts": 3
+      },
+      "same_first_parent_chain": true,
+      "history_ready": false,
+      "indexes": 0,
+      "preparation": {
+        "status": "failed",
+        "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+        "previous_preparation": {
+          "status": "failed",
+          "error": "IndexStoreError: Index commit storage reservation requires 832988704 bytes (limit 536870912); run explicit generation gc to reduce retention",
+          "seconds": 58.54700000025332,
+          "policy_digest": "aeac38e086a8734292100a1e839dfa9e372f43748519468c4e1fab65a2088888"
+        },
+        "study": "prospective endpoint-navigation development pilot",
+        "history_unavailable": true,
+        "identity_continuity_across_contexts": false,
+        "max_storage_bytes": 536870912,
+        "no_rebuild_during_refresh": true
+      },
+      "probes": []
+    }
+  ]
+}
