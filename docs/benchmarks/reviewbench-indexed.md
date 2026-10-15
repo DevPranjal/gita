@@ -46,6 +46,15 @@ short-root preflight. Its remaining judge ceiling is **169**, retaining the
 prior 0.034632 known credits and 30-credit unknown reservation within the total
 200-credit judging authorization. Prior protocols, source archives and ledgers
 are hash-bound; no prior successful quality outcome is selected or replaced.
+That analysis scored ten pairs; eleven exceeded its mandatory whole-PR
+source-context limit. A separately sealed continuation retains **every** completed
+judgment unchanged and targets only those eleven blocked pairs. It supplies
+merged exact HEAD windows around both arms' candidates and all golden findings,
+with 40-line margins and explicit omitted-context warnings; it does not imply
+full-diff coverage or cross-revision alignment. Insufficient evidence remains an
+uncertainty, never default FP. The remaining judge cap is **146**, including all
+prior spend and unknown reservations within the original 200-credit allowance.
+All eleven targeted contexts passed the unchanged 180,000-character preflight.
 ([campaign.py:41](../../src/gita/eval/reviewbench/campaign.py),
 [judge.py:1](../../src/gita/eval/reviewbench/judge.py))
 

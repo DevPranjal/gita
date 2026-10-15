@@ -143,7 +143,8 @@ def labels_for(grader: Path, frozen: dict, task: dict) -> list[dict]:
     return rows
 
 
-def source_context(scope: dict, candidates: list[dict], golden: list[dict]) -> dict:
+def source_context(scope: dict, candidates: list[dict], golden: list[dict], *,
+                   targeted: bool = False) -> dict:
     evidence = Evidence({**scope, "arm": "B", "cursor_secret": secrets.token_hex(32)})
     try:
         requests = {}
@@ -154,15 +155,26 @@ def source_context(scope: dict, candidates: list[dict], golden: list[dict]) -> d
                 requests.setdefault(row["file"], []).append((start, end))
         snippets = []
         for path in sorted(requests):
-            for start, end in sorted(set(requests[path])):
-                for commit in (scope["effective_base"], scope["task"]["head"]):
+            ranges = sorted(set(requests[path]))
+            if targeted:
+                merged = []
+                for start, end in ranges:
+                    if merged and start <= merged[-1][1] + 1:
+                        merged[-1] = (merged[-1][0], max(end, merged[-1][1]))
+                    else:
+                        merged.append((start, end))
+                ranges = merged
+            for start, end in ranges:
+                commits = (scope["task"]["head"],) if targeted else (
+                    scope["effective_base"], scope["task"]["head"])
+                for commit in commits:
                     if path not in evidence.paths(commit):
                         continue
                     lines = source_lines(evidence.blob(path, commit))
                     text = "\n".join(f"{i}: {line}" for i, line in enumerate(lines, 1) if start <= i <= end)
                     snippets.append({"file": path, "commit": commit, "source": text})
         parts, cursor, seen = [], "", set()
-        while True:
+        while not targeted:
             patch = evidence.raw_diff(cursor=cursor)
             parts.append(patch["text"])
             require(len(json.dumps("".join(parts))) <= 180000,
@@ -176,7 +188,13 @@ def source_context(scope: dict, candidates: list[dict], golden: list[dict]) -> d
             cursor = next_cursor
         context = {"head": scope["task"]["head"], "effective_base": scope["effective_base"],
                    "snippets": snippets, "patch": "".join(parts),
-                   "omissions": "Related unchanged files/imported APIs are not interactively investigated."}
+                   "omissions": (
+                       "Exact HEAD candidate/reference line windows with 40-line margins are supplied. "
+                       "Full PR diff, base snapshots and other related files/APIs are omitted. "
+                       "This is not evidence of absence or a cross-revision mapping. "
+                       "If more context is necessary, return uncertainty."
+                       if targeted else
+                       "Related unchanged files/imported APIs are not interactively investigated.")}
         require(len(json.dumps(context)) <= 180000, "Judge fixed source-context limit exceeded")
         return context
     finally:
@@ -301,7 +319,7 @@ def grade(root: Path, run_root: Path, grader: Path) -> dict:
 
 def grade_pair(root: Path, grader: Path, dataset: dict, scope: dict,
                rows: list[tuple[str, dict]], frozen: dict, ledger: CreditLedger,
-               deadline: float) -> dict:
+               deadline: float, *, targeted_context: bool = False) -> dict:
     """Shared blinded judging; campaign authorization and missingness stay with callers."""
     task = scope["task"]
     require(len(rows) == 2 and {arm for arm, _ in rows} == {"B", "H"},
@@ -334,7 +352,7 @@ def grade_pair(root: Path, grader: Path, dataset: dict, scope: dict,
                for arm, row in rows for i, finding in enumerate(row["findings"])]
     random.Random(frozen["seed"] + int(task["id"][:8], 16)).shuffle(blinded)
     candidates = [{"candidate_index": i, **row[2]} for i, row in enumerate(blinded)]
-    context = source_context(scope, candidates, golden)
+    context = source_context(scope, candidates, golden, targeted=targeted_context)
     refs = [{"golden_index": i, **{k: r[k] for k in (
         "file", "start_line", "end_line", "message")}} for i, r in enumerate(golden)]
     destination.mkdir(parents=True, exist_ok=True)

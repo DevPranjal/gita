@@ -66,8 +66,9 @@ def prior_judges(analysis: Path, reviewer_protocol: str) -> tuple[float, dict]:
                                         if s["state"] == "settled")) < 1e-6,
                 "Prior judge total differs from receipts")
         quality = read_json(root / "quality.json")
-        require(quality["protocol"] == frozen["digest"] and quality["scored_pairs"] == 0,
-                "Compatibility follow-up must not select among previous quality outcomes")
+        require(quality["protocol"] == frozen["digest"], "Prior quality protocol mismatch")
+        require(quality["scored_pairs"] == 0 or entry.get("carry_all_completed") is True,
+                "Every completed prior judgment must be retained, never selected")
         upper += state["spent"] + sum(s["cap"] for s in state["slots"].values()
                                        if s["state"] == "unknown")
         bindings[frozen["digest"]] = entry["ledger_sha256"]
@@ -141,6 +142,32 @@ def inputs(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
     pairs = {task: rows for task, rows in receipts.items()
              if len(rows) == 2 and {arm for arm, _ in rows} == {"B", "H"}}
     require(len(scopes) == 25 and len(pairs) == 21, "Authorized population is exactly 21/25 pairs")
+    carried, carried_hashes = {}, {}
+    prior_path = analysis / "prior-judges.json"
+    for entry in (read_json(prior_path) if prior_path.exists() else []):
+        if not entry.get("carry_all_completed"):
+            continue
+        previous = read_json(Path(entry["root"]) / "protocol.json")
+        quality = read_json(Path(entry["root"]) / "quality.json")
+        ids = {arm: [r["pr_key"] for r in quality["scores"][arm]["per_pr"]]
+               for arm in ("B", "H")}
+        require(set(ids["B"]) == set(ids["H"])
+                and len(ids["B"]) == len(ids["H"]) == len(set(ids["B"])) == len(set(ids["H"]))
+                == quality["scored_pairs"], "Incomplete/duplicate prior quality population")
+        for task in ids["B"]:
+            require(task in pairs and task not in carried, "Invalid/duplicated carried task")
+            destination = grader / "judgments" / previous["digest"][:32] / task[:32]
+            receipt = read_json(destination / "scoring.json")
+            require_integrity(receipt["protocol"] == previous["digest"]
+                              and receipt["reviews_digest"] == digest(pairs[task]),
+                              "Carried judgment belongs to different reviews")
+            require_integrity(receipt["digest"] == digest({
+                k: v for k, v in receipt.items() if k != "digest"}), "Carried judgment tampered")
+            for name, expected in receipt["artifacts"].items():
+                require_integrity(file_digest(destination / name) == expected,
+                                  "Carried raw judgment changed")
+            carried[task] = previous
+            carried_hashes[task] = file_digest(destination / "scoring.json")
     sources = Path(__file__).parent
     binding = {
         "reviewer_protocol": frozen["digest"], "dataset_digest": dataset["digest"],
@@ -157,17 +184,20 @@ def inputs(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
         "all_prior_reviewer_cost_upper": PRIOR_REVIEWER_BOUND + ledger["spent"] + unknown,
         "prior_judge_cost_upper": prior_upper, "prior_judge_binding": prior_binding,
         "remaining_judge_ceiling": judge_ceiling,
+        "carried_scoring_receipts": carried_hashes,
     }
     return {"binding": binding, "dataset": dataset, "scopes": scopes,
-            "pairs": pairs, "delivery": delivery, "seed": frozen["seed"]}
+            "pairs": pairs, "delivery": delivery, "seed": frozen["seed"], "carried": carried}
 
 
 def seal(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
     captured = inputs(corpus, reviewer, grader, analysis)
-    body = {"kind": "authorized-partial-quality-v2", "binding": captured["binding"],
+    body = {"kind": "authorized-partial-quality-v3", "binding": captured["binding"],
             "source_git_head": git(Path(__file__).parent.parents[3], "rev-parse", "HEAD").decode().strip(),
             "seed": captured["seed"], "model": "auto", "native_streaming": "off",
             "judgment_directory_identity": "128-bit prefixes with full protocol/task collision bindings",
+            "new_context_policy": "Merged exact HEAD candidate/reference windows +/-40 lines; no full PR patch",
+            "prior_context_policy": "Every completed previous judgment retained without rejudging",
             "judge_credit_cap": captured["binding"]["remaining_judge_ceiling"],
             "fixed_tasks": 25, "eligible_pairs": 21,
             "reviewer_retries": 0, "judge_retries": 0,
@@ -194,7 +224,7 @@ def verify_analysis(corpus: Path, reviewer: Path, grader: Path, analysis: Path) 
     require_integrity(captured["binding"] == frozen["binding"],
                       "Immutable reviews, source ledger, labels or analysis code changed")
     require(frozen["judge_credit_cap"] == captured["binding"]["remaining_judge_ceiling"]
-            and frozen["kind"] == "authorized-partial-quality-v2", "Invalid analysis ceiling/kind")
+            and frozen["kind"] == "authorized-partial-quality-v3", "Invalid analysis ceiling/kind")
     return frozen, captured
 
 
@@ -222,8 +252,16 @@ def grade(corpus: Path, reviewer: Path, grader: Path, analysis: Path) -> dict:
             require(reconcile_judge_outcomes(analysis, frozen["digest"]) is None,
                     "Prior judge failure blocks additional model sessions")
             try:
+                previous = captured["carried"].get(task["id"])
+                if previous is not None:
+                    path = (grader / "judgments" / previous["digest"][:32]
+                            / task["id"][:32] / "scoring.json")
+                    require_integrity(file_digest(path)
+                                      == frozen["binding"]["carried_scoring_receipts"][task["id"]],
+                                      "Carried judgment changed before reuse")
                 arms = grade_pair(corpus, grader, captured["dataset"], scope,
-                                  captured["pairs"][task["id"]], frozen, ledger, deadline)
+                                  captured["pairs"][task["id"]], previous or frozen, ledger, deadline,
+                                  targeted_context=previous is None)
                 for arm in ("B", "H"):
                     scores[arm].append(arms[arm])
             except IntegrityError as error:
@@ -267,7 +305,10 @@ def results(corpus: Path, grader: Path, frozen: dict, captured: dict, scores: di
             "scores": aggregates, "fixed_delivered_grounded_recall_bounds": bounds,
             "bounds_interpretation": "Worst/best missing-delivery bounds, not confidence intervals",
             "retained_reviewer_unknown_reservations":
-                frozen["binding"]["retained_source_unknown_reservations"]}
+                frozen["binding"]["retained_source_unknown_reservations"],
+            "carried_pairs": len(captured["carried"]),
+            "context_policy": {"new": frozen["new_context_policy"],
+                               "carried": frozen["prior_context_policy"]}}
 
 
 def main() -> int:

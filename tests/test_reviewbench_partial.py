@@ -131,9 +131,10 @@ def test_fixed_recall_bounds_handle_tp_free_tasks(tmp_path, monkeypatch):
     monkeypatch.setattr(partial, "labels_for", lambda grader, dataset, task:
                         [{"tp_fp": "tp"}] if task["id"] != "no_tp" else [])
     ledger = runtime.CreditLedger(tmp_path / "judge-ledger.json", "analysis", 200)
-    frozen = {"digest": "analysis", "deviations": [],
+    frozen = {"digest": "analysis", "deviations": [], "new_context_policy": "new",
+              "prior_context_policy": "old",
               "binding": {"reviewer_protocol": "review", "retained_source_unknown_reservations": 30}}
-    captured = {"scopes": [{"task": {"id": n}} for n in ("tp", "missing", "no_tp")],
+    captured = {"scopes": [{"task": {"id": n}} for n in ("tp", "missing", "no_tp")], "carried": {},
                 "dataset": {}, "delivery": {
                     "B": {"tp": "valid", "missing": "measurement_invalid", "no_tp": "valid"},
                     "H": {"tp": "valid", "missing": "unfinished", "no_tp": "valid"}}}
@@ -146,7 +147,7 @@ def test_fixed_recall_bounds_handle_tp_free_tasks(tmp_path, monkeypatch):
 
 def test_compact_judge_paths_keep_full_identity_and_reject_collisions(tmp_path, monkeypatch):
     monkeypatch.setattr(judge, "labels_for", lambda *args: [])
-    def stop(*args):
+    def stop(*args, **kwargs):
         raise ProtocolError("before paid calls")
     monkeypatch.setattr(judge, "source_context", stop)
     task, protocol = "a" * 64, "b" * 64
@@ -201,4 +202,67 @@ def test_prior_failed_judge_reservation_reduces_next_cap(study):
     ledger["slots"]["unknown"]["credits"] = 0
     write_json(prior / "judge-ledger.json", ledger)
     with pytest.raises(ProtocolError, match="changed"):
+        partial.verify_analysis(*study)
+
+
+def test_targeted_source_context_merges_windows_without_whole_pr_diff(monkeypatch):
+    class Fake:
+        def __init__(self, config):
+            pass
+
+        def paths(self, commit):
+            return {"code.py": "tracked"}
+
+        def blob(self, path, commit):
+            return "\n".join("line" + str(i) for i in range(1, 201)).encode()
+
+        def raw_diff(self, **kwargs):
+            raise AssertionError("Whole PR must not be dumped into targeted judging")
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(judge, "Evidence", Fake)
+    scope = {"task": {"head": "a" * 40}, "effective_base": "b" * 40}
+    rows = [{"file": "code.py", "start_line": n, "end_line": n + 1} for n in (50, 55)]
+    result = judge.source_context(scope, rows, [], targeted=True)
+    assert result["patch"] == ""
+    assert len(result["snippets"]) == 1
+    assert result["snippets"][0]["commit"] == scope["task"]["head"]
+    text = result["snippets"][0]["source"]
+    assert text.startswith("10: line10") and text.endswith("96: line96")
+    assert "50: line50" in text and "56: line56" in text
+    assert "Full PR diff" in result["omissions"]
+
+
+def test_every_completed_judgment_is_carried_with_its_original_fingerprint(study):
+    corpus, reviewer, grader, analysis = study
+    prior = analysis.parent / "prior-completed"
+    prior.mkdir()
+    body = {"binding": {"reviewer_protocol": "review", "analysis_sources": {}},
+            "judge_credit_cap": 200}
+    frozen = {**body, "digest": digest(body)}
+    write_json(prior / "protocol.json", frozen)
+    write_json(prior / "judge-ledger.json", {"protocol": frozen["digest"], "ceiling": 200,
+                                           "terminal_stop": None, "spent": 0, "slots": {}})
+    write_json(prior / "quality.json", {"protocol": frozen["digest"], "scored_pairs": 1,
+                                       "scores": {a: {"per_pr": [{"pr_key": "0"}]} for a in ("B", "H")}})
+    directory = grader / "judgments" / frozen["digest"][:32] / "0"
+    rows = [(arm, read_json(reviewer / "attempts" / f"0-{arm}-r0-a0" / "result.json"))
+            for arm in ("B", "H")]
+    body = {"protocol": frozen["digest"], "reviews_digest": digest(rows), "artifacts": {}}
+    write_json(directory / "scoring.json", {**body, "digest": digest(body)})
+    entries = [{"root": str(prior), "protocol_sha256": file_digest(prior / "protocol.json"),
+                "ledger_sha256": file_digest(prior / "judge-ledger.json"),
+                "quality_sha256": file_digest(prior / "quality.json"),
+                "source_archive": str(prior / "archive"), "carry_all_completed": True}]
+    write_json(analysis / "prior-judges.json", entries)
+    captured = partial.inputs(*study)
+    assert set(captured["carried"]) == {"0"}
+    assert captured["binding"]["carried_scoring_receipts"]["0"] == file_digest(directory / "scoring.json")
+    partial.seal(*study)
+    data = read_json(directory / "scoring.json")
+    data["reviews_digest"] = "different"
+    write_json(directory / "scoring.json", data)
+    with pytest.raises(IntegrityError):
         partial.verify_analysis(*study)
