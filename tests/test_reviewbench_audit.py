@@ -79,7 +79,9 @@ def test_wrong_index_provenance_cannot_be_valid_empty_review(tmp_path, monkeypat
 
 def test_settled_integrity_stop_is_sticky_across_repeated_run(tmp_path, monkeypatch):
     slots = [{"task": "task", "arm": arm, "repeat": 0, "attempt": 0} for arm in ("H", "B")]
-    protocol = {"digest": "protocol", "dataset_digest": "dataset", "schedule": slots}
+    protocol = {"digest": "protocol", "dataset_digest": "dataset", "schedule": slots,
+                "budgets": {"reviewer_credits": runtime.REVIEWER_CREDITS,
+                            "judge_credits": runtime.JUDGE_CREDITS}}
     write_json(tmp_path / "scopes.json", [{"task": {"id": "task"}}])
     monkeypatch.setattr(campaign, "verify_protocol", lambda _: protocol)
     monkeypatch.setattr(campaign, "validate_receipt", lambda directory, *_: read_json(directory / "result.json"))
@@ -108,7 +110,9 @@ def test_settled_integrity_stop_is_sticky_across_repeated_run(tmp_path, monkeypa
 
 def test_resume_checks_prior_integrity_receipt_before_any_new_reservation(tmp_path, monkeypatch):
     slots = [{"task": "task", "arm": arm, "repeat": 0, "attempt": 0} for arm in ("H", "B")]
-    frozen = {"digest": "protocol", "dataset_digest": "dataset", "schedule": slots}
+    frozen = {"digest": "protocol", "dataset_digest": "dataset", "schedule": slots,
+              "budgets": {"reviewer_credits": runtime.REVIEWER_CREDITS,
+                          "judge_credits": runtime.JUDGE_CREDITS}}
     write_json(tmp_path / "scopes.json", [{"task": {"id": "task"}}])
     ledger = runtime.CreditLedger(tmp_path / "reviewer-ledger.json", "protocol", runtime.REVIEWER_CREDITS)
     key = campaign.slot_id(slots[0])
@@ -137,7 +141,9 @@ def test_stopped_protocol_cannot_be_copied_to_fresh_root_for_same_approval(tmp_p
 
 def test_terminal_reviewer_integrity_stop_blocks_judging(tmp_path, monkeypatch):
     from gita.eval.reviewbench import judge
-    protocol = {"digest": "protocol", "dataset_digest": "dataset"}
+    protocol = {"digest": "protocol", "dataset_digest": "dataset",
+                "budgets": {"reviewer_credits": runtime.REVIEWER_CREDITS,
+                            "judge_credits": runtime.JUDGE_CREDITS}}
     run_root = tmp_path / "run"
     ledger = runtime.CreditLedger(run_root / "reviewer-ledger.json", "protocol", runtime.REVIEWER_CREDITS)
     ledger.halt_integrity("failed", "typed integrity failure")
@@ -158,7 +164,9 @@ def test_settled_judge_integrity_stop_also_blocks_reviewers(tmp_path, monkeypatc
         judge._judge_call(tmp_path / "judge-attempt", "synthetic", ledger, "judge", time.time() + 15)
     assert ledger.snapshot()["slots"]["judge"]["state"] == "settled"
     assert ledger.snapshot()["spent"] == 0.1
-    frozen = {"digest": "protocol", "dataset_digest": "dataset", "schedule": [
+    frozen = {"digest": "protocol", "dataset_digest": "dataset",
+              "budgets": {"reviewer_credits": runtime.REVIEWER_CREDITS,
+                          "judge_credits": runtime.JUDGE_CREDITS}, "schedule": [
         {"task": "task", "arm": "B", "repeat": 0, "attempt": 0}]}
     write_json(tmp_path / "scopes.json", [{"task": {"id": "task"}}])
     monkeypatch.setattr(campaign, "verify_protocol", lambda _: frozen)
@@ -206,7 +214,9 @@ def test_startup_reconciles_settled_integrity_judge_receipt_without_marker(tmp_p
     state["slots"]["prior"]["receipt_path"] = str(receipt)
     write_json(ledger.path, state)
     ledger.settle("prior", 0.1)
-    frozen = {"digest": "protocol", "dataset_digest": "dataset", "schedule": [
+    frozen = {"digest": "protocol", "dataset_digest": "dataset",
+              "budgets": {"reviewer_credits": runtime.REVIEWER_CREDITS,
+                          "judge_credits": runtime.JUDGE_CREDITS}, "schedule": [
         {"task": "task", "arm": "B", "repeat": 0, "attempt": 0}]}
     write_json(tmp_path / "scopes.json", [{"task": {"id": "task"}}])
     monkeypatch.setattr(campaign, "verify_protocol", lambda _: frozen)

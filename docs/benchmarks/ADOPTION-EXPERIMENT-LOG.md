@@ -155,3 +155,41 @@ equivalent to the legacy integration.
 Do not restore legacy extraction or its unsupported compression promises.
 Design a truthful indexed entry point and document the evidence workflow,
 while keeping the baseline's objective and available raw evidence comparable.
+
+## E0c: PR-level trace analysis completed
+
+[Per-PR analysis](adoption-pr-analysis.md) covers all 21 pairs with artifact
+digests. Actual source retrieval was overwhelmingly raw file access, not entity
+retrieval: 46/117 file reads were clipped, while only 1.7% of delivered lines
+repeated. This points more strongly to bounded complete context and actionable
+entry points than to a generic repeated-reading/cache claim. No completed
+indexed-to-source workflow occurred. History is a conditional aid, not something
+every static PR review demonstrably needs.
+
+## E2: connected history and small workflow pilot
+
+[Connected-history preparation](adoption-connected-history-pilot.json):
+positions 0 and 6 passed source/preflight/history validation over 18 and 16
+commits; eight multi-event named-entity histories checked per ready repository.
+Coverage remains partial. Position 3 built 17 commits in 262.370 seconds but
+did not complete verification before its 300-second supervisor limit; it is
+not silently counted ready and remains in the eventual fixed 25-task cohort.
+
+**Development pilot:** positions 0 and 6, chosen for verified readiness and
+concrete source-navigation opportunities, not for favorable quality labels.
+This selection is not confirmation evidence. B receives raw diff/source
+workflow guidance. H receives explicit indexed source/history workflow guidance
+with raw fallback; no minimum call count and no instruction to invent temporal
+questions. This tests agent-plus-product onboarding, not pure tool availability.
+
+Pilot protocol must declare four scheduled review sessions, Copilot `auto`,
+reviewer ceiling 80 credits / judge ceiling 60, prospective native 30-credit
+reservations, no automatic retries, and consistent targeted judging from the
+start. The worst-case new allocation 140 plus the previous all-native upper
+bound 589.474791 remains below the original 950 total authorization.
+Unused reservations are not expenditure; actual pilot spending will determine
+remaining ceilings before the final 25-task run.
+
+**Readiness validation:** 125 offline evaluator tests pass. Small pilot/task
+limits and budgets are frozen explicitly; the ordinary 25-task membership gate
+is unchanged. All reviewer/judge ledger consumers use the declared frozen caps.

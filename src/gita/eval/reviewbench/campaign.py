@@ -46,13 +46,25 @@ with no defensible findings. Do not output markdown fences or narrative outside 
 PR_IDENTITY = """
 
 
-def review_prompt(task: dict) -> str:
+WORKFLOW_GUIDANCE = {
+    "B": "Evidence workflow: use raw_diff for changed-line anchors and read_file/search for relevant source and callers. Use raw history when it helps resolve a concrete concern.",
+    "H": "Evidence workflow: inspect index_status. Use raw_diff for changed-line anchors (events is not an endpoint diff), then entity_context(path,line) for the containing function/class source. Use id and history for a concrete question about how a named entity changed. Use read_file/search for imports, callers, uncovered files or genuinely missing context. Coverage gaps are not evidence of absence. Do not make irrelevant calls to meet a quota.",
+}
+
+
+def review_prompt(task: dict, *, arm: str | None = None, indexed_workflow: bool = False) -> str:
     from .common import pr_identity
     # Identical for B and H. Titles/bodies are deliberately excluded to avoid label cues.
-    return PROMPT + json.dumps(pr_identity(task), sort_keys=True)
+    prompt = PROMPT + json.dumps(pr_identity(task), sort_keys=True)
+    if indexed_workflow:
+        require(arm in WORKFLOW_GUIDANCE, "Workflow arm missing")
+        prompt += "\n" + WORKFLOW_GUIDANCE[arm]
+    return prompt
 
 
-def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261014) -> dict:
+def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261014,
+             development_pilot: bool = False, indexed_workflow: bool = False,
+             reviewer_credits: int = REVIEWER_CREDITS, judge_credits: int = JUDGE_CREDITS) -> dict:
     manifest = verify(root)
     package = Path(__file__).parent
     executable = __import__("shutil").which("copilot.exe") or __import__("shutil").which("copilot")
@@ -61,9 +73,17 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
                                  timeout=30, check=True).stdout.strip()
     require("1.0.97" in cli_version, "CLI protocol needs requalification for this version")
     require(parsers["policy_digest"] == policy_digest(), "Parser/product policy changed after provisioning")
-    require(len(scopes) == 25, "Freeze all 25 starter slots before any model calls")
-    require([scope["task"]["id"] for scope in scopes] == manifest["starter_ids"],
-            "Wrong starter ordering/membership")
+    ids = [scope["task"]["id"] for scope in scopes]
+    if development_pilot:
+        require(1 <= len(ids) <= 3 and len(set(ids)) == len(ids)
+                and set(ids) <= set(manifest["starter_ids"]), "Pilot must name 1-3 unique starter tasks")
+    else:
+        require(len(scopes) == 25, "Freeze all 25 starter slots before any model calls")
+        require(ids == manifest["starter_ids"], "Wrong starter ordering/membership")
+    require(type(reviewer_credits) is int and SESSION_CREDITS <= reviewer_credits <= REVIEWER_CREDITS,
+            "Invalid reviewer campaign ceiling")
+    require(type(judge_credits) is int and SESSION_CREDITS <= judge_credits <= JUDGE_CREDITS,
+            "Invalid judge campaign ceiling")
     randomizer = random.Random(seed)
     schedule = []
     for scope in scopes:
@@ -80,9 +100,12 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "harness_sources": {path.name: file_digest(path)
                                 for path in sorted(package.glob("*")) if path.suffix in (".py", ".mjs")},
             "prompt_digest": digest(PROMPT),
+            "development_pilot": development_pilot, "indexed_workflow": indexed_workflow,
+            "targeted_judging": indexed_workflow,
+            "workflow_guidance": WORKFLOW_GUIDANCE if indexed_workflow else {},
             "tool_schemas": {arm: inventory(arm) for arm in ("B", "H")},
             "scope_digests": {scope["task"]["id"]: digest(scope) for scope in scopes},
-            "budgets": {"reviewer_credits": REVIEWER_CREDITS, "judge_credits": 200,
+            "budgets": {"reviewer_credits": reviewer_credits, "judge_credits": judge_credits,
                         "session_native_credits": SESSION_CREDITS, "max_sessions": 2,
                         "max_calls": EVIDENCE_CALL_LIMIT, "max_tool_attempts": EVIDENCE_CALL_LIMIT + FINALIZATION_GRACE,
                         "max_turns": MAX_TURNS + FINALIZATION_GRACE,
@@ -96,12 +119,16 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
     return {**body, "digest": digest(body)}
 
 
-def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed: int) -> dict:
+def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed: int,
+         development_pilot: bool = False, indexed_workflow: bool = False,
+         reviewer_credits: int = REVIEWER_CREDITS, judge_credits: int = JUDGE_CREDITS) -> dict:
     require(run_root.resolve() != root.resolve() and root.resolve() not in run_root.resolve().parents,
             "Run artifacts must live outside corpus root")
     for scope in scopes:
         preflight(scope)
-    frozen = protocol(root, scopes, parsers, seed=seed)
+    frozen = protocol(root, scopes, parsers, seed=seed, development_pilot=development_pilot,
+                      indexed_workflow=indexed_workflow, reviewer_credits=reviewer_credits,
+                      judge_credits=judge_credits)
     body = {k: v for k, v in frozen.items() if k != "digest"}
     body["run_root_digest"] = digest(str(run_root.resolve()))
     frozen = {**body, "digest": digest(body)}
@@ -194,7 +221,9 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
               "started": utc_now(), "usage": None}
     names = ["review-" + t["name"] for t in inventory(slot["arm"])]
     try:
-        outcome = invoke(directory, review_prompt(scope["task"]), names, directory / "mcp.json", timeout=timeout)
+        prompt = review_prompt(scope["task"], arm=slot["arm"],
+                               indexed_workflow=frozen.get("indexed_workflow", False))
+        outcome = invoke(directory, prompt, names, directory / "mcp.json", timeout=timeout)
     except IntegrityError as error:
         outcome = {"status": "integrity_failed", "integrity_stop": True, "error_code": error.code,
                    "usage": None, "error": str(error), "wall_seconds": None}
@@ -274,14 +303,18 @@ def validate_receipt(path: Path, slot: dict, frozen: dict) -> dict:
 
 def run(run_root: Path, *, task_limit: int, audit_approval: str,
         pilot_approval: str | None = None) -> dict:
-    require(task_limit in (1, 25), "Only initial one-pair canary or approved 25-task pilot")
     frozen = verify_protocol(run_root)
+    limit = 3 if frozen.get("development_pilot", False) else 25
+    require(task_limit in range(1, limit + 1)
+            and (frozen.get("development_pilot", False) or task_limit in (1, 25)),
+            "Invalid task limit for frozen experiment")
     require(audit_approval == frozen["digest"], "Independent audit approval must name exact protocol digest")
-    if task_limit == 25:
+    if task_limit > 1:
         require(pilot_approval == pair_digest(run_root), "Inspect initial live pair before authorizing pilot")
     scopes = {s["task"]["id"]: s for s in read_json(run_root / "scopes.json")}
     tasks = list(scopes)[:task_limit]
-    ledger = CreditLedger(run_root / "reviewer-ledger.json", frozen["digest"], REVIEWER_CREDITS)
+    ledger = CreditLedger(run_root / "reviewer-ledger.json", frozen["digest"],
+                          frozen["budgets"]["reviewer_credits"])
     with file_lock(run_root / "campaign.lock"):
         state = ledger.snapshot()
         started = datetime.fromisoformat(state["created"])
@@ -291,7 +324,7 @@ def run(run_root: Path, *, task_limit: int, audit_approval: str,
         def persist_summary(stop):
             summary = {"protocol": frozen["digest"], "approved_task_limit": task_limit,
                        "stop_reason": stop, "ledger": ledger.snapshot(),
-                       "scheduled_primary_slots": 50, "automatic_retries": 0}
+                       "scheduled_primary_slots": len(frozen["schedule"]), "automatic_retries": 0}
             write_json(run_root / "campaign.json", summary)
             return summary
 

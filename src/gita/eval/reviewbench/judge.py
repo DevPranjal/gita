@@ -239,12 +239,14 @@ def grade(root: Path, run_root: Path, grader: Path) -> dict:
     require(dataset["digest"] == frozen["dataset_digest"], "Wrong judge dataset")
     require(grader.resolve() not in run_root.resolve().parents
             and run_root.resolve() not in grader.resolve().parents, "Separate grader workspace required")
-    ledger = CreditLedger(run_root / "judge-ledger.json", frozen["digest"], JUDGE_CREDITS)
+    ledger = CreditLedger(run_root / "judge-ledger.json", frozen["digest"],
+                          frozen["budgets"]["judge_credits"])
     require(reconcile_judge_outcomes(run_root, frozen["digest"]) is None,
             "Prior judge outcomes block model reservations")
     require_integrity(ledger.snapshot().get("terminal_stop") is None,
                       "Terminal protocol integrity stop blocks judge sessions")
-    reviewer = CreditLedger(run_root / "reviewer-ledger.json", frozen["digest"], REVIEWER_CREDITS).snapshot()
+    reviewer = CreditLedger(run_root / "reviewer-ledger.json", frozen["digest"],
+                            frozen["budgets"]["reviewer_credits"]).snapshot()
     require_integrity(reviewer.get("terminal_stop") is None,
                       "Terminal protocol integrity stop blocks reviewer and judge sessions")
     require(not any(s["state"] in ("reserved", "unknown") for s in reviewer["slots"].values()),
@@ -256,7 +258,8 @@ def grade(root: Path, run_root: Path, grader: Path) -> dict:
                 labels_for(grader, dataset, scope["task"])) for scope in scopes}
     delivery = {arm: {scope["task"]["id"]: "unfinished" for scope in scopes} for arm in ("B", "H")}
     with file_lock(run_root / "campaign.lock"):
-        latest_reviewer = CreditLedger(run_root / "reviewer-ledger.json", frozen["digest"], REVIEWER_CREDITS).snapshot()
+        latest_reviewer = CreditLedger(run_root / "reviewer-ledger.json", frozen["digest"],
+                                       frozen["budgets"]["reviewer_credits"]).snapshot()
         require_integrity(latest_reviewer.get("terminal_stop") is None,
                           "Terminal protocol integrity stop blocks reviewer and judge sessions")
         for scope in scopes:
@@ -276,13 +279,15 @@ def grade(root: Path, run_root: Path, grader: Path) -> dict:
                 pending.append({"task": task["id"], "reason": "Incomplete/invalid primary pair"})
                 continue
             try:
-                arms = grade_pair(root, grader, dataset, scope, rows, frozen, ledger, deadline)
+                arms = grade_pair(root, grader, dataset, scope, rows, frozen, ledger, deadline,
+                                  targeted_context=frozen.get("targeted_judging", False))
                 for arm in ("B", "H"):
                     scores[arm].append(arms[arm])
             except IntegrityError as error:
                 reason = "Judge campaign integrity gate: " + str(error)
                 ledger.halt_integrity(task["id"] + "-judge", reason)
-                CreditLedger(run_root / "reviewer-ledger.json", frozen["digest"], REVIEWER_CREDITS).halt_integrity(
+                CreditLedger(run_root / "reviewer-ledger.json", frozen["digest"],
+                             frozen["budgets"]["reviewer_credits"]).halt_integrity(
                     task["id"] + "-judge", reason)
                 pending.append({"task": task["id"], "reason": reason})
                 break
