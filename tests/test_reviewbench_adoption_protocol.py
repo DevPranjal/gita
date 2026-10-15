@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import pytest
 
 from gita.eval.reviewbench import campaign
-from gita.eval.reviewbench.common import ProtocolError
+from gita.eval.reviewbench.common import ProtocolError, digest
 
 
 @pytest.fixture
@@ -61,3 +61,17 @@ def test_review_profile_matches_capabilities_without_hiding_raw_fallback():
     assert not {"entity_diff", "history"} & gaps
     assert not {"entities", "source", "state", "events"} & ready
     assert {"entity_context", "change_context", "id", "index_status"} <= gaps
+
+
+def test_workflow_metadata_is_bound_separately_from_immutable_source_scope():
+    scope = {"repo": "source", "history_ready": True}
+    slot = {"task": "task", "arm": "H"}
+    frozen = {"indexed_workflow": True, "task_tool_schemas": {},
+              "scope_digests": {"task": digest(scope)}}
+    config = {**scope, "arm": "H", "cursor_secret": "secret", "tool_log": "calls",
+              "indexed_workflow": True}
+    campaign.validate_broker_config(config, slot, frozen)
+    for changed in ({**config, "indexed_workflow": False},
+                    {**config, "arm": "B"}, {**config, "history_ready": False}):
+        with pytest.raises(ProtocolError):
+            campaign.validate_broker_config(changed, slot, frozen)

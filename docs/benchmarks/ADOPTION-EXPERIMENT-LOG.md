@@ -292,3 +292,30 @@ sentence is removed only for declared workflow experiments.
 diff, raw fallback retention, capability-specific discovery and unchanged
 default prompts. This remains a broker prototype, not completed public CLI/MCP
 productization. A final win is not assumed; full25 inference remains gated.
+
+### E4 canary: stopped on a harness replay-guard regression
+
+One H review completed valid source/output checks at 3.582495 credits, using
+the indexed change map and raw verification. Before B could start, cached
+scope verification incorrectly hashed the new `indexed_workflow` control flag
+as though it belonged to the immutable repository scope. The source/index data
+were not shown corrupt; this was a harness integration error.
+
+The stopped ledger remains untouched, and the one-sided attempt is not
+included in a paired performance/quality comparison. Fix: validate arm/workflow
+against their frozen controls separately, and remove only those explicit
+control fields when reconstructing the source-scope digest. A regression test
+checks valid profiles plus tampered arm, workflow and history scope.
+
+## Full25 offline qualification: not yet a model-launch gate
+
+All 25 preparations were attempted in 34.8 minutes:
+17 verified connected PR-range histories; 3 verified endpoint-only scopes;
+2 build timeouts (positions1,13); 3 strict source-verification failures
+(positions7,14,18, "Python AST span missing").
+
+Original endpoint fallbacks are recorded, but a failed strict source oracle
+is **not** silently reclassified as a verified connected index. The final paid
+25-task review run is blocked until those three cases are understood. Existing
+failure receipts/source oracles are being inspected under a bounded follow-up,
+without rerunning the whole preparation batch.

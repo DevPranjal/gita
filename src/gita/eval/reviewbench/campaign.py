@@ -48,7 +48,7 @@ PR_IDENTITY = """
 
 WORKFLOW_GUIDANCE = {
     "B": "Evidence workflow: use raw_diff for changed-line anchors and read_file/search for relevant source and callers. Verify the containing function and relevant guards before asserting behavior, not just added lines. If the patch already includes that complete context, do not reread it unnecessarily. Use raw history when it helps resolve a concrete concern.",
-    "H": "Gita evidence workflow: start with change_context for the indexed changed-code map, then entity_context(path,line) for relevant enclosing source. Verify the containing function and guards before asserting behavior. Use entity_diff(token,path) for exact persistent-entity before/after source where connected history is available; use raw_diff for unsupported/ambiguous changes and file-level edits. Inspect index_status for gaps. Use id and history for a concrete temporal question. Use read_file/search for imports, callers and uncovered source. If supplied evidence already contains full relevant context, do not reread it unnecessarily. Coverage gaps are not evidence of absence. Do not make irrelevant calls to meet a quota.",
+    "H": "Gita evidence workflow: start with change_context for the indexed changed-code map. For existing indexed functions, prefer entity_diff(token,path) over raw_diff to inspect the exact persistent-entity before/after source. Use entity_context(path,line) for enclosing source and guards. Use raw_diff for new/deleted entities, uncovered or ambiguous changes, and file-level edits; raw fallback remains valid. Inspect index_status for gaps. Use id and history for a concrete temporal question. Use read_file/search for imports, callers and uncovered source. If supplied evidence already contains full relevant context, do not reread it unnecessarily. Coverage gaps are not evidence of absence. Do not make irrelevant calls to meet a quota.",
 }
 
 
@@ -272,6 +272,18 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
     return result
 
 
+def validate_broker_config(config: dict, slot: dict, frozen: dict) -> None:
+    require(config["arm"] == slot["arm"], "Cached broker arm mismatch")
+    if "indexed_workflow" in config or "task_tool_schemas" in frozen:
+        require(type(config.get("indexed_workflow")) is bool
+                and config["indexed_workflow"] == frozen.get("indexed_workflow", False),
+                "Cached broker workflow/protocol mismatch")
+    original_scope = {k: v for k, v in config.items()
+                      if k not in ("arm", "cursor_secret", "tool_log", "indexed_workflow")}
+    require(digest(original_scope) == frozen["scope_digests"][slot["task"]],
+            "Cached broker scope/protocol mismatch")
+
+
 def validate_receipt(path: Path, slot: dict, frozen: dict) -> dict:
     row = read_json(path / "result.json")
     expected = {**slot, "protocol_digest": frozen["digest"],
@@ -291,9 +303,7 @@ def validate_receipt(path: Path, slot: dict, frozen: dict) -> dict:
             "broker.json", "events.jsonl", "usage.json", "tools.jsonl", "findings.json")),
             "A failed/missing-raw attempt cannot become a valid empty review")
         config = read_json(path / "broker.json")
-        original_scope = {k: v for k, v in config.items() if k not in ("arm", "cursor_secret", "tool_log")}
-        require(digest(original_scope) == frozen["scope_digests"][slot["task"]],
-                "Cached broker scope/protocol mismatch")
+        validate_broker_config(config, slot, frozen)
         require(parse_usage(read_json(path / "usage.json")) == row["usage"], "Cached usage changed")
         events = read_events(path / "events.jsonl")
         inventories(events, {"review-" + t["name"] for t in tool_inventory(config)})
