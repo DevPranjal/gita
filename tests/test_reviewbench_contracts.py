@@ -101,12 +101,14 @@ def test_max_two_reservations_and_persisted_started_slots(tmp_path):
         resumed.reserve("a")
 
 
-def test_native_cap_violation_keeps_unknown_receipt(tmp_path):
+def test_native_cap_violation_retains_measured_overrun_receipt(tmp_path):
     ledger = CreditLedger(tmp_path / "ledger.json", digest("p"), REVIEWER_CREDITS)
     ledger.reserve("a")
     with pytest.raises(ProtocolError, match="exceeded"):
         ledger.settle("a", 31)
-    assert ledger.snapshot()["slots"]["a"]["state"] == "unknown"
+    assert ledger.snapshot()["slots"]["a"]["state"] == "overrun"
+    assert ledger.snapshot()["spent"] == 31
+    assert ledger.snapshot()["terminal_stop"]["kind"] == "integrity"
 
 
 def test_judge_sentinel_not_ignored_empty_flag(monkeypatch, tmp_path):

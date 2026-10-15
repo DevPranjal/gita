@@ -511,3 +511,30 @@ runtime/fixed-model tests pass. Missing usage still remains unknown. No further
 paid calls, retry or old-ledger clearing followed this stop. The native limit
 is demonstrably not a strict upper bound; future campaign budgeting must
 allow a documented overrun reserve rather than promise a hard provider cap.
+
+### Both already-paid fixed-model pairs are now quality-scored
+
+Separate read-only source analysis bound all four valid measured receipts,
+the unchanged stopped ledger and first-pair judgment. Only the second pair
+received new Sol/medium matcher/classifier calls; the first pair was reused.
+This did not resume reviewers or clear the spending stop. Additional judging
+20.100900 credits; all fixed-run judging37.098800. Actual review plus judge
+total **143.137200**.
+
+| Two-pair macro quality | B | H |
+| --- | ---: | ---: |
+| Grounded precision | 0% | 0% |
+| Grounded recall | 5.56% | 5.56% |
+| Augmented precision | 50% | 16.67% |
+| Augmented recall | 12.70% | 10% |
+
+Micro augmented precision33.33% /25%, recall12.5% /12.5%. These are not a
+quality win or formal non-inferiority. All23 unstarted pairs remain explicit.
+Actual credits B56.656820 /H49.381580 and input421,944 /280,152 are conditional
+two-pair observations only.
+
+Updated the pre-existing overrun regression to assert measured `overrun`
+instead of the old inaccurate `unknown` contract. **All157 evaluator tests
+pass.** The broader task remains incomplete: a23-pair continuation requires
+an explicitly increased total budget and revised native-cap overrun handling.
+No approval is inferred from an unanswered budget form.
