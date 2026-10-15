@@ -564,9 +564,52 @@ tests pass. This proves fewer interface failures, **not** improved review qualit
 or inference credits. Original reviewer receipts remain unchanged.
 
 One final small development check may use the remaining original allowance:
-prior all-native conservative bound846.1512005, new reviewer60/judge35 ceilings,
-leaving8.8487995 credits of reserve below950. Native per-session limits can
+prior all-native conservative bound846.1512005, new reviewer60/judge40 ceilings,
+leaving3.8487995 credits of reserve below950. Native per-session limits can
 overshoot, so any measured overrun remains a stop, never an automatic retry.
 The check uses an already-seen development PR and cannot establish held-out
 quality or justify a25-task claim. Do not spend past authorization or select
 only favorable prior results.
+
+### E7 result: actual defect fixed, requested efficacy target not achieved
+
+[Complete fixed-model pilot](adoption-e7-solmedium-pilot.json). Both arms and
+both judge stages used GPT-5.6 Sol / medium. All reviewer outputs and judgments
+completed without tool errors; no alternate route or retry.
+
+| Metric | B | H |
+| --- | ---: | ---: |
+| Review credits | 19.694500 | 26.897860 |
+| Input tokens including cache | 137,411 | 144,702 |
+| Grounded precision | 0% | 0% |
+| Grounded recall | 11.11% | 11.11% |
+| Augmented precision | 50% | 0% |
+| Augmented recall | 20% | 11.11% |
+
+Meaningful indexed-source usage increased: H made seven `entity_context` calls,
+plus the indexed source-preview packet. But it also read nine raw source
+windows and eight patch pages. Index use became **additional** evidence rather
+than consistently replacing raw exploration. There were no schema errors, but
+H cost36.6% more and consumed5.3% more input. This falsifies the hypothesis that
+fixing interface refusals alone delivers a joint quality/efficiency win.
+
+Actual E7 cost63.494260 including judging; conservative all-native cumulative
+upper909.6454605 leaves40.3545395 under the original950 ceiling. A fresh paired
+review requires two30-credit prospective reservations plus judging allowance,
+so another paid paired experiment is not authorized under the remainder.
+No unavailable-user budget proposal is treated as approval.
+
+**Delivery status:** code and all seven iteration outcomes are preserved on
+the PR; all159 evaluator tests pass. The fixed-model study remains two primary
+pairs plus a separately reported one-PR development iteration, not25 completed
+tasks. No cost/quality win, official-score equivalence or held-out confirmation
+is claimed. All old raw artifacts and negative outcomes remain intact.
+
+**Next measurable intervention, not yet executed:** an integrated source
+retrieval contract must replace redundant raw/structured navigation rather
+than add another optional tool surface. It should expose enough code for
+caller/guard checks, track source coverage/omissions and measure repeated
+retrieval at identical evidence scope. Qualify this independently of golden
+labels, then use a newly authorized fixed-model paired run with a frozen,
+consistent judge and explicit native-cap-overrun reserve. Do not force minimum
+history calls or train the prompt to this repeatedly seen regex PR.
