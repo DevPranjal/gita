@@ -61,6 +61,10 @@ def test_entity_context_returns_exact_named_source_without_copying_references(fi
         changed = evidence.execute("change_context", {})
         assert "divide" in changed["text"] and "code.py:2" in changed["text"]
         assert changed["semantic_endpoint_diff"] is False
+        delta = evidence.execute("entity_diff", {"token": "divide", "path": "code.py"})
+        assert "error" not in delta, delta
+        assert delta["eid"].startswith("oeid1_")
+        assert "return 10 / value" in delta["text"] and "return 20 / value" in delta["text"]
     finally:
         evidence.close()
 

@@ -48,4 +48,16 @@ def test_default_prompts_remain_identical_and_workflow_is_explicit():
     b = campaign.review_prompt(task, arm="B", indexed_workflow=True)
     h = campaign.review_prompt(task, arm="H", indexed_workflow=True)
     assert "entity_context(path,line)" in h and "entity_context(path,line)" not in b
-    assert "semantic endpoint diff" in h and "start with change_context" in h
+    assert "entity_diff(token,path)" in h and "start with change_context" in h
+    assert "All evidence tools are optional" not in h
+
+
+def test_review_profile_matches_capabilities_without_hiding_raw_fallback():
+    from gita.eval.reviewbench.evidence import COMMON_TOOLS, inventory
+    ready = {t["name"] for t in inventory("H", workflow=True, history_ready=True)}
+    gaps = {t["name"] for t in inventory("H", workflow=True, history_ready=False)}
+    assert set(COMMON_TOOLS) <= ready and set(COMMON_TOOLS) <= gaps
+    assert {"entity_diff", "history"} <= ready
+    assert not {"entity_diff", "history"} & gaps
+    assert not {"entities", "source", "state", "events"} & ready
+    assert {"entity_context", "change_context", "id", "index_status"} <= gaps

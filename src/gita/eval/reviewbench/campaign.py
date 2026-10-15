@@ -15,7 +15,7 @@ from . import VERSION
 from .common import (EVIDENCE_CALL_LIMIT, FINALIZATION_GRACE, IntegrityError, ProtocolError, digest, file_digest, final_answer, git, read_json,
                      require, require_integrity, utc_now, validate_findings, write_json)
 from .dataset import verify
-from .evidence import Evidence, inventory
+from .evidence import Evidence, inventory, tool_inventory
 from .evidence import COMMON_TOOLS, MAX_RESPONSE_CHARS, PAGE_CHARS
 from .preparation import policy_digest, preflight
 from .runtime import (CAMPAIGN_SECONDS, CreditLedger, MAX_SECONDS, MAX_TURNS,
@@ -47,8 +47,8 @@ PR_IDENTITY = """
 
 
 WORKFLOW_GUIDANCE = {
-    "B": "Evidence workflow: use raw_diff for changed-line anchors and read_file/search for relevant source and callers. Use raw history when it helps resolve a concrete concern.",
-    "H": "Evidence workflow: start with change_context for the changed-code map, then entity_context(path,line) for relevant enclosing source. Use raw_diff to inspect actual edits where necessary (neither the map nor events is a semantic endpoint diff). Inspect index_status for gaps. Use id and history for a concrete question about how a named entity changed. Use read_file/search for imports, callers and uncovered source. Coverage gaps are not evidence of absence. Do not make irrelevant calls to meet a quota.",
+    "B": "Evidence workflow: use raw_diff for changed-line anchors and read_file/search for relevant source and callers. Verify the containing function and relevant guards before asserting behavior, not just added lines. If the patch already includes that complete context, do not reread it unnecessarily. Use raw history when it helps resolve a concrete concern.",
+    "H": "Gita evidence workflow: start with change_context for the indexed changed-code map, then entity_context(path,line) for relevant enclosing source. Verify the containing function and guards before asserting behavior. Use entity_diff(token,path) for exact persistent-entity before/after source where connected history is available; use raw_diff for unsupported/ambiguous changes and file-level edits. Inspect index_status for gaps. Use id and history for a concrete temporal question. Use read_file/search for imports, callers and uncovered source. If supplied evidence already contains full relevant context, do not reread it unnecessarily. Coverage gaps are not evidence of absence. Do not make irrelevant calls to meet a quota.",
 }
 
 
@@ -58,6 +58,9 @@ def review_prompt(task: dict, *, arm: str | None = None, indexed_workflow: bool 
     prompt = PROMPT + json.dumps(pr_identity(task), sort_keys=True)
     if indexed_workflow:
         require(arm in WORKFLOW_GUIDANCE, "Workflow arm missing")
+        prompt = prompt.replace(
+            "All evidence tools are optional: use whichever help you review accurately.",
+            "Follow the evidence workflow below, choosing relevant evidence rather than padding calls.")
         prompt += "\n" + WORKFLOW_GUIDANCE[arm]
     return prompt
 
@@ -104,6 +107,10 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "targeted_judging": indexed_workflow,
             "workflow_guidance": WORKFLOW_GUIDANCE if indexed_workflow else {},
             "tool_schemas": {arm: inventory(arm) for arm in ("B", "H")},
+            "task_tool_schemas": {
+                s["task"]["id"]: {arm: tool_inventory({
+                    **s, "arm": arm, "indexed_workflow": indexed_workflow})
+                    for arm in ("B", "H")} for s in scopes},
             "scope_digests": {scope["task"]["id"]: digest(scope) for scope in scopes},
             "budgets": {"reviewer_credits": reviewer_credits, "judge_credits": judge_credits,
                         "session_native_credits": SESSION_CREDITS, "max_sessions": 2,
@@ -210,16 +217,17 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
                 "task_tuple_digest": scope["task"]["id"]}
     write_json(directory / "started.json", {"identity": identity, "started": utc_now()})
     config = {**scope, "arm": slot["arm"], "cursor_secret": secrets.token_hex(32),
+              "indexed_workflow": frozen.get("indexed_workflow", False),
               "tool_log": str(directory / "tools.jsonl")}
     write_json(directory / "broker.json", config)
     write_json(directory / "mcp.json", {"mcpServers": {"review": {
         "type": "local", "command": sys.executable,
         "args": ["-m", "gita.eval.reviewbench.evidence", str(directory / "broker.json")],
         "env": {"PYTHONPATH": str(Path(__file__).resolve().parents[3]),
-                "PYTHONIOENCODING": "utf-8"}, "tools": [t["name"] for t in inventory(slot["arm"])]}}})
+                "PYTHONIOENCODING": "utf-8"}, "tools": [t["name"] for t in tool_inventory(config)]}}})
     result = {"identity": identity, "status": "runtime_failed", "findings": None,
               "started": utc_now(), "usage": None}
-    names = ["review-" + t["name"] for t in inventory(slot["arm"])]
+    names = ["review-" + t["name"] for t in tool_inventory(config)]
     try:
         prompt = review_prompt(scope["task"], arm=slot["arm"],
                                indexed_workflow=frozen.get("indexed_workflow", False))
@@ -288,7 +296,7 @@ def validate_receipt(path: Path, slot: dict, frozen: dict) -> dict:
                 "Cached broker scope/protocol mismatch")
         require(parse_usage(read_json(path / "usage.json")) == row["usage"], "Cached usage changed")
         events = read_events(path / "events.jsonl")
-        inventories(events, {"review-" + t["name"] for t in inventory(slot["arm"])})
+        inventories(events, {"review-" + t["name"] for t in tool_inventory(config)})
         require(audit_calls(events, path / "tools.jsonl") == row["tool_audit"], "Cached tool audit changed")
         answer = final_answer(events)
         require(answer == read_json(path / "findings.json"), "Cached findings differ from raw final answer")

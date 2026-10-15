@@ -8,6 +8,7 @@ import hashlib
 import hmac
 import json
 import re
+import difflib
 from pathlib import Path
 import time
 from typing import Any
@@ -19,7 +20,7 @@ from .common import (EVIDENCE_CALL_LIMIT, EvidenceBudgetError, IntegrityError, P
 PAGE_CHARS = 6000
 MAX_RESPONSE_CHARS = 8000
 COMMON_TOOLS = ("raw_diff", "read_file", "search", "list_files", "commit_log", "file_history")
-INDEX_TOOLS = ("change_context", "index_status", "entities", "entity_context", "id", "state", "source", "history", "events")
+INDEX_TOOLS = ("change_context", "index_status", "entities", "entity_context", "entity_diff", "id", "state", "source", "history", "events")
 
 
 def schema(properties: dict, required: tuple[str, ...] = ()) -> dict:
@@ -44,6 +45,7 @@ SCHEMAS = {
     "entities": schema({"path": STRING, "commit": STRING, "cursor": CURSOR}, ("path",)),
     "entity_context": schema({"path": STRING, "line": INTEGER, "commit": STRING, "cursor": CURSOR},
                              ("path", "line")),
+    "entity_diff": schema({"token": STRING, "path": STRING, "cursor": CURSOR}, ("token",)),
     "id": schema({"token": STRING, "commit": STRING, "cursor": CURSOR}, ("token",)),
     "state": schema({"eid": STRING, "commit": STRING}, ("eid",)),
     "source": schema({"reference": {"type": "object"}}, ("reference",)),
@@ -61,6 +63,7 @@ DESCRIPTIONS = {
     "change_context": "Review starting point: map actual Git changed-line anchors to prebuilt indexed entities at HEAD. Returns paths, locations, names and coverage gaps; use entity_context for bodies and raw_diff to verify edits. Not a semantic endpoint diff.",
     "entities": "Indexed file entities with exact occurrence references, coverage and opaque continuation.",
     "entity_context": "Read bounded enclosing indexed source at a file line, including parent function context rather than only a tiny nested callback. Exact Git-verified bytes; pages large entities. Use raw read_file if coverage is unavailable.",
+    "entity_diff": "Compare exact base/head source of a uniquely resolved persistent entity in connected indexed history. Supply a function name and optional HEAD path. Preserves rename/move identity; refuses ambiguous or unqualified endpoints. This is one entity's source diff, not a complete PR diff.",
     "id": "Resolve an indexed EID or entity name at an allowed revision, preserving ambiguity.",
     "state": "Generation-qualified indexed entity state at an allowed revision.",
     "source": "Exact source of a complete previously issued occurrence reference. Over-budget is an error.",
@@ -69,11 +72,23 @@ DESCRIPTIONS = {
 }
 
 
-def inventory(arm: str) -> list[dict]:
+def inventory(arm: str, *, workflow: bool = False, history_ready: bool = True) -> list[dict]:
     require(arm in ("B", "H"), "Unknown arm")
-    names = COMMON_TOOLS + (INDEX_TOOLS if arm == "H" else ())
-    return [{"name": name, "description": DESCRIPTIONS[name], "inputSchema": SCHEMAS[name]}
+    indexed = INDEX_TOOLS
+    if workflow:
+        indexed = ("change_context", "entity_context", "entity_diff", "id", "history", "index_status")
+        if not history_ready:
+            indexed = tuple(name for name in indexed if name not in ("history", "entity_diff"))
+    names = COMMON_TOOLS + (indexed if arm == "H" else ())
+    return [{"name": name, "description": (
+        "Gita index readiness, declared coverage and connected-history availability; no build or mutation."
+        if workflow and name == "index_status" else DESCRIPTIONS[name]), "inputSchema": SCHEMAS[name]}
             for name in names]
+
+
+def tool_inventory(config: dict) -> list[dict]:
+    return inventory(config["arm"], workflow=config.get("indexed_workflow", False),
+                     history_ready=config.get("history_ready", False))
 
 
 class Evidence:
@@ -88,7 +103,7 @@ class Evidence:
             oid(commit)
         require(self.base in self.allowed and self.head in self.allowed, "Endpoint outside task scope")
         self.arm = config["arm"]
-        self.tools = {tool["name"] for tool in inventory(self.arm)}
+        self.tools = {tool["name"] for tool in tool_inventory(config)}
         self.calls = 0
         self.log = Path(config["tool_log"]) if config.get("tool_log") else None
         self.secret = config["cursor_secret"].encode()
@@ -526,6 +541,49 @@ class Evidence:
                                   complete_entity=not cursor and not result["truncated"])
         return result
 
+    def entity_diff(self, token: str, path: str = "", cursor: str = "") -> dict:
+        require(self.config.get("history_ready") is True, "Connected indexed history required")
+        if path:
+            checked_path(path)
+        session = self._index(self.head)
+        require(session is self._index(self.base), "Endpoint generations differ")
+        matches, native_cursor = [], None
+        while True:
+            page = session.resolve(token, at=GitOid.from_hex("sha1", self.head),
+                                   historical=False, limit=1000, cursor=native_cursor)
+            self._occurrences(page, session)
+            matches.extend(r for r in page["results"]
+                           if r.get("occurrence") and (not path or r["occurrence"]["path"] == path))
+            native_cursor = page["page"]["next_cursor"]
+            if not native_cursor:
+                break
+        require(len(matches) == 1, "Entity name missing or ambiguous; narrow the HEAD path or use id")
+        eid = matches[0]["eid"]
+        states = [session.state_at(eid, at=GitOid.from_hex("sha1", commit))
+                  for commit in (self.base, self.head)]
+        for state in states:
+            self._occurrences(state, session)
+            require_integrity(state["eid"] == eid, "Returned endpoint identity mismatch")
+            require(state["state"] == "present" and state.get("occurrence"),
+                    "Entity lacks qualified present state at both endpoints; use raw_diff")
+        before, after = [state["occurrence"] for state in states]
+        require_integrity(after["id"] == matches[0]["occurrence"]["id"],
+                          "Resolved entity differs from endpoint state")
+        texts = [session.source(ref).decode("utf8", "strict").splitlines(keepends=True)
+                 for ref in (before, after)]
+        pieces = difflib.unified_diff(
+            *texts, fromfile=f"{before['path']}:{before['span']['start_line']}@{self.base}",
+            tofile=f"{after['path']}:{after['span']['start_line']}@{self.head}")
+        patch = "".join(line if line.endswith("\n") else
+                        line + "\n\\ No newline at end of entity\n" for line in pieces)
+        return {**self.page(patch, "entity_diff", {"eid": eid, "path": path}, cursor),
+                "eid": eid, "before": {"path": before["path"], "span": before["span"]},
+                "after": {"path": after["path"], "span": after["span"]},
+                "provenance": {**self.provenance(), "generation": session.generation,
+                               "identity_context": session.context.id,
+                               "source": "persistent_entity_exact_endpoint_source"},
+                "scope": "one qualified entity; not a complete PR diff"}
+
     def state(self, eid: str, commit: str | None = None) -> dict:
         return self._query("state", self.commit(commit), {"eid": eid})
 
@@ -588,7 +646,7 @@ def serve(config: dict) -> None:
     import anyio
     evidence = Evidence(config)
     async def list_tools():
-        return [Tool(**tool) for tool in inventory(config["arm"])]
+        return [Tool(**tool) for tool in tool_inventory(config)]
 
     async def call_tool(name: str, arguments: dict, request_id: str):
         result = evidence.execute(name, arguments, request_id)

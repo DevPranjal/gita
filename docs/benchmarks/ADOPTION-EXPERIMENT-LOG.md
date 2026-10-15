@@ -247,3 +247,48 @@ Do not scale to 25 on E2's quality-only improvement. Test E3 contemporaneously
 against B, retain the negative E2 cost result, and report routing explicitly.
 Offline full-set PR-range index preparation is proceeding separately, bounded
 per repository and without models or excluding failed tasks.
+
+### E3 result: less context, not better joint outcomes
+
+[All E3 outcomes](adoption-pilot2-summary.json), no failures or cursor errors:
+B/H credits 1.039816 / 8.813205; input tokens 225,156 / 86,971. Macro
+grounded precision 50% / 50%; recall 14.65% / 10.10%. H retrieved indexed
+entity source on one PR but skipped indexed tools on the other. Do not call
+this a quality/cost success or select only its lower-token result.
+
+**Routing evidence, not speculation:** native `auto_v2` records selected GPT
+for both B sessions and Claude for both H sessions. This is a large credit
+confound even though H used much less context. Category scores were similar;
+the records do not establish *why* those candidate sets differed. Keep `auto`
+as requested and report realized routes rather than silently switching models.
+
+The same broad ReDoS concern also received different golden-match assignments
+between pilots. Judgments and official resolver output are retained unchanged;
+do not tune reviewer prompts to golden labels or choose a favorable rerun.
+Small-sample quality and automatic semantic matching remain uncertain.
+
+## E4: a genuine entity-source diff and review-specific exposure
+
+The missing diff operation is not restored legacy extraction. New
+`entity_diff(token,path?)` resolves a persistent EID in a connected generation,
+requires independently verified present states at both PR endpoints, and diffs
+their exact stored/Git-backed source. Ambiguity, unqualified endpoints and
+disconnected contexts refuse with raw fallback guidance. It is one entity's
+source diff, not a complete semantic PR comparison.
+
+[Actual round trip](adoption-entity-diff-roundtrip.json): `validatePattern`
+resolved to the same EID at base lines207-245 and head247-299; 1,621 diff
+characters / 2,732 response characters, complete and independently verified.
+
+The review profile now exposes six common raw tools plus six relevant indexed
+operations, rather than every low-level primitive. Unavailable history/entity
+diff are omitted for disconnected contexts. Exact task-specific schemas are
+frozen, and server discovery, dispatch, native permissions and receipt audit
+use that same profile. Both arms' guidance requires relevant full-function
+verification without unnecessary rereads. The conflicting "all tools optional"
+sentence is removed only for declared workflow experiments.
+
+**Validation:** 127 offline tests pass, including exact persistent-EID source
+diff, raw fallback retention, capability-specific discovery and unchanged
+default prompts. This remains a broker prototype, not completed public CLI/MCP
+productization. A final win is not assumed; full25 inference remains gated.
