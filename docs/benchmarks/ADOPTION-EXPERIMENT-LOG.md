@@ -350,3 +350,33 @@ did not request per-entity source/diff on this PR. Credits B/H 0.425992 /
 price comparison. Automatic matching/classification is unstable on this
 single broad regex finding across runs; retain each judgment and do not choose
 the most favorable classification. No all-metrics success gate is claimed.
+
+### E5 qualification completed
+
+The next blocker was a real Python-version mismatch in the independent oracle:
+the CPython3.11 host could not parse a newer valid f-string. An explicitly
+configured CPython3.13.14 **isolated stdlib AST subprocess** now handles syntax
+the host rejects; it only parses bytes and never imports/executes corpus code.
+Returned coordinates are validated and interpreter versions are recorded.
+Invalid syntax still fails. 29 oracle/benchmark tests pass.
+
+Read-only requalification finished with **19 connected histories, 4 verified
+endpoint-only scopes, 2 explicit timeout fallbacks**. Both newer verification
+projections and all old failures are retained; database/auxiliary hashes remain
+unchanged. No product parser/matcher/index fingerprint changed.
+
+## E6: the entry packet must contain evidence, not just a table of contents
+
+The canaries show that an indexed name/location map alone often sends agents
+straight back to raw patches. `change_context` now includes up to two verified
+persistent-entity source-diff previews before the complete paginated map.
+Non-test paths are prioritized for these limited previews; test paths remain
+in the map. Scope and incompleteness are explicit; new/deleted/ambiguous
+entities retain raw fallback. Integrity failures propagate, not preview skips.
+Backend preview generation is not counted as extra agent tool requests.
+
+Validation initially encountered the retained-store test's existing requirement
+for a clean committed runtime: it reported a source-pin mismatch while the
+prototype source was dirty, before checking its deliberately missing store.
+Do not weaken that source gate or change its expected error; commit the
+qualified source and rerun the test under its intended precondition.

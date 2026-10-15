@@ -29,6 +29,20 @@ from gita.index.store import IndexStore
 from gita.vcs.git import CommittedRepo, Repo
 from verify.index_oracle import canonical_digest, validate_records
 
+AST_ORACLE_VERSIONS = set()
+AST_ORACLE_SCRIPT = """import ast,json,sys
+source=sys.stdin.buffer.read()
+offsets=[]; offset=0
+for line in source.splitlines(keepends=True):
+    offsets.append(offset); offset+=len(line)
+result={}
+for node in ast.parse(source).body:
+    if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)):
+        result[node.name]=(offsets[node.lineno-1]+node.col_offset,
+                           offsets[node.end_lineno-1]+node.end_col_offset)
+print(json.dumps({"version":sys.version.split()[0],"spans":result}))
+"""
+
 
 @contextmanager
 def profile_build(result, output, enabled):
@@ -99,12 +113,28 @@ def write(path, value):
 
 def ast_spans(source):
     """Independent Python UTF-8 def/class coordinates, excluding decorators."""
+    try:
+        module = ast.parse(source)
+    except SyntaxError:
+        oracle = os.environ.get("GITA_AST_ORACLE_PYTHON")
+        if not oracle:
+            raise
+        result = subprocess.run([oracle, "-I", "-c", AST_ORACLE_SCRIPT], input=source,
+                                capture_output=True, timeout=30, check=False)
+        assert result.returncode == 0, "Configured independent AST oracle refused syntax: " + result.stderr.decode("utf8", "replace")[:1000]
+        value = json.loads(result.stdout)
+        for name, span in value["spans"].items():
+            assert type(name) is str and type(span) is list and len(span) == 2
+            assert all(type(p) is int for p in span) and 0 <= span[0] <= span[1] <= len(source)
+        AST_ORACLE_VERSIONS.add(value["version"])
+        return {name: tuple(span) for name, span in value["spans"].items()}
+    AST_ORACLE_VERSIONS.add(platform.python_version())
     offsets, position = [], 0
     for line in source.splitlines(keepends=True):
         offsets.append(position)
         position += len(line)
     result = {}
-    for node in ast.parse(source).body:
+    for node in module.body:
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             continue
         start = offsets[node.lineno - 1] + node.col_offset
@@ -170,6 +200,7 @@ def verify_sources(root, store, generation, expected_commits):
     The database chooses evidence to inspect, not expected byte values or lineage.
     This is not an authored operation ledger or a completeness oracle.
     """
+    AST_ORACLE_VERSIONS.clear()
     db = store.connection
     assert db.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
     assert not db.execute("PRAGMA foreign_key_check").fetchall()
@@ -244,6 +275,7 @@ def verify_sources(root, store, generation, expected_commits):
         "exact_member_scope": "passed", "git_blob_and_source_digest_checks": byte_checks,
         "git_member_tree_entry_checks": tree_checks,
         "independent_python_ast_span_checks": span_checks, "python_span_examples": reviewed,
+        "independent_python_ast_oracle_versions": sorted(AST_ORACLE_VERSIONS),
         "canonical_digest": canonical_digest(db, generation),
         "lineage_truth": "not independently established for these real repositories",
         "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",

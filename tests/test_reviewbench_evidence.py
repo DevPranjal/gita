@@ -41,7 +41,7 @@ def config(scope, arm="H"):
     return {**scope, "arm": arm, "cursor_secret": secrets.token_hex(32)}
 
 
-def test_entity_context_returns_exact_named_source_without_copying_references(fixture_repo):
+def test_entity_context_returns_exact_named_source_without_copying_references(fixture_repo, monkeypatch):
     _, scope, _ = fixture_repo
     indexed = build_indexes(scope)
     assert indexed["indexes"], indexed["index_preparation"]
@@ -60,11 +60,19 @@ def test_entity_context_returns_exact_named_source_without_copying_references(fi
         assert evidence.execute("entity_context", {"path": "code.py", "line": 0})["error"]
         changed = evidence.execute("change_context", {})
         assert "divide" in changed["text"] and "code.py:2" in changed["text"]
+        assert "verified indexed source previews" in changed["text"]
+        assert "return 10 / value" in changed["text"] and "return 20 / value" in changed["text"]
         assert changed["semantic_endpoint_diff"] is False
         delta = evidence.execute("entity_diff", {"token": "divide", "path": "code.py"})
         assert "error" not in delta, delta
         assert delta["eid"].startswith("oeid1_")
         assert "return 10 / value" in delta["text"] and "return 20 / value" in delta["text"]
+        evidence._change_context.clear()
+        from gita.eval.reviewbench.common import IntegrityError
+        def corrupt(*args, **kwargs):
+            raise IntegrityError("Wrong source")
+        monkeypatch.setattr(evidence, "entity_diff", corrupt)
+        assert evidence.execute("change_context", {})["error"]["code"] == "integrity"
     finally:
         evidence.close()
 

@@ -60,7 +60,7 @@ DESCRIPTIONS = {
     "commit_log": "Ordered allowed commits only, with subjects and parents qualified at the scope boundary.",
     "file_history": "Raw Git changes for a member path over the same declared allowed commit graph.",
     "index_status": "Optional: inspect prebuilt index readiness and gaps. For named-function context, entities(path) or id(name) -> state/source can retrieve exact entity evidence instead of whole files. Raw Git fallback is valid. No build or mutation.",
-    "change_context": "Review starting point: map actual Git changed-line anchors to prebuilt indexed entities at HEAD. Returns paths, locations, names and coverage gaps; use entity_context for bodies and raw_diff to verify edits. Not a semantic endpoint diff.",
+    "change_context": "Gita review starting point: indexed changed-code map plus up to two verified persistent-entity source-diff previews when connected history permits. Returns actual code evidence, locations and explicit gaps; use entity_diff/entity_context for more. Not a complete semantic PR diff.",
     "entities": "Indexed file entities with exact occurrence references, coverage and opaque continuation.",
     "entity_context": "Read bounded enclosing indexed source at a file line, including parent function context rather than only a tiny nested callback. Exact Git-verified bytes; pages large entities. Use raw read_file if coverage is unavailable.",
     "entity_diff": "Compare exact base/head source of a uniquely resolved persistent entity in connected indexed history. Supply a function name and optional HEAD path. Preserves rename/move identity; refuses ambiguous or unqualified endpoints. This is one entity's source diff, not a complete PR diff.",
@@ -323,6 +323,7 @@ class Evidence:
                 self.repo, "diff", "--no-ext-diff", "--name-only", "-z",
                 self.base, self.head, "--", *([":(literal)" + path] if path else [])).split(b"\0") if p]
             lines = ["Indexed changed-code map; anchors are Git lines, not identity/semantic diff claims."]
+            preview_candidates = []
             for member in paths:
                 if member not in self.members(self.head):
                     lines.append(f"{member}: deleted at HEAD; use base raw/source evidence.")
@@ -367,9 +368,32 @@ class Evidence:
                         lines.append(f"{member}:{max(start, span['start_line'])} "
                                      f"[{span['start_line']}-{span['end_line']}] "
                                      + ".".join(ref["names"]))
+                        if ref["names"] != ["<module>"]:
+                            test_path = bool(re.search(
+                                r"(^|/)(__tests__|tests?|specs?)(/|[._])|[._](test|spec)[.]", member))
+                            preview_candidates.append((test_path, len(ref["names"]),
+                                                       member, ref["names"][-1]))
                 if not anchors:
                     lines.append(f"{member}: non-text/mode-only or no textual anchor; raw fallback required.")
-            self._change_context[path] = "\n".join(lines)
+            previews, attempted = [], set()
+            if self.config.get("history_ready"):
+                for _, _, member, token in sorted(set(preview_candidates)):
+                    if len(attempted) >= 6 or len(previews) >= 2:
+                        break
+                    attempted.add((member, token))
+                    try:
+                        diff = self.entity_diff(token, member)
+                    except IntegrityError:
+                        raise
+                    except ProtocolError as error:
+                        lines.append(f"Indexed source preview unavailable for {member} {token}: {error}")
+                        continue
+                    if diff["text"]:
+                        status = "partial preview; request entity_diff for continuation" if diff["truncated"] else "complete entity source diff"
+                        previews.append(f"{member} :: {token} ({status})\n{diff['text']}")
+            intro = ("Gita verified indexed source previews (at most two; not the whole PR):\n"
+                     + "\n\n".join(previews) + "\n\n") if previews else ""
+            self._change_context[path] = intro + "\n".join(lines)
         return {**self.page(self._change_context[path], "change_context", {"path": path}, cursor),
                 "provenance": {**self.provenance(), "source": "git_anchors_with_verified_indexed_entities"},
                 "semantic_endpoint_diff": False}
