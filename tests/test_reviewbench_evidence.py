@@ -108,6 +108,36 @@ def test_cursor_handles_are_short_session_owned_and_query_bound(fixture_repo):
         b.close()
 
 
+def test_search_path_alias_preserves_filter_and_cursor_binding(fixture_repo):
+    _, scope, _ = fixture_repo
+    for arm in ("B", "H"):
+        e = Evidence(config(scope, arm))
+        try:
+            a = e.execute("search", {"text": "return", "path": "code.py"})
+            b = e.execute("search", {"text": "return", "pattern": "code.py"})
+            assert a == b and "20 / value" in a["text"]
+            assert e.execute("search", {"text": "return", "path": "absent.py"})["text"] == ""
+            assert e.execute("search", {
+                "text": "return", "pattern": "code.py", "path": "other.py"})["error"]
+            assert e.execute("search", {"text": "return", "path": ""})["error"]
+        finally:
+            e.close()
+
+
+def test_unbuilt_workflow_exposes_readiness_not_broken_index_calls(fixture_repo):
+    from gita.eval.reviewbench.evidence import COMMON_TOOLS, tool_inventory
+    _, scope, _ = fixture_repo
+    cfg = {**config(scope), "indexed_workflow": True}
+    tools = {t["name"] for t in tool_inventory(cfg)}
+    assert tools == set(COMMON_TOOLS) | {"index_status"}
+    e = Evidence(cfg)
+    try:
+        assert e.execute("entity_context", {"path": "code.py", "line": 1})["error"]
+        assert "20 / value" in e.execute("read_file", {"path": "code.py"})["text"]
+    finally:
+        e.close()
+
+
 def test_common_inventory_and_evidence_are_identical(fixture_repo):
     _, scope, _ = fixture_repo
     baseline, indexed = Evidence(config(scope, "B")), Evidence(config(scope))

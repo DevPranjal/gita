@@ -268,6 +268,10 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
     try:
         prompt = review_prompt(scope["task"], arm=slot["arm"],
                                indexed_workflow=frozen.get("indexed_workflow", False))
+        if frozen.get("indexed_workflow") and slot["arm"] == "H" and not scope.get("indexes"):
+            prompt += ("\nPreparation notice: no qualified index is available for this task. "
+                       "The indexed workflow above is unavailable here; use the common raw "
+                       "Git tools directly. Do not infer that missing indexed evidence means no issues.")
         outcome = invoke(directory, prompt, names, directory / "mcp.json", timeout=timeout,
                          model=model, reasoning=reasoning)
     except IntegrityError as error:

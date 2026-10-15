@@ -538,3 +538,35 @@ instead of the old inaccurate `unknown` contract. **All157 evaluator tests
 pass.** The broader task remains incomplete: a23-pair continuation requires
 an explicitly increased total budget and revised native-cap overrun handling.
 No approval is inferred from an unanswered budget form.
+
+## E7: remove measured schema failures before buying more inference
+
+Inspected the fixed-model tool traces, not reference answers. **Eleven source
+searches were refused solely because the model used `path` instead of `pattern`**:
+three in the first H session and eight in the second. The second also requested
+an indexed changed-code packet although no index was available after its timeout.
+Those refusals consumed calls/context and helped exhaust the evidence budget.
+
+Changes:
+
+- Accept an explicit documented `path` glob alias for `pattern`, with identical
+  literal filtering, scope and cursor binding. Conflicting values still refuse.
+  Both arms receive the same schema improvement; this is not a Gita-only baseline
+  handicap.
+- Workflow discovery on a task with no qualified index exposes only common raw
+  tools plus readiness. The task prompt explicitly switches to raw fallback.
+  No failed task is removed and no empty index is treated as complete coverage.
+
+[Exact offline replay](adoption-path-alias-replay.json): all11 previously refused
+queries now succeed and equal their canonical `pattern` queries against the
+same frozen Git objects. No model calls or corpus execution.29 focused evidence
+tests pass. This proves fewer interface failures, **not** improved review quality
+or inference credits. Original reviewer receipts remain unchanged.
+
+One final small development check may use the remaining original allowance:
+prior all-native conservative bound846.1512005, new reviewer60/judge35 ceilings,
+leaving8.8487995 credits of reserve below950. Native per-session limits can
+overshoot, so any measured overrun remains a stop, never an automatic retry.
+The check uses an already-seen development PR and cannot establish held-out
+quality or justify a25-task claim. Do not spend past authorization or select
+only favorable prior results.

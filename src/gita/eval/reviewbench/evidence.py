@@ -35,7 +35,9 @@ SCHEMAS = {
     "raw_diff": schema({"path": STRING, "cursor": CURSOR}),
     "read_file": schema({"path": STRING, "commit": STRING, "start_line": INTEGER,
                          "end_line": INTEGER, "cursor": CURSOR}, ("path",)),
-    "search": schema({"text": STRING, "pattern": STRING, "commit": STRING,
+    "search": schema({"text": STRING, "pattern": STRING,
+                      "path": {"type": "string", "description": "Path glob alias for pattern; do not give conflicting values."},
+                      "commit": STRING,
                       "cursor": CURSOR}, ("text",)),
     "list_files": schema({"pattern": STRING, "commit": STRING, "cursor": CURSOR}),
     "commit_log": schema({"cursor": CURSOR}),
@@ -87,8 +89,11 @@ def inventory(arm: str, *, workflow: bool = False, history_ready: bool = True) -
 
 
 def tool_inventory(config: dict) -> list[dict]:
-    return inventory(config["arm"], workflow=config.get("indexed_workflow", False),
-                     history_ready=config.get("history_ready", False))
+    tools = inventory(config["arm"], workflow=config.get("indexed_workflow", False),
+                      history_ready=config.get("history_ready", False))
+    if config.get("indexed_workflow") and not config.get("indexes"):
+        return [tool for tool in tools if tool["name"] in COMMON_TOOLS + ("index_status",)]
+    return tools
 
 
 class Evidence:
@@ -258,8 +263,13 @@ class Evidence:
         return {**self.page(text, "list_files", {"pattern": pattern, "commit": commit}, cursor),
                 "provenance": self.provenance(commit)}
 
-    def search(self, text: str, pattern: str = "*", commit: str | None = None, cursor: str = "") -> dict:
+    def search(self, text: str, pattern: str = "*", commit: str | None = None,
+               cursor: str = "", path: str | None = None) -> dict:
         commit = self.commit(commit)
+        if path is not None:
+            require(type(path) is str and bool(path), "Expected a nonempty path glob")
+            require(pattern == "*" or pattern == path, "Conflicting path and pattern globs")
+            pattern = path
         require(type(text) is str and 0 < len(text) <= 500 and not any(c in text for c in "\0\r\n"),
                 "Expected a nonempty literal single-line query")
         require(type(pattern) is str and len(pattern) <= 500, "Invalid path glob")
