@@ -1,0 +1,136 @@
+{
+  "kind": "E20 separately named causal-equivalence and requested-SQL-source quality variant",
+  "review_protocol": "a81e1f1535eee1b1e353cc653c52a359532da582e504a19c64626ab70b757559",
+  "equivalence_protocol": "96a8f57da85f8332fdfaa1cd238ac5e51619998156143ec14f704128851fa31e",
+  "context_protocol": "cdfea8bcc30b5b9eaea3d73f5e6bb6eb4f643582ea97ffe365f1f486fe4054a6",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "review_rows": [
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "B",
+      "status": "valid",
+      "credits": 43.6683,
+      "input_tokens": 371081,
+      "output_tokens": 2878,
+      "cache_read_tokens": 320925,
+      "cache_write_tokens": 50129,
+      "reasoning_tokens": 1943,
+      "model_requests": 9,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 19,
+        "executed_call_attempts": 19,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "history_patches_delivered": 0
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "H",
+      "status": "valid",
+      "credits": 33.85668,
+      "input_tokens": 189290,
+      "output_tokens": 3018,
+      "cache_read_tokens": 145267,
+      "cache_write_tokens": 44008,
+      "reasoning_tokens": 1912,
+      "model_requests": 5,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 19,
+        "executed_call_attempts": 19,
+        "denied_over_budget": 0,
+        "indexed_calls": 5,
+        "errors": 0
+      },
+      "indexed_operations": {
+        "source": 5
+      },
+      "history_patches_delivered": 0
+    }
+  ],
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": null,
+        "grounded_recall": 0,
+        "augmented_precision": 0.5,
+        "augmented_recall": 0.09090909090909091,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.5,
+        "candidate_count": 2,
+        "golden_tp_count": 10,
+        "matched_count": 0,
+        "matched_tp_count": 0,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 1,
+        "golden_covered_count": 0
+      },
+      "micro": {
+        "grounded_precision": null,
+        "grounded_recall": 0,
+        "augmented_precision": 0.5,
+        "augmented_recall": 0.09090909090909091,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.5,
+        "candidate_count": 2,
+        "golden_tp_count": 10,
+        "matched_count": 0,
+        "matched_tp_count": 0,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 1,
+        "golden_covered_count": 0
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": null,
+        "grounded_recall": 0,
+        "augmented_precision": 0.3333333333333333,
+        "augmented_recall": 0.09090909090909091,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.3333333333333333,
+        "candidate_count": 3,
+        "golden_tp_count": 10,
+        "matched_count": 0,
+        "matched_tp_count": 0,
+        "unmatched_count": 3,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 2,
+        "golden_covered_count": 0
+      },
+      "micro": {
+        "grounded_precision": null,
+        "grounded_recall": 0,
+        "augmented_precision": 0.3333333333333333,
+        "augmented_recall": 0.09090909090909091,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.3333333333333333,
+        "candidate_count": 3,
+        "golden_tp_count": 10,
+        "matched_count": 0,
+        "matched_tp_count": 0,
+        "unmatched_count": 3,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 2,
+        "golden_covered_count": 0
+      }
+    }
+  },
+  "original_judge_credits": 55.2119,
+  "additional_equivalence_judge_credits": 51.130399999999995,
+  "additional_SQL_context_judge_credits": 26.7882,
+  "policy": "All five claims rematched, all five unmatched claims classified for both arms. Explicit requested migration SQL added without execution. Original failed classifications/matches retained.",
+  "interpretation": "Original matcher conflated different causes, but source-complete reclassification still fails joint quality gate: one TP in each arm; B one FP, H two FP. No second case or25-run authorization.",
+  "limitations": [
+    "A single repeatedly used development PR; no inferential or held-out claim.",
+    "Automatic source-grounded Copilot judgment with official pinned arithmetic, not official upstream judge.",
+    "No reviewer or matcher retry on identical input; one explicit missing-source supplement changed the classifier input."
+  ]
+}

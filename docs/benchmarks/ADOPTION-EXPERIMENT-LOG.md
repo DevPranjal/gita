@@ -6,6 +6,18 @@ Do not change preserved review/judgment artifacts or leak reference labels into
 reviewer-facing inputs. The 25-task starter is development data, not held-out
 confirmation.
 
+## Current status: E20 quality gate remains failed
+
+Engineering changes are tested and committed; **no25-task model run is
+authorized**. All50 initial evidence packets passed offline preparation.
+The latest one-pair canary reduces review credits22.47% and input48.99%,
+but does not preserve precision. Its history-rendering change was not actually
+used by that reviewer session; five indexed source queries were used.
+The separate stricter-equivalence/source-complete policy still finds one TP
+per arm, with one B FP versus two H FP. Preserve both policies, all source
+supplements and all judging spend. Product correctness and useful tool uptake
+are not evidence that the requested joint benchmark target has been achieved.
+
 ## 2026-10-15: E0, diagnose before another paid run
 
 **Objective:** explain actual PR-level navigation, index usefulness/coverage,
@@ -1493,3 +1505,26 @@ unmatched findings under the same unchanged classifier. Freeze a separate
 policy variant and retain original matching, classifications, failed gate and
 all additional spending. No reviewer reruns, no desired TP/FP label in inputs,
 no automatic second-case authorization from rewritten historical metrics.
+
+### E20 audit outcome: matching improved, joint quality still fails
+
+The [separate all-candidate policy](adoption-e20-equivalence-quality-results.json)
+correctly treats all five concerns as unmatched rather than equating neighboring
+causes. Its classifier then explicitly requests the included migration SQL to
+evaluate the baseline's missing-index performance claim. That exact committed
+SQL is supplied to **all five candidates, both arms**, without executing it.
+No reviewer is rerun and the already-completed stricter matcher is not sampled again.
+
+The new source-grounded classifications find one TP in each arm:
+B has one FP, H two FP. Augmented P50.00%/33.33%, R9.09%/9.09%.
+The alleged unrecoverable retention state is contradicted by the next cleanup
+and missing-file recovery behavior; the extension-write claim lacks a reachable
+unsafe input in the supplied callers. The candidate/reference equivalence
+defect was real, but correcting it does **not** rescue the desired outcome.
+
+Retain original55.21190 judge credits,51.13040 for stricter rematching plus
+the uncertain classification, and26.78820 for the different-input SQL supplement.
+These are quality-study costs, not reviewer savings. The original and revised
+precision gates both fail; the second case and25-run remain unstarted.
+Further reviewer rerolls or favorable-policy selection on this one PR would
+not establish a reliable product win.
