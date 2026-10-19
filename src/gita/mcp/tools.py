@@ -336,29 +336,48 @@ def entities_tool(repo: str, path: str, at: str | None = None, scope: str = "def
 
 
 @_guard
-def source_tool(repo: str, occurrence: dict[str, Any], scope: str = "default",
-                generation: str | None = None, budget: int = DEFAULT_BUDGET) -> dict[str, Any]:
-    """Retrieve exact committed bytes from a returned occurrence, never worktree text.
+def source_tool(repo: str, occurrence: dict[str, Any] | None = None, scope: str = "default",
+                generation: str | None = None, budget: int = DEFAULT_BUDGET,
+                entity: str | None = None, at: str | None = None) -> dict[str, Any]:
+    """Retrieve exact committed bytes by occurrence or unique indexed name/locator/EID.
 
     Content is UTF-8 text when lossless, otherwise base64. A budget error is
-    returned rather than truncating source. The occurrence pins its generation.
+    returned rather than truncating source. Occurrences pin their generation;
+    names resolve at the selected indexed revision, without building or parsing.
     """
+    from ..index.model import GitOid
     from ..index.query import _json_oid
 
-    at = _json_oid(occurrence.get("commit"))
-    pinned = occurrence.get("generation")
-    if generation is not None and generation != pinned:
-        raise QueryError("invalid_source", "Generation differs from the occurrence")
+    if (occurrence is None) == (entity is None):
+        raise QueryError("invalid_query", "Select exactly one occurrence or entity")
+    pinned = generation
+    selected_at: GitOid | str | None = at
+    if occurrence is not None:
+        if at is not None:
+            raise QueryError("invalid_query", "An occurrence already pins its revision; omit at")
+        selected_at = _json_oid(occurrence.get("commit"))
+        pinned = occurrence.get("generation")
+        if generation is not None and generation != pinned:
+            raise QueryError("invalid_source", "Generation differs from the occurrence")
 
     def fetch(session, selected):
-        raw = session.source(occurrence)
+        reference = occurrence
+        if entity is not None:
+            resolution = session.resolve(entity, at=selected, limit=2)
+            if resolution["status"] != "unique":
+                code = "ambiguous" if resolution["status"] == "ambiguous" else "not_found"
+                raise QueryError(code, "No unique indexed source; use gita_id to inspect matches")
+            reference = resolution["results"][0]["occurrence"]
+        if reference is None:
+            raise QueryError("not_live", "Entity is not present at the selected revision")
+        raw = session.source(reference)
         try:
             content, encoding = raw.decode("utf-8", errors="strict"), "utf-8"
         except UnicodeDecodeError:
             content, encoding = base64.b64encode(raw).decode("ascii"), "base64"
-        return {"occurrence": occurrence, "content": content, "encoding": encoding, "byte_length": len(raw)}
+        return {"occurrence": reference, "content": content, "encoding": encoding, "byte_length": len(raw)}
 
-    return _read_query(repo, "source", fetch, scope=scope, generation=pinned, at=at, budget=budget)
+    return _read_query(repo, "source", fetch, scope=scope, generation=pinned, at=selected_at, budget=budget)
 
 
 _TOOLS = {

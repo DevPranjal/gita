@@ -34,7 +34,9 @@ Range events include intermediate changes; gita_diff --indexed currently uses th
 too, not a net endpoint comparison. Plain gita_diff compares endpoints.
 
 The indexed workflow is gita_index(action="status"), an explicit build if needed,
-then gita_id -> gita_history/gita_state -> gita_source. gita_entities lists a
+then gita_source(entity="name", at="HEAD") for one unique body, or
+gita_id -> gita_history/gita_state -> gita_source for disambiguation/history.
+gita_entities lists a
 file's occurrences. Reads never build an index and exclude uncommitted work.
 Keep returned scopes, generations, occurrences and cursors together. Report
 partial coverage or ambiguity instead of treating it as proof of absence.
@@ -46,7 +48,8 @@ There is no caller graph, semantic equivalence proof, or merge-safety verdict.
 SERVER_INSTRUCTIONS = """\
 Gita provides published indexed entity evidence.
 Start with gita_index(action="status"); build explicitly if needed.
-Use gita_id -> gita_history/gita_state -> gita_source.
+Use gita_source(entity="name", at="HEAD") for a unique indexed body in one call.
+Use gita_id to disambiguate names or select history/state and returned occurrences.
 gita_entities lists a file's recorded occurrences.
 History is indexed by default; indexed is a compatibility no-op.
 Range history returns intermediate events, not endpoint diffs.
@@ -175,16 +178,18 @@ def build_server(repo_path: str | None = None):
                                 generation=generation, budget=budget)
 
     @server.tool()
-    def gita_source(occurrence: dict[str, Any], scope: str = "default",
+    def gita_source(occurrence: dict[str, Any] | None = None, scope: str = "default",
                     generation: str | None = None, budget: int = tools.DEFAULT_BUDGET,
-                    repo: str = "") -> dict:
-        """Get exact committed source using an occurrence returned by id/state/history/entities.
+                    repo: str = "", entity: str | None = None, at: str | None = None) -> dict:
+        """Get exact indexed source by unique entity name/locator/EID, or a returned occurrence.
 
         Content is UTF-8 or base64 with explicit encoding; budget overflow is an
-        error, never silently truncated source. Reuse the occurrence's scope.
+        error, never silently truncated source. Use entity with optional at for
+        one-call lookup; ambiguous names require gita_id. Otherwise reuse the
+        occurrence's scope, generation and revision, without entity or at.
         """
         return tools.source_tool(repo or root, occurrence, scope=scope,
-                                 generation=generation, budget=budget)
+                                 generation=generation, budget=budget, entity=entity, at=at)
 
     @server.tool()
     def gita_entities(path: str, at: str | None = None, scope: str = "default",

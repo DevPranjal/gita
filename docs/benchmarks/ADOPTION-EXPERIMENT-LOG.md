@@ -1192,3 +1192,19 @@ Same declared positions6/8/17, order, seed, Sol/medium, native60,90 reserve
 and600/400 phase ceilings. No judge-policy change or late proof filter.
 Scale25 remains blocked until joint quality/cost evidence; if a promising
 small signal appears, require an unchanged-candidate transfer check first.
+
+### Production API improvement: one-call named committed source
+
+The public MCP source tool previously required copying a complete occurrence
+from a separate identity/state query. It now also accepts a unique indexed
+name, path-qualified locator or EID with an optional committed revision:
+`gita_source(entity="app.py::handle", at="HEAD")`. Returned source retains
+the exact occurrence and generation. Existing occurrence calls are unchanged.
+Ambiguity, missing identity, removed state and budget overflow remain explicit;
+no query-time parsing, implicit index build or worktree fallback.
+
+All45 existing/new MCP tests pass with the suite's explicit legacy-enabled
+baseline. Six named-source/missing-index tests also pass with legacy explicitly
+disabled, including the actual server schema and historical source.
+This is a production usability improvement, **not a measured cause of E17's
+results**: the frozen experimental broker still has its prior interface.
