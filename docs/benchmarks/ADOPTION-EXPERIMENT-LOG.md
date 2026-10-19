@@ -901,3 +901,31 @@ free pass.
 
 Verification inference and latency must be included in B/H agent costs.
 No source/verifier menu changes or large25 inference while this check is pending.
+
+### E12 implementation
+
+`proof.py` builds complete blinded inputs from already-validated primary
+receipts, original findings and original broker results. Assistant reasoning,
+intermediate messages, producer/arm labels, native usage and reference/scoring
+artifacts are excluded. Completion *status* is retained but duplicate native
+completion bodies are not: source results are supplied only once.
+
+Each finding needs exactly one keep/drop/uncertain decision with a real
+evidence-call ID; no additions or message edits. Only unchanged kept rows
+become output. Unknown/integrity/invalid verification outcomes stop subsequent
+sessions, with usage recovery and explicit errors. Original artifacts are
+hash-checked before and after; the proof protocol binds source code, inputs,
+model, limits and prior run. Complete input over400,000 serialized characters
+refuses before any inference rather than silently truncating source.
+
+A standalone retained-finding scorer re-resolves precision claims using the
+pinned semantics, remaps candidate indices and requires classifications for
+every remaining unmatched candidate. It never invents FP labels or awards
+perfect precision to empty output.
+
+Initial proof qualification selects only the audited PROTRIDER task, both
+original arms, modelSolmedium and a90-credit verification ceiling with45-credit
+reservations. Reviewer output/labels are not regenerated. Scores and **review
+plus verification cost** must be checked before applying it to the other four.
+This is an explicit agent-workflow intervention shared by both arms, not
+evidence that indexing itself can repair a model's reasoning.
