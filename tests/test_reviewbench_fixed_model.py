@@ -99,6 +99,43 @@ def test_judge_settings_are_frozen_independently(protocol_inputs):
         *protocol_inputs, reviewer_model=MODEL, reviewer_reasoning="medium")["digest"]
 
 
+def test_native_budget_is_explicit_bounded_and_frozen(protocol_inputs, tmp_path, monkeypatch):
+    monkeypatch.setattr(runtime.shutil, "which", lambda _: "copilot.exe")
+    args = runtime.command(tmp_path, "review", [], None, model=MODEL,
+                           reasoning="medium", native_credits=60)
+    assert args[args.index("--max-ai-credits") + 1] == "60"
+    root, scopes, parsers = protocol_inputs
+    frozen = campaign.seal(root, tmp_path / "larger-native", scopes, parsers,
+                           seed=1, reviewer_credits=600,
+                           judge_credits=400, session_reservation=90, native_session_credits=60)
+    assert frozen["budgets"]["session_native_credits"] == 60
+    assert frozen["budgets"]["session_reservation"] == 90
+    assert campaign.protocol(*protocol_inputs)["budgets"]["session_native_credits"] == 30
+    for cap in (True, 29, 121, 60.0):
+        with pytest.raises(ProtocolError, match="native session"):
+            runtime.command(tmp_path, "review", [], None, native_credits=cap)
+    with pytest.raises(ProtocolError, match="session reserve"):
+        campaign.protocol(*protocol_inputs, native_session_credits=60, session_reservation=45)
+
+
+def test_judge_receives_the_same_larger_native_setting(tmp_path, monkeypatch):
+    from gita.eval.reviewbench import judge
+    observed = {}
+
+    def invoke(directory, prompt, allowed, mcp, **kwargs):
+        observed.update(kwargs)
+        return {"status": "runtime_complete", "usage": {"credits": 0.2}, "events": []}
+
+    monkeypatch.setattr(judge, "invoke", invoke)
+    monkeypatch.setattr(judge, "final_answer", lambda _: {"qualified": True})
+    ledger = runtime.CreditLedger(tmp_path / "judge-ledger.json", "protocol", 180, reservation=90)
+    judge._judge_call(tmp_path / "judgment", "JSON only", ledger, "budget",
+                      time.time() + 60, model=MODEL, reasoning="medium", native_credits=60)
+    assert observed["native_credits"] == 60
+    assert observed["model"] == MODEL and observed["reasoning"] == "medium"
+    assert ledger.snapshot()["spent"] == 0.2
+
+
 def test_fixed_judge_uses_native_login_and_measured_usage(tmp_path, monkeypatch):
     from gita.eval.reviewbench import judge
     observed = {}

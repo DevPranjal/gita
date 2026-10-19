@@ -22,7 +22,7 @@ from .runtime import (CAMPAIGN_SECONDS, CreditLedger, MAX_SECONDS, MAX_TURNS,
                       JUDGE_CREDITS, REVIEWER_CREDITS, SESSION_CREDITS, file_lock, invoke, read_events)
 from .runtime import (inventories, parse_usage, reconcile_judge_outcomes,
                       validate_realized_model, validate_settings)
-from .runtime import MAX_REVIEWER_CREDITS, MAX_JUDGE_CREDITS
+from .runtime import MAX_REVIEWER_CREDITS, MAX_JUDGE_CREDITS, MAX_SESSION_CREDITS
 
 PROMPT = """Review the fixed code change exposed by the read-only evidence tools.
 Find actionable correctness, security, performance, maintainability or readability
@@ -74,7 +74,8 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
              reviewer_model: str = "auto", reviewer_reasoning: str | None = None,
              judge_model: str = "auto", judge_reasoning: str | None = None,
              integrated_source: bool = False, session_reservation: int = SESSION_CREDITS,
-             engine_frontend: bool = False, initial_context: bool = False) -> dict:
+             engine_frontend: bool = False, initial_context: bool = False,
+             native_session_credits: int = SESSION_CREDITS) -> dict:
     validate_settings(reviewer_model, reviewer_reasoning)
     validate_settings(judge_model, judge_reasoning)
     require(type(integrated_source) is bool and (not integrated_source or indexed_workflow),
@@ -103,6 +104,9 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "Invalid judge campaign ceiling")
     require(type(session_reservation) is int and SESSION_CREDITS <= session_reservation
             <= min(reviewer_credits, judge_credits), "Invalid session reserve")
+    require(type(native_session_credits) is int
+            and SESSION_CREDITS <= native_session_credits <= min(MAX_SESSION_CREDITS, session_reservation),
+            "Native credit setting must fit the explicit session reserve")
     randomizer = random.Random(seed)
     schedule = []
     for scope in scopes:
@@ -138,7 +142,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
                     for arm in ("B", "H")} for s in scopes},
             "scope_digests": {scope["task"]["id"]: digest(scope) for scope in scopes},
             "budgets": {"reviewer_credits": reviewer_credits, "judge_credits": judge_credits,
-                        "session_native_credits": SESSION_CREDITS, "max_sessions": 2,
+                        "session_native_credits": native_session_credits, "max_sessions": 2,
                         "session_reservation": session_reservation,
                         "max_calls": EVIDENCE_CALL_LIMIT, "max_tool_attempts": EVIDENCE_CALL_LIMIT + FINALIZATION_GRACE,
                         "max_turns": MAX_TURNS + FINALIZATION_GRACE,
@@ -160,7 +164,8 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
          reviewer_model: str = "auto", reviewer_reasoning: str | None = None,
          judge_model: str = "auto", judge_reasoning: str | None = None,
          integrated_source: bool = False, session_reservation: int = SESSION_CREDITS,
-         engine_frontend: bool = False, initial_context: bool = False) -> dict:
+         engine_frontend: bool = False, initial_context: bool = False,
+         native_session_credits: int = SESSION_CREDITS) -> dict:
     require(run_root.resolve() != root.resolve() and root.resolve() not in run_root.resolve().parents,
             "Run artifacts must live outside corpus root")
     for scope in scopes:
@@ -171,7 +176,8 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
                       reviewer_reasoning=reviewer_reasoning,
                       judge_model=judge_model, judge_reasoning=judge_reasoning,
                       integrated_source=integrated_source, session_reservation=session_reservation,
-                      engine_frontend=engine_frontend, initial_context=initial_context)
+                      engine_frontend=engine_frontend, initial_context=initial_context,
+                      native_session_credits=native_session_credits)
     body = {k: v for k, v in frozen.items() if k != "digest"}
     body["run_root_digest"] = digest(str(run_root.resolve()))
     if initial_context:
@@ -399,9 +405,10 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
                 "only as needed for a complete, accurate review. Preloaded source has not been "
                 "seeded into the delivery ledger, so subsequent queries can conservatively resend it."
                 "\nBEGIN INITIAL EVIDENCE\n" + rendered + "\nEND INITIAL EVIDENCE")
-        diagnostic_options = {"input_diagnostics": True} if frozen.get("reviewer_input_diagnostics") else {}
+        native_credits = frozen.get("budgets", {}).get("session_native_credits", SESSION_CREDITS)
         outcome = invoke(directory, prompt, names, directory / "mcp.json", timeout=timeout,
-                         model=model, reasoning=reasoning, **diagnostic_options)
+                         model=model, reasoning=reasoning, native_credits=native_credits,
+                         input_diagnostics=frozen.get("reviewer_input_diagnostics", False))
     except IntegrityError as error:
         outcome = {"status": "integrity_failed", "integrity_stop": True, "error_code": error.code,
                    "usage": None, "error": str(error), "wall_seconds": None}
@@ -493,6 +500,13 @@ def validate_receipt(path: Path, slot: dict, frozen: dict) -> dict:
                     and args[args.index("--reasoning-effort") + 1:
                              args.index("--reasoning-effort") + 2] == [reasoning]),
                 "Cached requested reasoning/protocol mismatch")
+        if "budgets" in frozen:
+            native_credits = frozen["budgets"].get("session_native_credits", SESSION_CREDITS)
+            require(invocation.get("native_credit_cap") == native_credits
+                    and args.count("--max-ai-credits") == 1
+                    and args[args.index("--max-ai-credits") + 1:
+                             args.index("--max-ai-credits") + 2] == [str(native_credits)],
+                    "Cached native credit setting/protocol mismatch")
         if row["status"] == "valid":
             require(row.get("initial_evidence") == validate_initial_delivery(path, slot, frozen),
                     "Cached initial evidence receipt changed")

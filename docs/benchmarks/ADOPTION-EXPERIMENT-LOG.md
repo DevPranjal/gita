@@ -1092,3 +1092,51 @@ legitimately make zero further calls, but only with an explicit empty broker
 log and attested initial evidence. Native malformed redacted **user-input
 echoes only** may be quarantined and recorded under this frozen profile;
 reasoning, final answers, tools, controls and usage remain strict.
+
+### E15 live result: adoption recovered, joint gate failed
+
+The first pair is valid and fully scored: B/H credits25.31762/25.13212,
+input101,218/89,713, both grounded and augmented P100%, R18.18%.
+H made two successful indexed source queries after its preload.
+This justified only completing the remaining two declared pilot cases.
+
+[All six attempts](adoption-e15-dev3-results.json) remain reported.
+Total measured B/H credits85.27764/86.21496 and input417,868/477,975:
+H is not cheaper overall. H received 13 complete indexed callable blocks
+plus22 related indexed definitions across the three preloads, and made three
+additional indexed-source requests. This fixes evidence adoption, **not**
+quality. No dummy indexed calls or history quota.
+
+Only two pairs have valid paired quality outputs: pooled grounded/augmented
+P100% in both arms, R22.22% B versus11.11% H; macro R21.59%/12.22%.
+The third H review is valid but unpaired; the third B session has no valid
+review and is not scored as empty or silently retried.
+
+Native events identify a separate termination confound, not index corruption:
+the third H session reports "28.89/30" and explicitly disables tools on its
+next, final model call; its total is31.90350 credits. B reports20.06,25.43
+and31.47/30, then emits one completion without a corresponding start and no
+valid review. Its31.46520 measured credits are retained. Fixed routing and
+medium reasoning remain verified; no authoritative frame was repaired.
+Thus the old funding-derived30 setting is actively truncating investigations.
+Do not infer what unconstrained precision/recall would have been.
+
+## E16: qualify adequate native review headroom before further engine tuning
+
+This is a small development experiment, **not** the25-set launch.
+Keep E15 evidence generation,100,000-character packets, task ordering,
+seed, tools, reviewer objective and fixed Sol/medium unchanged.
+The single treatment-policy change is native session setting60, with explicit
+90-credit reservations,600 reviewer/400 judge finite campaign ceilings.
+Apply60 consistently to both reviewer arms and the judge. Actual spend,
+including any overrun, remains authoritative. Historical30 defaults and
+already-failed experiments remain unchanged.
+
+Native setting is now frozen in the protocol, command, invocation receipt
+and replay audit rather than hardcoded in the CLI builder. Reject invalid
+settings and any setting larger than its reservation.104 focused regressions
+pass (7 environment-dependent upstream tests skipped), including explicit
+transport to reviewer and judge. The first pair must pass native/protocol
+checks before authorizing the remaining two. A larger allowance is **not**
+an efficiency improvement or permission to claim a quality win; measure all
+three outcomes before deciding on another source-delivery improvement.

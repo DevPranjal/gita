@@ -19,12 +19,12 @@ from .common import (IntegrityError, ProtocolError, digest, file_digest, final_a
                      read_json, require, require_integrity, source_lines, utc_now, write_json)
 from .dataset import verify
 from .evidence import Evidence
-from .runtime import (CAMPAIGN_SECONDS, CreditLedger, JUDGE_CREDITS, REVIEWER_CREDITS, file_lock, invoke,
+from .runtime import (CAMPAIGN_SECONDS, CreditLedger, JUDGE_CREDITS, REVIEWER_CREDITS, SESSION_CREDITS, file_lock, invoke,
                       reconcile_judge_outcomes)
 
 SCORE_NAME = "blinded-auto-reference-agreement (pinned official resolver/scorer)"
 DEVIATIONS = [
-    "Copilot --model auto instead of upstream hosted judge provider/model.",
+    "Copilot native authentication and protocol-selected model instead of upstream hosted judge provider/model.",
     "Custom tool-free semantic matcher and classifier, not upstream session prompts.",
     "Fixed same-scope source snippets, not interactive tools, builds, future fixes or network.",
     "Uncertain/missing/malformed classification fails closed rather than upstream default FP.",
@@ -212,7 +212,8 @@ def source_context(scope: dict, candidates: list[dict], golden: list[dict], *,
 
 
 def _judge_call(directory: Path, prompt: str, ledger: CreditLedger, key: str,
-                deadline: float, *, model: str = "auto", reasoning: str | None = None) -> dict:
+                deadline: float, *, model: str = "auto", reasoning: str | None = None,
+                native_credits: int = SESSION_CREDITS) -> dict:
     require(time.time() < deadline, "Overall campaign deadline before judge")
     require(reconcile_judge_outcomes(ledger.path.parent, ledger.protocol) is None,
             "Prior judge outcomes block another model reservation")
@@ -223,7 +224,8 @@ def _judge_call(directory: Path, prompt: str, ledger: CreditLedger, key: str,
     try:
         directory.mkdir(parents=True, exist_ok=False)
         outcome = invoke(directory, prompt, [], None, timeout=min(900, deadline - time.time()),
-                         streaming=False, diagnostic_transport=True, model=model, reasoning=reasoning)
+                         streaming=False, diagnostic_transport=True, model=model, reasoning=reasoning,
+                         native_credits=native_credits)
         events = outcome.pop("events", [])
         integrity = bool(outcome.get("integrity_stop") or outcome.get("status") == "integrity_failed")
         if integrity:
@@ -383,7 +385,8 @@ def grade_pair(root: Path, grader: Path, dataset: dict, scope: dict,
         answer = _judge_call(destination / "matcher", MATCH_PROMPT + json.dumps(match_payload),
                              ledger, task["id"] + "-matcher", deadline,
                              model=frozen.get("judge_model", "auto"),
-                             reasoning=frozen.get("judge_reasoning"))
+                             reasoning=frozen.get("judge_reasoning"),
+                             native_credits=frozen.get("budgets", {}).get("session_native_credits", SESSION_CREDITS))
         match_rows = validate_judgments(answer, len(candidates), len(golden), classify=False)
     write_json(destination / "correspondences.json", match_rows)
     arms, global_unmatched = {}, set()
@@ -406,7 +409,8 @@ def grade_pair(root: Path, grader: Path, dataset: dict, scope: dict,
         answer = _judge_call(destination / "classifier", CLASSIFY_PROMPT + json.dumps(payload),
                              ledger, task["id"] + "-classifier", deadline,
                              model=frozen.get("judge_model", "auto"),
-                             reasoning=frozen.get("judge_reasoning"))
+                             reasoning=frozen.get("judge_reasoning"),
+                             native_credits=frozen.get("budgets", {}).get("session_native_credits", SESSION_CREDITS))
         classifications = validate_judgments(
             answer, len(candidates), len(golden), classify=True, required_indices=global_unmatched)
     write_json(destination / "classifications.json", classifications)

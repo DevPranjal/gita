@@ -17,6 +17,7 @@ from .common import (EVIDENCE_CALL_LIMIT, FINALIZATION_GRACE, IntegrityError, Pr
                      require_integrity, utc_now, write_json)
 
 SESSION_CREDITS = 30  # CLI 1.0.97 rejects lower native caps.
+MAX_SESSION_CREDITS = 120
 REVIEWER_CREDITS = 400
 JUDGE_CREDITS = 200
 MAX_REVIEWER_CREDITS = 2500
@@ -379,13 +380,16 @@ def validate_realized_model(usage: dict, model: str) -> None:
 
 
 def command(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
-            *, model: str = "auto", reasoning: str | None = None) -> list[str]:
+            *, model: str = "auto", reasoning: str | None = None,
+            native_credits: int = SESSION_CREDITS) -> list[str]:
     validate_settings(model, reasoning)
+    require(type(native_credits) is int and SESSION_CREDITS <= native_credits <= MAX_SESSION_CREDITS,
+            "Invalid native session credit setting")
     executable = shutil.which("copilot.exe") or shutil.which("copilot")
     require(executable is not None, "Copilot CLI missing")
     args = [executable, "-C", str(directory / "workspace"), "--model", model,
             "--context", "default",
-            "--max-ai-credits", str(SESSION_CREDITS), "--no-auto-update",
+            "--max-ai-credits", str(native_credits), "--no-auto-update",
             "--no-custom-instructions", "--disable-builtin-mcps", "--no-ask-user",
             "--no-color", "--output-format", "json", "--stream", "on",
             "--usage-output-file", str(directory / "usage.json"),
@@ -404,12 +408,14 @@ def command(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
 def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
            *, timeout: float = MAX_SECONDS, streaming: bool = True,
            diagnostic_transport: bool = False, model: str = "auto",
-           reasoning: str | None = None, input_diagnostics: bool = False) -> dict:
+           reasoning: str | None = None, input_diagnostics: bool = False,
+           native_credits: int = SESSION_CREDITS) -> dict:
     validate_settings(model, reasoning)
     require(0 < timeout <= MAX_SECONDS, "Invalid reviewer timeout")
     for name in ("workspace", "home", "logs"):
         (directory / name).mkdir(parents=True, exist_ok=False)
-    args = command(directory, prompt, allowed, mcp, model=model, reasoning=reasoning)
+    args = command(directory, prompt, allowed, mcp, model=model, reasoning=reasoning,
+                   native_credits=native_credits)
     require(type(streaming) is bool, "Streaming selection must be boolean")
     require(type(diagnostic_transport) is bool, "Diagnostic transport selection must be boolean")
     require(type(input_diagnostics) is bool, "Input diagnostic selection must be boolean")
@@ -423,7 +429,7 @@ def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
         "requested_reasoning": reasoning,
         "diagnostic_transport": diagnostic_transport,
         "input_diagnostics": input_diagnostics,
-        "native_credit_cap": SESSION_CREDITS})
+        "native_credit_cap": native_credits})
     (directory / "prompt.txt").write_text(prompt, encoding="utf8", newline="")
     start = time.monotonic()
     outcome = {"status": "runtime_failed", "usage": None, "error": None,

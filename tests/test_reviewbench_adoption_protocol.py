@@ -156,6 +156,7 @@ def initial_attempt(tmp_path, monkeypatch):
               "model": "gpt-5.6-sol", "reasoning_effort": "medium",
               "reviewer_model": "gpt-5.6-sol", "reviewer_reasoning": "medium",
               "initial_context": True, "reviewer_input_diagnostics": True,
+              "budgets": {"session_native_credits": 60},
               "initial_context_digests": {task["id"]: {"H": digest(packet)}},
               "indexed_workflow": True, "integrated_source": True, "engine_frontend": True}
     write_json(tmp_path / "initial-context" / task["id"] / "H.json", packet)
@@ -165,11 +166,17 @@ def initial_attempt(tmp_path, monkeypatch):
         assert "gita_review(operation='source')" in prompt
         assert "entity_context" not in prompt
         assert options["input_diagnostics"] is True
+        assert options["native_credits"] == 60
         assert options["model"] == "gpt-5.6-sol" and options["reasoning"] == "medium"
         assert prompt.endswith(serialize_context(packet) + "\nEND INITIAL EVIDENCE")
         (path / "prompt.txt").write_text(prompt, encoding="utf8", newline="")
         write_json(path / "invocation.json", {
-            "prompt_digest": digest(prompt), "input_diagnostics": True})
+            "prompt_digest": digest(prompt), "input_diagnostics": True,
+            "requested_model": options["model"], "requested_reasoning": options["reasoning"],
+            "native_credit_cap": options["native_credits"],
+            "arguments_without_prompt": ["--model", options["model"], "--reasoning-effort",
+                                         options["reasoning"], "--max-ai-credits",
+                                         str(options["native_credits"])]})
         (path / "events.jsonl").write_text("", encoding="utf8")
         return {"status": "measurement_invalid", "events": [], "usage": None}
 
@@ -212,3 +219,21 @@ def test_no_call_review_requires_explicit_preload_and_existing_empty_log(tmp_pat
     with pytest.raises(ProtocolError):
         campaign.audit_calls([{"type": "tool.execution_start", "data": {"toolName": "review-search"}}],
                              log, allow_empty=True)
+
+
+@pytest.mark.parametrize("change", ["metadata", "command"])
+def test_cached_native_limit_must_match_frozen_budget(initial_attempt, change):
+    from gita.eval.reviewbench.common import file_digest
+    directory, slot, frozen, _ = initial_attempt
+    assert campaign.validate_receipt(directory, slot, frozen)["status"] == "measurement_invalid"
+    invocation = read_json(directory / "invocation.json")
+    if change == "metadata":
+        invocation["native_credit_cap"] = 30
+    else:
+        invocation["arguments_without_prompt"][-1] = "30"
+    write_json(directory / "invocation.json", invocation)
+    result = read_json(directory / "result.json")
+    result["artifacts"]["invocation.json"] = file_digest(directory / "invocation.json")
+    write_json(directory / "result.json", result)
+    with pytest.raises(ProtocolError, match="native credit setting"):
+        campaign.validate_receipt(directory, slot, frozen)
