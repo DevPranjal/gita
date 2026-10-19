@@ -33,7 +33,8 @@ reviewers. All evidence tools are optional: use whichever help you review accura
 There are at most 40 evidence calls. After exhaustion, all further requests return
 no evidence; a five-turn finalization grace only allows completing your JSON answer.
 Do not waste that grace requesting more tools. Truncation is not absence:
-follow the supplied opaque continuation or narrow the request. Index gaps are not
+use continue_evidence(cursor) with the supplied next_cursor (do not copy or
+change the original query arguments), or narrow the request. Index gaps are not
 proof of absence; common raw evidence remains available. Scope is limited to exact
 allowed commits. Do not guess line numbers.
 Finish with ONLY one JSON object in the official findings contract:
@@ -112,6 +113,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "judge_model": judge_model, "judge_reasoning": judge_reasoning,
             "reasoning_effort": reviewer_reasoning or "auto-provider-default", "context": "default",
             "product_policy_digest": policy_digest(), "parsers": parsers,
+            "source_delivery_sha256": file_digest(package.parents[1] / "source_delivery.py"),
             "harness_sources": {path.name: file_digest(path)
                                 for path in sorted(package.glob("*")) if path.suffix in (".py", ".mjs")},
             "prompt_digest": digest(PROMPT),
@@ -178,6 +180,9 @@ def verify_protocol(run_root: Path, *, harness_root: Path | None = None) -> dict
     require_integrity(frozen.get("run_root_digest") == digest(str(run_root.resolve())),
                       "Protocol belongs to a different run root; reseal a new protocol")
     require(frozen["product_policy_digest"] == policy_digest(), "Production policy changed; use new run root")
+    if "source_delivery_sha256" in frozen:
+        require(file_digest(Path(__file__).parent.parents[1] / "source_delivery.py")
+                == frozen["source_delivery_sha256"], "Source delivery implementation changed")
     source_root = Path(__file__).parent if harness_root is None else harness_root
     for name, expected in frozen["harness_sources"].items():
         require(Path(name).name == name, "Invalid frozen harness source path")

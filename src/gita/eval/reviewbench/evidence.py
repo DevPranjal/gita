@@ -20,7 +20,8 @@ from .common import (EVIDENCE_CALL_LIMIT, EvidenceBudgetError, IntegrityError, P
 
 PAGE_CHARS = 6000
 MAX_RESPONSE_CHARS = 8000
-COMMON_TOOLS = ("raw_diff", "read_file", "search", "list_files", "commit_log", "file_history")
+COMMON_TOOLS = ("raw_diff", "read_file", "search", "list_files", "commit_log", "file_history",
+                "continue_evidence")
 INDEX_TOOLS = ("change_context", "index_status", "entities", "entity_context", "entity_diff", "id", "state", "source", "history", "events")
 
 
@@ -44,6 +45,7 @@ SCHEMAS = {
     "list_files": schema({"pattern": STRING, "commit": STRING, "cursor": CURSOR}),
     "commit_log": schema({"cursor": CURSOR}),
     "file_history": schema({"path": STRING, "cursor": CURSOR}, ("path",)),
+    "continue_evidence": schema({"cursor": CURSOR}, ("cursor",)),
     "index_status": schema({}),
     "change_context": schema({"path": STRING, "cursor": CURSOR}),
     "entities": schema({"path": STRING, "commit": STRING, "cursor": CURSOR}, ("path",)),
@@ -64,6 +66,7 @@ DESCRIPTIONS = {
     "list_files": "List every tracked member path at an allowed commit; optional glob.",
     "commit_log": "Ordered allowed commits only, with subjects and parents qualified at the scope boundary.",
     "file_history": "Raw Git changes for a member path over the same declared allowed commit graph.",
+    "continue_evidence": "Continue any previously issued next_cursor without copying the original tool arguments. Cursor must belong to this session. Preferred for all paginated evidence.",
     "index_status": "Optional: inspect prebuilt index readiness and gaps. For named-function context, entities(path) or id(name) -> state/source can retrieve exact entity evidence instead of whole files. Raw Git fallback is valid. No build or mutation.",
     "change_context": "Gita review starting point: indexed changed-code map plus up to two verified persistent-entity source-diff previews when connected history permits. Returns actual code evidence, locations and explicit gaps; use entity_diff/entity_context for more. Not a complete semantic PR diff.",
     "entities": "Indexed file entities with exact occurrence references, coverage and opaque continuation.",
@@ -117,6 +120,7 @@ class Evidence:
         self.secret = config["cursor_secret"].encode()
         self.issued: dict[str, dict] = {}
         self.cursor_values: dict[str, dict] = {}
+        self.continuations: dict[str, tuple[str, dict]] = {}
         self.sessions: dict[str, Any] = {}
         self.repository = None
         self._paths: dict[str, dict[str, tuple[str, str]]] = {}
@@ -217,6 +221,7 @@ class Evidence:
         offset = 0 if not cursor else self._decode(cursor, binding)["offset"]
         require(type(offset) is int and 0 <= offset <= len(text), "Invalid continuation offset")
         end = min(len(text), offset + PAGE_CHARS)
+        low, high, best = offset + 1, end, None
         while True:
             result = {"text": text[offset:end], "next_cursor": self._encode(
                 {"binding": binding, "offset": end}) if end < len(text) else None,
@@ -224,10 +229,21 @@ class Evidence:
                              "shown_characters": end - offset},
                 "omitted": {"characters": len(text) - end}, "truncated": end < len(text)}
             if len(json.dumps(result, ensure_ascii=True)) <= MAX_RESPONSE_CHARS - 2000:
-                return result
-            if end - offset <= 1:
-                raise EvidenceBudgetError("Raw evidence metadata exceeds output budget")
-            end = offset + max(1, (end - offset) // 2)
+                best = result
+                low = end + 1
+            else:
+                high = end - 1
+            if low > high:
+                if best is None:
+                    raise EvidenceBudgetError("Raw evidence metadata exceeds output budget")
+                return best
+            end = (low + high) // 2
+
+    def continue_evidence(self, cursor: str) -> dict:
+        require(cursor in self.continuations, "Continuation was not issued in this session")
+        name, arguments = self.continuations[cursor]
+        require(name in self.tools and name != "continue_evidence", "Unavailable continuation tool")
+        return getattr(self, name)(**{**arguments, "cursor": cursor})
 
     def raw_diff(self, path: str = "", cursor: str = "") -> dict:
         if path:
@@ -717,13 +733,21 @@ class Evidence:
             require(set(arguments) <= set(SCHEMAS[name]["properties"]), "Unexpected tool argument")
             require(set(SCHEMAS[name]["required"]) <= set(arguments), "Missing tool argument")
             result = getattr(self, name)(**arguments)
-            pending = self._prepare_source_delivery(name, arguments, result)
+            effective_name, effective_arguments = (
+                self.continuations[arguments["cursor"]] if name == "continue_evidence" else
+                (name, arguments))
+            # Continuations never claim partial source pages as complete reusable lines.
+            pending = (None if name == "continue_evidence" else
+                       self._prepare_source_delivery(name, arguments, result))
             if len(json.dumps(result, ensure_ascii=True)) > MAX_RESPONSE_CHARS:
                 raise EvidenceBudgetError(
                     "Evidence exceeds safe SDK output budget; narrow the request or use raw source lines")
             if pending is not None:
                 key, lines, receipt = pending
                 self.source_delivery.register_completed(key, lines, receipt_id=receipt)
+            if result.get("next_cursor"):
+                self.continuations[result["next_cursor"]] = (effective_name, {
+                    key: value for key, value in effective_arguments.items() if key != "cursor"})
             ok = True
         except (ProtocolError, ValueError, TypeError, KeyError, RuntimeError) as error:
             code = getattr(error, "code", "refused")

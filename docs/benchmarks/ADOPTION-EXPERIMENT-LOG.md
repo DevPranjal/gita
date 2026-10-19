@@ -683,3 +683,43 @@ counts actual spend, and permanently stops if the explicit45 reserve is
 exceeded. This is budget headroom, not an assertion the provider enforces a hard
 cap. Defaults and historical ledger semantics remain30. Pilot caps:
 reviewer300 / judge150; sequential calls, no automatic retries.
+
+### E8 paired result: scale gate failed
+
+[All three PR outcomes](adoption-e8-dev3-results.json):
+B/H credits81.844480 /76.737260 (**6.24% lower**);
+input500,039 /492,185 (**1.57% lower**).
+Macro precision91.67% /88.89%, recall14.99% /13.40%.
+All six review sessions and three judgments completed; review158.581740 +
+judge33.401600 credits. Only three source lines were actually reused in this
+pilot: do not attribute the whole credit difference to the delivery ledger.
+
+CrabTrap had the same measured quality with lower H consumption; node-postgres
+had equal quality but higher H cost/context; PROTRIDER had one fewer matched
+TP in H and two continuation argument-binding errors. The aggregate is not a
+joint win; do not select only the favorable repository or start25.
+
+## E9: eliminate avoidable pagination fragmentation and query-copy failures
+
+The prior safe-output implementation halved a6,000-character candidate if it
+slightly exceeded its serialized6,000-character envelope, usually returning
+only3,000 characters. Replace halving with a bounded binary search for the
+largest valid page under the **same** serialized/SDK limits. No larger output
+or hidden truncation.
+
+Add common `continue_evidence(cursor)` to both arms: it dispatches only a
+previously issued continuation with its original scoped arguments. Unissued,
+other-session or unavailable-tool continuations refuse. This prevents the
+model having to reconstruct a source path/range while copying a cursor.
+Tool-call budgets, output limits and provenance remain unchanged.
+
+[Exact full-patch replay](adoption-e9-pagination-replay.json): node-postgres
+6->4 pages, CrabTrap7->4, PROTRIDER68->37, with identical complete patch
+content. That is a transport improvement for **both arms**, not agent quality
+or a Gita-only credit claim. The huge PROTRIDER patch still exceeds practical
+full-review budgets: it must not be declared completely inspected.
+
+39 evidence/paging regressions pass. Future protocols explicitly bind the
+standalone source-delivery helper hash as well as review-package sources.
+The next small comparison keeps all three predefined development tasks,
+fixedSol/medium and the same quality scorer; no golden-text prompt changes.

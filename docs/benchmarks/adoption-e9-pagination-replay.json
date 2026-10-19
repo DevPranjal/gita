@@ -1,0 +1,32 @@
+{
+  "kind": "exact-content source transport, no models",
+  "rows": [
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "raw_patch_characters": 20489,
+      "old_pages": 6,
+      "new_pages": 4,
+      "exact_content_equal": true,
+      "output_cap_unchanged": true
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "raw_patch_characters": 22206,
+      "old_pages": 7,
+      "new_pages": 4,
+      "exact_content_equal": true,
+      "output_cap_unchanged": true
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "raw_patch_characters": 204956,
+      "old_pages": 68,
+      "new_pages": 37,
+      "exact_content_equal": true,
+      "output_cap_unchanged": true
+    }
+  ],
+  "old_pages_total": 81,
+  "new_pages_total": 45,
+  "interpretation": "Fewer required pagination calls with identical complete patch bytes; not measured agent usage or quality."
+}

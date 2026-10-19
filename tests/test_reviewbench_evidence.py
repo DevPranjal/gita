@@ -177,6 +177,31 @@ def test_truncated_source_is_not_registered_as_delivered(fixture_repo, monkeypat
         e.close()
 
 
+def test_continuation_uses_issued_original_query_without_argument_copy(fixture_repo, monkeypatch):
+    _, scope, _ = fixture_repo
+    e = Evidence(config(scope, "B"))
+    other = Evidence(config(scope, "B"))
+    try:
+        text = "content " * 3000
+        monkeypatch.setattr(e, "raw_diff", lambda path="", cursor="":
+                            e.page(text, "raw_diff", {"path": path}, cursor))
+        first = e.execute("raw_diff", {"path": "code.py"})
+        assert 5000 < len(first["text"]) < 6000
+        token = first["next_cursor"]
+        assert other.execute("continue_evidence", {"cursor": token})["error"]
+        pieces = [first["text"]]
+        while token:
+            page = e.execute("continue_evidence", {"cursor": token})
+            assert "error" not in page, page
+            pieces.append(page["text"])
+            token = page["next_cursor"]
+        assert "".join(pieces) == text
+        assert e.execute("continue_evidence", {"cursor": "invented"})["error"]
+    finally:
+        e.close()
+        other.close()
+
+
 def test_common_inventory_and_evidence_are_identical(fixture_repo):
     _, scope, _ = fixture_repo
     baseline, indexed = Evidence(config(scope, "B")), Evidence(config(scope))
