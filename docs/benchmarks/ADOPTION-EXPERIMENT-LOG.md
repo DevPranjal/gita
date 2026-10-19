@@ -929,3 +929,45 @@ reservations. Reviewer output/labels are not regenerated. Scores and **review
 plus verification cost** must be checked before applying it to the other four.
 This is an explicit agent-workflow intervention shared by both arms, not
 evidence that indexing itself can repair a model's reasoning.
+
+### E12 first qualification: did not reject the disputed claim
+
+All242 offline regressions passed. Both source-only verification sessions
+completed, spending39.506400 credits. H kept allthree findings, including
+the disputed checkpoint consequence; B keptthree and withheldone uncertain.
+Thus this first proof pass is **not qualified** merely because it produced
+valid JSON and lower H verification cost.
+
+Its rationale claimed a failed-load sentinel remains unchanged. A further
+source/AST audit found an intervening fallback assignment, plus conditional
+training/save. Existing checkpoint + non-None fallback disables those actions;
+failure alone does not establish overwrite. A None-valued successful fallback
+remains unverified. This qualifies the earlier shorthand "known FP":
+the central advertised path is unsupported, not an unconditional proof that
+no configuration could ever reach it. All earlier verdicts are retained with
+[the conflict corrigendum](adoption-e12-guard-conflict.md).
+
+## E13: current-snapshot proof instead of mixed-version tool transcripts
+
+**Hypothesis, not an established cause:** diff before/after text plus partial
+source windows encourages stale-value/guard reconciliation errors. The proof
+pass still did not reject the unsupported consequence. Test canonical current
+source, not another reviewer rerun or a benchmark-specific hint.
+
+Opt-in snapshot verification deterministically gathers the **complete exact
+HEAD files containing the proposed findings**, with numbered lines and Git
+blob/commit provenance. It supplies no removed/base patch lines, golden data,
+judgments or explicit arm/producer labels. Missing external callers/base
+versions remain explicit and may require uncertainty. This differs from E12:
+new backend source reads are recorded as snapshot evidence IDs, not falsely
+claimed original model tool calls. Both arms use the same policy.
+
+The generic proof instruction also tracks intervening assignments/fallbacks
+before evaluating guards; it contains no benchmark-specific name or label.
+Original E12 inputs/results remain intact.41 focused proof/scoring tests pass,
+including unchanged legacy mode, complete HEAD source, no mixed patch input,
+artifact integrity, full-cost settlement and no default-FP scoring.
+
+Next check is the same one-task/two-arm PROTRIDER qualification, separately
+sealed with90 verification credits maximum. Do not apply it to allfive or25
+unless it demonstrates useful source-grounded decisions at measured total cost.

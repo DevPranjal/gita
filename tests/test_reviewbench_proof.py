@@ -140,6 +140,34 @@ def test_input_is_blinded_and_excludes_reasoning(primary):
     assert "producer" not in payload["findings"][0]
 
 
+def test_snapshot_proof_uses_complete_head_files_not_mixed_patch_states(primary, monkeypatch):
+    run, _, slots, _ = primary
+    write_json(run / "scopes.json", [{"task": {"id": "task"}}])
+    class Snapshot:
+        head = "exact-head"
+        def __init__(self, config):
+            assert config["arm"] == "B" and "tool_log" not in config
+        def blob(self, path, commit):
+            assert path == "a.py" and commit == self.head
+            return b"def update(existing):\n    if not existing:\n        return 'write'\n    return 'skip'\n"
+        def members(self, commit):
+            return {"a.py": ("100644", "blob")}
+        def close(self):
+            pass
+    monkeypatch.setattr(proof, "Evidence", Snapshot)
+    payload = proof.build_input(run, slots[0], snapshot_sources=True)
+    assert len(payload["tool_results"]) == 1
+    source = payload["tool_results"][0]
+    assert source["tool"] == "exact_head_snapshot"
+    assert source["result"]["complete_file"] is True
+    assert "2:     if not existing:" in source["result"]["text"]
+    assert "4:     return 'skip'" in source["result"]["text"]
+    assert source["result"]["commit"] == "exact-head"
+    assert "observable_completions" not in payload
+    assert "complete observable source" not in proof._prompt(payload)
+    assert "Other files" in payload["evidence_scope"]
+
+
 def test_both_reviews_single_call_unchanged_rows_and_no_retry(primary, monkeypatch):
     run, output, slots, originals = primary
     before = proof._original_hashes(run)
