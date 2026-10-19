@@ -15,12 +15,12 @@ import subprocess
 import time
 
 from .campaign import slot_id, validate_receipt, verify_protocol
-from .common import (IntegrityError, ProtocolError, digest, file_digest, final_answer, pr_identity,
+from .common import (IntegrityError, ProtocolError, checked_path, digest, file_digest, final_answer, pr_identity,
                      read_json, require, require_integrity, source_lines, utc_now, write_json)
 from .dataset import verify
 from .evidence import Evidence
 from .runtime import (CAMPAIGN_SECONDS, CreditLedger, JUDGE_CREDITS, REVIEWER_CREDITS, SESSION_CREDITS, file_lock, invoke,
-                      reconcile_judge_outcomes)
+                      read_events, reconcile_judge_outcomes)
 
 SCORE_NAME = "blinded-auto-reference-agreement (pinned official resolver/scorer)"
 DEVIATIONS = [
@@ -153,8 +153,34 @@ def labels_for(grader: Path, frozen: dict, task: dict) -> list[dict]:
     return rows
 
 
+def requested_source_paths(run_root: Path, rows: list[tuple[str, dict]]) -> list[str]:
+    """Union source requests from both arms, without exposing reviewer reasoning."""
+    paths = set()
+    for _, review in rows:
+        directory = run_root / "attempts" / slot_id(review["identity"])
+        require((directory / "tools.jsonl").is_file(), "Reviewer source-request log missing")
+        for call in read_events(directory / "tools.jsonl"):
+            if not call["ok"]:
+                continue
+            tool, args, result = call["tool"], call["arguments"], call["result"]
+            if (tool not in ("read_file", "entity_context", "source", "gita_review")
+                    or (tool == "gita_review" and args.get("operation") != "source")):
+                continue
+            path = (args.get("path") or result.get("entity", {}).get("path")
+                    or args.get("reference", {}).get("path"))
+            if path:
+                checked_path(path)
+                paths.add(path)
+        if review.get("initial_evidence") is not None:
+            visible = read_json(directory / "initial_context.txt")
+            for item in visible["current_source"]["blocks"] + visible["related"].get("sources", []):
+                checked_path(item["path"])
+                paths.add(item["path"])
+    return sorted(paths)
+
+
 def source_context(scope: dict, candidates: list[dict], golden: list[dict], *,
-                   targeted: bool = False) -> dict:
+                   targeted: bool = False, supporting_paths: list[str] | None = None) -> dict:
     evidence = Evidence({**scope, "arm": "B", "cursor_secret": secrets.token_hex(32)})
     try:
         requests = {}
@@ -206,6 +232,45 @@ def source_context(scope: dict, candidates: list[dict], golden: list[dict], *,
                        if targeted else
                        "Related unchanged files/imported APIs are not interactively investigated.")}
         require(len(json.dumps(context)) <= 180000, "Judge fixed source-context limit exceeded")
+        if supporting_paths is not None:
+            context["omissions"] = (
+                ("HEAD line windows and listed complete supporting HEAD files are supplied; "
+                 "base snapshots and the full PR diff are not supplied. " if targeted else
+                 "Base/head line windows, patch and listed supporting HEAD files are supplied. ")
+                + "Other files, omitted supporting files and imported APIs may remain unseen. "
+                "Coverage gaps are not evidence of absence; return uncertainty when needed.")
+            context["supporting_sources"] = []
+            coverage = {"requested_paths": sorted(set(supporting_paths)),
+                        "already_complete_in_snippets": [], "omitted": [], "absence_claim": False,
+                        "selection": "Symmetric union of both reviewers' source requests and visible preloads"}
+            context["supporting_source_coverage"] = coverage
+            head = scope["task"]["head"]
+            for path in sorted(set(supporting_paths), key=lambda p: (p in requests, p)):
+                checked_path(path)
+                if path not in evidence.paths(head):
+                    coverage["omitted"].append({"path": path, "reason": "not_present_at_HEAD"})
+                    continue
+                raw = evidence.blob(path, head)
+                try:
+                    text = raw.decode("utf8", "strict")
+                except UnicodeDecodeError:
+                    coverage["omitted"].append({"path": path, "reason": "non_utf8"})
+                    continue
+                if b"\0" in raw:
+                    coverage["omitted"].append({"path": path, "reason": "binary"})
+                    continue
+                numbered = "\n".join(f"{i}: {line}" for i, line in enumerate(source_lines(raw), 1))
+                if any(s["file"] == path and s["commit"] == head and s["source"] == numbered
+                       for s in snippets):
+                    coverage["already_complete_in_snippets"].append(path)
+                    continue
+                item = {"file": path, "commit": head, "blob": evidence.members(head)[path][1],
+                        "source": text, "source_kind": "complete_HEAD_file_from_verified_Git"}
+                context["supporting_sources"].append(item)
+                if len(json.dumps(context)) > 175000:
+                    context["supporting_sources"].pop()
+                    coverage["omitted"].append({"path": path, "reason": "whole_source_budget"})
+            require(len(json.dumps(context)) <= 180000, "Judge supporting-source metadata exceeds budget")
         return context
     finally:
         evidence.close()
@@ -373,7 +438,9 @@ def grade_pair(root: Path, grader: Path, dataset: dict, scope: dict,
                for arm, row in rows for i, finding in enumerate(row["findings"])]
     random.Random(frozen["seed"] + int(task["id"][:8], 16)).shuffle(blinded)
     candidates = [{"candidate_index": i, **row[2]} for i, row in enumerate(blinded)]
-    context = source_context(scope, candidates, golden, targeted=targeted_context)
+    paths = (requested_source_paths(ledger.path.parent, rows)
+             if frozen.get("judge_reviewed_source", False) else None)
+    context = source_context(scope, candidates, golden, targeted=targeted_context, supporting_paths=paths)
     if frozen.get("judge_runtime_contracts") is not None:
         from .runtime_contracts import supplement_context
         context = supplement_context(context, frozen["judge_runtime_contracts"])

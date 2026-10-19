@@ -12,18 +12,24 @@ from gita.eval.reviewbench.preparation import build_indexes, preflight, source_s
 
 
 @pytest.fixture
-def fixture_repo(tmp_path):
+def fixture_repo(tmp_path, request):
     repository = tmp_path / "source"
     repository.mkdir()
     git(repository, "init")
     git(repository, "config", "user.name", "Synthetic Test")
     git(repository, "config", "user.email", "synthetic@example.invalid")
     source = repository / "code.py"
-    source.write_text("def divide(value):\n    return 10 / value\n", encoding="utf8")
+    duplicate = getattr(request, "param", None) == "duplicate"
+    padding = ("    # " + "x" * 80 + "\n") * 100 if getattr(request, "param", None) == "large" else ""
+    source.write_text("def divide(value):\n" + padding + "    return 10 / value\n"
+                      + ("\ndef divide(other):\n    return 30 / other\n" if duplicate else ""),
+                      encoding="utf8")
     git(repository, "add", "--", "code.py")
     git(repository, "commit", "--no-gpg-sign", "-m", "base")
     base = git(repository, "rev-parse", "HEAD").decode().strip()
-    source.write_text("def divide(value):\n    return 20 / value\n", encoding="utf8")
+    source.write_text("def divide(value):\n" + padding + "    return 20 / value\n"
+                      + ("\ndef divide(other):\n    return 40 / other\n" if duplicate else ""),
+                      encoding="utf8")
     git(repository, "add", "--", "code.py")
     git(repository, "commit", "--no-gpg-sign", "-m", "review")
     head = git(repository, "rev-parse", "HEAD").decode().strip()
@@ -88,6 +94,107 @@ def test_entity_context_stays_out_of_baseline_and_does_not_build(fixture_repo):
         assert not scope["indexes"]
     finally:
         evidence.close()
+
+
+def test_named_source_frontend_resolves_without_line_search_and_reuses_verified_lines(fixture_repo):
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    e = Evidence({**config(indexed), "indexed_workflow": True,
+                  "integrated_source": True, "engine_frontend": True})
+    try:
+        result = e.execute("gita_review", {"operation": "source", "token": "divide"})
+        assert "error" not in result, result
+        assert e.calls == 1 and result["coverage"]["complete_entity"]
+        assert result["coverage"]["lookup"] == "unique_name_locator_or_eid"
+        assert result["entity"]["path"] == "code.py"
+        assert "2:     return 20 / value" in result["text"]
+        assert "SECRET_FUTURE_LABEL" not in result["text"]
+        reused = e.execute("read_file", {"path": "code.py", "start_line": 1, "end_line": 2})
+        assert reused["coverage"]["reused_source_lines"] == 2
+        replay = e.execute("gita_review", {
+            "operation": "source", "token": "code.py::divide", "force_full": True})
+        assert "return 20 / value" in replay["text"]
+        base = e.execute("gita_review", {
+            "operation": "source", "token": "divide", "path": "code.py",
+            "commit": scope["effective_base"]})
+        assert "return 10 / value" in base["text"] and "previously_delivered" not in base
+        assert e.execute("gita_review", {
+            "operation": "source", "token": "divide", "line": 2})["error"]
+        missing = e.execute("gita_review", {"operation": "source", "token": "missing_entity"})
+        assert missing["error"]["code"] == "not_found"
+        assert "gita_id" not in missing["error"]["message"]
+        assert len(json.dumps(result, ensure_ascii=True)) <= 8000
+    finally:
+        e.close()
+
+
+def test_named_source_frontend_verifies_public_adapter_bytes(fixture_repo, monkeypatch):
+    from gita.mcp import tools
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    original = tools.source_tool
+
+    def corrupted(*args, **kwargs):
+        result = original(*args, **kwargs)
+        assert result["error"] is None
+        result["results"][0]["content"] = "not committed source"
+        return result
+
+    monkeypatch.setattr(tools, "source_tool", corrupted)
+    e = Evidence({**config(indexed), "indexed_workflow": True,
+                  "integrated_source": True, "engine_frontend": True})
+    try:
+        result = e.execute("gita_review", {"operation": "source", "token": "divide"})
+        assert result["error"]["code"] == "integrity"
+    finally:
+        e.close()
+
+
+@pytest.mark.parametrize("fixture_repo", ["duplicate"], indirect=True)
+def test_named_source_ambiguity_returns_actionable_eids_without_selecting_source(fixture_repo):
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    e = Evidence({**config(indexed), "indexed_workflow": True,
+                  "integrated_source": True, "engine_frontend": True})
+    try:
+        result = e.execute("gita_review", {
+            "operation": "source", "token": "divide", "path": "code.py"})
+        assert result["status"] == "ambiguous" and len(result["candidates"]) == 2
+        assert not result["coverage"]["complete_entity"] and "source_receipt" not in result
+        assert "return" not in result["text"] and "gita_id" not in result["text"]
+        eid = result["candidates"][0]["eid"]
+        selected = e.execute("gita_review", {"operation": "source", "token": eid})
+        assert "error" not in selected, selected
+        assert selected["coverage"]["complete_entity"]
+        assert "return 20 / value" in selected["text"] or "return 40 / other" in selected["text"]
+    finally:
+        e.close()
+
+
+@pytest.mark.parametrize("fixture_repo", ["large"], indirect=True)
+def test_named_source_pages_complete_body_with_bound_continuation(fixture_repo):
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    e = Evidence({**config(indexed), "indexed_workflow": True,
+                  "integrated_source": True, "engine_frontend": True})
+    try:
+        first = e.execute("gita_review", {"operation": "source", "token": "divide"})
+        assert "error" not in first and first["truncated"], first
+        pieces = [first["text"]]
+        cursor = first["next_cursor"]
+        while cursor:
+            result = e.execute("continue_evidence", {"cursor": cursor})
+            assert "error" not in result and "source_receipt" not in result, result
+            assert len(json.dumps(result, ensure_ascii=True)) <= 8000
+            pieces.append(result["text"])
+            cursor = result["next_cursor"]
+        displayed = "".join(pieces).split("\n")
+        assert [line.partition(": ")[0] for line in displayed] == [
+            str(i) for i in range(1, len(displayed) + 1)]
+        reconstructed = "\n".join(line.partition(": ")[2] for line in displayed).encode("utf8") + b"\n"
+        assert reconstructed == e.blob("code.py", scope["task"]["head"])
+    finally:
+        e.close()
 
 
 def test_cursor_handles_are_short_session_owned_and_query_bound(fixture_repo):

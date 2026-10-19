@@ -48,7 +48,9 @@ SCHEMAS = {
     "continue_evidence": schema({"cursor": CURSOR}, ("cursor",)),
     "gita_review": schema({
         "operation": {"type": "string", "enum": ["changes", "source", "diff", "history", "raw_patch", "status"]},
-        "path": STRING, "line": INTEGER, "token": STRING, "commit": STRING,
+        "path": STRING, "line": INTEGER,
+        "token": {"type": "string", "description": "Prefer a simple name plus optional path, or a full EID. Separate captured scope components with :: in a qualified name."},
+        "commit": STRING,
         "cursor": CURSOR, "force_full": FORCE_FULL}, ("operation",)),
     "index_status": schema({}),
     "change_context": schema({"path": STRING, "cursor": CURSOR}),
@@ -71,7 +73,7 @@ DESCRIPTIONS = {
     "commit_log": "Ordered allowed commits only, with subjects and parents qualified at the scope boundary.",
     "file_history": "Raw Git changes for a member path over the same declared allowed commit graph.",
     "continue_evidence": "Continue any previously issued next_cursor without copying the original tool arguments. Cursor must belong to this session. Preferred for all paginated evidence.",
-    "gita_review": "Indexed review evidence: changes=changed-code/source-preview packet; source(path,line)=numbered enclosing source; diff(token,path)=persistent-entity endpoint diff; history(token,path)=entity history; status=coverage. raw_patch(path?) provides EXACT ordinary Git patch fallback for new/unsupported/ambiguous changes. Nothing is built or parsed on read. Use continue_evidence for pages.",
+    "gita_review": "Indexed review evidence: source(token,path?) retrieves a unique named function/class directly, without searching for line numbers; token can be a name, locator or EID. Alternatively source(path,line) gives enclosing context. changes=changed-code map; diff(token,path)=entity endpoint diff; history(token,path)=entity history; status=coverage. raw_patch(path?) is exact ordinary Git fallback. Ambiguous names require a narrower locator; no guessed binding, parsing or build. Use continue_evidence for pages.",
     "index_status": "Optional: inspect prebuilt index readiness and gaps. For named-function context, entities(path) or id(name) -> state/source can retrieve exact entity evidence instead of whole files. Raw Git fallback is valid. No build or mutation.",
     "change_context": "Gita review starting point: indexed changed-code map plus up to two verified persistent-entity source-diff previews when connected history permits. Returns actual code evidence, locations and explicit gaps; use entity_diff/entity_context for more. Not a complete semantic PR diff.",
     "entities": "Indexed file entities with exact occurrence references, coverage and opaque continuation.",
@@ -264,8 +266,12 @@ class Evidence:
                     "changes accepts only path and cursor")
             result = self.change_context(path, cursor)
         elif operation == "source":
-            require(path and line is not None and not token, "source requires path/line, not token")
-            result = self.entity_context(path, line, commit, cursor, force_full)
+            if token:
+                require(line is None, "source accepts token or path/line, not both")
+                result = self.named_source(token, path, commit, cursor, force_full)
+            else:
+                require(path and line is not None, "source requires token or path/line")
+                result = self.entity_context(path, line, commit, cursor, force_full)
         elif operation == "diff":
             require(token and line is None and commit is None and not force_full,
                     "diff requires token and optional path/cursor")
@@ -599,6 +605,80 @@ class Evidence:
     def id(self, token: str, commit: str | None = None, cursor: str = "") -> dict:
         return self._query("id", self.commit(commit), {"token": token}, cursor)
 
+    def named_source(self, token: str, path: str = "", commit: str | None = None,
+                     cursor: str = "", force_full: bool = False) -> dict:
+        from ...index.query import QueryError
+        from ...mcp.tools import source_tool
+        require(type(token) is str and bool(token), "Named source requires a nonempty token")
+        require(type(force_full) is bool, "force_full must be boolean")
+        if path:
+            checked_path(path)
+        commit = self.commit(commit)
+        session = self._index(commit)
+        locator = token
+        if path and not token.startswith(("eid1_", "oeid1_", path + "::")):
+            locator = path + "::" + token
+        response = source_tool(str(self.repo), entity=locator, at=commit,
+                               scope=session.scope, generation=session.generation)
+        if response.get("error"):
+            error = response["error"]
+            if error["code"] == "ambiguous":
+                matches = session.resolve(locator, at=GitOid.from_hex("sha1", commit), limit=10)
+                require_integrity(matches["status"] == "ambiguous" and matches["page"]["total"] > 1,
+                                  "Public/native source ambiguity disagrees")
+                self._occurrences(matches["results"], session)
+                candidates = [{"eid": row["eid"], "path": row["occurrence"]["path"],
+                               "names": row["occurrence"]["names"], "span": row["occurrence"]["span"]}
+                              for row in matches["results"] if row["occurrence"] is not None]
+                return {"status": "ambiguous", "candidates": candidates,
+                        "text": "No source selected. Choose a candidate EID with source(token), "
+                                "or narrow the locator/path. These are lexical matches, not resolved calls.",
+                        "next_cursor": None,
+                        "coverage": {"source": "indexed_candidates_only", "complete_entity": False,
+                                     "total_matches": matches["page"]["total"], "absence_claim": False},
+                        "omitted": {"count": matches["page"]["total"] - len(candidates),
+                                    "count_known": True, "reason": "candidate_limit_or_non_live"}}
+            if error["code"] in ("corrupt", "digest_collision", "verification_failed",
+                                 "invariant_failure", "invalid_record", "invalid_object", "invalid_source"):
+                raise IntegrityError("Named source adapter refused invalid indexed evidence")
+            if error["code"] == "not_found":
+                raise QueryError("not_found", "No indexed name/locator match; coverage is not absence. "
+                                 "Use source(path,line) or common search/read_file.")
+            raise QueryError(error["code"], error["message"]
+                             + "; use source(path,line) or common search/read_file for raw fallback")
+        require_integrity(response["generation"] == session.generation
+                          and len(response["results"]) == 1, "Named source generation/result changed")
+        payload = response["results"][0]
+        reference = payload["occurrence"]
+        self._occurrences(reference, session)
+        actual_path = reference["path"]
+        require_integrity(reference["commit"]["hex"] == commit, "Named source revision changed")
+        require(not path or actual_path == path, "Named source does not match the requested path")
+        require(payload["encoding"] == "utf-8",
+                "Named source is non-UTF8; inspect explicit raw evidence instead")
+        raw = payload["content"].encode("utf8", "strict")
+        blob = self.blob(actual_path, commit)
+        span = reference["span"]
+        require_integrity(raw == blob[span["start_byte"]:span["end_byte"]]
+                          and payload["byte_length"] == len(raw), "Named source bytes changed")
+        lines = source_lines(blob)
+        start, end = span["start_line"], span["end_line"]
+        text = "\n".join(f"{i}: {lines[i - 1]}" for i in range(start, end + 1))
+        result = self.page(text, "named_source", {
+            "token": token, "path": path, "commit": commit, "occurrence": reference["id"]}, cursor)
+        result.update(entity={"occurrence": reference["id"], "names": reference["names"],
+                              "path": actual_path, "span": span},
+                      provenance={**self.provenance(commit), "generation": session.generation,
+                                  "identity_context": session.context.id,
+                                  "source": "public_named_source_verified_against_git"},
+                      window={"start_line": start, "end_line": end, "whole_entity": True},
+                      history_available=self.config.get("history_ready", False))
+        result["coverage"].update(
+            source="indexed", exact_git_lines=True,
+            complete_entity=not cursor and not result["truncated"],
+            lookup="unique_name_locator_or_eid", ambiguity="refused_not_guessed")
+        return result
+
     def entity_context(self, path: str, line: int, commit: str | None = None,
                        cursor: str = "", force_full: bool = False) -> dict:
         require(type(force_full) is bool, "force_full must be boolean")
@@ -732,9 +812,12 @@ class Evidence:
         if (name not in ("read_file", "entity_context")
                 or not self.config.get("integrated_source") or self.arm != "H"
                 or result.get("truncated") or arguments.get("cursor")
+                or result.get("status") == "ambiguous"
                 or result.get("coverage", {}).get("lossy_decoding")):
             return None
-        commit, path = self.commit(arguments.get("commit")), arguments["path"]
+        commit = self.commit(arguments.get("commit"))
+        path = arguments.get("path") or result.get("entity", {}).get("path")
+        require_integrity(type(path) is str and bool(path), "Reusable source path missing")
         lines = source_lines(self.blob(path, commit))
         numbered = {}
         for displayed in result["text"].split("\n"):

@@ -76,7 +76,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
              integrated_source: bool = False, session_reservation: int = SESSION_CREDITS,
              engine_frontend: bool = False, initial_context: bool = False,
              native_session_credits: int = SESSION_CREDITS, initial_related: bool = True,
-             judge_runtime_contracts: dict | None = None) -> dict:
+             judge_runtime_contracts: dict | None = None, judge_reviewed_source: bool = False) -> dict:
     validate_settings(reviewer_model, reviewer_reasoning)
     validate_settings(judge_model, judge_reasoning)
     require(type(integrated_source) is bool and (not integrated_source or indexed_workflow),
@@ -85,6 +85,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "Engine frontend requires integrated source")
     require(type(initial_context) is bool, "Initial context selection must be boolean")
     require(type(initial_related) is bool, "Initial related-source selection must be boolean")
+    require(type(judge_reviewed_source) is bool, "Judge reviewed-source selection must be boolean")
     if judge_runtime_contracts is not None:
         from .runtime_contracts import validate_contracts
         validate_contracts(judge_runtime_contracts)
@@ -126,9 +127,12 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "reviewer_model": reviewer_model, "reviewer_reasoning": reviewer_reasoning,
             "judge_model": judge_model, "judge_reasoning": judge_reasoning,
             "judge_runtime_contracts": judge_runtime_contracts,
+            "judge_reviewed_source": judge_reviewed_source,
             "reasoning_effort": reviewer_reasoning or "auto-provider-default", "context": "default",
             "product_policy_digest": policy_digest(), "parsers": parsers,
             "source_delivery_sha256": file_digest(package.parents[1] / "source_delivery.py"),
+            "named_source_adapter_sha256": file_digest(package.parents[1] / "mcp" / "tools.py"),
+            "indexed_adapter_sha256": file_digest(package.parents[1] / "cli" / "indexed.py"),
             "harness_sources": {path.name: file_digest(path)
                                 for path in sorted(package.glob("*")) if path.suffix in (".py", ".mjs")},
             "prompt_digest": digest(PROMPT),
@@ -173,7 +177,7 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
          integrated_source: bool = False, session_reservation: int = SESSION_CREDITS,
          engine_frontend: bool = False, initial_context: bool = False,
          native_session_credits: int = SESSION_CREDITS, initial_related: bool = True,
-         judge_runtime_contracts: dict | None = None) -> dict:
+         judge_runtime_contracts: dict | None = None, judge_reviewed_source: bool = False) -> dict:
     require(run_root.resolve() != root.resolve() and root.resolve() not in run_root.resolve().parents,
             "Run artifacts must live outside corpus root")
     for scope in scopes:
@@ -186,7 +190,7 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
                       integrated_source=integrated_source, session_reservation=session_reservation,
                       engine_frontend=engine_frontend, initial_context=initial_context,
                       native_session_credits=native_session_credits, initial_related=initial_related,
-                      judge_runtime_contracts=judge_runtime_contracts)
+                      judge_runtime_contracts=judge_runtime_contracts, judge_reviewed_source=judge_reviewed_source)
     body = {k: v for k, v in frozen.items() if k != "digest"}
     body["run_root_digest"] = digest(str(run_root.resolve()))
     if initial_context:
@@ -223,6 +227,12 @@ def verify_protocol(run_root: Path, *, harness_root: Path | None = None) -> dict
     if "source_delivery_sha256" in frozen:
         require(file_digest(Path(__file__).parent.parents[1] / "source_delivery.py")
                 == frozen["source_delivery_sha256"], "Source delivery implementation changed")
+    for key, source in (
+        ("named_source_adapter_sha256", Path(__file__).parent.parents[1] / "mcp" / "tools.py"),
+        ("indexed_adapter_sha256", Path(__file__).parent.parents[1] / "cli" / "indexed.py"),
+    ):
+        if key in frozen:
+            require(file_digest(source) == frozen[key], "Named source adapter changed")
     source_root = Path(__file__).parent if harness_root is None else harness_root
     for name, expected in frozen["harness_sources"].items():
         require(Path(name).name == name, "Invalid frozen harness source path")
@@ -381,7 +391,9 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
         if config["engine_frontend"] and scope.get("indexes"):
             prompt = prompt.replace(WORKFLOW_GUIDANCE["H"], (
                 "Gita evidence workflow: use gita_review(operation='changes') to start. "
-                "For relevant bodies use operation='source' with path/line, and operation='diff' "
+                "For relevant functions/classes use operation='source' with token (name or locator) "
+                "and optional path: it resolves and returns source in one query, without a separate "
+                "line-number search. Alternatively supply path/line. Use operation='diff' "
                 "with token/path for persistent-entity before/after changes. This is a single "
                 "review interface, not an extra pass: use operation='raw_patch' for ordinary "
                 "Git patches of new/unsupported/ambiguous or file-level changes. Raw patch "

@@ -275,3 +275,14 @@ def test_qualified_runtime_contract_is_bound_before_judging(tmp_path, frozen_inp
         tmp_path, scopes, parsers, development_pilot=True)["digest"]
     with pytest.raises(ProtocolError, match="Unsupported judge runtime contract"):
         campaign.protocol(tmp_path, scopes, parsers, development_pilot=True, judge_runtime_contracts={})
+
+
+def test_union_reviewed_source_policy_is_explicit_and_bound(tmp_path, frozen_inputs):
+    scopes, parsers = frozen_inputs
+    original = campaign.protocol(tmp_path, scopes, parsers, development_pilot=True)
+    changed = campaign.protocol(tmp_path, scopes, parsers, development_pilot=True, judge_reviewed_source=True)
+    assert not original["judge_reviewed_source"] and changed["judge_reviewed_source"]
+    assert changed["digest"] != original["digest"]
+    assert changed["named_source_adapter_sha256"] and changed["indexed_adapter_sha256"]
+    with pytest.raises(ProtocolError, match="reviewed-source"):
+        campaign.protocol(tmp_path, scopes, parsers, development_pilot=True, judge_reviewed_source="yes")

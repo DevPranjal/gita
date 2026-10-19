@@ -1276,3 +1276,77 @@ prompt, tool, source-selection or product-policy tuning during that check.
 These tasks were used in earlier development, so call this **transfer of
 the unchanged candidate**, not a held-out confirmation. Inspect all outcomes
 and combined five-case macro/pooled results before any25-set launch.
+
+### E17 transfer completed: quality preserved, cost signal weakened
+
+[All five results](adoption-e17-transfer5-results.json) now have quality scores.
+The C# classifier explicitly requested missing implementation/DI source.
+Verified complete HEAD files were supplied to **both arms**, with unchanged
+reviewers and matcher; one new, different-input classifier call cost7.39370.
+The original uncertainty and27.68680 transfer judge credits remain preserved.
+No missing classifier result was defaulted to FP or zero findings.
+
+| Combined five metric | Git B | Gita H |
+| --- | ---: | ---: |
+| Review credits | 179.35154 | 176.85430 |
+| Input tokens | 1,019,613 | 1,022,683 |
+| Macro augmented precision / recall | 79.33% / 18.25% | 81.67% / 18.58% |
+| Pooled augmented precision / recall | 80.00% / 17.39% | 80.00% / 17.65% |
+| Pooled grounded recall | 10.94% | 12.50% |
+
+The two transfer cases alone cost **more** with H. Combined credit savings
+shrink to1.39%, and H input tokens are0.30% higher. This is not robust evidence
+for the requested efficiency improvement; **do not launch25 yet**.
+Keep the positive three-case result and the unfavorable transfer equally visible.
+
+## E18: expose the production one-call source API in the reviewer interface
+
+Trace evidence identifies an actual remaining navigation defect: the H
+interface still requires file/line coordinates, so it often performs a raw
+name search before requesting indexed source. The already-tested public
+`gita_source(entity=...)` API is now wired into `gita_review(operation="source",
+token="name", path=...)`. Existing path/line, raw fallback and history/diff
+routes remain. No index rebuild or query-time parsing.
+
+- Name/locator/EID selection uses the **production MCP source adapter**, not
+  a benchmark-specific guessed binding. Its exact occurrence, generation,
+  revision and source bytes are independently checked against Git again.
+- Ambiguous names return explicit bounded candidates with full EIDs; the
+  reviewer can choose one with the same available tool. No suggestion to
+  call a hidden identity tool, and no arbitrary source selection.
+- Complete bodies are numbered and safely paginated; shared receipts reuse
+  only fully delivered exact lines. CRLF bytes survive reconstruction.
+- Freeze the public source and CLI adapter hashes as well as evaluator code.
+  Existing schemas keep one review interface; there is no forced-use quota.
+
+The [first offline lookup replay](adoption-e18-named-source-preflight.json)
+incorrectly joined captured name components with dots. That loses literal
+dots inside namespace/expression components; this was an engineering replay
+error, not evidence of wrong indexed bytes. Native `::` component syntax
+plus actionable ambiguity yields [11 exact same-occurrence source bodies
+and one explicit ambiguity](adoption-e18-named-source-preflight-v2.json)
+for all12 previously requested distinct entities. Original logs are hash-checked
+unchanged. Seven focused source/paging/ledger tests and75 protocol/judge
+regressions pass. A test initially normalized CRLF; the byte reconstruction
+oracle was corrected, not the source producer.
+
+### Preserve supporting evidence in the judge, rather than repeatedly losing it
+
+The uncertain C# grader lacked files the reviewers had **already requested**.
+An explicit new judge profile retains the symmetric union of successful
+source-request paths and **actually visible** preloads, then fetches bounded
+complete HEAD files from verified Git. It does not copy reviewer reasoning,
+unused private preload sections or model conclusions into judging.
+Already-complete snippets are not repeated; binary/non-UTF8/missing/over-budget
+files remain explicit omissions, never absence evidence. Both arms share the
+same judge context. The [offline qualification](adoption-e18-judge-context-preflight.json)
+automatically supplies the formerly missing implementation and DI registration,
+without hardcoding a benchmark ID or running corpus code.
+
+Prospective paid gate: first positions15/20, where E17 incurred extra indexed
+navigation and failed to save cost. If the named-source mechanism yields a
+credible joint signal, run the unchanged candidate on6/8/17 before25.
+Fixed Sol/medium, native60,90 reserve,400/400 phase ceilings for the two-case
+stage. Same current-function preload, on-demand dependencies, no late filtering,
+no reviewer retries. Stronger shared source grounding is a declared judge-policy
+change, not a reviewer advantage. Offline lookup success alone is not efficacy.
