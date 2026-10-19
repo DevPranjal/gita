@@ -70,9 +70,12 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
              development_pilot: bool = False, indexed_workflow: bool = False,
              reviewer_credits: int = REVIEWER_CREDITS, judge_credits: int = JUDGE_CREDITS,
              reviewer_model: str = "auto", reviewer_reasoning: str | None = None,
-             judge_model: str = "auto", judge_reasoning: str | None = None) -> dict:
+             judge_model: str = "auto", judge_reasoning: str | None = None,
+             integrated_source: bool = False, session_reservation: int = SESSION_CREDITS) -> dict:
     validate_settings(reviewer_model, reviewer_reasoning)
     validate_settings(judge_model, judge_reasoning)
+    require(type(integrated_source) is bool and (not integrated_source or indexed_workflow),
+            "Integrated source requires the explicit indexed workflow")
     manifest = verify(root)
     package = Path(__file__).parent
     executable = __import__("shutil").which("copilot.exe") or __import__("shutil").which("copilot")
@@ -92,6 +95,8 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "Invalid reviewer campaign ceiling")
     require(type(judge_credits) is int and SESSION_CREDITS <= judge_credits <= JUDGE_CREDITS,
             "Invalid judge campaign ceiling")
+    require(type(session_reservation) is int and SESSION_CREDITS <= session_reservation
+            <= min(reviewer_credits, judge_credits), "Invalid session reserve")
     randomizer = random.Random(seed)
     schedule = []
     for scope in scopes:
@@ -112,15 +117,18 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "prompt_digest": digest(PROMPT),
             "development_pilot": development_pilot, "indexed_workflow": indexed_workflow,
             "targeted_judging": indexed_workflow,
+            "integrated_source": integrated_source,
             "workflow_guidance": WORKFLOW_GUIDANCE if indexed_workflow else {},
             "tool_schemas": {arm: inventory(arm) for arm in ("B", "H")},
             "task_tool_schemas": {
                 s["task"]["id"]: {arm: tool_inventory({
-                    **s, "arm": arm, "indexed_workflow": indexed_workflow})
+                    **s, "arm": arm, "indexed_workflow": indexed_workflow,
+                    "integrated_source": integrated_source and arm == "H"})
                     for arm in ("B", "H")} for s in scopes},
             "scope_digests": {scope["task"]["id"]: digest(scope) for scope in scopes},
             "budgets": {"reviewer_credits": reviewer_credits, "judge_credits": judge_credits,
                         "session_native_credits": SESSION_CREDITS, "max_sessions": 2,
+                        "session_reservation": session_reservation,
                         "max_calls": EVIDENCE_CALL_LIMIT, "max_tool_attempts": EVIDENCE_CALL_LIMIT + FINALIZATION_GRACE,
                         "max_turns": MAX_TURNS + FINALIZATION_GRACE,
                         "finalization_grace": FINALIZATION_GRACE, "session_seconds": MAX_SECONDS,
@@ -139,7 +147,8 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
          development_pilot: bool = False, indexed_workflow: bool = False,
          reviewer_credits: int = REVIEWER_CREDITS, judge_credits: int = JUDGE_CREDITS,
          reviewer_model: str = "auto", reviewer_reasoning: str | None = None,
-         judge_model: str = "auto", judge_reasoning: str | None = None) -> dict:
+         judge_model: str = "auto", judge_reasoning: str | None = None,
+         integrated_source: bool = False, session_reservation: int = SESSION_CREDITS) -> dict:
     require(run_root.resolve() != root.resolve() and root.resolve() not in run_root.resolve().parents,
             "Run artifacts must live outside corpus root")
     for scope in scopes:
@@ -148,7 +157,8 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
                       indexed_workflow=indexed_workflow, reviewer_credits=reviewer_credits,
                       judge_credits=judge_credits, reviewer_model=reviewer_model,
                       reviewer_reasoning=reviewer_reasoning,
-                      judge_model=judge_model, judge_reasoning=judge_reasoning)
+                      judge_model=judge_model, judge_reasoning=judge_reasoning,
+                      integrated_source=integrated_source, session_reservation=session_reservation)
     body = {k: v for k, v in frozen.items() if k != "digest"}
     body["run_root_digest"] = digest(str(run_root.resolve()))
     frozen = {**body, "digest": digest(body)}
@@ -255,6 +265,7 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
     write_json(directory / "started.json", {"identity": identity, "started": utc_now()})
     config = {**scope, "arm": slot["arm"], "cursor_secret": secrets.token_hex(32),
               "indexed_workflow": frozen.get("indexed_workflow", False),
+              "integrated_source": frozen.get("integrated_source", False) and slot["arm"] == "H",
               "tool_log": str(directory / "tools.jsonl")}
     write_json(directory / "broker.json", config)
     write_json(directory / "mcp.json", {"mcpServers": {"review": {
@@ -272,6 +283,12 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
             prompt += ("\nPreparation notice: no qualified index is available for this task. "
                        "The indexed workflow above is unavailable here; use the common raw "
                        "Git tools directly. Do not infer that missing indexed evidence means no issues.")
+        if config["integrated_source"]:
+            prompt += ("\nSource delivery: entity_context gives exact numbered source near your location. "
+                       "read_file and entity_context share a verified delivery ledger: previously delivered "
+                       "lines are explicitly referenced, not resent. Use force_full=true if you need those "
+                       "lines repeated. Inspect new context, callers and guards as necessary; index source "
+                       "is not an additional mandatory pass after complete raw source.")
         outcome = invoke(directory, prompt, names, directory / "mcp.json", timeout=timeout,
                          model=model, reasoning=reasoning)
     except IntegrityError as error:
@@ -316,12 +333,18 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
 
 def validate_broker_config(config: dict, slot: dict, frozen: dict) -> None:
     require(config["arm"] == slot["arm"], "Cached broker arm mismatch")
+    if "integrated_source" in config or "integrated_source" in frozen:
+        require(type(config.get("integrated_source")) is bool
+                and config["integrated_source"] == (
+                    frozen.get("integrated_source", False) and slot["arm"] == "H"),
+                "Cached source-delivery profile mismatch")
     if "indexed_workflow" in config or "task_tool_schemas" in frozen:
         require(type(config.get("indexed_workflow")) is bool
                 and config["indexed_workflow"] == frozen.get("indexed_workflow", False),
                 "Cached broker workflow/protocol mismatch")
     original_scope = {k: v for k, v in config.items()
-                      if k not in ("arm", "cursor_secret", "tool_log", "indexed_workflow")}
+                      if k not in ("arm", "cursor_secret", "tool_log", "indexed_workflow",
+                                   "integrated_source")}
     require(digest(original_scope) == frozen["scope_digests"][slot["task"]],
             "Cached broker scope/protocol mismatch")
 
@@ -389,7 +412,8 @@ def run(run_root: Path, *, task_limit: int, audit_approval: str,
     scopes = {s["task"]["id"]: s for s in read_json(run_root / "scopes.json")}
     tasks = list(scopes)[:task_limit]
     ledger = CreditLedger(run_root / "reviewer-ledger.json", frozen["digest"],
-                          frozen["budgets"]["reviewer_credits"])
+                          frozen["budgets"]["reviewer_credits"],
+                          reservation=frozen["budgets"].get("session_reservation", SESSION_CREDITS))
     with file_lock(run_root / "campaign.lock"):
         state = ledger.snapshot()
         started = datetime.fromisoformat(state["created"])

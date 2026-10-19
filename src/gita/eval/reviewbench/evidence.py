@@ -13,6 +13,7 @@ from pathlib import Path
 import time
 from typing import Any
 from ...index.model import GitOid
+from ...source_delivery import SourceDeliveryLedger, SourceKey
 
 from .common import (EVIDENCE_CALL_LIMIT, EvidenceBudgetError, IntegrityError, ProtocolError, append_json, checked_path, digest, git,
                      oid, read_json, require, require_integrity, source_lines)
@@ -30,11 +31,12 @@ def schema(properties: dict, required: tuple[str, ...] = ()) -> dict:
 
 STRING = {"type": "string"}
 INTEGER = {"type": "integer"}
+FORCE_FULL = {"type": "boolean", "description": "Return requested source even when already delivered earlier."}
 CURSOR = {"type": "string", "description": "Opaque next_cursor from this exact query; omit on first page."}
 SCHEMAS = {
     "raw_diff": schema({"path": STRING, "cursor": CURSOR}),
     "read_file": schema({"path": STRING, "commit": STRING, "start_line": INTEGER,
-                         "end_line": INTEGER, "cursor": CURSOR}, ("path",)),
+                         "end_line": INTEGER, "cursor": CURSOR, "force_full": FORCE_FULL}, ("path",)),
     "search": schema({"text": STRING, "pattern": STRING,
                       "path": {"type": "string", "description": "Path glob alias for pattern; do not give conflicting values."},
                       "commit": STRING,
@@ -45,7 +47,8 @@ SCHEMAS = {
     "index_status": schema({}),
     "change_context": schema({"path": STRING, "cursor": CURSOR}),
     "entities": schema({"path": STRING, "commit": STRING, "cursor": CURSOR}, ("path",)),
-    "entity_context": schema({"path": STRING, "line": INTEGER, "commit": STRING, "cursor": CURSOR},
+    "entity_context": schema({"path": STRING, "line": INTEGER, "commit": STRING, "cursor": CURSOR,
+                              "force_full": FORCE_FULL},
                              ("path", "line")),
     "entity_diff": schema({"token": STRING, "path": STRING, "cursor": CURSOR}, ("token",)),
     "id": schema({"token": STRING, "commit": STRING, "cursor": CURSOR}, ("token",)),
@@ -119,6 +122,7 @@ class Evidence:
         self._paths: dict[str, dict[str, tuple[str, str]]] = {}
         self._blobs: dict[tuple[str, str], bytes] = {}
         self._change_context: dict[str, str] = {}
+        self.source_delivery = SourceDeliveryLedger(max_chars=500_000, max_lines=3000)
         # Check task scope against actual Git ancestry, not a self-consistent manifest hash.
         reachable = set(git(self.repo, "rev-list", self.head, config["task"]["base"])
                         .decode().splitlines())
@@ -235,7 +239,8 @@ class Evidence:
                 "provenance": self.provenance()}
 
     def read_file(self, path: str, commit: str | None = None, start_line: int = 1,
-                  end_line: int = 200, cursor: str = "") -> dict:
+                  end_line: int = 200, cursor: str = "", force_full: bool = False) -> dict:
+        require(type(force_full) is bool, "force_full must be boolean")
         commit = self.commit(commit)
         require(type(start_line) is int and type(end_line) is int
                 and 1 <= start_line <= end_line < start_line + 1000, "Invalid source line request")
@@ -532,7 +537,8 @@ class Evidence:
         return self._query("id", self.commit(commit), {"token": token}, cursor)
 
     def entity_context(self, path: str, line: int, commit: str | None = None,
-                       cursor: str = "") -> dict:
+                       cursor: str = "", force_full: bool = False) -> dict:
+        require(type(force_full) is bool, "force_full must be boolean")
         checked_path(path)
         commit = self.commit(commit)
         require(type(line) is int and line >= 1, "Entity line must be a positive integer")
@@ -563,6 +569,16 @@ class Evidence:
                 ref["span"]["end_byte"] - ref["span"]["start_byte"], ref["id"])))
         source = session.source(reference)
         text = source.decode("utf8", "strict")
+        window = None
+        if self.config.get("integrated_source"):
+            span = reference["span"]
+            start, end = span["start_line"], span["end_line"]
+            if len(source) > 4000:
+                start, end = max(start, line - 20), min(end, line + 30)
+            lines = source_lines(self.blob(path, commit))
+            text = "\n".join(f"{i}: {lines[i - 1]}" for i in range(start, end + 1))
+            window = {"start_line": start, "end_line": end,
+                      "whole_entity": start == span["start_line"] and end == span["end_line"]}
         result = self.page(text, "entity_context", {
             "path": path, "line": line, "commit": commit, "occurrence": reference["id"]}, cursor)
         result.update(entity={"occurrence": reference["id"], "names": reference["names"],
@@ -573,6 +589,12 @@ class Evidence:
                       history_available=self.config.get("history_ready", False))
         result["coverage"].update(source="indexed", exact_entity_source=True,
                                   complete_entity=not cursor and not result["truncated"])
+        if window is not None:
+            result["window"] = window
+            result["coverage"].update(
+                complete_entity=window["whole_entity"] and not cursor and not result["truncated"],
+                exact_entity_source=False, exact_git_lines=True,
+                outside_window="Not returned; use explicit source lines for more context")
         return result
 
     def entity_diff(self, token: str, path: str = "", cursor: str = "") -> dict:
@@ -643,6 +665,47 @@ class Evidence:
                                "identity_context": session.context.id},
                 "coverage": {"exact_span": True}, "omitted": {"bytes": 0}, "next_cursor": None}
 
+    def _prepare_source_delivery(self, name: str, arguments: dict, result: dict):
+        if (name not in ("read_file", "entity_context")
+                or not self.config.get("integrated_source") or self.arm != "H"
+                or result.get("truncated") or arguments.get("cursor")
+                or result.get("coverage", {}).get("lossy_decoding")):
+            return None
+        commit, path = self.commit(arguments.get("commit")), arguments["path"]
+        lines = source_lines(self.blob(path, commit))
+        numbered = {}
+        for displayed in result["text"].split("\n"):
+            number, separator, text = displayed.partition(": ")
+            require_integrity(bool(separator) and number.isdecimal(), "Unnumbered reusable source")
+            index = int(number)
+            require_integrity(1 <= index <= len(lines) and lines[index - 1] == text,
+                              "Reusable source differs from exact Git line")
+            numbered[index] = text
+        if not numbered:
+            return None
+        key = SourceKey(commit, path, self.members(commit)[path][1])
+        start, end = min(numbered), max(numbered)
+        delivery = self.source_delivery.render(
+            key, numbered, start=start, end=end, force_full=arguments.get("force_full", False))
+        receipt = f"evidence-call-{self.calls}"
+        if delivery.previously_delivered_ranges:
+            result["text"] = "\n".join(f"{line.number}: {line.text}" for line in delivery.new_lines)
+            if not result["text"]:
+                result["text"] = "Already delivered; see receipts. force_full=true repeats."
+            result["previously_delivered"] = [
+                {"start_line": item.start, "end_line": item.end, "receipt": item.receipt_id}
+                for item in delivery.previously_delivered_ranges]
+            result["coverage"].update(reused_source_lines=sum(
+                item.end - item.start + 1 for item in delivery.previously_delivered_ranges),
+                newly_delivered_lines=len(delivery.new_lines),
+                complete_entity=False, source_available_across_receipts=True)
+            result["omitted"]["already_delivered_lines"] = result["coverage"]["reused_source_lines"]
+        result["provenance"] = {key: value for key, value in result["provenance"].items()
+                                if key in ("commit", "generation", "identity_context", "source")}
+        result["coverage"]["shown_characters"] = len(result["text"])
+        result["source_receipt"] = receipt
+        return key, {line.number: line.text for line in delivery.new_lines}, receipt
+
     def execute(self, name: str, arguments: dict, request_id: str | None = None) -> dict:
         start = time.monotonic()
         self.calls += 1
@@ -654,9 +717,13 @@ class Evidence:
             require(set(arguments) <= set(SCHEMAS[name]["properties"]), "Unexpected tool argument")
             require(set(SCHEMAS[name]["required"]) <= set(arguments), "Missing tool argument")
             result = getattr(self, name)(**arguments)
+            pending = self._prepare_source_delivery(name, arguments, result)
             if len(json.dumps(result, ensure_ascii=True)) > MAX_RESPONSE_CHARS:
                 raise EvidenceBudgetError(
                     "Evidence exceeds safe SDK output budget; narrow the request or use raw source lines")
+            if pending is not None:
+                key, lines, receipt = pending
+                self.source_delivery.register_completed(key, lines, receipt_id=receipt)
             ok = True
         except (ProtocolError, ValueError, TypeError, KeyError, RuntimeError) as error:
             code = getattr(error, "code", "refused")

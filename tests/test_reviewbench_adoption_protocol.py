@@ -75,3 +75,22 @@ def test_workflow_metadata_is_bound_separately_from_immutable_source_scope():
                     {**config, "arm": "B"}, {**config, "history_ready": False}):
         with pytest.raises(ProtocolError):
             campaign.validate_broker_config(changed, slot, frozen)
+
+
+def test_integrated_source_setting_is_explicit_and_scope_bound(tmp_path, frozen_inputs):
+    scopes, parsers = frozen_inputs
+    frozen = campaign.protocol(tmp_path, scopes, parsers, development_pilot=True,
+                               indexed_workflow=True, integrated_source=True)
+    assert frozen["integrated_source"] is True
+    assert frozen["digest"] != campaign.protocol(
+        tmp_path, scopes, parsers, development_pilot=True, indexed_workflow=True)["digest"]
+    with pytest.raises(ProtocolError, match="requires"):
+        campaign.protocol(tmp_path, scopes, parsers, development_pilot=True, integrated_source=True)
+    scope = {"repo": "source", "history_ready": True}
+    config = {**scope, "arm": "H", "cursor_secret": "key", "tool_log": "log",
+              "indexed_workflow": True, "integrated_source": True}
+    frozen["scope_digests"] = {"0": digest(scope)}
+    campaign.validate_broker_config(config, {"task": "0", "arm": "H"}, frozen)
+    with pytest.raises(ProtocolError, match="source-delivery"):
+        campaign.validate_broker_config({**config, "integrated_source": False},
+                                        {"task": "0", "arm": "H"}, frozen)

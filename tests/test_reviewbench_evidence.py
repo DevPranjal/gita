@@ -138,6 +138,45 @@ def test_unbuilt_workflow_exposes_readiness_not_broken_index_calls(fixture_repo)
         e.close()
 
 
+def test_integrated_source_reuses_only_completed_exact_lines_and_can_replay(fixture_repo):
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    e = Evidence({**config(indexed), "integrated_source": True})
+    try:
+        first = e.execute("entity_context", {"path": "code.py", "line": 2})
+        assert first["coverage"]["exact_git_lines"] is True
+        assert "1: def divide(value):" in first["text"]
+        assert "2:     return 20 / value" in first["text"]
+        reused = e.execute("read_file", {"path": "code.py", "start_line": 1, "end_line": 2})
+        assert reused["coverage"]["reused_source_lines"] == 2
+        assert reused["previously_delivered"] == [{
+            "start_line": 1, "end_line": 2, "receipt": first["source_receipt"]}]
+        full = e.execute("read_file", {"path": "code.py", "start_line": 1,
+                                      "end_line": 2, "force_full": True})
+        assert "return 20 / value" in full["text"] and "previously_delivered" not in full
+        base = e.execute("read_file", {"path": "code.py", "commit": scope["effective_base"],
+                                      "start_line": 1, "end_line": 2})
+        assert "return 10 / value" in base["text"] and "previously_delivered" not in base
+    finally:
+        e.close()
+
+
+def test_truncated_source_is_not_registered_as_delivered(fixture_repo, monkeypatch):
+    _, scope, _ = fixture_repo
+    e = Evidence({**config(scope), "integrated_source": True})
+    try:
+        original = e.page
+        monkeypatch.setattr(e, "page", lambda *args, **kwargs:
+                            {**original(*args, **kwargs), "truncated": True})
+        first = e.execute("read_file", {"path": "code.py", "start_line": 1, "end_line": 2})
+        assert first["truncated"] is True and e.source_delivery.retained_lines == 0
+        monkeypatch.setattr(e, "page", original)
+        second = e.execute("read_file", {"path": "code.py", "start_line": 1, "end_line": 2})
+        assert "return 20 / value" in second["text"] and "previously_delivered" not in second
+    finally:
+        e.close()
+
+
 def test_common_inventory_and_evidence_are_identical(fixture_repo):
     _, scope, _ = fixture_repo
     baseline, indexed = Evidence(config(scope, "B")), Evidence(config(scope))

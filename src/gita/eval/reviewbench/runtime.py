@@ -114,14 +114,18 @@ def file_lock(path: Path) -> Iterator[None]:
 
 
 class CreditLedger:
-    def __init__(self, path: Path, protocol: str, ceiling: int):
+    def __init__(self, path: Path, protocol: str, ceiling: int, *, reservation: int = SESSION_CREDITS):
         require(0 < ceiling <= REVIEWER_CREDITS, "Invalid ledger ceiling")
+        require(type(reservation) is int and SESSION_CREDITS <= reservation <= ceiling,
+                "Invalid session reservation")
         self.path, self.protocol, self.ceiling = path, protocol, ceiling
+        self.reservation = reservation
         with file_lock(path.with_suffix(".lock")):
             if path.exists():
                 self._load()
             else:
                 write_json(path, {"protocol": protocol, "ceiling": ceiling,
+                                  "session_reservation": reservation,
                                   "created": utc_now(), "spent": 0, "slots": {},
                                   "terminal_stop": None})
 
@@ -129,6 +133,8 @@ class CreditLedger:
         state = read_json(self.path)
         require(state["protocol"] == self.protocol and state["ceiling"] == self.ceiling,
                 "Ledger protocol/ceiling mismatch")
+        require(state.get("session_reservation", SESSION_CREDITS) == self.reservation,
+                "Ledger reservation mismatch")
         return state
 
     def snapshot(self) -> dict:
@@ -145,9 +151,10 @@ class CreditLedger:
                     "Campaign stopped: unknown usage")
             active = sum(s["state"] == "reserved" for s in state["slots"].values())
             require(active < MAX_SESSIONS, "At most two model sessions")
-            require(state["spent"] + (active + 1) * SESSION_CREDITS <= self.ceiling,
+            active_reservations = sum(s["cap"] for s in state["slots"].values() if s["state"] == "reserved")
+            require(state["spent"] + active_reservations + self.reservation <= self.ceiling,
                     "Campaign budget cannot reserve another 30-credit session")
-            state["slots"][slot] = {"state": "reserved", "cap": SESSION_CREDITS,
+            state["slots"][slot] = {"state": "reserved", "cap": self.reservation,
                                      "started": utc_now(), "credits": None}
             if receipt_path is not None:
                 state["slots"][slot]["receipt_path"] = str(receipt_path.resolve())
@@ -189,7 +196,8 @@ def reconcile_judge_outcomes(run_root: Path, protocol: str) -> dict | None:
     ceiling = read_json(path)["ceiling"]
     require_integrity(type(ceiling) is int and 0 < ceiling <= JUDGE_CREDITS,
                       "Judge ledger exceeds its authorized maximum")
-    ledger = CreditLedger(path, protocol, ceiling)
+    ledger = CreditLedger(path, protocol, ceiling,
+                          reservation=read_json(path).get("session_reservation", SESSION_CREDITS))
     state = ledger.snapshot()
     if state.get("terminal_stop") is not None:
         return state["terminal_stop"]

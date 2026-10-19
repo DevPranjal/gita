@@ -131,6 +131,18 @@ def test_measured_native_overrun_is_counted_and_permanently_stops_ledger(tmp_pat
         ledger.reserve("next")
 
 
+def test_explicit_reserve_accounts_for_soft_native_cap_without_understating_spend(tmp_path):
+    ledger = runtime.CreditLedger(tmp_path / "judge-ledger.json", "protocol", 90, reservation=45)
+    ledger.reserve("first")
+    ledger.settle("first", 32.53016)
+    assert ledger.snapshot()["spent"] == 32.53016
+    assert ledger.snapshot()["slots"]["first"]["cap"] == 45
+    assert ledger.snapshot()["slots"]["first"]["state"] == "settled"
+    assert runtime.reconcile_judge_outcomes(tmp_path, "protocol") is not None
+    with pytest.raises(ProtocolError, match="reservation mismatch"):
+        runtime.CreditLedger(tmp_path / "judge-ledger.json", "protocol", 90)
+
+
 def test_defaults_and_legacy_identity_remain_auto(protocol_inputs):
     frozen = campaign.protocol(*protocol_inputs)
     assert campaign.reviewer_settings(frozen) == ("auto", None)

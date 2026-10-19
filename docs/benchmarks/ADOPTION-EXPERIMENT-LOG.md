@@ -613,3 +613,73 @@ retrieval at identical evidence scope. Qualify this independently of golden
 labels, then use a newly authorized fixed-model paired run with a frozen,
 consistent judge and explicit native-cap-overrun reserve. Do not force minimum
 history calls or train the prompt to this repeatedly seen regex PR.
+
+## 2026-10-19: E8, integrated source reuse (funding constraint lifted)
+
+The user explicitly lifted the earlier funding constraint but requested that
+long evaluations remain gated by small verified improvements. New work uses
+bounded protocols, not an unlimited search for winning runs.
+
+**Concrete trace evidence:** E7 asked for `handlers.ts:340`. The smallest
+indexed containing occurrence was a 508-line module. Pagination returned the
+**beginning of the file**, not the requested location. A later method source
+request therefore became more work rather than useful enclosing context.
+Other calls retrieved exact functions, then repeated their bodies with raw
+`read_file`. Eleven observed schema errors were fixed in E7; the remaining
+issue is evidence-delivery composition, not another prompt slogan.
+
+**Intervention:** opt-in integrated source delivery. Large containing
+occurrences start with an explicitly partial exact line window around the
+requested location, not the beginning of the module. All source displays have
+absolute line numbers. An immutable commit/path/blob keyed delivery ledger
+will permit repeated source requests to reference already-delivered lines
+while returning new lines; full replay remains available. Only fully delivered,
+independently verified source may become reusable evidence.
+
+**Initial no-model reproduction:** the real `handlers.ts:340` request now
+returns exact lines320-370, 1,722 characters, with `whole_entity=false` and
+explicitly omitted outside context. No hidden extraction/build or semantic
+equivalence claim.
+
+**Pilot population before judging:** positions6 (node-postgres),8 (CrabTrap),
+17 (PROTRIDER): three supported connected-history tasks with distinct languages
+and layouts. Do not use the repeatedly evaluated regex task as the new quality
+gate. Their prior results remain development information; this is not held-out
+confirmation. Both arms fixed Sol/medium, same judge, one repeat, no automatic
+retries. Scale only if cost/context improve without a measured recall or
+precision regression and delivery/source correctness gates pass.
+
+### E8 offline qualification
+
+- Shared source-delivery utility is independent of parsing/matching/index build
+  policy. It keys exact commit/path/blob/line and is memory-bounded; forgetting
+  a receipt resends source rather than claiming it known.
+- Both integrated source and raw reads explicitly identify prior call receipts
+  for repeated complete lines. `force_full=true` always permits a full reread.
+  Truncated, lossy or continued-page outputs do not register complete delivery.
+  Exact Git lines are independently checked before reuse; unread or future
+  source cannot enter the ledger.
+- Compact responses retain commit, blob where applicable, generation/context
+  and source kind, without repeating the same task/base/head envelope on every
+  source response.
+- The original source-query sequence replayed offline against frozen objects:
+  serialized source-response characters38,797 ->33,887 (**12.66% less**), with
+  101 explicitly reused source lines. This is a transport counterfactual, not
+  a credit/quality result; line numbering and reference overhead are included.
+- **196 tests pass**, including source reuse, revision isolation, forced replay,
+  incomplete-output exclusion, protocol binding and existing scorer conformance.
+
+**Audit correction:** an early engineering probe inherited the old E7 tool-log
+path and appended one engineering response. Before further replay, restored
+the exact original prefix matching the original receipt's SHA256; retained
+the full before-correction log, appended suffix and a correction receipt
+separately. No reviewer findings/usage changed. Subsequent probes explicitly
+remove tool-log paths and hash-check old logs unchanged. This correction is not
+hidden or treated as another benchmark attempt.
+
+**Soft native cap:** the provider's30-credit limit previously exported32.53.
+New pilot freezes a45-credit reservation around the still30-credit native cap,
+counts actual spend, and permanently stops if the explicit45 reserve is
+exceeded. This is budget headroom, not an assertion the provider enforces a hard
+cap. Defaults and historical ledger semantics remain30. Pilot caps:
+reviewer300 / judge150; sequential calls, no automatic retries.
