@@ -971,3 +971,50 @@ artifact integrity, full-cost settlement and no default-FP scoring.
 Next check is the same one-task/two-arm PROTRIDER qualification, separately
 sealed with90 verification credits maximum. Do not apply it to allfive or25
 unless it demonstrates useful source-grounded decisions at measured total cost.
+
+### E13 qualification result
+
+[All E12/E13 pair costs and retained scores](adoption-e12-e13-proof-results.json).
+The canonical HEAD verifier rejected the disputed H consequence, but withheld
+another H finding because the model/loss class implementations were absent.
+B retainedthree and withheldone external-library-contract claim.
+E13 verification cost19.738900 versus E12's39.506400. This is cheaper and
+better calibrated on that unsupported claim, **not** a sufficient recall result.
+No source/reviewer outputs are rewritten and no uncertain finding is called FP.
+
+## E14: supply repository-local dependency implementations, without another agent loop
+
+The remaining H uncertainty requested two repository-local type implementations.
+Those are precisely the context the persistent symbol store can retrieve.
+Test a deterministic related-source stage before the single verifier call:
+select at most16 type/call identifiers from the original proposed findings and
+current HEAD source, not reference labels or judge messages.
+
+- H resolves stored names at HEAD and retrieves independently Git-verified
+  definition bodies, qualified spans and ambiguity/coverage.
+- B uses a **competitive conventional Git-grep declaration locator** and
+  complete matching source files, not a deliberately weak all-reference dump.
+  Declaration locators are explicitly heuristic, not entity parsing/identity.
+- Missing index and unresolved indexed terms retain the same raw fallback.
+  Reference-only names remain explicit; they are not loaded as implementations
+  or treated as absence. No query-time Tree-sitter extraction or build.
+- Whole-source100,000-character retrieval budgets and exclusions are explicit.
+  Indexed bodies already contained in a supplied identical raw file are
+  exact-byte-checked and referenced, not duplicated in the model input.
+
+The first naive raw preflight loaded too many usage/test files. It was
+strengthened **before any paid E14 call**, with source-first global budgeting
+and declaration-locator evidence. Do not claim wins against that rejected
+weaker baseline.
+
+[Final no-model preflight](adoption-e14-related-preflight.json) supplies the
+needed local class bodies. No budget omissions in either arm; prompt lengths
+B111,035 /H94,190. This is only a context-size observation, not a credit/quality
+claim.74 focused proof/related-source/scorer tests pass, including real committed
+Git, source-byte checks, injection rejection, fallback, ambiguity, budget
+omissions and exact-content deduplication.
+
+Next paid qualification: same original one-task pair, both verifiers fixed
+Solmedium, no reviewers rerun, a separate90-credit cap. It must recover
+source-supported local-type findings without restoring the unsupported claim.
+Do not apply it to allfive or25 based on fewer prompt characters alone.

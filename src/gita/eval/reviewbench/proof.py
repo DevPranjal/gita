@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import json
 import secrets
+import re
+from collections import Counter
 from pathlib import Path
 from typing import Literal, TypedDict
 
@@ -67,8 +69,55 @@ def _verify(run_root: Path) -> dict:
         run_root, harness_root=archive if archive.is_dir() else None)
 
 
-def build_input(run: Path, slot: dict, *, snapshot_sources: bool = False) -> dict:
+def _related_terms(findings: list[dict], source_texts: list[str]) -> list[str]:
+    pattern = r"\b[A-Za-z_][A-Za-z0-9_]{2,79}\b"
+    mentioned = set(re.findall(pattern, "\n".join(row["message"] for row in findings)))
+    text = "\n".join(source_texts)
+    counts = Counter(re.findall(pattern, text))
+    called = set(re.findall(r"\b([A-Za-z_][A-Za-z0-9_]{2,79})\s*\(", text))
+    controls = {"for", "while", "switch", "catch", "with", "if", "return", "assert",
+                "print", "len", "range", "super", "isinstance", "enumerate", "zip",
+                "and", "or", "not", "else", "elif", "except"}
+    candidates = {token for token in set(counts) | mentioned if (
+        token[0].isupper() and sum(c.isupper() for c in token) >= 2
+        and any(c.islower() for c in token)) or (
+            token in called and token not in controls and (
+                token[0].isupper() or "_" in token or re.search(r"[a-z][A-Z]", token)))}
+    return sorted(candidates, key=lambda token: (
+        not (token[0].isupper() and token in called),
+        token not in mentioned, not token[0].isupper(), -counts[token], token))[:16]
+
+
+def _coalesce_related(indexed: dict, raw: dict) -> dict:
+    full_files = {s["path"]: s for s in raw["sources"] if s["source_kind"] == "raw_git_file"
+                  and s["span"]["start_byte"] == 0}
+    retained, references = [], []
+    for source in indexed["sources"]:
+        full = full_files.get(source["path"])
+        if full is None:
+            retained.append(source)
+            continue
+        require_integrity(full["commit"] == source["commit"] and full["blob"] == source["blob"],
+                          "Related source versions differ")
+        span = source["span"]
+        original = full["text"].encode("utf8")
+        require_integrity(0 <= span["start_byte"] <= span["end_byte"] <= len(original)
+                          and original[span["start_byte"]:span["end_byte"]] == source["text"].encode("utf8"),
+                          "Related source reuse differs from exact file bytes")
+        references.append({"source_id": source["source_id"], "available_via": full["source_id"],
+                           "path": source["path"], "span": span})
+    return {**indexed, "sources": retained, "source_references": references,
+            "coverage": {**indexed["coverage"],
+                         "retrieved_source_characters": indexed["coverage"]["serialized_source_characters"],
+                         "serialized_source_characters": len(json.dumps(retained, ensure_ascii=True))}}
+
+
+def build_input(run: Path, slot: dict, *, snapshot_sources: bool = False,
+                related_symbols: bool = False) -> dict:
     """Validate an original receipt and expose no reasoning or experiment metadata."""
+    require(type(snapshot_sources) is bool and type(related_symbols) is bool
+            and (not related_symbols or snapshot_sources),
+            "Related symbols require canonical snapshot sources")
     run = Path(run).resolve()
     frozen = _verify(run)
     require(slot in frozen["schedule"] and slot["repeat"] == 0 and slot["attempt"] == 0,
@@ -110,16 +159,40 @@ def build_input(run: Path, slot: dict, *, snapshot_sources: bool = False) -> dic
                               "result": {"text": text, "complete_file": True,
                                          "blob": evidence.members(evidence.head)[path][1],
                                          "commit": evidence.head, "path": path}})
+            payload["tool_results"] = files
+            payload.pop("observable_completions", None)
+            payload["evidence_scope"] = (
+                "Automatically gathered complete exact HEAD files containing these findings. "
+                "Evidence IDs identify these snapshot reads, not original reviewer calls. "
+                "Deleted code and before/after patch lines are NOT current code. "
+                "Other files are supplied only when explicitly listed as related_source. "
+                "External implementations and base snapshots are not supplied. "
+                "Verify current cause/impact; do not assume a claimed regression or library contract.")
+            if related_symbols:
+                from .related_source import related_sources
+                _prompt(payload)
+                terms = _related_terms(payload["findings"], [r["result"]["text"] for r in files])
+                related = related_sources(
+                    evidence, terms, indexed=slot["arm"] == "H", max_characters=100_000,
+                    excluded_paths={r["arguments"]["path"] for r in files})
+                files.append({"sequence": len(files) + 1, "tool": "repo_local_related_source",
+                              "arguments": {"symbols": terms, "commit": evidence.head},
+                              "ok": True, "result": related})
+                unresolved = related["coverage"].get("unresolved", [])
+                if slot["arm"] == "H" and related["source_kind"] == "indexed_definition" and unresolved:
+                    remaining = 100_000 - related["coverage"]["serialized_source_characters"]
+                    if remaining >= 2:
+                        fallback = related_sources(
+                            evidence, unresolved, indexed=False, max_characters=remaining,
+                            excluded_paths={r["arguments"]["path"] for r in files
+                                            if r["tool"] == "exact_head_snapshot"})
+                        files[-1]["result"] = _coalesce_related(related, fallback)
+                        files.append({"sequence": len(files) + 1,
+                                      "tool": "repo_local_raw_dependency_fallback",
+                                      "arguments": {"symbols": unresolved, "commit": evidence.head},
+                                      "ok": True, "result": fallback})
         finally:
             evidence.close()
-        payload["tool_results"] = files
-        payload.pop("observable_completions", None)
-        payload["evidence_scope"] = (
-            "Automatically gathered complete exact HEAD files containing these findings. "
-            "Evidence IDs identify these snapshot reads, not original reviewer calls. "
-            "Deleted code and before/after patch lines are NOT current code. "
-            "Other files, external implementations and base snapshots are not supplied. "
-            "Verify current cause/impact; do not assume a claimed regression or library contract.")
     _prompt(payload)
     return payload
 
@@ -208,7 +281,7 @@ def _check_prior(root: Path, ledger: runtime.CreditLedger) -> None:
 
 def run_proof(run_root: Path, output_root: Path, task_ids: list[str] | None = None,
               cap: int = 200, model: str = MODEL, *, timeout: float = 900,
-              snapshot_sources: bool = False) -> dict:
+              snapshot_sources: bool = False, related_symbols: bool = False) -> dict:
     """Seal complete inputs, then run one fixed-model verification per task/arm.
 
     Artifacts are private source-bearing files, not public deliverables. An output
@@ -220,6 +293,8 @@ def run_proof(run_root: Path, output_root: Path, task_ids: list[str] | None = No
             and output_root not in run_root.parents, "Proof and original roots must be disjoint")
     require(model == MODEL, "Verification model is fixed to gpt-5.6-sol")
     require(type(snapshot_sources) is bool, "Snapshot source selection must be boolean")
+    require(type(related_symbols) is bool and (not related_symbols or snapshot_sources),
+            "Related symbols require canonical snapshot sources")
     require(type(timeout) in (int, float) and 0 < timeout <= 900, "Invalid timeout")
     entry_hashes = _original_hashes(run_root)
     output_root.mkdir(parents=True, exist_ok=True)
@@ -243,13 +318,15 @@ def run_proof(run_root: Path, output_root: Path, task_ids: list[str] | None = No
                         == ["B", "H"], "Every task requires both primary reviews")
             # Build ALL inputs and reject oversize payloads before any reservation.
             inputs = {campaign.slot_id(slot): build_input(
-                run_root, slot, snapshot_sources=snapshot_sources) for slot in schedule}
+                run_root, slot, snapshot_sources=snapshot_sources,
+                related_symbols=related_symbols) for slot in schedule}
             body = {
                 "version": 1, "run_root": str(run_root), "original_protocol": frozen["digest"],
                 "original_artifacts": entry_hashes, "sources": _sources(),
                 "schedule": schedule, "model": model, "reasoning": "medium",
                 "streaming": False, "diagnostic_transport": True, "allowed_tools": [],
                 "snapshot_sources": snapshot_sources,
+                "related_symbols": related_symbols,
                 "cap": cap, "reservation": RESERVATION, "prompt_sha256": digest(PROMPT),
                 "input_digests": {key: digest(value) for key, value in inputs.items()},
             }

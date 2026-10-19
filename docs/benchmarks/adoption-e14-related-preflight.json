@@ -1,0 +1,128 @@
+{
+  "kind": "No-model exact-HEAD dependency preflight",
+  "rows": [
+    {
+      "arm": "H",
+      "prompt_characters": 94190,
+      "packets": [
+        {
+          "kind": "indexed_definition",
+          "terms": [
+            "DataFrame",
+            "MSEBCELoss",
+            "Path",
+            "ValueError",
+            "FitParameters",
+            "ProtriderAutoencoder",
+            "ProtriderConfig",
+            "ModelInfo",
+            "ProtriderDataset",
+            "Result",
+            "Parallel",
+            "AttributeError",
+            "fit_residuals",
+            "PROTEIN_outlier",
+            "GridSearchResult",
+            "ProtriderSubset"
+          ],
+          "names": [
+            "MSEBCELoss",
+            "ProtriderAutoencoder",
+            "ModelInfo",
+            "ProtriderDataset",
+            "GridSearchResult",
+            "ProtriderSubset"
+          ],
+          "paths": [
+            "src/protrider/model/model.py",
+            "src/protrider/model/model.py",
+            "src/protrider/model/model.py",
+            "src/protrider/datasets/datasets.py",
+            "src/protrider/model/model_helper.py",
+            "src/protrider/datasets/datasets.py"
+          ],
+          "chars": 14849,
+          "source_references": [
+            {
+              "source_id": "b462b109b630dd1e1a9a78088b18429d2baaae9b:src/protrider/config.py:239:6242",
+              "available_via": "b462b109b630dd1e1a9a78088b18429d2baaae9b:src/protrider/config.py:0:7553",
+              "path": "src/protrider/config.py",
+              "span": {
+                "start_byte": 239,
+                "end_byte": 6242,
+                "start_line": 11,
+                "end_line": 176
+              }
+            }
+          ],
+          "budget_omissions": 0
+        },
+        {
+          "kind": "raw_git_file",
+          "terms": [
+            "DataFrame",
+            "Path",
+            "ValueError",
+            "Parallel",
+            "AttributeError",
+            "PROTEIN_outlier"
+          ],
+          "names": [
+            null
+          ],
+          "paths": [
+            "src/protrider/config.py"
+          ],
+          "chars": 8262,
+          "source_references": [],
+          "budget_omissions": 0
+        }
+      ]
+    },
+    {
+      "arm": "B",
+      "prompt_characters": 111035,
+      "packets": [
+        {
+          "kind": "raw_git_file",
+          "terms": [
+            "DataFrame",
+            "Path",
+            "ProtriderAutoencoder",
+            "GridSearchResult",
+            "ProtriderDataset",
+            "ProtriderConfig",
+            "MSEBCELoss",
+            "ModelInfo",
+            "Result",
+            "UnboundLocalError",
+            "load_model",
+            "ProtriderSubset",
+            "PROTEIN_outlier",
+            "FitParameters",
+            "NAs",
+            "reset_index"
+          ],
+          "names": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "paths": [
+            "src/protrider/config.py",
+            "src/protrider/datasets/datasets.py",
+            "src/protrider/model/model.py",
+            "src/protrider/stats.py"
+          ],
+          "chars": 39847,
+          "source_references": [],
+          "budget_omissions": 0
+        }
+      ]
+    }
+  ],
+  "selection": "Source type constructors/called named functions + candidate type terms; max16, no reference labels",
+  "baseline": "Competitive raw declaration-locator grep with explicit reference-only metadata, same budget and current HEAD",
+  "deduplication": "Indexed bodies contained in supplied identical raw fallback files are exact-byte verified and referenced rather than repeated"
+}

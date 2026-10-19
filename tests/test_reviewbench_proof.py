@@ -166,6 +166,62 @@ def test_snapshot_proof_uses_complete_head_files_not_mixed_patch_states(primary,
     assert "observable_completions" not in payload
     assert "complete observable source" not in proof._prompt(payload)
     assert "Other files" in payload["evidence_scope"]
+    from gita.eval.reviewbench import related_source
+    requested = []
+    def related(evidence, symbols, **kwargs):
+        requested.append(kwargs)
+        return {"sources": [{"text": "class StorageEngine: pass"}],
+                "source_kind": "indexed_definition" if kwargs["indexed"] else "raw_git_file",
+                "coverage": {"absence_claim": False}}
+    monkeypatch.setattr(related_source, "related_sources", related)
+    enriched = proof.build_input(run, slots[1], snapshot_sources=True, related_symbols=True)
+    assert requested[0]["indexed"] is True
+    assert requested[0]["excluded_paths"] == {"a.py"}
+    assert enriched["tool_results"][-1]["sequence"] == 2
+    assert enriched["tool_results"][-1]["tool"] == "repo_local_related_source"
+    proof.build_input(run, slots[0], snapshot_sources=True, related_symbols=True)
+    assert requested[1]["indexed"] is False
+
+
+def test_related_query_terms_are_bounded_identifiers_not_reference_answers():
+    findings = [{"message": "StorageEngine and parse_value(value) interact incorrectly."}]
+    source = ["None True False\nclass StorageEngine: pass\nclass DependencyGraph: pass\n"
+              "engine = StorageEngine()\nresult = parse_value(x)\n"
+              + "\n".join(f"RelatedType{i}" for i in range(40))]
+    terms = proof._related_terms(findings, source)
+    assert len(terms) == 16
+    assert terms[:2] == ["StorageEngine", "parse_value"]
+    assert all(term.isidentifier() for term in terms)
+    assert not {"None", "True", "False"} & set(terms)
+    assert terms == proof._related_terms(findings, source)
+
+
+def test_related_lookup_cannot_be_silently_enabled_without_snapshot_scope(primary):
+    run, _, slots, _ = primary
+    with pytest.raises(ProtocolError, match="require canonical"):
+        proof.build_input(run, slots[0], related_symbols=True)
+
+
+def test_related_index_body_is_referenced_not_duplicated_when_raw_fallback_has_same_file():
+    from copy import deepcopy
+    raw = "prefix\nclass Widget:\n    pass\n"
+    start = len("prefix\n".encode())
+    body = raw.encode()[start:].decode()
+    indexed = {"sources": [{"source_id": "definition", "path": "lib.py", "blob": "same",
+                            "commit": "head", "text": body,
+                            "span": {"start_byte": start, "end_byte": len(raw.encode())}}],
+               "coverage": {"serialized_source_characters": 100}}
+    fallback = {"sources": [{"source_id": "file", "source_kind": "raw_git_file",
+                             "path": "lib.py", "blob": "same", "commit": "head",
+                             "text": raw, "span": {"start_byte": 0, "end_byte": len(raw.encode())}}]}
+    before = deepcopy(indexed)
+    result = proof._coalesce_related(indexed, fallback)
+    assert result["sources"] == []
+    assert result["source_references"][0]["available_via"] == "file"
+    assert indexed == before
+    fallback["sources"][0]["blob"] = "different"
+    with pytest.raises(IntegrityError, match="versions differ"):
+        proof._coalesce_related(indexed, fallback)
 
 
 def test_both_reviews_single_call_unchanged_rows_and_no_retry(primary, monkeypatch):

@@ -1,0 +1,226 @@
+{
+  "kind": "one-task development diagnostics, both arms, no reviewer reruns",
+  "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+  "rows": [
+    {
+      "stage": "E12mixedobservations",
+      "arms": {
+        "B": {
+          "kept_indices": [
+            0,
+            1,
+            3
+          ],
+          "decisions": [
+            {
+              "finding_index": 0,
+              "decision": "keep",
+              "evidence_calls": [
+                25,
+                26,
+                27
+              ]
+            },
+            {
+              "finding_index": 1,
+              "decision": "keep",
+              "evidence_calls": [
+                21
+              ]
+            },
+            {
+              "finding_index": 2,
+              "decision": "uncertain",
+              "evidence_calls": []
+            },
+            {
+              "finding_index": 3,
+              "decision": "keep",
+              "evidence_calls": [
+                25,
+                26
+              ]
+            }
+          ],
+          "proof_credits": 22.1722,
+          "review_plus_proof_credits": 55.756820000000005,
+          "score": {
+            "grounded_precision": 1,
+            "grounded_recall": 0.09523809523809523,
+            "augmented_precision": 1,
+            "augmented_recall": 0.13636363636363635,
+            "novel_tp_count": 1,
+            "novel_tp_yield": 0.3333333333333333,
+            "candidate_count": 3,
+            "golden_tp_count": 21,
+            "matched_count": 2,
+            "matched_tp_count": 2,
+            "unmatched_count": 1,
+            "unmatched_tp_count": 1,
+            "unmatched_fp_count": 0,
+            "golden_covered_count": 2
+          }
+        },
+        "H": {
+          "kept_indices": [
+            0,
+            1,
+            2
+          ],
+          "decisions": [
+            {
+              "finding_index": 0,
+              "decision": "keep",
+              "evidence_calls": [
+                16,
+                14
+              ]
+            },
+            {
+              "finding_index": 1,
+              "decision": "keep",
+              "evidence_calls": [
+                16,
+                17,
+                23
+              ]
+            },
+            {
+              "finding_index": 2,
+              "decision": "keep",
+              "evidence_calls": [
+                7,
+                19
+              ]
+            }
+          ],
+          "proof_credits": 17.3342,
+          "review_plus_proof_credits": 46.6036,
+          "score": {
+            "grounded_precision": 1,
+            "grounded_recall": 0.047619047619047616,
+            "augmented_precision": 0.6666666666666666,
+            "augmented_recall": 0.09090909090909091,
+            "novel_tp_count": 1,
+            "novel_tp_yield": 0.3333333333333333,
+            "candidate_count": 3,
+            "golden_tp_count": 21,
+            "matched_count": 1,
+            "matched_tp_count": 1,
+            "unmatched_count": 2,
+            "unmatched_tp_count": 1,
+            "unmatched_fp_count": 1,
+            "golden_covered_count": 1
+          }
+        }
+      },
+      "protocol_sha256": "6de3363364cdaa131f35214cc5c2f602d787b0584aa8bba11edb219ae83d7454"
+    },
+    {
+      "stage": "E13completeHEAD",
+      "arms": {
+        "B": {
+          "kept_indices": [
+            0,
+            1,
+            3
+          ],
+          "decisions": [
+            {
+              "finding_index": 0,
+              "decision": "keep",
+              "evidence_calls": [
+                2
+              ]
+            },
+            {
+              "finding_index": 1,
+              "decision": "keep",
+              "evidence_calls": [
+                1
+              ]
+            },
+            {
+              "finding_index": 2,
+              "decision": "uncertain",
+              "evidence_calls": [
+                2
+              ]
+            },
+            {
+              "finding_index": 3,
+              "decision": "keep",
+              "evidence_calls": [
+                2
+              ]
+            }
+          ],
+          "proof_credits": 10.2872,
+          "review_plus_proof_credits": 43.87182,
+          "score": {
+            "grounded_precision": 1,
+            "grounded_recall": 0.09523809523809523,
+            "augmented_precision": 1,
+            "augmented_recall": 0.13636363636363635,
+            "novel_tp_count": 1,
+            "novel_tp_yield": 0.3333333333333333,
+            "candidate_count": 3,
+            "golden_tp_count": 21,
+            "matched_count": 2,
+            "matched_tp_count": 2,
+            "unmatched_count": 1,
+            "unmatched_tp_count": 1,
+            "unmatched_fp_count": 0,
+            "golden_covered_count": 2
+          }
+        },
+        "H": {
+          "kept_indices": [
+            2
+          ],
+          "decisions": [
+            {
+              "finding_index": 0,
+              "decision": "drop",
+              "evidence_calls": [
+                1
+              ]
+            },
+            {
+              "finding_index": 1,
+              "decision": "uncertain",
+              "evidence_calls": []
+            },
+            {
+              "finding_index": 2,
+              "decision": "keep",
+              "evidence_calls": [
+                2
+              ]
+            }
+          ],
+          "proof_credits": 9.4517,
+          "review_plus_proof_credits": 38.7211,
+          "score": {
+            "grounded_precision": 1,
+            "grounded_recall": 0.047619047619047616,
+            "augmented_precision": 1,
+            "augmented_recall": 0.047619047619047616,
+            "novel_tp_count": 0,
+            "novel_tp_yield": 0,
+            "candidate_count": 1,
+            "golden_tp_count": 21,
+            "matched_count": 1,
+            "matched_tp_count": 1,
+            "unmatched_count": 0,
+            "unmatched_tp_count": 0,
+            "unmatched_fp_count": 0,
+            "golden_covered_count": 1
+          }
+        }
+      },
+      "protocol_sha256": "72d16fe7cb86a382e39abe049e2cfb42d5f808cbcd86426a0fe5d85db77f258f"
+    }
+  ],
+  "interpretation": "E12keptdisputedclaim;E13rejecteditsunsupportedimpactbutwithheldarepo-dependencyclaim. Neitherqualifiesalong25run. Extra inferencefullycounted, original findings/labels unchanged."
+}
