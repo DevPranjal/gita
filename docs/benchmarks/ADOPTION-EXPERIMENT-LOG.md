@@ -1242,3 +1242,37 @@ for both arms; reuse an existing decision only when the entire classifier
 input is byte-equivalent. No repeat sampling of unchanged judgments.
 Keep this as a separately named policy variant, with all extra judge spend.
 Do not launch25 while this known quality defect is unresolved.
+
+### E17 verified-contract policy result and prospective transfer gate
+
+The [separate corrected policy](adoption-e17-contract-quality-results.json)
+marks the Node claim FP in **both** arms, consistent with the independently
+observed runtime contract. All five unchanged-input novel classifications
+are reused, not sampled again. All original matcher edges and reviewer
+outputs remain fixed. Extra judge inference7.48420 credits; no review reruns.
+An engineering script syntax error occurred before execution/inference and
+was corrected before the new variant root existed.
+
+| Corrected metric | Git B | Gita H |
+| --- | ---: | ---: |
+| Review credits | 120.94146 | 114.18016 |
+| Input tokens | 717,836 | 635,734 |
+| Macro augmented precision / recall | 82.22% / 17.87% | 86.11% / 18.42% |
+| Pooled augmented precision / recall | 81.82% / 17.65% | 81.82% / 18.00% |
+| Pooled grounded precision / recall | 85.71% / 12.50% | 87.50% / 14.58% |
+
+This is the first new initial-context candidate with lower measured cost
+and no quality point-regression across these displayed aggregate measures.
+It is **only a small, repeatedly used development signal**, not proof that
+noninferiority confidence bounds pass. Independent stochastic variation is
+visible in the changing B outputs; do not attribute across-run differences
+solely to the dependency ablation.
+
+Next prospective check: unchanged E17 reviewer treatment on positions15/20,
+not per-outcome selection, fixed Sol/medium, native60,90 reserve,400/400
+finite phase ceilings. The verified runtime contract is frozen before
+judging and is source-triggered, not task/arm-triggered. No further reviewer
+prompt, tool, source-selection or product-policy tuning during that check.
+These tasks were used in earlier development, so call this **transfer of
+the unchanged candidate**, not a held-out confirmation. Inspect all outcomes
+and combined five-case macro/pooled results before any25-set launch.
