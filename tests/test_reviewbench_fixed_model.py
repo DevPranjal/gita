@@ -143,6 +143,22 @@ def test_explicit_reserve_accounts_for_soft_native_cap_without_understating_spen
         runtime.CreditLedger(tmp_path / "judge-ledger.json", "protocol", 90)
 
 
+def test_larger_explicit_campaign_caps_do_not_raise_legacy_defaults(protocol_inputs, tmp_path):
+    default = campaign.protocol(*protocol_inputs)
+    assert default["budgets"]["reviewer_credits"] == 400
+    assert default["budgets"]["judge_credits"] == 200
+    funded = campaign.protocol(*protocol_inputs, reviewer_credits=1800, judge_credits=750,
+                               session_reservation=45)
+    assert funded["budgets"]["reviewer_credits"] == 1800
+    assert funded["budgets"]["judge_credits"] == 750
+    runtime.CreditLedger(tmp_path / "judge-ledger.json", "funded", 750, reservation=45)
+    assert runtime.reconcile_judge_outcomes(tmp_path, "funded") is None
+    with pytest.raises(ProtocolError, match="ceiling"):
+        campaign.protocol(*protocol_inputs, reviewer_credits=2501)
+    with pytest.raises(ProtocolError, match="ceiling"):
+        campaign.protocol(*protocol_inputs, judge_credits=1501)
+
+
 def test_defaults_and_legacy_identity_remain_auto(protocol_inputs):
     frozen = campaign.protocol(*protocol_inputs)
     assert campaign.reviewer_settings(frozen) == ("auto", None)

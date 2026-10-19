@@ -19,6 +19,8 @@ from .common import (EVIDENCE_CALL_LIMIT, FINALIZATION_GRACE, IntegrityError, Pr
 SESSION_CREDITS = 30  # CLI 1.0.97 rejects lower native caps.
 REVIEWER_CREDITS = 400
 JUDGE_CREDITS = 200
+MAX_REVIEWER_CREDITS = 2500
+MAX_JUDGE_CREDITS = 1500
 MAX_SESSIONS = 2
 MAX_SECONDS = 900
 CAMPAIGN_SECONDS = 4 * 3600
@@ -115,7 +117,7 @@ def file_lock(path: Path) -> Iterator[None]:
 
 class CreditLedger:
     def __init__(self, path: Path, protocol: str, ceiling: int, *, reservation: int = SESSION_CREDITS):
-        require(0 < ceiling <= REVIEWER_CREDITS, "Invalid ledger ceiling")
+        require(type(ceiling) is int and 0 < ceiling <= MAX_REVIEWER_CREDITS, "Invalid ledger ceiling")
         require(type(reservation) is int and SESSION_CREDITS <= reservation <= ceiling,
                 "Invalid session reservation")
         self.path, self.protocol, self.ceiling = path, protocol, ceiling
@@ -194,7 +196,7 @@ def reconcile_judge_outcomes(run_root: Path, protocol: str) -> dict | None:
     if not path.exists():
         return None
     ceiling = read_json(path)["ceiling"]
-    require_integrity(type(ceiling) is int and 0 < ceiling <= JUDGE_CREDITS,
+    require_integrity(type(ceiling) is int and 0 < ceiling <= MAX_JUDGE_CREDITS,
                       "Judge ledger exceeds its authorized maximum")
     ledger = CreditLedger(path, protocol, ceiling,
                           reservation=read_json(path).get("session_reservation", SESSION_CREDITS))

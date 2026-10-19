@@ -800,3 +800,104 @@ tasks separately and all five combined; never replace earlier negative runs.
 Only a supported joint quality/cost outcome on the combined dataset permits
 the long25 study. If evidence remains mixed, report that rather than spend on
 an unqualified long run. Reviewer200/judge100 caps,45-credit reservation.
+
+### Transfer check completed; all five outcomes retained
+
+[New two-task and combined five-task results](adoption-e10-transfer5-results.json).
+On the two additional tasks, grounded P/R are equal between arms, augmented P/R
+are higher in H, credits52.844680 /38.552600, input436,849 /181,249.
+Combined allfive: credits134.057760 /110.754900 (**17.38% lower**);
+input912,236 /593,294 (**34.96% lower**).
+Automatic macro augmented P75% /90%, R14.43% /16.39%; grounded P73.33% /80%,
+R10.12% /9.17%. One classifier needed exact dependency source, then allfive
+were scored; four already completed pair judgments were retained unchanged.
+
+### Novel-finding audit changed the confidence, not the historical scores
+
+[Eight novel-decision audit](adoption-e10-novel-audit.md): six agree, one
+disagree, one uncertain. The PROTRIDER H claim credits failed-load retraining
+and checkpoint overwrite despite an existing-file guard disabling the nested
+training/save. This is a real classifier error. The node-postgres error-channel
+claim requires decisive built-in runtime semantics.
+
+[Audited sensitivity](adoption-e10-audited-sensitivity.md), exact pinned
+arithmetic with original automatic scores unchanged: flipping the known H FP
+gives H augmented P83.33% /R15.60%; also pessimistically treating the uncertain
+case as FP gives P76.67% /R14.24%. B remains P75% /R14.43%.
+Thus the optimistic apparent quality improvement is **not** a robust certified
+gain. Do not hide this or change only H labels in the primary result.
+
+## E11: generic control-flow discipline for both arms' quality judges
+
+The classifier prompt now requires reachable triggering conditions through
+enclosing guards/early returns/side-effect conditions, and verification of a
+compound finding's central claimed consequence. Contradicted central impacts
+are not credited just because a weaker generic concern is plausible. Missing
+decisive caller/runtime evidence stays uncertainty. No benchmark-specific
+function, path, expected TP/FP or golden wording is added to reviewer prompts.
+
+An **authored, independently executed Python oracle qualification** checked a
+guarded write incorrectly alleged reachable, and an unguarded empty-list access:
+the fixedSolmedium judge returned FP/TP correctly with source-line proof,
+cost2.064700. No corpus program was executed. This is a small policy regression,
+not proof that the judge is generally reliable.
+
+All eight novel candidates from **both arms** are now being reclassified under
+the same generic policy, with original matching edges and reviewer outputs
+unchanged. The policy-variant result will be separately named and preserve every
+earlier result/uncertainty. No full25 launch before this verification completes.
+The explicit funding configuration supports bounded larger runs after the
+user lifted the old allowance; old default400/200 caps remain unchanged.
+
+### E11 result: errors caught; optimistic quality claim withdrawn
+
+[Separate policy-variant results](adoption-e11-guard-policy-results.json).
+All eight novel candidates were reclassified for both arms. Six decisions
+remained unchanged; the two questioned H decisions became FP. Two missing
+contexts were supplied: exact store/handler implementation and the documented
+Node tracing contract with an independently authored built-in-only probe.
+The probe on Node22.19.0 showed an ordinary error-first callback publishes the
+tracing error event; no benchmark tests/application were executed.
+
+The revised judge is still custom research judging. Original reviews, matching
+edges and all older scores remain intact. Requalification cost65.324900,
+plus authored qualification2.064700.
+
+| Audited-policy allfive macro | B | H |
+| --- | ---: | ---: |
+| Grounded precision |73.33%|80%|
+| Grounded recall |10.12%|9.17%|
+| Augmented precision |75%|76.67%|
+| Augmented recall |14.43%|14.24%|
+
+Crucially, **pooled** augmented precision81.82% /72.73% is worse in H.
+Do not select the favorable macro denominator or call this quality preserved.
+The cost/context signal remains, but the original quality gate is not passed.
+The long25 run is therefore still not launched.
+
+The follow-up trace audit found the PROTRIDER reviewer **received both the
+existing-file guard and nested save in a raw-patch page**, then received the
+guard again in indexed source. This is a reasoning/reconciliation failure,
+not evidence that the source engine hid the guard. Avoid inventing an index
+extraction fix for a statement the model had already seen.
+
+## E12: source-only verification, equal treatment and complete cost accounting
+
+Test a source-only proof pass on already generated reviews, **for both arms**.
+It receives original findings and observable tool results, never benchmark
+references, prior judge labels, arm names or credit totals. It can retain,
+drop or withhold uncertain existing findings, but cannot add/edit findings.
+Decisions cite original evidence calls. A guard/reachability check must
+reconcile the actual condition with the claimed side effect; unverifiable
+library behavior remains uncertainty, not proof of an API defect.
+
+First qualification uses the already audited PROTRIDER pair, then the remaining
+four tasks only if useful. This is a development diagnostic, not an independent
+confirmation. No reviewers are rerun. Final quality derives from the unchanged
+retained findings using pinned resolver/scorer; existing labels are not changed
+to make retained output look better. Missing re-resolved classifications stop
+scoring rather than default FP. Empty output has undefined precision, not a
+free pass.
+
+Verification inference and latency must be included in B/H agent costs.
+No source/verifier menu changes or large25 inference while this check is pending.

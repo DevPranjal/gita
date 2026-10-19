@@ -22,6 +22,7 @@ from .runtime import (CAMPAIGN_SECONDS, CreditLedger, MAX_SECONDS, MAX_TURNS,
                       JUDGE_CREDITS, REVIEWER_CREDITS, SESSION_CREDITS, file_lock, invoke, read_events)
 from .runtime import (inventories, parse_usage, reconcile_judge_outcomes,
                       validate_realized_model, validate_settings)
+from .runtime import MAX_REVIEWER_CREDITS, MAX_JUDGE_CREDITS
 
 PROMPT = """Review the fixed code change exposed by the read-only evidence tools.
 Find actionable correctness, security, performance, maintainability or readability
@@ -95,9 +96,9 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
     else:
         require(len(scopes) == 25, "Freeze all 25 starter slots before any model calls")
         require(ids == manifest["starter_ids"], "Wrong starter ordering/membership")
-    require(type(reviewer_credits) is int and SESSION_CREDITS <= reviewer_credits <= REVIEWER_CREDITS,
+    require(type(reviewer_credits) is int and SESSION_CREDITS <= reviewer_credits <= MAX_REVIEWER_CREDITS,
             "Invalid reviewer campaign ceiling")
-    require(type(judge_credits) is int and SESSION_CREDITS <= judge_credits <= JUDGE_CREDITS,
+    require(type(judge_credits) is int and SESSION_CREDITS <= judge_credits <= MAX_JUDGE_CREDITS,
             "Invalid judge campaign ceiling")
     require(type(session_reservation) is int and SESSION_CREDITS <= session_reservation
             <= min(reviewer_credits, judge_credits), "Invalid session reserve")

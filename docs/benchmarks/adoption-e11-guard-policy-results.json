@@ -1,0 +1,105 @@
+{
+  "kind": "separate all-five-pair guard-policy qualification",
+  "reviewer_candidate_unchanged": true,
+  "reviewers_rerun": 0,
+  "all_novel_candidates_reclassified": 8,
+  "prior_matched_reference_edges_unchanged": true,
+  "changed_classifications": [
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "H",
+      "candidate_index": 0,
+      "old": "tp",
+      "guard_policy": "fp"
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "H",
+      "candidate_index": 0,
+      "old": "tp",
+      "guard_policy": "fp"
+    }
+  ],
+  "authored_runtime_qualification_passed": true,
+  "judge": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 0.7333333333333333,
+        "grounded_recall": 0.10124458874458875,
+        "augmented_precision": 0.75,
+        "augmented_recall": 0.14430863254392665,
+        "novel_tp_count": 3,
+        "novel_tp_yield": 0.25,
+        "candidate_count": 11,
+        "golden_tp_count": 64,
+        "matched_count": 8,
+        "matched_tp_count": 6,
+        "unmatched_count": 3,
+        "unmatched_tp_count": 3,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 6
+      },
+      "micro": {
+        "grounded_precision": 0.75,
+        "grounded_recall": 0.09375,
+        "augmented_precision": 0.8181818181818182,
+        "augmented_recall": 0.13432835820895522,
+        "novel_tp_count": 3,
+        "novel_tp_yield": 0.2727272727272727,
+        "candidate_count": 11,
+        "golden_tp_count": 64,
+        "matched_count": 8,
+        "matched_tp_count": 6,
+        "unmatched_count": 3,
+        "unmatched_tp_count": 3,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 6
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 0.8,
+        "grounded_recall": 0.09172077922077922,
+        "augmented_precision": 0.7666666666666666,
+        "augmented_recall": 0.14237012987012987,
+        "novel_tp_count": 3,
+        "novel_tp_yield": 0.26666666666666666,
+        "candidate_count": 11,
+        "golden_tp_count": 64,
+        "matched_count": 6,
+        "matched_tp_count": 5,
+        "unmatched_count": 5,
+        "unmatched_tp_count": 3,
+        "unmatched_fp_count": 2,
+        "golden_covered_count": 5
+      },
+      "micro": {
+        "grounded_precision": 0.8333333333333334,
+        "grounded_recall": 0.078125,
+        "augmented_precision": 0.7272727272727273,
+        "augmented_recall": 0.11940298507462686,
+        "novel_tp_count": 3,
+        "novel_tp_yield": 0.2727272727272727,
+        "candidate_count": 11,
+        "golden_tp_count": 64,
+        "matched_count": 6,
+        "matched_tp_count": 5,
+        "unmatched_count": 5,
+        "unmatched_tp_count": 3,
+        "unmatched_fp_count": 2,
+        "golden_covered_count": 5
+      }
+    }
+  },
+  "pending": [],
+  "reclassification_credits": 65.3249,
+  "authored_qualification_credits": 2.0647,
+  "provenance": {
+    "guard_protocol": "545a0e48028f745de3a27e28fb757ae2d77f3cd0991d004ff19f96f653d77e54",
+    "supplement_protocol": "14eaa823c87995c1f6a2df68cb188a18416df4e1cf815bdacc67fd3c022c19e0",
+    "quality": "c37c09b03c2fa7f254c629799cf4115ca7df87eccc3dbd3856ac5a0ee37c49b0"
+  },
+  "interpretation": "Both earlier audited/suspected false positives are no longer credited. Relativequality remains mixed:macroaugmentedPslightlyhigher,Rslightlylower;groundedRlower;pooledaugmentedprecisionlower. OriginalstrictgateNOTpassed. Do notclaimfull25readinessfromcostalone."
+}
