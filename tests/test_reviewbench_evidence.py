@@ -202,6 +202,32 @@ def test_continuation_uses_issued_original_query_without_argument_copy(fixture_r
         other.close()
 
 
+def test_engine_frontend_preserves_raw_patch_and_indexed_source_without_fake_usage(fixture_repo):
+    from gita.eval.reviewbench.evidence import tool_inventory
+    _, scope, _ = fixture_repo
+    scope = build_indexes(scope)
+    cfg = {**config(scope), "indexed_workflow": True, "integrated_source": True,
+           "engine_frontend": True}
+    names = {t["name"] for t in tool_inventory(cfg)}
+    assert "gita_review" in names and "raw_diff" not in names
+    assert not {"entity_context", "entity_diff", "id", "history", "index_status"} & names
+    e, b = Evidence(cfg), Evidence(config(scope, "B"))
+    try:
+        patch = e.execute("gita_review", {"operation": "raw_patch", "path": "code.py"})
+        assert patch["text"] == b.raw_diff("code.py")["text"]
+        source = e.execute("gita_review", {"operation": "source", "path": "code.py", "line": 2})
+        assert "2:     return 20 / value" in source["text"]
+        reread = e.execute("read_file", {"path": "code.py", "start_line": 1, "end_line": 2})
+        assert reread["coverage"]["reused_source_lines"] == 2
+        delta = e.execute("gita_review", {"operation": "diff", "token": "divide", "path": "code.py"})
+        assert "return 10 / value" in delta["text"] and "return 20 / value" in delta["text"]
+        assert e.execute("gita_review", {"operation": "diff", "token": "divide", "line": 2})["error"]
+        assert e.execute("gita_review", {"operation": "imaginary"})["error"]
+    finally:
+        e.close()
+        b.close()
+
+
 def test_common_inventory_and_evidence_are_identical(fixture_repo):
     _, scope, _ = fixture_repo
     baseline, indexed = Evidence(config(scope, "B")), Evidence(config(scope))

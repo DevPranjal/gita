@@ -723,3 +723,51 @@ full-review budgets: it must not be declared completely inspected.
 standalone source-delivery helper hash as well as review-package sources.
 The next small comparison keeps all three predefined development tasks,
 fixedSol/medium and the same quality scorer; no golden-text prompt changes.
+
+### E9 result and independent judgment check
+
+[Complete E9 pilot](adoption-e9-dev3-results.json): B/H credits78.924260 /
+80.428220, input430,093 /459,457. Macro grounded precision88.89% /91.67%,
+grounded recall11.32% /14.99%; augmented precision88.89% /91.67%,
+augmented recall15.43% /14.99%. The continuation fix eliminated H's earlier
+query-copy failures, but cost/context did not win. **Scale gate fails.**
+
+[Independent E8 decision audit](adoption-e8-judge-audit.md): all eight inspected
+accepted matches agreed on underlying issue/cause/impact. This deliberately
+small accepted-TP sample cannot establish FP discrimination, missed-match
+reliability or judge repeatability. Existing classifications/scores are not
+changed, and no reviewer prompt is tuned to audited reference text.
+
+## E10: replace the extra tool menu with one engine-first review interface
+
+The previous arms had seven baseline tools versus thirteen H tools. Even with
+correct source delivery, the H workflow invites a parallel sequence of map,
+status, entity diff, entity source and raw patch calls.
+
+**Explicit new treatment:** H has a single `gita_review` operation interface
+for changes/source/diff/history/status and exact ordinary `raw_patch` fallback.
+The separately exposed H `raw_diff` is replaced by that explicit fallback,
+not removed from the permitted evidence. Common raw file/search/list/log/
+history and safe continuations remain. The objective, source endpoints,
+history scope and fallback patch bytes stay the same.
+
+This is **engine-plus-interface integration**, not a pure availability or
+identical-schema experiment. It must not be advertised otherwise. No minimum
+indexed-call quota; raw fallback through `gita_review` counts as raw, **not**
+indexed usage. The first changed-code packet includes readiness/coverage so
+the agent need not make a separate status call just to learn the same facts.
+
+Actual H discovery:13->7 tools, serialized schema5,859->3,612 characters
+(38.35% smaller). All201 evaluator/source-delivery tests pass, including exact
+raw-fallback equality, source reuse, control binding and false indexed-usage
+prevention. Smaller schema is not proof of cheaper reviews or equal quality.
+
+Report tooling is corrected to use declared task/session counts and fixed
+models rather than hardcoded25/50/auto. Measured overrun counts once; missing
+reservations use their actual frozen caps; unrelated old plumbing spend is
+not silently added to every new study.
+
+Next bounded comparison: same predeclared three development PRs, fixedSol/
+medium for both reviewers and judge, reviewer300/judge150,45-credit reserve.
+No full25 inference until the combined quality/cost gate is supported. Do not
+choose a favorable task subset or hide the prior failed candidates.

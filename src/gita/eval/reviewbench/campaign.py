@@ -72,11 +72,14 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
              reviewer_credits: int = REVIEWER_CREDITS, judge_credits: int = JUDGE_CREDITS,
              reviewer_model: str = "auto", reviewer_reasoning: str | None = None,
              judge_model: str = "auto", judge_reasoning: str | None = None,
-             integrated_source: bool = False, session_reservation: int = SESSION_CREDITS) -> dict:
+             integrated_source: bool = False, session_reservation: int = SESSION_CREDITS,
+             engine_frontend: bool = False) -> dict:
     validate_settings(reviewer_model, reviewer_reasoning)
     validate_settings(judge_model, judge_reasoning)
     require(type(integrated_source) is bool and (not integrated_source or indexed_workflow),
             "Integrated source requires the explicit indexed workflow")
+    require(type(engine_frontend) is bool and (not engine_frontend or integrated_source),
+            "Engine frontend requires integrated source")
     manifest = verify(root)
     package = Path(__file__).parent
     executable = __import__("shutil").which("copilot.exe") or __import__("shutil").which("copilot")
@@ -120,12 +123,14 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "development_pilot": development_pilot, "indexed_workflow": indexed_workflow,
             "targeted_judging": indexed_workflow,
             "integrated_source": integrated_source,
+            "engine_frontend": engine_frontend,
             "workflow_guidance": WORKFLOW_GUIDANCE if indexed_workflow else {},
             "tool_schemas": {arm: inventory(arm) for arm in ("B", "H")},
             "task_tool_schemas": {
                 s["task"]["id"]: {arm: tool_inventory({
                     **s, "arm": arm, "indexed_workflow": indexed_workflow,
-                    "integrated_source": integrated_source and arm == "H"})
+                    "integrated_source": integrated_source and arm == "H",
+                    "engine_frontend": engine_frontend and arm == "H"})
                     for arm in ("B", "H")} for s in scopes},
             "scope_digests": {scope["task"]["id"]: digest(scope) for scope in scopes},
             "budgets": {"reviewer_credits": reviewer_credits, "judge_credits": judge_credits,
@@ -150,7 +155,8 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
          reviewer_credits: int = REVIEWER_CREDITS, judge_credits: int = JUDGE_CREDITS,
          reviewer_model: str = "auto", reviewer_reasoning: str | None = None,
          judge_model: str = "auto", judge_reasoning: str | None = None,
-         integrated_source: bool = False, session_reservation: int = SESSION_CREDITS) -> dict:
+         integrated_source: bool = False, session_reservation: int = SESSION_CREDITS,
+         engine_frontend: bool = False) -> dict:
     require(run_root.resolve() != root.resolve() and root.resolve() not in run_root.resolve().parents,
             "Run artifacts must live outside corpus root")
     for scope in scopes:
@@ -160,7 +166,8 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
                       judge_credits=judge_credits, reviewer_model=reviewer_model,
                       reviewer_reasoning=reviewer_reasoning,
                       judge_model=judge_model, judge_reasoning=judge_reasoning,
-                      integrated_source=integrated_source, session_reservation=session_reservation)
+                      integrated_source=integrated_source, session_reservation=session_reservation,
+                      engine_frontend=engine_frontend)
     body = {k: v for k, v in frozen.items() if k != "digest"}
     body["run_root_digest"] = digest(str(run_root.resolve()))
     frozen = {**body, "digest": digest(body)}
@@ -234,6 +241,7 @@ def audit_calls(events: list[dict], path: Path) -> dict:
     return {"evidence_calls": len(calls), "executed_call_attempts": min(len(calls), EVIDENCE_CALL_LIMIT),
             "denied_over_budget": max(0, len(calls) - EVIDENCE_CALL_LIMIT), "indexed_calls": sum(
         call["tool"] not in COMMON_TOOLS
+        and not (call["tool"] == "gita_review" and call["arguments"].get("operation") == "raw_patch")
         for call in calls), "errors": sum(not call["ok"] for call in calls)}
 
 
@@ -271,6 +279,7 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
     config = {**scope, "arm": slot["arm"], "cursor_secret": secrets.token_hex(32),
               "indexed_workflow": frozen.get("indexed_workflow", False),
               "integrated_source": frozen.get("integrated_source", False) and slot["arm"] == "H",
+              "engine_frontend": frozen.get("engine_frontend", False) and slot["arm"] == "H",
               "tool_log": str(directory / "tools.jsonl")}
     write_json(directory / "broker.json", config)
     write_json(directory / "mcp.json", {"mcpServers": {"review": {
@@ -284,6 +293,18 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
     try:
         prompt = review_prompt(scope["task"], arm=slot["arm"],
                                indexed_workflow=frozen.get("indexed_workflow", False))
+        if config["engine_frontend"] and scope.get("indexes"):
+            prompt = prompt.replace(WORKFLOW_GUIDANCE["H"], (
+                "Gita evidence workflow: use gita_review(operation='changes') to start. "
+                "For relevant bodies use operation='source' with path/line, and operation='diff' "
+                "with token/path for persistent-entity before/after changes. This is a single "
+                "review interface, not an extra pass: use operation='raw_patch' for ordinary "
+                "Git patches of new/unsupported/ambiguous or file-level changes. Raw patch "
+                "content and complete pagination remain available; there is no minimum indexed "
+                "call quota. read_file/search provide imports, callers and other raw context. "
+                "Use operation='history' only for a concrete temporal question. "
+                "Do not repeat complete source merely because two interfaces can return it. "
+                "Coverage gaps are not evidence of absence."))
         if frozen.get("indexed_workflow") and slot["arm"] == "H" and not scope.get("indexes"):
             prompt += ("\nPreparation notice: no qualified index is available for this task. "
                        "The indexed workflow above is unavailable here; use the common raw "
@@ -338,6 +359,11 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
 
 def validate_broker_config(config: dict, slot: dict, frozen: dict) -> None:
     require(config["arm"] == slot["arm"], "Cached broker arm mismatch")
+    if "engine_frontend" in config or "engine_frontend" in frozen:
+        require(type(config.get("engine_frontend")) is bool
+                and config["engine_frontend"] == (
+                    frozen.get("engine_frontend", False) and slot["arm"] == "H"),
+                "Cached engine frontend profile mismatch")
     if "integrated_source" in config or "integrated_source" in frozen:
         require(type(config.get("integrated_source")) is bool
                 and config["integrated_source"] == (
@@ -349,7 +375,7 @@ def validate_broker_config(config: dict, slot: dict, frozen: dict) -> None:
                 "Cached broker workflow/protocol mismatch")
     original_scope = {k: v for k, v in config.items()
                       if k not in ("arm", "cursor_secret", "tool_log", "indexed_workflow",
-                                   "integrated_source")}
+                                   "integrated_source", "engine_frontend")}
     require(digest(original_scope) == frozen["scope_digests"][slot["task"]],
             "Cached broker scope/protocol mismatch")
 

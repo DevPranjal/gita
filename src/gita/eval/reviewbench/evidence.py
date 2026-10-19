@@ -46,6 +46,10 @@ SCHEMAS = {
     "commit_log": schema({"cursor": CURSOR}),
     "file_history": schema({"path": STRING, "cursor": CURSOR}, ("path",)),
     "continue_evidence": schema({"cursor": CURSOR}, ("cursor",)),
+    "gita_review": schema({
+        "operation": {"type": "string", "enum": ["changes", "source", "diff", "history", "raw_patch", "status"]},
+        "path": STRING, "line": INTEGER, "token": STRING, "commit": STRING,
+        "cursor": CURSOR, "force_full": FORCE_FULL}, ("operation",)),
     "index_status": schema({}),
     "change_context": schema({"path": STRING, "cursor": CURSOR}),
     "entities": schema({"path": STRING, "commit": STRING, "cursor": CURSOR}, ("path",)),
@@ -67,6 +71,7 @@ DESCRIPTIONS = {
     "commit_log": "Ordered allowed commits only, with subjects and parents qualified at the scope boundary.",
     "file_history": "Raw Git changes for a member path over the same declared allowed commit graph.",
     "continue_evidence": "Continue any previously issued next_cursor without copying the original tool arguments. Cursor must belong to this session. Preferred for all paginated evidence.",
+    "gita_review": "Indexed review evidence: changes=changed-code/source-preview packet; source(path,line)=numbered enclosing source; diff(token,path)=persistent-entity endpoint diff; history(token,path)=entity history; status=coverage. raw_patch(path?) provides EXACT ordinary Git patch fallback for new/unsupported/ambiguous changes. Nothing is built or parsed on read. Use continue_evidence for pages.",
     "index_status": "Optional: inspect prebuilt index readiness and gaps. For named-function context, entities(path) or id(name) -> state/source can retrieve exact entity evidence instead of whole files. Raw Git fallback is valid. No build or mutation.",
     "change_context": "Gita review starting point: indexed changed-code map plus up to two verified persistent-entity source-diff previews when connected history permits. Returns actual code evidence, locations and explicit gaps; use entity_diff/entity_context for more. Not a complete semantic PR diff.",
     "entities": "Indexed file entities with exact occurrence references, coverage and opaque continuation.",
@@ -95,6 +100,10 @@ def inventory(arm: str, *, workflow: bool = False, history_ready: bool = True) -
 
 
 def tool_inventory(config: dict) -> list[dict]:
+    if config.get("engine_frontend") and config["arm"] == "H" and config.get("indexes"):
+        names = tuple(name for name in COMMON_TOOLS if name != "raw_diff") + ("gita_review",)
+        return [{"name": name, "description": DESCRIPTIONS[name], "inputSchema": SCHEMAS[name]}
+                for name in names]
     tools = inventory(config["arm"], workflow=config.get("indexed_workflow", False),
                       history_ready=config.get("history_ready", False))
     if config.get("indexed_workflow") and not config.get("indexes"):
@@ -244,6 +253,41 @@ class Evidence:
         name, arguments = self.continuations[cursor]
         require(name in self.tools and name != "continue_evidence", "Unavailable continuation tool")
         return getattr(self, name)(**{**arguments, "cursor": cursor})
+
+    def gita_review(self, operation: str, path: str = "", line: int | None = None,
+                    token: str = "", commit: str | None = None, cursor: str = "",
+                    force_full: bool = False) -> dict:
+        require(operation in SCHEMAS["gita_review"]["properties"]["operation"]["enum"],
+                "Unknown review operation")
+        if operation == "changes":
+            require(line is None and not token and commit is None and not force_full,
+                    "changes accepts only path and cursor")
+            result = self.change_context(path, cursor)
+        elif operation == "source":
+            require(path and line is not None and not token, "source requires path/line, not token")
+            result = self.entity_context(path, line, commit, cursor, force_full)
+        elif operation == "diff":
+            require(token and line is None and commit is None and not force_full,
+                    "diff requires token and optional path/cursor")
+            result = self.entity_diff(token, path, cursor)
+        elif operation == "history":
+            require(token and line is None and not force_full, "history requires a token")
+            resolved = self.id(token, commit)
+            matches = [r for r in resolved["results"] if r.get("occurrence")
+                       and (not path or r["occurrence"]["path"] == path)]
+            require(resolved.get("next_cursor") is None and len(matches) == 1,
+                    "History token missing/ambiguous; use a qualified name and path")
+            result = self.history(matches[0]["eid"], commit, cursor)
+        elif operation == "raw_patch":
+            require(line is None and not token and commit is None and not force_full,
+                    "raw_patch accepts only path and cursor")
+            result = self.raw_diff(path, cursor)
+        else:
+            require(not path and line is None and not token and commit is None and not cursor
+                    and not force_full, "status accepts no selectors")
+            result = self.index_status()
+        result["operation"] = operation
+        return result
 
     def raw_diff(self, path: str = "", cursor: str = "") -> dict:
         if path:
@@ -427,6 +471,9 @@ class Evidence:
             self._change_context[path] = intro + "\n".join(lines)
         return {**self.page(self._change_context[path], "change_context", {"path": path}, cursor),
                 "provenance": {**self.provenance(), "source": "git_anchors_with_verified_indexed_entities"},
+                "availability": {"history_ready": self.config.get("history_ready", False),
+                                 "published_coverage": [i["build_status"] for i in self.config.get("indexes", [])],
+                                 "gaps_are_not_absence": True},
                 "semantic_endpoint_diff": False}
 
     def _index(self, commit: str):
@@ -737,8 +784,9 @@ class Evidence:
                 self.continuations[arguments["cursor"]] if name == "continue_evidence" else
                 (name, arguments))
             # Continuations never claim partial source pages as complete reusable lines.
+            source_name = "entity_context" if name == "gita_review" and arguments["operation"] == "source" else name
             pending = (None if name == "continue_evidence" else
-                       self._prepare_source_delivery(name, arguments, result))
+                       self._prepare_source_delivery(source_name, arguments, result))
             if len(json.dumps(result, ensure_ascii=True)) > MAX_RESPONSE_CHARS:
                 raise EvidenceBudgetError(
                     "Evidence exceeds safe SDK output budget; narrow the request or use raw source lines")

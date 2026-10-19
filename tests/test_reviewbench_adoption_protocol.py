@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import pytest
 
 from gita.eval.reviewbench import campaign
-from gita.eval.reviewbench.common import ProtocolError, digest
+from gita.eval.reviewbench.common import ProtocolError, digest, append_json
 
 
 @pytest.fixture
@@ -88,9 +88,35 @@ def test_integrated_source_setting_is_explicit_and_scope_bound(tmp_path, frozen_
         campaign.protocol(tmp_path, scopes, parsers, development_pilot=True, integrated_source=True)
     scope = {"repo": "source", "history_ready": True}
     config = {**scope, "arm": "H", "cursor_secret": "key", "tool_log": "log",
-              "indexed_workflow": True, "integrated_source": True}
+              "indexed_workflow": True, "integrated_source": True, "engine_frontend": False}
     frozen["scope_digests"] = {"0": digest(scope)}
     campaign.validate_broker_config(config, {"task": "0", "arm": "H"}, frozen)
     with pytest.raises(ProtocolError, match="source-delivery"):
         campaign.validate_broker_config({**config, "integrated_source": False},
                                         {"task": "0", "arm": "H"}, frozen)
+
+
+def test_frontend_is_explicit_and_cannot_bypass_integrated_profile(tmp_path, frozen_inputs):
+    scopes, parsers = frozen_inputs
+    with pytest.raises(ProtocolError, match="frontend requires"):
+        campaign.protocol(tmp_path, scopes, parsers, development_pilot=True, engine_frontend=True)
+    f = campaign.protocol(tmp_path, scopes, parsers, development_pilot=True,
+                          indexed_workflow=True, integrated_source=True, engine_frontend=True)
+    assert f["engine_frontend"] is True
+    h = {t["name"] for t in f["task_tool_schemas"]["0"]["H"]}
+    # Synthetic fixtures have no usable index; no unavailable engine tool is exposed.
+    assert "gita_review" not in h and "raw_diff" in h
+
+
+def test_raw_patch_through_frontend_is_not_counted_as_index_usage(tmp_path):
+    path = tmp_path / "calls.jsonl"
+    arguments = {"operation": "raw_patch"}
+    result = {"text": "ordinary Git patch"}
+    append_json(path, {"sequence": 1, "tool": "gita_review", "ok": True,
+                       "arguments": arguments, "argument_digest": digest(arguments),
+                       "result": result, "result_digest": digest(result)})
+    events = [
+        {"type": "tool.execution_start", "data": {
+            "toolName": "review-gita_review", "arguments": arguments, "toolCallId": "call"}},
+        {"type": "tool.execution_complete", "data": {"toolCallId": "call"}}]
+    assert campaign.audit_calls(events, path)["indexed_calls"] == 0
