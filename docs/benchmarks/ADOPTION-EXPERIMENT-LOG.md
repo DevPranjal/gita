@@ -1460,3 +1460,36 @@ receipts plus a joint cost/quality signal justify completing the already-declare
 C# case. Same Sol/medium, native60,90 reserve,400/400 phase ceilings and shared
 source-grounded judging. No25 launch, no rerunning an unchanged review after
 failure and no claiming that code-bearing output alone proves lower agent cost.
+
+### E20 canary: cost/recall pass, original precision gate fails
+
+[The original canary](adoption-e20-canary-results.json) records B/H credits
+43.66830/33.85668 (**22.47% lower H**), input371,081/189,290
+(**48.99% lower H**). Both have two novel TP and augmented recall16.67%;
+precision is100% B versus66.67% H because one H finding matches a reference
+labeled FP. No grounded reference TP is found in either arm.
+Judge costs55.21190 are retained. The automatic gate **stopped the second case**.
+
+H makes five successful indexed source queries and **no history query**.
+Therefore the observed savings cannot be attributed to the new history renderer.
+Do not turn a favorable cost result into a causal or quality-success claim.
+
+### Audit the precision-losing correspondence before accepting its meaning
+
+Direct inspection finds a specific possible equivalence error: the candidate
+describes unvalidated extension components escaping a storage parent; the
+matched reference describes Windows/mixed-drive handling on a macOS-only project.
+The matcher broadens these into generic "path validation" rather than comparing
+their actual triggering inputs/platform and causal mechanism. The reference's
+FP label must not automatically classify a distinct neighboring concern.
+This observation does **not** establish that the candidate itself is TP;
+reachability/guards/callers still require independent source-grounded classification.
+
+Strengthen the generic equivalence rule: do not repair or broaden a reference
+with source evidence; require the same stated cause, trigger and failure.
+Shared file/API/category is insufficient. Apply that rule to **all five
+candidates and all references**, not only the disputed edge. Reclassify all
+unmatched findings under the same unchanged classifier. Freeze a separate
+policy variant and retain original matching, classifications, failed gate and
+all additional spending. No reviewer reruns, no desired TP/FP label in inputs,
+no automatic second-case authorization from rewritten historical metrics.
