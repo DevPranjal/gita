@@ -1583,3 +1583,43 @@ no reviewer retries. Inspect the first native pair before the remaining two;
 assess the entire declared small cohort before any25 launch.
 This is an engine-plus-presentation/workflow treatment, not proof of a
 persistent-history-only effect. Keep both arms' prompts and judgments symmetric.
+
+### E21 result: stronger useful baseline, no joint win
+
+[All three prospectively selected pairs](adoption-e21-new3-results.json)
+complete and score with no manual source supplement:
+B/H review credits109.35370/110.25668 (**0.83% higher H**),
+input704,918/678,140 (**3.80% lower H**).
+Pooled augmented P100%/93.33%, R41.07%/32.73%;
+macro grounded R36.11%/29.63%. Judge credits97.53380 are separate.
+The useful baseline is substantially higher on this different development
+cohort, but H loses quality. No25 authorization.
+
+A bounded source-only trace diagnosis, without accessing reference labels,
+finds a concrete discoverability gap: the first H packet selects8 of30
+candidate source blocks, omits22, and reports40 no-callable plus2 oversized
+gaps only as aggregate counts. Its29 calls include clipped raw patches but
+do not systematically recover the omitted changed ranges. Existing warnings
+are honest, yet do not tell the agent which precise changed units remain
+unseen or provide direct range locators. Complete file inventory alone is
+not complete changed-unit discoverability.
+
+Implement a compact complete changed-hunk manifest with individual delivered
+coverage and direct source locators, preserving identical neutral ranges/raw
+allocation for B/H, without forcing calls or selecting benchmark issues.
+It must not treat one delivered block as covering every change in that file,
+silently truncate missing ranges, or claim deleted identity from a zero-count
+hunk. Implementation remains bounded and offline before further inference.
+
+### Independent uncertainty assessment of the earlier promising E17 five-case set
+
+[Repository-cluster bootstrap](adoption-e17-fivecase-uncertainty.json) reuses
+the existing paired-report resampling method,10,000 draws, seed20261020;
+pooled-precision count arithmetic is cross-checked against the pinned scorer.
+The95% credit-reduction interval is **-8.03% to+8.23%**, input reduction
+**-27.39% to+12.99%**, grounded recall H-B **-5.68pp to+7.53pp**, and pooled
+augmented precision H-B **-7.94pp to+5.56pp**. Thus the earlier1.39% saving
+does not establish cost superiority or the strict noise/recall margins.
+These are descriptive intervals on adaptively used development data, not
+post-selection-valid confirmation. Five PRs also cannot satisfy the S4
+requirement of known TP delivery on at least20 confirmation PRs.

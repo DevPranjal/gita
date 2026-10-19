@@ -1,0 +1,261 @@
+{
+  "kind": "E21 readable exact source and equal first-pass checks, prospectively selected positions3/4/7",
+  "protocol": "86d20de5aaa00d29a7888d147ff3d3877f22a60a719ed2652b9b55e9f2120dee",
+  "source_commit": "3d61973482f7a6666fe0159161902699e66327b5",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "review_totals": {
+    "B": {
+      "credits": 109.35369999999999,
+      "input_tokens": 704918,
+      "output_tokens": 10227
+    },
+    "H": {
+      "credits": 110.25667999999999,
+      "input_tokens": 678140,
+      "output_tokens": 10125
+    }
+  },
+  "judge_credits": 97.53380000000001,
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.3611111111111111,
+        "augmented_precision": 1,
+        "augmented_recall": 0.40151515151515155,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.13333333333333333,
+        "candidate_count": 17,
+        "golden_tp_count": 54,
+        "matched_count": 15,
+        "matched_tp_count": 15,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 21
+      },
+      "micro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.3888888888888889,
+        "augmented_precision": 1,
+        "augmented_recall": 0.4107142857142857,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.11764705882352941,
+        "candidate_count": 17,
+        "golden_tp_count": 54,
+        "matched_count": 15,
+        "matched_tp_count": 15,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 21
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 0.8888888888888888,
+        "grounded_recall": 0.2962962962962963,
+        "augmented_precision": 0.9166666666666666,
+        "augmented_recall": 0.3222222222222222,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.08333333333333333,
+        "candidate_count": 15,
+        "golden_tp_count": 54,
+        "matched_count": 14,
+        "matched_tp_count": 13,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 17
+      },
+      "micro": {
+        "grounded_precision": 0.9285714285714286,
+        "grounded_recall": 0.3148148148148148,
+        "augmented_precision": 0.9333333333333333,
+        "augmented_recall": 0.32727272727272727,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.06666666666666667,
+        "candidate_count": 15,
+        "golden_tp_count": 54,
+        "matched_count": 14,
+        "matched_tp_count": 13,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 17
+      }
+    }
+  },
+  "rows": [
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "B",
+      "status": "valid",
+      "credits": 52.4984,
+      "input_tokens": 394273,
+      "output_tokens": 3489,
+      "findings": 9,
+      "tool_audit": {
+        "evidence_calls": 32,
+        "executed_call_attempts": 32,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "head_blocks": 8,
+      "head_coverage": {
+        "candidate_blocks": 31,
+        "omitted_blocks": 23,
+        "gaps": {},
+        "absence_claim": false
+      },
+      "prompt_bytes": 81210
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "H",
+      "status": "valid",
+      "credits": 44.60504,
+      "input_tokens": 267567,
+      "output_tokens": 3337,
+      "findings": 8,
+      "tool_audit": {
+        "evidence_calls": 29,
+        "executed_call_attempts": 29,
+        "denied_over_budget": 0,
+        "indexed_calls": 2,
+        "errors": 0
+      },
+      "indexed_operations": {
+        "source": 2
+      },
+      "head_blocks": 8,
+      "head_coverage": {
+        "candidate_blocks": 30,
+        "omitted_blocks": 22,
+        "gaps": {
+          "no_published_callable": 40,
+          "outermost_callable_exceeds_20000_bytes": 2,
+          "zero_count_hunk_adjacent_HEAD_only_no_deleted_entity_claim": 1
+        },
+        "absence_claim": false
+      },
+      "prompt_bytes": 82320
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "B",
+      "status": "valid",
+      "credits": 19.67438,
+      "input_tokens": 127319,
+      "output_tokens": 2716,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 19,
+        "executed_call_attempts": 19,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "head_blocks": 1,
+      "head_coverage": {
+        "candidate_blocks": 1,
+        "omitted_blocks": 0,
+        "gaps": {},
+        "absence_claim": false
+      },
+      "prompt_bytes": 9687
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "H",
+      "status": "valid",
+      "credits": 20.93032,
+      "input_tokens": 153821,
+      "output_tokens": 2654,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 33,
+        "executed_call_attempts": 33,
+        "denied_over_budget": 0,
+        "indexed_calls": 2,
+        "errors": 1
+      },
+      "indexed_operations": {
+        "source": 1
+      },
+      "head_blocks": 1,
+      "head_coverage": {
+        "candidate_blocks": 1,
+        "omitted_blocks": 0,
+        "gaps": {
+          "no_published_callable": 1
+        },
+        "absence_claim": false
+      },
+      "prompt_bytes": 10662
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arm": "H",
+      "status": "valid",
+      "credits": 44.72132,
+      "input_tokens": 256752,
+      "output_tokens": 4134,
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 39,
+        "executed_call_attempts": 39,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 1
+      },
+      "indexed_operations": {},
+      "head_blocks": 11,
+      "head_coverage": {
+        "candidate_blocks": 27,
+        "omitted_blocks": 16,
+        "gaps": {
+          "no_published_callable": 26,
+          "zero_count_hunk_adjacent_HEAD_only_no_deleted_entity_claim": 18
+        },
+        "absence_claim": false
+      },
+      "prompt_bytes": 84049
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arm": "B",
+      "status": "valid",
+      "credits": 37.18092,
+      "input_tokens": 183326,
+      "output_tokens": 4022,
+      "findings": 5,
+      "tool_audit": {
+        "evidence_calls": 27,
+        "executed_call_attempts": 27,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "head_blocks": 5,
+      "head_coverage": {
+        "candidate_blocks": 22,
+        "omitted_blocks": 17,
+        "gaps": {},
+        "absence_claim": false
+      },
+      "prompt_bytes": 81647
+    }
+  ],
+  "interpretation": "All3 pairs valid/scored. Preserved source/proof instructions do not establish joint efficacy; H quality point estimates regress. No25 authorization.",
+  "limitations": [
+    "Different from iterated five-case set, but still development starter data.",
+    "Stricter Copilot claim equivalence and source-grounded classification with official pinned scoring arithmetic, not official upstream judge.",
+    "No reviewer retries, late filtering or task exclusions."
+  ]
+}
