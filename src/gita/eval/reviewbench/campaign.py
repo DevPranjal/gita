@@ -75,7 +75,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
              judge_model: str = "auto", judge_reasoning: str | None = None,
              integrated_source: bool = False, session_reservation: int = SESSION_CREDITS,
              engine_frontend: bool = False, initial_context: bool = False,
-             native_session_credits: int = SESSION_CREDITS) -> dict:
+             native_session_credits: int = SESSION_CREDITS, initial_related: bool = True) -> dict:
     validate_settings(reviewer_model, reviewer_reasoning)
     validate_settings(judge_model, judge_reasoning)
     require(type(integrated_source) is bool and (not integrated_source or indexed_workflow),
@@ -83,6 +83,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
     require(type(engine_frontend) is bool and (not engine_frontend or integrated_source),
             "Engine frontend requires integrated source")
     require(type(initial_context) is bool, "Initial context selection must be boolean")
+    require(type(initial_related) is bool, "Initial related-source selection must be boolean")
     manifest = verify(root)
     package = Path(__file__).parent
     executable = __import__("shutil").which("copilot.exe") or __import__("shutil").which("copilot")
@@ -131,6 +132,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "integrated_source": integrated_source,
             "engine_frontend": engine_frontend,
             "initial_context": initial_context,
+            "initial_related": initial_related,
             "reviewer_input_diagnostics": initial_context,
             "workflow_guidance": WORKFLOW_GUIDANCE if indexed_workflow else {},
             "tool_schemas": {arm: inventory(arm) for arm in ("B", "H")},
@@ -165,7 +167,7 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
          judge_model: str = "auto", judge_reasoning: str | None = None,
          integrated_source: bool = False, session_reservation: int = SESSION_CREDITS,
          engine_frontend: bool = False, initial_context: bool = False,
-         native_session_credits: int = SESSION_CREDITS) -> dict:
+         native_session_credits: int = SESSION_CREDITS, initial_related: bool = True) -> dict:
     require(run_root.resolve() != root.resolve() and root.resolve() not in run_root.resolve().parents,
             "Run artifacts must live outside corpus root")
     for scope in scopes:
@@ -177,7 +179,7 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
                       judge_model=judge_model, judge_reasoning=judge_reasoning,
                       integrated_source=integrated_source, session_reservation=session_reservation,
                       engine_frontend=engine_frontend, initial_context=initial_context,
-                      native_session_credits=native_session_credits)
+                      native_session_credits=native_session_credits, initial_related=initial_related)
     body = {k: v for k, v in frozen.items() if k != "digest"}
     body["run_root_digest"] = digest(str(run_root.resolve()))
     if initial_context:
@@ -310,7 +312,12 @@ def initial_packet(directory: Path, slot: dict, frozen: dict) -> tuple[dict, str
     packet = read_json(source)
     require(digest(packet) == frozen["initial_context_digests"][slot["task"]][slot["arm"]],
             "Sealed initial evidence changed or wrong arm")
-    return packet, serialize_context(packet)
+    visible = packet
+    if not frozen.get("initial_related", True):
+        visible = {**packet, "related": {
+            "view": "related", "omission": "on_demand_only", "absence_claim": False,
+            "notice": "Dependencies were not prefetched; use evidence tools when relevant."}}
+    return packet, serialize_context(visible)
 
 
 def initial_evidence_receipt(packet: dict, rendered: str) -> dict:

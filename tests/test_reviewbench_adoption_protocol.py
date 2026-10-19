@@ -1,5 +1,6 @@
 """Declare small workflow experiments without weakening fixed25 confirmation."""
 from types import SimpleNamespace
+import json
 
 import pytest
 
@@ -237,3 +238,23 @@ def test_cached_native_limit_must_match_frozen_budget(initial_attempt, change):
     write_json(directory / "result.json", result)
     with pytest.raises(ProtocolError, match="native credit setting"):
         campaign.validate_receipt(directory, slot, frozen)
+
+
+def test_on_demand_related_projection_preserves_all_other_evidence(tmp_path):
+    packet = {"inventory": ["file"], "raw_patch": {"text": "patch"},
+              "current_source": {"blocks": [{"text": "complete HEAD function"}]},
+              "related": {"sources": [{"text": "not actually resolved dependency"}]}}
+    slot = {"task": "task", "arm": "H"}
+    frozen = {"initial_related": False,
+              "initial_context_digests": {"task": {"H": digest(packet)}}}
+    write_json(tmp_path / "initial-context" / "task" / "H.json", packet)
+    original, rendered = campaign.initial_packet(tmp_path / "attempts" / "one", slot, frozen)
+    visible = json.loads(rendered)
+    assert original == packet
+    assert visible["related"]["omission"] == "on_demand_only"
+    assert visible["related"]["absence_claim"] is False
+    assert "not actually resolved dependency" not in rendered
+    for key in ("inventory", "raw_patch", "current_source"):
+        assert visible[key] == packet[key]
+    frozen["initial_related"] = True
+    assert json.loads(campaign.initial_packet(tmp_path / "attempts" / "one", slot, frozen)[1]) == packet

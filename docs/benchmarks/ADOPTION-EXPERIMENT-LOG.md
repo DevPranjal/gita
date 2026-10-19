@@ -1140,3 +1140,55 @@ transport to reviewer and judge. The first pair must pass native/protocol
 checks before authorizing the remaining two. A larger allowance is **not**
 an efficiency improvement or permission to claim a quality win; measure all
 three outcomes before deciding on another source-delivery improvement.
+
+### E16 result: reliable completion, no joint improvement
+
+[All three pairs](adoption-e16-dev3-results.json) are valid and fully scored.
+Native60 usage is directly observed in the later sessions; neither arm hits
+the native ceiling. The external canary check initially expected an optional
+usage-info message even below half-budget. That engineering assertion was
+corrected using already-written command/invocation receipts; **no review was
+rerun**. The correction is retained in the private run artifacts.
+
+| Metric | Git B | Gita H |
+| --- | ---: | ---: |
+| Review credits | 111.14754 | 128.22336 |
+| Input tokens | 778,160 | 778,376 |
+| Macro augmented precision / recall | 91.67% / 14.04% | 91.67% / 14.77% |
+| Pooled augmented precision / recall | 85.71% / 14.58% | 87.50% / 14.29% |
+| Pooled grounded recall | 14.58% | 12.50% |
+
+Judge inference costs46.99730 credits separately. H makes11 successful
+indexed-source calls across the three sessions, in addition to the frozen
+index-backed preload. Better adoption does not compensate for15.36% more
+review credits or lower pooled recall. Reject scale-up.
+
+### Measured source-relevance/format issue, not wrong indexed bytes
+
+Offline decomposition of the unchanged packets finds related-source sections
+of16,363/17,677/15,014 serialized characters for only7,514/3,740/6,307 source
+characters. Candidate provenance is repeated in symbol mappings and bodies.
+More importantly, the identifier selector collects qualified member calls
+such as `Get` and standard-library calls. Name lookup correctly returns
+ambiguous repository definitions, but those are **not resolved dependencies**:
+in one Go case, automatically prefetched `Get` bodies belong to unrelated
+store/cache types. Explicit ambiguity protects truthfulness, not relevance.
+Do not treat lexical candidates as a verified call graph.
+
+## E17: on-demand dependencies, unchanged current-function evidence
+
+Remove gratuitous **automatic related-source presentation in both arms**.
+Keep every private packet, raw-patch prefix, inventory and HEAD block identical
+to E16; attest that equality before inference. Present an explicit on-demand
+notice instead of the related section, without reallocating its unused budget.
+Agents retain search/raw reads and indexed source/history/diff as needed.
+This is not finding deletion or an absence claim, and the original full
+packet remains privately available for provenance.
+
+This narrow ablation tests the observed relevance/metadata cost rather than
+inventing a speculative type resolver or tuning names to benchmark issues.
+It does not yet solve semantic dependency resolution in the product.
+Same declared positions6/8/17, order, seed, Sol/medium, native60,90 reserve
+and600/400 phase ceilings. No judge-policy change or late proof filter.
+Scale25 remains blocked until joint quality/cost evidence; if a promising
+small signal appears, require an unchanged-candidate transfer check first.
