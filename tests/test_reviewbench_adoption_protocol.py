@@ -146,12 +146,13 @@ def test_initial_packets_are_frozen_by_task_and_arm(tmp_path, frozen_inputs, mon
 
 
 @pytest.fixture
-def initial_attempt(tmp_path, monkeypatch):
+def initial_attempt(tmp_path, monkeypatch, request):
     from gita.eval.reviewbench.initial_context import serialize_context
     task = {"id": "a" * 64, "repo": "https://github.com/example/repo", "pr_number": 1,
             "base": "b" * 40, "head": "c" * 40}
     packet = {"inventory": [{"path": "code.py"}], "current_source": {"blocks": []},
-              "raw_patch": {"text": "untrusted source"}}
+              "raw_patch": {"text": "untrusted source"},
+              "related": {"omission": "on_demand"}, "budget": {"max_characters": 100000}}
     slot = {"task": task["id"], "arm": "H", "repeat": 0, "attempt": 0}
     frozen = {"digest": "protocol", "dataset_digest": "dataset",
               "model": "gpt-5.6-sol", "reasoning_effort": "medium",
@@ -160,6 +161,8 @@ def initial_attempt(tmp_path, monkeypatch):
               "budgets": {"session_native_credits": 60},
               "initial_context_digests": {task["id"]: {"H": digest(packet)}},
               "indexed_workflow": True, "integrated_source": True, "engine_frontend": True}
+    mode, checks = getattr(request, "param", ("json", False))
+    frozen.update(initial_context_format=mode, proof_before_reporting=checks)
     write_json(tmp_path / "initial-context" / task["id"] / "H.json", packet)
     directory = tmp_path / "attempts" / "one"
 
@@ -169,7 +172,9 @@ def initial_attempt(tmp_path, monkeypatch):
         assert options["input_diagnostics"] is True
         assert options["native_credits"] == 60
         assert options["model"] == "gpt-5.6-sol" and options["reasoning"] == "medium"
-        assert prompt.endswith(serialize_context(packet) + "\nEND INITIAL EVIDENCE")
+        presented = campaign.present_initial_evidence(serialize_context(packet), frozen)
+        assert prompt.endswith(presented + "\nEND INITIAL EVIDENCE")
+        assert (campaign.FINDING_CHECKS in prompt) is checks
         (path / "prompt.txt").write_text(prompt, encoding="utf8", newline="")
         write_json(path / "invocation.json", {
             "prompt_digest": digest(prompt), "input_diagnostics": True,
@@ -191,6 +196,14 @@ def test_initial_packet_is_delivered_in_exact_native_prompt(initial_attempt):
     directory, slot, frozen, result = initial_attempt
     assert campaign.validate_initial_delivery(directory, slot, frozen) == result["initial_evidence"]
     assert (directory / "tools.jsonl").read_bytes() == b""
+
+
+@pytest.mark.parametrize("initial_attempt", [("readable-v1", True)], indirect=True)
+def test_readable_native_prompt_and_first_pass_checks_are_attested(initial_attempt):
+    directory, slot, frozen, result = initial_attempt
+    assert campaign.validate_initial_delivery(directory, slot, frozen) == result["initial_evidence"]
+    assert (directory / "initial_rendered.txt").is_file()
+    assert (directory / "initial_context.txt").read_text(encoding="utf8").startswith("{")
 
 
 @pytest.mark.parametrize("artifact", [
@@ -286,3 +299,14 @@ def test_union_reviewed_source_policy_is_explicit_and_bound(tmp_path, frozen_inp
     assert changed["named_source_adapter_sha256"] and changed["indexed_adapter_sha256"]
     with pytest.raises(ProtocolError, match="reviewed-source"):
         campaign.protocol(tmp_path, scopes, parsers, development_pilot=True, judge_reviewed_source="yes")
+
+
+def test_readable_evidence_and_finding_checks_are_explicit_protocol_changes(tmp_path, frozen_inputs):
+    scopes, parsers = frozen_inputs
+    old = campaign.protocol(tmp_path, scopes, parsers, development_pilot=True)
+    changed = campaign.protocol(tmp_path, scopes, parsers, development_pilot=True,
+                                initial_context_format="readable-v1", proof_before_reporting=True)
+    assert changed["digest"] != old["digest"]
+    assert old["initial_context_format"] == "json" and not old["proof_before_reporting"]
+    assert changed["proof_before_reporting"] and changed["initial_context_format"] == "readable-v1"
+    assert "recovery/retry" in campaign.FINDING_CHECKS and "fixed safe values" in campaign.FINDING_CHECKS

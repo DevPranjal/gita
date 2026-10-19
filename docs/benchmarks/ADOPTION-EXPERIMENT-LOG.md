@@ -1549,3 +1549,37 @@ fully preserved development benchmark record, **not** a demonstrated joint
 credit/precision/recall win. All50 offline packets remain ready. The unstarted
 second case and25 task cohort are conditional remaining work, not completed
 deliverables or zero-finding reviews.
+
+## E21: readable unchanged evidence and first-pass disconfirmation, on different tasks
+
+Continue autonomously without rerolling the precision-losing PR. The recovery
+audit ruled out a missing-source explanation there. Test presentation and
+review discipline instead of adding more source or filtering final findings:
+
+- A lossless readable presentation shows literal source lines in dynamically
+  sized fences, with all original metadata/coverage retained. Canonical visible
+  JSON remains separately stored; actual presented bytes and the native prompt
+  digest are attested. Embedded fences, Unicode, CRLF and non-Unicode Git patch
+  bytes have explicit lossless handling. No source bodies/fields are dropped.
+- Both arms get the same first-pass finding checks: reachable trigger, input
+  boundary, guards, intervening changes, retry/recovery and actual callers.
+  Report every supported issue, not a quota. No extra model proof pass, late
+  deletion stage, reference-label hint or fabricated test execution.
+- Flags default to the historical JSON/old instructions, preserving old receipts.
+  The new modes are explicitly frozen in new protocols.
+
+[All50 offline packets](adoption-e21-readable-preflight.json) fit the same
+100,000-character ceiling; aggregate presentation size2,819,134 versus2,880,188
+canonical characters. This modest size difference is not a native-token or
+quality result.81 focused rendering/protocol/model/judge regressions pass,
+including actual CRLF prompt transport and tamper detection.
+
+Prospective three-case selection uses seed20261020 to shuffle history-ready
+starter positions excluding0/6/8/15/17/20. The first three are3/4/7, selected
+without reading reference labels or quality outcomes. They are different from
+the repeatedly iterated five-case set, but remain development starter data.
+Fixed Sol/medium, native60,90 reserve,600 reviewer/400 judge phase ceilings,
+no reviewer retries. Inspect the first native pair before the remaining two;
+assess the entire declared small cohort before any25 launch.
+This is an engine-plus-presentation/workflow treatment, not proof of a
+persistent-history-only effect. Keep both arms' prompts and judgments symmetric.

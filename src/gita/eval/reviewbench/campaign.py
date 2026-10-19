@@ -54,6 +54,22 @@ WORKFLOW_GUIDANCE = {
     "H": "Gita evidence workflow: start with change_context for the indexed changed-code map. For existing indexed functions, prefer entity_diff(token,path) over raw_diff to inspect the exact persistent-entity before/after source. Use entity_context(path,line) for enclosing source and guards. Use raw_diff for new/deleted entities, uncovered or ambiguous changes, and file-level edits; raw fallback remains valid. Inspect index_status for gaps. Use id and history for a concrete temporal question. Use read_file/search for imports, callers and uncovered source. If supplied evidence already contains full relevant context, do not reread it unnecessarily. Coverage gaps are not evidence of absence. Do not make irrelevant calls to meet a quota.",
 }
 
+FINDING_CHECKS = """
+Finding discipline, applied to every proposed issue:
+Identify a concrete reachable trigger and check the relevant guards, callers,
+intervening assignments and recovery/retry behavior before reporting its impact.
+Do not call a transient inconsistency permanent without checking the next supported
+retry/cleanup path. Do not infer unsafe external input when the supplied callers
+only use fixed safe values; trace the input boundary. Check what happens on the
+failure path, not merely which call can fail. For API-dependent claims, distinguish
+known source contracts from assumptions and state necessary preconditions accurately.
+Report all distinct source-supported actionable issues, including supported issues
+outside the first changed function; do not stop after finding one or pad to a quota.
+Use the existing findings JSON only. Each message must concisely state the reachable
+trigger, incorrect behavior and concrete impact. No extra proof pass, copied analysis,
+invented execution results or deletion of valid issues just because tests cannot run.
+"""
+
 
 def review_prompt(task: dict, *, arm: str | None = None, indexed_workflow: bool = False) -> str:
     from .common import pr_identity
@@ -76,7 +92,8 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
              integrated_source: bool = False, session_reservation: int = SESSION_CREDITS,
              engine_frontend: bool = False, initial_context: bool = False,
              native_session_credits: int = SESSION_CREDITS, initial_related: bool = True,
-             judge_runtime_contracts: dict | None = None, judge_reviewed_source: bool = False) -> dict:
+             judge_runtime_contracts: dict | None = None, judge_reviewed_source: bool = False,
+             initial_context_format: str = "json", proof_before_reporting: bool = False) -> dict:
     validate_settings(reviewer_model, reviewer_reasoning)
     validate_settings(judge_model, judge_reasoning)
     require(type(integrated_source) is bool and (not integrated_source or indexed_workflow),
@@ -86,6 +103,8 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
     require(type(initial_context) is bool, "Initial context selection must be boolean")
     require(type(initial_related) is bool, "Initial related-source selection must be boolean")
     require(type(judge_reviewed_source) is bool, "Judge reviewed-source selection must be boolean")
+    require(initial_context_format in ("json", "readable-v1"), "Unknown initial evidence format")
+    require(type(proof_before_reporting) is bool, "Finding-check selection must be boolean")
     if judge_runtime_contracts is not None:
         from .runtime_contracts import validate_contracts
         validate_contracts(judge_runtime_contracts)
@@ -142,6 +161,8 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "engine_frontend": engine_frontend,
             "initial_context": initial_context,
             "initial_related": initial_related,
+            "initial_context_format": initial_context_format,
+            "proof_before_reporting": proof_before_reporting,
             "reviewer_input_diagnostics": initial_context,
             "workflow_guidance": WORKFLOW_GUIDANCE if indexed_workflow else {},
             "tool_schemas": {arm: inventory(arm) for arm in ("B", "H")},
@@ -177,7 +198,8 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
          integrated_source: bool = False, session_reservation: int = SESSION_CREDITS,
          engine_frontend: bool = False, initial_context: bool = False,
          native_session_credits: int = SESSION_CREDITS, initial_related: bool = True,
-         judge_runtime_contracts: dict | None = None, judge_reviewed_source: bool = False) -> dict:
+         judge_runtime_contracts: dict | None = None, judge_reviewed_source: bool = False,
+         initial_context_format: str = "json", proof_before_reporting: bool = False) -> dict:
     require(run_root.resolve() != root.resolve() and root.resolve() not in run_root.resolve().parents,
             "Run artifacts must live outside corpus root")
     for scope in scopes:
@@ -190,7 +212,8 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
                       integrated_source=integrated_source, session_reservation=session_reservation,
                       engine_frontend=engine_frontend, initial_context=initial_context,
                       native_session_credits=native_session_credits, initial_related=initial_related,
-                      judge_runtime_contracts=judge_runtime_contracts, judge_reviewed_source=judge_reviewed_source)
+                      judge_runtime_contracts=judge_runtime_contracts, judge_reviewed_source=judge_reviewed_source,
+                      initial_context_format=initial_context_format, proof_before_reporting=proof_before_reporting)
     body = {k: v for k, v in frozen.items() if k != "digest"}
     body["run_root_digest"] = digest(str(run_root.resolve()))
     if initial_context:
@@ -343,6 +366,20 @@ def initial_evidence_receipt(packet: dict, rendered: str) -> dict:
             "head_blocks": len(packet["current_source"]["blocks"])}
 
 
+def present_initial_evidence(canonical: str, frozen: dict) -> str:
+    mode = frozen.get("initial_context_format", "json")
+    require(mode in ("json", "readable-v1"), "Unknown frozen initial evidence format")
+    if mode == "json":
+        return canonical
+    from .initial_context import render_context
+    packet = json.loads(canonical)
+    presented = render_context(packet)
+    require(type(packet.get("budget", {}).get("max_characters")) is int
+            and len(presented) <= packet["budget"]["max_characters"],
+            "Readable initial evidence exceeds frozen character budget")
+    return presented
+
+
 def validate_initial_delivery(directory: Path, slot: dict, frozen: dict) -> dict | None:
     if not frozen.get("initial_context"):
         return
@@ -353,9 +390,14 @@ def validate_initial_delivery(directory: Path, slot: dict, frozen: dict) -> dict
             "Delivered initial evidence changed")
     require((directory / "initial_context.txt").read_text(encoding="utf8") == rendered,
             "Initial evidence rendering changed")
-    prompt = (directory / "prompt.txt").read_text(encoding="utf8")
+    presented = present_initial_evidence(rendered, frozen)
+    if frozen.get("initial_context_format", "json") != "json":
+        require((directory / "initial_rendered.txt").is_file()
+                and (directory / "initial_rendered.txt").read_bytes().decode("utf8") == presented,
+                "Readable initial evidence changed")
+    prompt = (directory / "prompt.txt").read_bytes().decode("utf8")
     invocation = read_json(directory / "invocation.json")
-    require(prompt.endswith(rendered + "\nEND INITIAL EVIDENCE")
+    require(prompt.endswith(presented + "\nEND INITIAL EVIDENCE")
             and invocation["prompt_digest"] == digest(prompt),
             "Initial evidence was not bound to the invoked prompt")
     require(invocation.get("input_diagnostics", False) == frozen["reviewer_input_diagnostics"],
@@ -413,11 +455,16 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
                        "lines are explicitly referenced, not resent. Use force_full=true if you need those "
                        "lines repeated. Inspect new context, callers and guards as necessary; index source "
                        "is not an additional mandatory pass after complete raw source.")
+        if frozen.get("proof_before_reporting", False):
+            prompt += "\n" + FINDING_CHECKS
         if frozen.get("initial_context"):
             packet, rendered = initial_packet(directory, slot, frozen)
             write_json(directory / "initial_context.json", packet)
             (directory / "initial_context.txt").write_text(rendered, encoding="utf8", newline="")
             result["initial_evidence"] = initial_evidence_receipt(packet, rendered)
+            presented = present_initial_evidence(rendered, frozen)
+            if frozen.get("initial_context_format", "json") != "json":
+                (directory / "initial_rendered.txt").write_text(presented, encoding="utf8", newline="")
             (directory / "tools.jsonl").touch(exist_ok=False)
             prompt += (
                 "\nInitial evidence is supplied below before your review. Begin with this evidence; "
@@ -430,7 +477,7 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
                 "continue that issued query. Obtain further source, dependencies, guards or history "
                 "only as needed for a complete, accurate review. Preloaded source has not been "
                 "seeded into the delivery ledger, so subsequent queries can conservatively resend it."
-                "\nBEGIN INITIAL EVIDENCE\n" + rendered + "\nEND INITIAL EVIDENCE")
+                "\nBEGIN INITIAL EVIDENCE\n" + presented + "\nEND INITIAL EVIDENCE")
         native_credits = frozen.get("budgets", {}).get("session_native_credits", SESSION_CREDITS)
         outcome = invoke(directory, prompt, names, directory / "mcp.json", timeout=timeout,
                          model=model, reasoning=reasoning, native_credits=native_credits,
