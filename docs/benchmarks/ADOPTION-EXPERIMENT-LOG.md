@@ -1350,3 +1350,65 @@ Fixed Sol/medium, native60,90 reserve,400/400 phase ceilings for the two-case
 stage. Same current-function preload, on-demand dependencies, no late filtering,
 no reviewer retries. Stronger shared source grounding is a declared judge-policy
 change, not a reviewer advantage. Offline lookup success alone is not efficacy.
+
+### E18 result: the source API is used; aggregate cost still fails
+
+[All two-case results](adoption-e18-transfer2-results.json) are valid and fully
+scored without a manual missing-source follow-up. On the Rust case H makes
+seven successful named-source queries, reduces credits49.60668 to40.06906
+and input335,635 to239,085, and finds an additional validated issue.
+The C# case still costs22.99988 H versus11.52268 B while finding an additional
+validated issue. Report the tradeoff, not just the favorable case.
+
+Total B/H credits61.12936/63.06894 (**3.17% higher H**), input371,805/370,684.
+Pooled augmented P33.33%/75.00%, R6.25%/16.67%; this is a small, low-recall
+development population, not a useful-baseline validation pass. No three-case
+or25-set continuation is authorized from this aggregate cost result.
+Judge costs65.52830 remain separate and visible.
+
+Independently, [all50 initial evidence packets for the25 tasks are ready](adoption-e18-offline25-readiness.json).
+Complete inventory/shared raw components and serialized limits pass with no
+model calls. This is readiness, not an efficacy result or cold indexing timing.
+
+## E19: repair real core namespace/path lookup failures, not another prompt slogan
+
+The costly C# trace contains three explicit refusals:
+one named source query scoped to a directory, and history/diff requests using
+a normal fully qualified dotted C# namespace. The index is built and contains
+the correct methods. Its stored scope tuple keeps a compound namespace as one
+component; the resolver previously split every dot into a separate component.
+The directory hint was also treated only as an exact filename.
+
+- Core resolution now matches qualified ASCII display names against the
+  canonical stored tuple representation without adding a JSON SQL extension,
+  reparsing code or collapsing distinct identities.
+- Directory locators use bounded byte-prefix ranges. Root namespace syntax
+  is not silently reinterpreted as a directory: `directory/::Name` is explicit;
+  the reviewer adapter constructs that scope from its separate path argument.
+- Ambiguity remains explicit. Name-query cursor context is versioned so old
+  name cursors are rejected rather than silently resumed under changed rules.
+  Stored generations, builder/matcher/parser/schema and EIDs are unchanged.
+- Directory lookup receipts bind the actual returned member path, not the
+  directory hint. A dedicated test catches this coupled delivery-ledger case.
+
+[Exact no-model replay of the three refusals](adoption-e19-core-lookup-replay.json)
+now returns two valid history/diff results and one honest source ambiguity
+with actionable EIDs; no original model trace is modified.
+Ten real-SQL predicate tests cover namespaces, ambiguity, path boundaries,
+literal names and injection-shaped input.82 core query/comparison regressions
+pass; four legacy-dependent comparison tests initially lacked opt-in and pass
+when rerun with the required legacy flag. Sixteen focused lookup/public-source
+tests pass with legacy disabled; sixteen core/evidence tests cover directory
+receipts and complete paging.
+
+Native parser artifacts are independently reprovisioned and unchanged.
+The new product-policy digest is query-only; existing immutable generations
+are reused, never silently rebuilt or relabeled. Source/query preflight runs
+again before inference. Retain the compatibility receipt with the new parser
+manifest. This fixes CLI, MCP and reviewer history/diff name resolution at
+their shared core, rather than working around incorrect outputs in scoring.
+
+Next bounded qualification remains the same two navigation-heavy cases with
+the same Sol/medium, native60,90 reserve,400/400 phase ceilings and shared
+judge grounding. No new25 launch unless the joint efficiency/quality signal
+improves beyond the failed E18 aggregate.

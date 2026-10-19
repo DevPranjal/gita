@@ -50,6 +50,7 @@ Gita provides published indexed entity evidence.
 Start with gita_index(action="status"); build explicitly if needed.
 Use gita_source(entity="name", at="HEAD") for a unique indexed body in one call.
 Use gita_id to disambiguate names or select history/state and returned occurrences.
+Dotted qualified namespaces and directory/::Name locators are supported; never guess ambiguity.
 gita_entities lists a file's recorded occurrences.
 History is indexed by default; indexed is a compatibility no-op.
 Range history returns intermediate events, not endpoint diffs.

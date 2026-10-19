@@ -525,18 +525,37 @@ class IndexSession:
 	@staticmethod
 	def _name_filter(token: str, *, locator: bool = False) -> tuple[str, tuple]:
 		def names(text: str) -> tuple[str, tuple]:
-			return ("(definition.terminal_name = ? OR definition.names_json = ? OR definition.names_json = ?)",
-					(text, _dump(tuple(text.split("."))), _dump(tuple(text.split("::")))))
+			predicate = "(definition.terminal_name = ? OR definition.names_json = ? OR definition.names_json = ?)"
+			parameters = (text, _dump(tuple(text.split("."))), _dump(tuple(text.split("::"))))
+			qualified = text.replace("::", ".")
+			if re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)+", qualified):
+				prefix, suffix = _dump(("_gita_name_",)).split("_gita_name_")
+				predicate = (
+					f"({predicate} OR replace(replace(substr(definition.names_json, ?, "
+					"length(definition.names_json) - ?), '\",\"', '.'), '::', '.') = ?)"
+				)
+				parameters += (len(prefix) + 1, len(prefix) + len(suffix), qualified)
+			return predicate, parameters
 
 		if locator:
 			path, local = token.split("::", 1)
+			directory = path.endswith("/")
+			if directory:
+				path = path[:-1]
 			raw_path = path.encode("utf-8", errors="strict")
 			try:
 				_path(raw_path)
 			except IndexContractError as error:
 				raise QueryError("unsupported_path_input", str(error)) from error
 			local_predicate, local_parameters = names(local)
-			return f"(file_state.path = ? AND {local_predicate})", (raw_path, *local_parameters)
+			if directory:
+				return (f"(file_state.path >= ? AND file_state.path < ? AND {local_predicate})",
+						(raw_path + b"/", raw_path + b"0", *local_parameters))
+			if not directory and "/" not in path:
+				return f"(file_state.path = ? AND {local_predicate})", (raw_path, *local_parameters)
+			path_predicate = "(file_state.path = ? OR (file_state.path >= ? AND file_state.path < ?))"
+			return (f"({path_predicate} AND {local_predicate})",
+					(raw_path, raw_path + b"/", raw_path + b"0", *local_parameters))
 		return names(token)
 
 	def resolve(
@@ -614,7 +633,8 @@ class IndexSession:
 					if tier == "name" or self._one(cte + " SELECT 1 FROM selected LIMIT 1", parameters) is not None:
 						break
 			context = self._cursor_context(
-				"resolve", {"token": token, "historical": historical, "tier": tier}, _oid_json(commit), "oldest",
+				"resolve", {"token": token, "historical": historical, "tier": tier,
+							**({"name_lookup_version": 2} if not typed else {})}, _oid_json(commit), "oldest",
 			)
 			last = self._decode_cursor(cursor, context)
 			rows, total, next_cursor = self._take(cte, parameters, context, last, limit)

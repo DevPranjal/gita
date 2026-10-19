@@ -242,7 +242,11 @@ def id_tool(repo: str, entity: str, scope: str | None = None,
             generation: str | None = None, at: str | None = None,
             historical: bool = False, limit: int = 20, cursor: str | None = None,
             budget: int = DEFAULT_BUDGET) -> dict[str, Any]:
-    """Resolve a name, locator or identity prefix without guessing ambiguous matches."""
+    """Resolve a name, qualified name, path locator or identity prefix without guessing.
+
+    Dotted namespace components are supported. Use directory/::Name for an
+    explicit directory scope; returned ambiguous identities remain distinct.
+    """
     return _command_result(repo, "id", [entity], scope=scope, generation=generation,
                            at=at, historical=historical, limit=limit, cursor=cursor, budget=budget)
 

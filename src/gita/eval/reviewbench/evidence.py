@@ -617,7 +617,11 @@ class Evidence:
         session = self._index(commit)
         locator = token
         if path and not token.startswith(("eid1_", "oeid1_", path + "::")):
-            locator = path + "::" + token
+            selector = path
+            if path not in self.members(commit) and any(
+                    member.startswith(path + "/") for member in self.members(commit)):
+                selector += "/"
+            locator = selector + "::" + token
         response = source_tool(str(self.repo), entity=locator, at=commit,
                                scope=session.scope, generation=session.generation)
         if response.get("error"):
@@ -653,7 +657,8 @@ class Evidence:
         self._occurrences(reference, session)
         actual_path = reference["path"]
         require_integrity(reference["commit"]["hex"] == commit, "Named source revision changed")
-        require(not path or actual_path == path, "Named source does not match the requested path")
+        require(not path or actual_path == path or actual_path.startswith(path + "/"),
+                "Named source does not match the requested path scope")
         require(payload["encoding"] == "utf-8",
                 "Named source is non-UTF8; inspect explicit raw evidence instead")
         raw = payload["content"].encode("utf8", "strict")
@@ -816,7 +821,8 @@ class Evidence:
                 or result.get("coverage", {}).get("lossy_decoding")):
             return None
         commit = self.commit(arguments.get("commit"))
-        path = arguments.get("path") or result.get("entity", {}).get("path")
+        path = (result.get("entity", {}).get("path") if name == "entity_context"
+                else arguments.get("path"))
         require_integrity(type(path) is str and bool(path), "Reusable source path missing")
         lines = source_lines(self.blob(path, commit))
         numbered = {}

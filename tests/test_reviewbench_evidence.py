@@ -18,23 +18,25 @@ def fixture_repo(tmp_path, request):
     git(repository, "init")
     git(repository, "config", "user.name", "Synthetic Test")
     git(repository, "config", "user.email", "synthetic@example.invalid")
-    source = repository / "code.py"
+    relative = "src/code.py" if getattr(request, "param", None) == "nested" else "code.py"
+    source = repository.joinpath(*relative.split("/"))
+    source.parent.mkdir(parents=True, exist_ok=True)
     duplicate = getattr(request, "param", None) == "duplicate"
     padding = ("    # " + "x" * 80 + "\n") * 100 if getattr(request, "param", None) == "large" else ""
     source.write_text("def divide(value):\n" + padding + "    return 10 / value\n"
                       + ("\ndef divide(other):\n    return 30 / other\n" if duplicate else ""),
                       encoding="utf8")
-    git(repository, "add", "--", "code.py")
+    git(repository, "add", "--", relative)
     git(repository, "commit", "--no-gpg-sign", "-m", "base")
     base = git(repository, "rev-parse", "HEAD").decode().strip()
     source.write_text("def divide(value):\n" + padding + "    return 20 / value\n"
                       + ("\ndef divide(other):\n    return 40 / other\n" if duplicate else ""),
                       encoding="utf8")
-    git(repository, "add", "--", "code.py")
+    git(repository, "add", "--", relative)
     git(repository, "commit", "--no-gpg-sign", "-m", "review")
     head = git(repository, "rev-parse", "HEAD").decode().strip()
     source.write_text("SECRET_FUTURE_LABEL = 'do not leak'\n", encoding="utf8")
-    git(repository, "add", "--", "code.py")
+    git(repository, "add", "--", relative)
     git(repository, "commit", "--no-gpg-sign", "-m", "future label fix")
     future = git(repository, "rev-parse", "HEAD").decode().strip()
     task = {"repo": "https://github.com/synthetic/repo", "pr_number": 1, "base": base, "head": head}
@@ -193,6 +195,23 @@ def test_named_source_pages_complete_body_with_bound_continuation(fixture_repo):
             str(i) for i in range(1, len(displayed) + 1)]
         reconstructed = "\n".join(line.partition(": ")[2] for line in displayed).encode("utf8") + b"\n"
         assert reconstructed == e.blob("code.py", scope["task"]["head"])
+    finally:
+        e.close()
+
+
+@pytest.mark.parametrize("fixture_repo", ["nested"], indirect=True)
+def test_named_source_directory_scope_registers_the_actual_member_path(fixture_repo):
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    e = Evidence({**config(indexed), "indexed_workflow": True,
+                  "integrated_source": True, "engine_frontend": True})
+    try:
+        result = e.execute("gita_review", {"operation": "source", "token": "divide", "path": "src"})
+        assert "error" not in result, result
+        assert result["entity"]["path"] == "src/code.py" and result["source_receipt"]
+        assert "return 20 / value" in result["text"]
+        reused = e.execute("read_file", {"path": "src/code.py", "start_line": 1, "end_line": 2})
+        assert reused["coverage"]["reused_source_lines"] == 2
     finally:
         e.close()
 
