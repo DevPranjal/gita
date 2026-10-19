@@ -771,3 +771,32 @@ Next bounded comparison: same predeclared three development PRs, fixedSol/
 medium for both reviewers and judge, reviewer300/judge150,45-credit reserve.
 No full25 inference until the combined quality/cost gate is supported. Do not
 choose a favorable task subset or hide the prior failed candidates.
+
+### E10 result: promising efficiency/augmented quality, not a clean scale pass
+
+[All three E10 outcomes](adoption-e10-dev3-results.json), all six reviews and
+judgments completed. Credits B81.213080 /H72.202300 (**11.10% lower**);
+input475,387 /412,045 (**13.32% lower**). H credits were lower on each task.
+Macro augmented precision91.67% /100%, augmented recall14.53% /14.76%.
+Grounded precision88.89% /100%, but grounded recall11.32% /9.73%.
+
+Meaningful indexed source was retrieved on all three H tasks (nine source
+operations), while thirteen raw-patch fallback requests are correctly counted
+as raw, not indexed. No quota or artificial denial of ordinary patch evidence.
+One changes-operation selector misuse and one nonexistent-file request remain
+explicit. Novel TP judgments are automatic and not certified defect precision.
+The E8 audit's accepted-edge sample does not settle these novel classifications.
+
+Do not retroactively relabel the original no-regression gate as passed:
+grounded recall declined. However, the cost reduction is consistent across
+the small tasks and augmented metrics did not regress. Before any25-task run,
+use a **small additional check of the unchanged candidate** on positions15
+(chronicle) and20 (LANdalf), disjoint from the three optimization PRs. Selected
+by source readiness/language/layout, not golden text or favorable prior scores.
+
+This is development validation, not a pristine held-out benchmark. Freeze
+the same prompts/tools/engine and fixedSolmedium judges. Report the two new
+tasks separately and all five combined; never replace earlier negative runs.
+Only a supported joint quality/cost outcome on the combined dataset permits
+the long25 study. If evidence remains mixed, report that rather than spend on
+an unqualified long run. Reviewer200/judge100 caps,45-credit reservation.

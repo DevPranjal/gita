@@ -1,0 +1,193 @@
+{
+  "stage": "E10 engine-first interface development pilot",
+  "protocol": "83fec8fd0ff5c0b021cae7b197faeb79f1ed18bd26345c6464d73fd8815e30dd",
+  "pairs": 3,
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "metrics": {
+    "B": {
+      "credits": 81.21307999999999,
+      "input_tokens": 475387,
+      "macro": {
+        "grounded_precision": 0.8888888888888888,
+        "grounded_recall": 0.11318542568542568,
+        "augmented_precision": 0.9166666666666666,
+        "augmented_recall": 0.14527629233511585,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.25,
+        "candidate_count": 8,
+        "golden_tp_count": 48,
+        "matched_count": 6,
+        "matched_tp_count": 5,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 5
+      }
+    },
+    "H": {
+      "credits": 72.20230000000001,
+      "input_tokens": 412045,
+      "macro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.09731240981240981,
+        "augmented_precision": 1,
+        "augmented_recall": 0.1476449275362319,
+        "novel_tp_count": 3,
+        "novel_tp_yield": 0.3333333333333333,
+        "candidate_count": 7,
+        "golden_tp_count": 48,
+        "matched_count": 4,
+        "matched_tp_count": 4,
+        "unmatched_count": 3,
+        "unmatched_tp_count": 3,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 4
+      }
+    }
+  },
+  "rows": [
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "B",
+      "credits": 24.52528,
+      "input_tokens": 137865,
+      "output_tokens": 3066,
+      "tool_counts": {
+        "raw_diff": 1,
+        "commit_log": 1,
+        "continue_evidence": 4,
+        "read_file": 11,
+        "search": 5
+      },
+      "gita_operations": {},
+      "errors": [
+        {
+          "tool": "read_file",
+          "error": {
+            "code": "refused",
+            "message": "File not present at requested exact revision"
+          }
+        }
+      ],
+      "findings": 2
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "H",
+      "credits": 20.93804,
+      "input_tokens": 109576,
+      "output_tokens": 2324,
+      "tool_counts": {
+        "gita_review": 8,
+        "continue_evidence": 1,
+        "search": 8,
+        "read_file": 10
+      },
+      "gita_operations": {
+        "changes": 2,
+        "raw_patch": 5,
+        "source": 1
+      },
+      "errors": [
+        {
+          "tool": "gita_review",
+          "error": {
+            "code": "refused",
+            "message": "changes accepts only path and cursor"
+          }
+        },
+        {
+          "tool": "read_file",
+          "error": {
+            "code": "refused",
+            "message": "File not present at requested exact revision"
+          }
+        }
+      ],
+      "findings": 1
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "B",
+      "credits": 33.58462,
+      "input_tokens": 214031,
+      "output_tokens": 2381,
+      "tool_counts": {
+        "raw_diff": 6,
+        "commit_log": 1,
+        "continue_evidence": 11,
+        "list_files": 2,
+        "read_file": 6,
+        "search": 1
+      },
+      "gita_operations": {},
+      "errors": [],
+      "findings": 4
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "H",
+      "credits": 29.2694,
+      "input_tokens": 212556,
+      "output_tokens": 2451,
+      "tool_counts": {
+        "gita_review": 14,
+        "continue_evidence": 7,
+        "search": 2
+      },
+      "gita_operations": {
+        "changes": 1,
+        "raw_patch": 7,
+        "source": 6
+      },
+      "errors": [],
+      "findings": 3
+    },
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "B",
+      "credits": 23.10318,
+      "input_tokens": 123491,
+      "output_tokens": 2519,
+      "tool_counts": {
+        "raw_diff": 1,
+        "commit_log": 1,
+        "continue_evidence": 3,
+        "read_file": 11,
+        "search": 3
+      },
+      "gita_operations": {},
+      "errors": [],
+      "findings": 2
+    },
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "H",
+      "credits": 21.99486,
+      "input_tokens": 89913,
+      "output_tokens": 4366,
+      "tool_counts": {
+        "gita_review": 4,
+        "continue_evidence": 3,
+        "read_file": 4,
+        "search": 2
+      },
+      "gita_operations": {
+        "changes": 1,
+        "raw_patch": 1,
+        "source": 2
+      },
+      "errors": [],
+      "findings": 3
+    }
+  ],
+  "review_credits": 153.41538,
+  "judge_credits": 61.95369999999999,
+  "raw_fallback_not_counted_as_index_usage": true,
+  "gate": "Mixed: report grounded-recall regression rather than declare full25success. Lower cost and stronger augmented scores warrant only a small new-task check of unchanged candidate.",
+  "provenance": {
+    "protocol_sha256": "014f4198132ae2bb85f9b1016dad80d8951773f7b5cb5c1a57b5c62088504530",
+    "quality_sha256": "ba98181eb9affc547a2ec09a9d5567972f6648ba8fa19589b133b8e991b7c3f5"
+  }
+}
