@@ -5,6 +5,7 @@ import pytest
 
 from gita.eval.reviewbench import campaign
 from gita.eval.reviewbench.common import ProtocolError, digest, append_json
+from gita.eval.reviewbench.common import read_json, write_json
 
 
 @pytest.fixture
@@ -120,3 +121,94 @@ def test_raw_patch_through_frontend_is_not_counted_as_index_usage(tmp_path):
             "toolName": "review-gita_review", "arguments": arguments, "toolCallId": "call"}},
         {"type": "tool.execution_complete", "data": {"toolCallId": "call"}}]
     assert campaign.audit_calls(events, path)["indexed_calls"] == 0
+
+
+def test_initial_packets_are_frozen_by_task_and_arm(tmp_path, frozen_inputs, monkeypatch):
+    from gita.eval.reviewbench import initial_context
+    scopes, parsers = frozen_inputs
+    monkeypatch.setattr(campaign, "preflight", lambda scope: None)
+    monkeypatch.setattr(initial_context, "build_initial_context",
+                        lambda scope, **kw: {"task": scope["task"]["id"], **kw})
+    root = tmp_path / "run"
+    frozen = campaign.seal(tmp_path / "corpus", root, scopes, parsers, seed=1,
+                           development_pilot=True, initial_context=True)
+    assert frozen["initial_context"] and frozen["reviewer_input_diagnostics"]
+    assert set(frozen["initial_context_digests"]) == {"0", "6"}
+    assert campaign.verify_protocol(root) == frozen
+    target = root / "initial-context" / "0" / "H.json"
+    target.write_bytes((target.parent / "B.json").read_bytes())
+    with pytest.raises(ProtocolError, match="content changed"):
+        campaign.verify_protocol(root)
+    target.unlink()
+    with pytest.raises(ProtocolError, match="file missing"):
+        campaign.verify_protocol(root)
+
+
+@pytest.fixture
+def initial_attempt(tmp_path, monkeypatch):
+    from gita.eval.reviewbench.initial_context import serialize_context
+    task = {"id": "a" * 64, "repo": "https://github.com/example/repo", "pr_number": 1,
+            "base": "b" * 40, "head": "c" * 40}
+    packet = {"inventory": [{"path": "code.py"}], "current_source": {"blocks": []},
+              "raw_patch": {"text": "untrusted source"}}
+    slot = {"task": task["id"], "arm": "H", "repeat": 0, "attempt": 0}
+    frozen = {"digest": "protocol", "dataset_digest": "dataset",
+              "model": "gpt-5.6-sol", "reasoning_effort": "medium",
+              "reviewer_model": "gpt-5.6-sol", "reviewer_reasoning": "medium",
+              "initial_context": True, "reviewer_input_diagnostics": True,
+              "initial_context_digests": {task["id"]: {"H": digest(packet)}},
+              "indexed_workflow": True, "integrated_source": True, "engine_frontend": True}
+    write_json(tmp_path / "initial-context" / task["id"] / "H.json", packet)
+    directory = tmp_path / "attempts" / "one"
+
+    def invoke(path, prompt, names, mcp, **options):
+        assert "gita_review(operation='source')" in prompt
+        assert "entity_context" not in prompt
+        assert options["input_diagnostics"] is True
+        assert options["model"] == "gpt-5.6-sol" and options["reasoning"] == "medium"
+        assert prompt.endswith(serialize_context(packet) + "\nEND INITIAL EVIDENCE")
+        (path / "prompt.txt").write_text(prompt, encoding="utf8", newline="")
+        write_json(path / "invocation.json", {
+            "prompt_digest": digest(prompt), "input_diagnostics": True})
+        (path / "events.jsonl").write_text("", encoding="utf8")
+        return {"status": "measurement_invalid", "events": [], "usage": None}
+
+    monkeypatch.setattr(campaign, "invoke", invoke)
+    result = campaign.attempt({"task": task, "indexes": [{"commits": [task["head"]]}]},
+                              slot, frozen, directory)
+    return directory, slot, frozen, result
+
+
+def test_initial_packet_is_delivered_in_exact_native_prompt(initial_attempt):
+    directory, slot, frozen, result = initial_attempt
+    assert campaign.validate_initial_delivery(directory, slot, frozen) == result["initial_evidence"]
+    assert (directory / "tools.jsonl").read_bytes() == b""
+
+
+@pytest.mark.parametrize("artifact", [
+    "initial_context.json", "initial_context.txt", "prompt.txt", "invocation.json"])
+def test_initial_prompt_attestation_rejects_tampering(initial_attempt, artifact):
+    directory, slot, frozen, _ = initial_attempt
+    path = directory / artifact
+    if artifact == "initial_context.json":
+        write_json(path, {"inventory": []})
+    elif artifact == "invocation.json":
+        write_json(path, {**read_json(path), "input_diagnostics": False})
+    else:
+        path.write_text("not the sealed evidence", encoding="utf8")
+    with pytest.raises(ProtocolError):
+        campaign.validate_initial_delivery(directory, slot, frozen)
+
+
+def test_no_call_review_requires_explicit_preload_and_existing_empty_log(tmp_path):
+    log = tmp_path / "tools.jsonl"
+    with pytest.raises(ProtocolError):
+        campaign.audit_calls([], log, allow_empty=True)
+    log.touch()
+    with pytest.raises(ProtocolError):
+        campaign.audit_calls([], log)
+    audit = campaign.audit_calls([], log, allow_empty=True)
+    assert audit["evidence_calls"] == audit["indexed_calls"] == 0
+    with pytest.raises(ProtocolError):
+        campaign.audit_calls([{"type": "tool.execution_start", "data": {"toolName": "review-search"}}],
+                             log, allow_empty=True)

@@ -289,7 +289,8 @@ class ProcessTree:
             self.process.wait(timeout=30)
 
 
-def read_events(path: Path, *, partial: bool = False, diagnostic_transport: bool = False) -> list[dict]:
+def read_events(path: Path, *, partial: bool = False, diagnostic_transport: bool = False,
+                input_diagnostics: bool = False) -> list[dict]:
     import json
     events = []
     raw = path.read_bytes() if path.exists() else b""
@@ -306,7 +307,9 @@ def read_events(path: Path, *, partial: bool = False, diagnostic_transport: bool
             event = json.loads(line)
         except json.JSONDecodeError as error:
             prefix = re.match(r'^\{"type":"(user\.message|assistant\.reasoning_delta)","data":\{', line)
-            if (diagnostic_transport and prefix and "******" in line
+            allowed_diagnostic = diagnostic_transport or (
+                input_diagnostics and prefix is not None and prefix.group(1) == "user.message")
+            if (allowed_diagnostic and prefix and "******" in line
                     and len(re.findall(r'\{"type"\s*:', line)) == 1):
                 events.append({"type": "transport.non_authoritative_frame", "data": {
                     "kind": prefix.group(1), "line": i + 1,
@@ -401,7 +404,7 @@ def command(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
 def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
            *, timeout: float = MAX_SECONDS, streaming: bool = True,
            diagnostic_transport: bool = False, model: str = "auto",
-           reasoning: str | None = None) -> dict:
+           reasoning: str | None = None, input_diagnostics: bool = False) -> dict:
     validate_settings(model, reasoning)
     require(0 < timeout <= MAX_SECONDS, "Invalid reviewer timeout")
     for name in ("workspace", "home", "logs"):
@@ -409,6 +412,7 @@ def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
     args = command(directory, prompt, allowed, mcp, model=model, reasoning=reasoning)
     require(type(streaming) is bool, "Streaming selection must be boolean")
     require(type(diagnostic_transport) is bool, "Diagnostic transport selection must be boolean")
+    require(type(input_diagnostics) is bool, "Input diagnostic selection must be boolean")
     require(not diagnostic_transport or (not allowed and mcp is None),
             "Diagnostic transport is permitted only for tool-free judging")
     if not streaming:
@@ -418,6 +422,7 @@ def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
         "prompt_transport": "utf8-stdin", "requested_model": model,
         "requested_reasoning": reasoning,
         "diagnostic_transport": diagnostic_transport,
+        "input_diagnostics": input_diagnostics,
         "native_credit_cap": SESSION_CREDITS})
     (directory / "prompt.txt").write_text(prompt, encoding="utf8", newline="")
     start = time.monotonic()
@@ -438,7 +443,8 @@ def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
             while process.poll() is None:
                 require(time.monotonic() - start < timeout, "Reviewer wall-time limit reached")
                 events = read_events(directory / "events.jsonl", partial=True,
-                                     diagnostic_transport=diagnostic_transport)
+                                     diagnostic_transport=diagnostic_transport,
+                                     input_diagnostics=input_diagnostics)
                 inventories(events, set(allowed), final=False)
                 turns = sum(e.get("type") == "assistant.turn_start" for e in events)
                 require(turns <= MAX_TURNS + FINALIZATION_GRACE, "Reviewer finalization turn limit reached")
@@ -446,7 +452,8 @@ def invoke(directory: Path, prompt: str, allowed: list[str], mcp: Path | None,
                 require(calls <= EVIDENCE_CALL_LIMIT + FINALIZATION_GRACE, "Evidence finalization grace exceeded")
                 time.sleep(0.25)
             require(process.returncode == 0, "CLI exited unsuccessfully")
-            events = read_events(directory / "events.jsonl", diagnostic_transport=diagnostic_transport)
+            events = read_events(directory / "events.jsonl", diagnostic_transport=diagnostic_transport,
+                                 input_diagnostics=input_diagnostics)
             inventories(events, set(allowed))
             outcome.update(status="runtime_complete", events=events)
         except IntegrityError as error:

@@ -1018,3 +1018,77 @@ Next paid qualification: same original one-task pair, both verifiers fixed
 Solmedium, no reviewers rerun, a separate90-credit cap. It must recover
 source-supported local-type findings without restoring the unsupported claim.
 Do not apply it to allfive or25 based on fewer prompt characters alone.
+
+### E14 final result: reject filtering despite lower relative cost
+
+All ten source-proof sessions on the five declared development PRs completed.
+The [five-pair aggregate](adoption-e14-verified5-results.json) includes both
+review and verification inference:
+
+| Metric | Git B | Gita H |
+| --- | ---: | ---: |
+| Agent credits | 240.08526 | 202.98240 |
+| Input tokens | 1,114,442 | 768,872 |
+| Retained findings | 6 | 6 |
+| Macro grounded recall | 5.54% | 4.59% |
+| Macro augmented precision / recall | 66.67% / 6.36% | 83.33% / 7.27% |
+| Pooled augmented precision / recall | 83.33% / 7.69% | 83.33% / 7.58% |
+
+H costs 15.45% less, but this is **not a successful quality-preserving
+optimization**. Filtering approximately halves useful recall; B is below the
+predeclared interpretability floor and pooled H recall is slightly lower.
+The [filtering ceiling diagnosis](adoption-e14-filter-ceiling.json) is an
+explicit oracle counterfactual, never an input or selection policy for agents.
+Deletion cannot recover issues the original reviewer never found.
+Stop optimizing late finding suppression. Preserve all original outputs,
+verification decisions, uncertain cases and both quality policies.
+
+## E15: deliver complete current-function evidence before the initial review
+
+**Frozen development design, before new paid calls:** positions 6, 8 and 17,
+the same three development PRs used in E8-E10, not held-out confirmation.
+Fixed `gpt-5.6-sol`, medium reasoning, for B, H and the existing Copilot
+semantic judge with pinned official scoring arithmetic. No late proof filter,
+reviewer retries, per-case winner selection or gold-derived context.
+Finite phase ceilings: 300 reviewer and 300 judge credits; native session
+setting 30 with a 45-credit reservation to cover observed soft-cap overshoot.
+Inspect and grade the first pair before authorizing the other two.
+
+This is an **engine-plus-workflow treatment**, not optional-tool availability:
+
+- Both arms receive identical all-path inventory and the same bounded Git
+  patch prefix. B receives competitive current-HEAD +/-100-line hunk windows.
+- H receives complete outermost published callable bodies where supported,
+  independently checked against exact Git bytes, with the same raw-window
+  fallback for gaps and oversized bodies. No query-time parsing/build.
+- Whole related implementations are retrieved via the same bounded helper:
+  conventional declaration lookup plus full files for B, stored definitions
+  plus raw fallback for H. Metadata and explicit omissions count toward budget.
+  An omitted related section is not a claim that dependencies do not exist.
+- Each packet has a 100,000 serialized-ASCII-character maximum: remaining
+  allocation 45% patch, 35% HEAD, 20% related. HEAD selection uses a shared
+  source/non-test tier and changed-line coverage per serialized byte, with
+  deterministic ties. It does not rank by reference issues.
+- Packets are built before inference, frozen by task/arm digest, copied into
+  each attempt and bound to the exact native prompt digest. No initial cursor,
+  delivery-cache seeding or fabricated indexed-tool calls. Preloaded indexed
+  source and subsequent tool use must be reported separately.
+
+The [first offline preflight](adoption-e15-initial-preflight.json) caught two
+actual composition faults before spending credits: filepath-first allocation
+starved later HEAD blocks; related-body budgeting omitted five of six complete
+sections because it did not reserve metadata. Generic global source selection
+and at most three metadata-aware related-budget attempts fix the composition.
+The [corrected offline preflight](adoption-e15-initial-preflight-v2.json)
+validates identical raw/inventory components, 50,542-95,275 total characters,
+and 3.72-14.59 seconds preparation per arm. H contains related source on all
+three; B explicitly omits the over-budget related sections and retains raw
+lookup access. No budget/coverage observation is a quality claim.
+
+112 focused tests pass: packet source/budget/omission checks, existing related
+retrieval, fixed model/reasoning, transport, frozen membership, wrong-arm
+packets, native prompt attestation and tamper rejection. A preloaded review may
+legitimately make zero further calls, but only with an explicit empty broker
+log and attested initial evidence. Native malformed redacted **user-input
+echoes only** may be quarantined and recorded under this frozen profile;
+reasoning, final answers, tools, controls and usage remain strict.

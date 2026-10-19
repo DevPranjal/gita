@@ -1,0 +1,388 @@
+{
+  "kind": "E14 equal source-proof workflow for both arms",
+  "pairs": 5,
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "metrics": {
+    "B": {
+      "agent_credits": 240.08525999999998,
+      "input_tokens": 1114442,
+      "retained_findings": 6,
+      "macro": {
+        "grounded_precision": 0.6666666666666666,
+        "grounded_recall": 0.05541125541125541,
+        "augmented_precision": 0.6666666666666666,
+        "augmented_recall": 0.06363636363636363,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.1111111111111111,
+        "candidate_count": 6,
+        "golden_tp_count": 64,
+        "matched_count": 5,
+        "matched_tp_count": 4,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 4
+      },
+      "micro": {
+        "grounded_precision": 0.8,
+        "grounded_recall": 0.0625,
+        "augmented_precision": 0.8333333333333334,
+        "augmented_recall": 0.07692307692307693,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.16666666666666666,
+        "candidate_count": 6,
+        "golden_tp_count": 64,
+        "matched_count": 5,
+        "matched_tp_count": 4,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 4
+      }
+    },
+    "H": {
+      "agent_credits": 202.9824,
+      "input_tokens": 768872,
+      "retained_findings": 6,
+      "macro": {
+        "grounded_precision": 0.6666666666666666,
+        "grounded_recall": 0.04588744588744589,
+        "augmented_precision": 0.8333333333333334,
+        "augmented_recall": 0.07272727272727272,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.3333333333333333,
+        "candidate_count": 6,
+        "golden_tp_count": 64,
+        "matched_count": 4,
+        "matched_tp_count": 3,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 3
+      },
+      "micro": {
+        "grounded_precision": 0.75,
+        "grounded_recall": 0.046875,
+        "augmented_precision": 0.8333333333333334,
+        "augmented_recall": 0.07575757575757576,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.3333333333333333,
+        "candidate_count": 6,
+        "golden_tp_count": 64,
+        "matched_count": 4,
+        "matched_tp_count": 3,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 3
+      }
+    }
+  },
+  "rows": [
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "H",
+      "kept": [
+        1,
+        2
+      ],
+      "decisions": [
+        {
+          "finding_index": 0,
+          "decision": "drop",
+          "evidence_calls": [
+            1
+          ]
+        },
+        {
+          "finding_index": 1,
+          "decision": "keep",
+          "evidence_calls": [
+            1,
+            3
+          ]
+        },
+        {
+          "finding_index": 2,
+          "decision": "keep",
+          "evidence_calls": [
+            2
+          ]
+        }
+      ],
+      "review_credits": 29.2694,
+      "verification_credits": 16.5752,
+      "agent_credits": 45.8446,
+      "input_tokens": 242947,
+      "retained_findings": 2
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "B",
+      "kept": [
+        0,
+        1,
+        3
+      ],
+      "decisions": [
+        {
+          "finding_index": 0,
+          "decision": "keep",
+          "evidence_calls": [
+            2
+          ]
+        },
+        {
+          "finding_index": 1,
+          "decision": "keep",
+          "evidence_calls": [
+            1
+          ]
+        },
+        {
+          "finding_index": 2,
+          "decision": "uncertain",
+          "evidence_calls": []
+        },
+        {
+          "finding_index": 3,
+          "decision": "keep",
+          "evidence_calls": [
+            2,
+            3
+          ]
+        }
+      ],
+      "review_credits": 33.58462,
+      "verification_credits": 18.7482,
+      "agent_credits": 52.33282,
+      "input_tokens": 248864,
+      "retained_findings": 3
+    },
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "B",
+      "kept": [
+        0,
+        1
+      ],
+      "decisions": [
+        {
+          "finding_index": 0,
+          "decision": "keep",
+          "evidence_calls": [
+            1,
+            3
+          ]
+        },
+        {
+          "finding_index": 1,
+          "decision": "keep",
+          "evidence_calls": [
+            2
+          ]
+        }
+      ],
+      "review_credits": 23.10318,
+      "verification_credits": 27.9042,
+      "agent_credits": 51.00738,
+      "input_tokens": 178008,
+      "retained_findings": 2
+    },
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "H",
+      "kept": [
+        1,
+        2
+      ],
+      "decisions": [
+        {
+          "finding_index": 0,
+          "decision": "uncertain",
+          "evidence_calls": []
+        },
+        {
+          "finding_index": 1,
+          "decision": "keep",
+          "evidence_calls": [
+            1
+          ]
+        },
+        {
+          "finding_index": 2,
+          "decision": "keep",
+          "evidence_calls": [
+            1,
+            2
+          ]
+        }
+      ],
+      "review_credits": 21.99486,
+      "verification_credits": 24.5077,
+      "agent_credits": 46.50256,
+      "input_tokens": 137061,
+      "retained_findings": 2
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "B",
+      "kept": [],
+      "decisions": [
+        {
+          "finding_index": 0,
+          "decision": "uncertain",
+          "evidence_calls": [
+            1
+          ]
+        },
+        {
+          "finding_index": 1,
+          "decision": "uncertain",
+          "evidence_calls": [
+            2
+          ]
+        }
+      ],
+      "review_credits": 24.52528,
+      "verification_credits": 27.2062,
+      "agent_credits": 51.73148,
+      "input_tokens": 190134,
+      "retained_findings": 0
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "H",
+      "kept": [],
+      "decisions": [
+        {
+          "finding_index": 0,
+          "decision": "uncertain",
+          "evidence_calls": [
+            1
+          ]
+        }
+      ],
+      "review_credits": 20.93804,
+      "verification_credits": 16.8512,
+      "agent_credits": 37.78924,
+      "input_tokens": 142571,
+      "retained_findings": 0
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "H",
+      "kept": [
+        0,
+        1
+      ],
+      "decisions": [
+        {
+          "finding_index": 0,
+          "decision": "keep",
+          "evidence_calls": [
+            1
+          ]
+        },
+        {
+          "finding_index": 1,
+          "decision": "keep",
+          "evidence_calls": [
+            2
+          ]
+        }
+      ],
+      "review_credits": 23.76856,
+      "verification_credits": 25.9407,
+      "agent_credits": 49.70926,
+      "input_tokens": 166557,
+      "retained_findings": 2
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "B",
+      "kept": [
+        0
+      ],
+      "decisions": [
+        {
+          "finding_index": 0,
+          "decision": "keep",
+          "evidence_calls": [
+            1,
+            2
+          ]
+        }
+      ],
+      "review_credits": 30.59668,
+      "verification_credits": 23.2962,
+      "agent_credits": 53.89288,
+      "input_tokens": 347680,
+      "retained_findings": 1
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "arm": "H",
+      "kept": [],
+      "decisions": [
+        {
+          "finding_index": 0,
+          "decision": "uncertain",
+          "evidence_calls": [
+            1
+          ]
+        },
+        {
+          "finding_index": 1,
+          "decision": "uncertain",
+          "evidence_calls": [
+            1,
+            2
+          ]
+        }
+      ],
+      "review_credits": 14.78404,
+      "verification_credits": 8.3527,
+      "agent_credits": 23.13674,
+      "input_tokens": 79736,
+      "retained_findings": 0
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "arm": "B",
+      "kept": [],
+      "decisions": [
+        {
+          "finding_index": 0,
+          "decision": "uncertain",
+          "evidence_calls": [
+            1
+          ]
+        },
+        {
+          "finding_index": 1,
+          "decision": "uncertain",
+          "evidence_calls": [
+            1,
+            2
+          ]
+        }
+      ],
+      "review_credits": 22.248,
+      "verification_credits": 8.8727,
+      "agent_credits": 31.1207,
+      "input_tokens": 149756,
+      "retained_findings": 0
+    }
+  ],
+  "original_reviews_unchanged": true,
+  "no_oracle_filtering": true,
+  "proof_protocols": {
+    "gita-rb-e14-proof-related-case": "1e609bc859155b7c6cce1eb501802d32e2c5d9fe0d8cfeef94dbea506ecb3a9c",
+    "gita-rb-e14-proof-other2": "97c944a72010f04c0805fcc4fc4669b3830bb73cb63b2b1737d13fb2ec4875ed",
+    "gita-rb-e14-proof-new2": "c6db034368f7278facd6529762e4c64eeccba91ed71cc1518dfdfd639bf2d0ee"
+  },
+  "scoring": "Unchanged retained comments, original matched/reference labels and guard-policy novel labels re-resolved with pinned official arithmetic",
+  "limits": "Development5, no repeat/confirmation, human/API semantics uncertainty, source retrieval strategies differ explicitly; not official leaderboard score."
+}

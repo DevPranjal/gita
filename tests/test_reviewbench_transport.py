@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from gita.eval.reviewbench.common import ProtocolError
-from gita.eval.reviewbench.runtime import read_events
+from gita.eval.reviewbench.common import IntegrityError, ProtocolError
+from gita.eval.reviewbench.runtime import read_events, inventories
 
 
 @pytest.mark.parametrize("kind", ["user.message", "assistant.reasoning_delta"])
@@ -57,3 +57,18 @@ def test_partial_reads_wait_for_physical_frame_completion(tmp_path):
     path.write_text('{"type":"result","data":broken}\n')
     with pytest.raises(ProtocolError):
         read_events(path, partial=True)
+
+
+def test_reviewer_input_echo_mode_keeps_tools_finals_and_reasoning_strict(tmp_path):
+    path = tmp_path / "events.jsonl"
+    bad_input = '{"type":"user.message","data":{"content":"******"+token"}}\n'
+    forbidden = {"type": "tool.execution_start", "data": {"toolName": "shell"}}
+    path.write_text(bad_input + json.dumps(forbidden) + "\n")
+    events = read_events(path, input_diagnostics=True)
+    assert events[0]["type"] == "transport.non_authoritative_frame"
+    with pytest.raises(IntegrityError, match="Forbidden tool"):
+        inventories(events, set(), final=False)
+    for kind in ("assistant.message", "assistant.reasoning_delta", "result", "tool.execution_start"):
+        path.write_text('{"type":"' + kind + '","data":{"content":"******"+token"}}\n')
+        with pytest.raises(ProtocolError, match="Malformed"):
+            read_events(path, input_diagnostics=True)
