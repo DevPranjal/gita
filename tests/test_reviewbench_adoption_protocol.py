@@ -258,3 +258,20 @@ def test_on_demand_related_projection_preserves_all_other_evidence(tmp_path):
         assert visible[key] == packet[key]
     frozen["initial_related"] = True
     assert json.loads(campaign.initial_packet(tmp_path / "attempts" / "one", slot, frozen)[1]) == packet
+
+
+def test_qualified_runtime_contract_is_bound_before_judging(tmp_path, frozen_inputs):
+    from gita.eval.reviewbench.runtime_contracts import NODE_CALLBACK_PROBE
+    scopes, parsers = frozen_inputs
+    contracts = {"node_trace_callback": {
+        "probe": NODE_CALLBACK_PROBE, "probe_digest": digest(NODE_CALLBACK_PROBE),
+        "observed": {"node": "v22.19.0", "cases": [
+            {"name": name, "errors": errors, "callbacks": 1}
+            for name, errors in (("sync_error", 1), ("async_error", 1), ("success", 0))]}}}
+    frozen = campaign.protocol(tmp_path, scopes, parsers, development_pilot=True,
+                               judge_runtime_contracts=contracts)
+    assert frozen["judge_runtime_contracts"] == contracts
+    assert frozen["digest"] != campaign.protocol(
+        tmp_path, scopes, parsers, development_pilot=True)["digest"]
+    with pytest.raises(ProtocolError, match="Unsupported judge runtime contract"):
+        campaign.protocol(tmp_path, scopes, parsers, development_pilot=True, judge_runtime_contracts={})

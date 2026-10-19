@@ -1208,3 +1208,37 @@ baseline. Six named-source/missing-index tests also pass with legacy explicitly
 disabled, including the actual server schema and historical source.
 This is a production usability improvement, **not a measured cause of E17's
 results**: the frozen experimental broker still has its prior interface.
+
+### E17 result: promising cost/coverage, runtime-contract scoring defect retained
+
+[All three paired attempts](adoption-e17-dev3-results.json) are valid.
+B/H review credits120.94146/114.18016 (**5.59% lower H**),
+input717,836/635,734 (**11.44% lower H**). Raw automatic grounded pooled
+P85.71%/87.50%, R12.50%/14.58%; raw augmented pooled P90.91%/90.91%,
+R19.23%/19.61%. H receives indexed current functions in all three preloads;
+three subsequent indexed source queries succeed. Raw judging costs56.64450.
+These raw augmented scores are **provisional**, not an efficacy claim.
+
+Audit catches the previously observed Node-contract error again: both arms'
+novel claims assert that `TracingChannel.traceCallback` does not publish a
+normal error-first callback on its error channel. The tool-free classifier
+incorrectly marks both TP from call-site source alone.
+
+- An authored built-in-only Node22.19 probe confirms one error notification
+  for both synchronous and asynchronous error-first callbacks, and zero for
+  success. No benchmark program, build, test or hook is executed.
+- The version-pinned official Node implementation independently confirms
+  `wrappedCallback` publishes truthy callback errors. A synthesized web answer
+  incorrectly cited a different runtime and contradicted these direct facts;
+  it was rejected, not used as evidence.
+- Add a generic, source-triggered runtime evidence registry, frozen before
+  judging. It supplies the authored script, digest, exact observations,
+  version-pinned implementation link and version/feature-gate limitations.
+  It never supplies a desired TP/FP label or a task/arm identity.
+
+Preserve original E17 scores and all reviewer/matcher outputs. Apply the
+registry policy to **all seven novel candidates**: reclassify changed inputs
+for both arms; reuse an existing decision only when the entire classifier
+input is byte-equivalent. No repeat sampling of unchanged judgments.
+Keep this as a separately named policy variant, with all extra judge spend.
+Do not launch25 while this known quality defect is unresolved.

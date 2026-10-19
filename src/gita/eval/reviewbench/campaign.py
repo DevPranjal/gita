@@ -75,7 +75,8 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
              judge_model: str = "auto", judge_reasoning: str | None = None,
              integrated_source: bool = False, session_reservation: int = SESSION_CREDITS,
              engine_frontend: bool = False, initial_context: bool = False,
-             native_session_credits: int = SESSION_CREDITS, initial_related: bool = True) -> dict:
+             native_session_credits: int = SESSION_CREDITS, initial_related: bool = True,
+             judge_runtime_contracts: dict | None = None) -> dict:
     validate_settings(reviewer_model, reviewer_reasoning)
     validate_settings(judge_model, judge_reasoning)
     require(type(integrated_source) is bool and (not integrated_source or indexed_workflow),
@@ -84,6 +85,9 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "Engine frontend requires integrated source")
     require(type(initial_context) is bool, "Initial context selection must be boolean")
     require(type(initial_related) is bool, "Initial related-source selection must be boolean")
+    if judge_runtime_contracts is not None:
+        from .runtime_contracts import validate_contracts
+        validate_contracts(judge_runtime_contracts)
     manifest = verify(root)
     package = Path(__file__).parent
     executable = __import__("shutil").which("copilot.exe") or __import__("shutil").which("copilot")
@@ -121,6 +125,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "seed": seed, "schedule": schedule, "model": reviewer_model, "cli_version": cli_version,
             "reviewer_model": reviewer_model, "reviewer_reasoning": reviewer_reasoning,
             "judge_model": judge_model, "judge_reasoning": judge_reasoning,
+            "judge_runtime_contracts": judge_runtime_contracts,
             "reasoning_effort": reviewer_reasoning or "auto-provider-default", "context": "default",
             "product_policy_digest": policy_digest(), "parsers": parsers,
             "source_delivery_sha256": file_digest(package.parents[1] / "source_delivery.py"),
@@ -167,7 +172,8 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
          judge_model: str = "auto", judge_reasoning: str | None = None,
          integrated_source: bool = False, session_reservation: int = SESSION_CREDITS,
          engine_frontend: bool = False, initial_context: bool = False,
-         native_session_credits: int = SESSION_CREDITS, initial_related: bool = True) -> dict:
+         native_session_credits: int = SESSION_CREDITS, initial_related: bool = True,
+         judge_runtime_contracts: dict | None = None) -> dict:
     require(run_root.resolve() != root.resolve() and root.resolve() not in run_root.resolve().parents,
             "Run artifacts must live outside corpus root")
     for scope in scopes:
@@ -179,7 +185,8 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
                       judge_model=judge_model, judge_reasoning=judge_reasoning,
                       integrated_source=integrated_source, session_reservation=session_reservation,
                       engine_frontend=engine_frontend, initial_context=initial_context,
-                      native_session_credits=native_session_credits, initial_related=initial_related)
+                      native_session_credits=native_session_credits, initial_related=initial_related,
+                      judge_runtime_contracts=judge_runtime_contracts)
     body = {k: v for k, v in frozen.items() if k != "digest"}
     body["run_root_digest"] = digest(str(run_root.resolve()))
     if initial_context:

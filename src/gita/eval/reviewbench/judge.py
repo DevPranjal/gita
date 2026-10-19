@@ -374,6 +374,9 @@ def grade_pair(root: Path, grader: Path, dataset: dict, scope: dict,
     random.Random(frozen["seed"] + int(task["id"][:8], 16)).shuffle(blinded)
     candidates = [{"candidate_index": i, **row[2]} for i, row in enumerate(blinded)]
     context = source_context(scope, candidates, golden, targeted=targeted_context)
+    if frozen.get("judge_runtime_contracts") is not None:
+        from .runtime_contracts import supplement_context
+        context = supplement_context(context, frozen["judge_runtime_contracts"])
     refs = [{"golden_index": i, **{k: r[k] for k in (
         "file", "start_line", "end_line", "message")}} for i, r in enumerate(golden)]
     destination.mkdir(parents=True, exist_ok=True)
