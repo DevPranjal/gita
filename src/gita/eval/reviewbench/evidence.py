@@ -73,7 +73,7 @@ DESCRIPTIONS = {
     "commit_log": "Ordered allowed commits only, with subjects and parents qualified at the scope boundary.",
     "file_history": "Raw Git changes for a member path over the same declared allowed commit graph.",
     "continue_evidence": "Continue any previously issued next_cursor without copying the original tool arguments. Cursor must belong to this session. Preferred for all paginated evidence.",
-    "gita_review": "Indexed review evidence: source(token,path?) retrieves a unique named function/class directly, without searching for line numbers; token can be a name, locator or EID. Alternatively source(path,line) gives enclosing context. changes=changed-code map; diff(token,path)=entity endpoint diff; history(token,path)=entity history; status=coverage. raw_patch(path?) is exact ordinary Git fallback. Ambiguous names require a narrower locator; no guessed binding, parsing or build. Use continue_evidence for pages.",
+    "gita_review": "Indexed review evidence: source(token,path?) retrieves a unique named function/class directly, without searching for line numbers; token can be a name, locator or EID. Alternatively source(path,line) gives enclosing context. changes=changed-code map; diff(token,path)=entity endpoint diff; history(token,path)=entity code-change ledger with verified patches and explicit omissions; status=coverage. raw_patch(path?) is exact ordinary Git fallback. Ambiguous names require a narrower locator; no guessed binding, parsing or build. Use continue_evidence for pages.",
     "index_status": "Optional: inspect prebuilt index readiness and gaps. For named-function context, entities(path) or id(name) -> state/source can retrieve exact entity evidence instead of whole files. Raw Git fallback is valid. No build or mutation.",
     "change_context": "Gita review starting point: indexed changed-code map plus up to two verified persistent-entity source-diff previews when connected history permits. Returns actual code evidence, locations and explicit gaps; use entity_diff/entity_context for more. Not a complete semantic PR diff.",
     "entities": "Indexed file entities with exact occurrence references, coverage and opaque continuation.",
@@ -560,7 +560,9 @@ class Evidence:
         commit = self.commit(commit)
         session = self._index(commit)
         selected = GitOid.from_hex("sha1", commit)
-        binding = digest([self.config["scope_digest"], session.generation, name, commit, arguments])
+        compact_history = name == "history" and self.config.get("engine_frontend", False)
+        binding = digest([self.config["scope_digest"], session.generation, name, commit, arguments,
+                          "code_history_v1" if compact_history else "native"])
         native_cursor = self._decode(cursor, binding)["native"] if cursor else None
         limit = 30
         while True:
@@ -580,6 +582,9 @@ class Evidence:
                 result = session.events_in(GitOid.from_hex("sha1", self.base), selected,
                                            limit=limit, cursor=native_cursor)
             require_integrity(type(result) is dict, "Malformed returned indexed evidence")
+            if compact_history:
+                self._occurrences(result, session)
+                result = self._code_history(result, session)
             native_next = result.get("page", {}).get("next_cursor")
             if "page" in result:
                 result["page"]["next_cursor"] = self._encode(
@@ -597,6 +602,32 @@ class Evidence:
             limit = max(1, limit // 2)
         self._occurrences(result, session)
         return result
+
+    def _code_history(self, result: dict, session: Any) -> dict:
+        from ...cli.indexed import _event_patch
+
+        def location(reference):
+            if reference is None:
+                return None
+            return {key: reference[key] for key in ("commit", "path", "names", "span")}
+
+        events = []
+        for event in result["results"]:
+            patch = _event_patch(session, event)
+            if len(json.dumps(patch, ensure_ascii=True)) > PAGE_CHARS:
+                patch = {"patch_status": "omitted:source_patch_budget",
+                         "omitted_patch_characters": len(patch.get("patch", ""))}
+            events.append({
+                "id": event["id"], "eid": event["eid"], "commit": event["commit"],
+                "parent": event["parent"], "flags": event["flags"],
+                "material": event["material"], "decision": event["decision"],
+                "source": location(event["source"]), "destination": location(event["destination"]),
+                **patch})
+        return {**result, "results": events, "history_view": "verified_entity_code_changes",
+                "source_guidance": (
+                    "Patches compare exact indexed entity bytes at the recorded commits, not the whole PR. "
+                    "An omitted/unavailable patch is not unchanged code; use source(path,line,commit) "
+                    "or raw evidence. Metadata locations are not complete occurrence references.")}
 
     def entities(self, path: str, commit: str | None = None, cursor: str = "") -> dict:
         checked_path(path)

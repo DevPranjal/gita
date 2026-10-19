@@ -1412,3 +1412,51 @@ Next bounded qualification remains the same two navigation-heavy cases with
 the same Sol/medium, native60,90 reserve,400/400 phase ceilings and shared
 judge grounding. No new25 launch unless the joint efficiency/quality signal
 improves beyond the failed E18 aggregate.
+
+### E19 result: core refusals fixed, agent efficacy not established
+
+[All four reviews are valid and scored](adoption-e19-transfer2-results.json).
+B/H credits64.80672/78.53276 (**21.18% higher H**), input385,285/592,749
+(**53.85% higher H**). Pooled augmented P83.33%/75.00%, R25.00%/16.67%;
+grounded recall6.25% in both arms. Judge credits70.55280 are separate.
+Do not interpret passing lookup tests or higher indexed usage as efficacy.
+No larger reviewer cohort is authorized.
+
+All prior source/history/diff refusals disappear. H now actually requests
+four indexed histories on the Rust case and one on C#, plus two C# source
+queries. This exposes another concrete fidelity problem in the experimental
+interface: its history route returns low-level immutable event/reference
+metadata, **without the code patches already supported by production indexed
+history**. The five responses carry1-2 events and2,005-4,424 serialized
+characters each, zero patches; three are paginated. This is usable identity
+provenance, but poor direct review evidence.
+
+## E20: code-bearing history using the existing production patch renderer
+
+The unified reviewer history route now renders compact event locations and
+verified entity patches using the existing production `_event_patch` helper.
+Retain every event ID/EID, commit/parent, identity decision, flags/material,
+names and source/destination spans. Full opaque occurrence dictionaries are
+not repeatedly printed when the available interface uses name/EID/file-line
+selectors instead. No query-time AST extraction, synthesized change or event
+selection. Raw primitive history outside the unified frontend is unchanged.
+
+Patch generation follows independent Git/source validation. Oversized patches
+are omitted whole with an explicit status, never clipped or described as
+unchanged. Remaining history pagination preserves native event order and exact
+query/generation binding; a presentation marker prevents mixing cursor forms.
+
+[Offline replay](adoption-e20-code-history-preflight.json) changes the two
+one-event Rust pages from3,339 characters/zero patches to complete three-event
+pages of7,697/7,712 characters with three patches. Other responses are retained
+with explicit code availability, not forced size-reduction claims. Four focused
+tests verify full event/decision preservation, exact source paging, no future
+source, code deltas and oversized-patch disclosure. The initial large-fixture
+test incorrectly assumed a large function implies a large diff; it now changes
+the actual fixture body and tests the real omission condition.
+
+Next paid check is bounded to the same Rust canary first. Only valid native
+receipts plus a joint cost/quality signal justify completing the already-declared
+C# case. Same Sol/medium, native60,90 reserve,400/400 phase ceilings and shared
+source-grounded judging. No25 launch, no rerunning an unchanged review after
+failure and no claiming that code-bearing output alone proves lower agent cost.

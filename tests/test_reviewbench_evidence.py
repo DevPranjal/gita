@@ -29,7 +29,7 @@ def fixture_repo(tmp_path, request):
     git(repository, "add", "--", relative)
     git(repository, "commit", "--no-gpg-sign", "-m", "base")
     base = git(repository, "rev-parse", "HEAD").decode().strip()
-    source.write_text("def divide(value):\n" + padding + "    return 20 / value\n"
+    source.write_text("def divide(value):\n" + padding.replace("x", "y") + "    return 20 / value\n"
                       + ("\ndef divide(other):\n    return 40 / other\n" if duplicate else ""),
                       encoding="utf8")
     git(repository, "add", "--", relative)
@@ -212,6 +212,35 @@ def test_named_source_directory_scope_registers_the_actual_member_path(fixture_r
         assert "return 20 / value" in result["text"]
         reused = e.execute("read_file", {"path": "src/code.py", "start_line": 1, "end_line": 2})
         assert reused["coverage"]["reused_source_lines"] == 2
+    finally:
+        e.close()
+
+
+@pytest.mark.parametrize("fixture_repo", ["default", "large"], indirect=True)
+def test_frontend_history_preserves_events_and_supplies_verified_code_patches(fixture_repo):
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    e = Evidence({**config(indexed), "indexed_workflow": True,
+                  "integrated_source": True, "engine_frontend": True})
+    try:
+        result = e.execute("gita_review", {"operation": "history", "token": "divide"})
+        assert "error" not in result, result
+        assert result["history_view"] == "verified_entity_code_changes"
+        events = list(result["results"])
+        while result["next_cursor"]:
+            result = e.execute("continue_evidence", {"cursor": result["next_cursor"]})
+            assert "error" not in result, result
+            events.extend(result["results"])
+        if len(e.blob("code.py", e.head)) <= 6000:
+            assert any("return 20 / value" in row.get("patch", "") for row in events)
+        assert all("patch_status" in row for row in events)
+        assert all("path_bytes_b64" not in (row["destination"] or {}) for row in events)
+        native = e._index(e.head).history(events[0]["eid"], at=e.head, limit=1000)
+        assert [row["id"] for row in events] == [row["id"] for row in native["results"]]
+        assert [row["decision"] for row in events] == [row["decision"] for row in native["results"]]
+        assert "SECRET_FUTURE_LABEL" not in json.dumps(events)
+        if len(e.blob("code.py", e.head)) > 6000:
+            assert any(row["patch_status"] == "omitted:source_patch_budget" for row in events)
     finally:
         e.close()
 
