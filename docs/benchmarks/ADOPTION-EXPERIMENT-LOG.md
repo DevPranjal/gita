@@ -1528,3 +1528,24 @@ These are quality-study costs, not reviewer savings. The original and revised
 precision gates both fail; the second case and25-run remain unstarted.
 Further reviewer rerolls or favorable-policy selection on this one PR would
 not establish a reliable product win.
+
+### No-paid follow-up: test the missing-recovery-context hypothesis
+
+With the user unavailable for a scope decision, preserve the existing constraint:
+no ungated25 run. Inspect evidence before building another context-expansion
+feature. The [byte-checked actual-input audit](adoption-e20-recovery-evidence-audit.json)
+shows **both reviewers already received** the missing-file recovery guard and
+expired-row reselection code. It checks only visible preloads and successful
+source outputs at exact HEAD, not unused private related-source sections.
+
+Thus missing caller/recovery source is **not supported as the cause** of the
+irrecoverability false positive in this case. More automatic context is not a
+justified fix from this observation. Prompt availability does not prove correct
+model attention or reasoning. No further reviewer/judge inference was purchased
+for this audit, and no larger benchmark was silently authorized.
+
+Current delivery remains verified product/API/index-query improvements plus a
+fully preserved development benchmark record, **not** a demonstrated joint
+credit/precision/recall win. All50 offline packets remain ready. The unstarted
+second case and25 task cohort are conditional remaining work, not completed
+deliverables or zero-finding reviews.
