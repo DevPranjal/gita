@@ -22,7 +22,8 @@ def fixture_repo(tmp_path, request):
     source = repository.joinpath(*relative.split("/"))
     source.parent.mkdir(parents=True, exist_ok=True)
     duplicate = getattr(request, "param", None) == "duplicate"
-    padding = ("    # " + "x" * 80 + "\n") * 100 if getattr(request, "param", None) == "large" else ""
+    size = getattr(request, "param", None)
+    padding = ("    # " + "x" * 80 + "\n") * (300 if size == "huge" else 100) if size in ("large", "huge") else ""
     if getattr(request, "param", None) == "escaped":
         padding = ("    # " + '\\"' * 45 + "\n") * 99
     source.write_text("def divide(value):\n" + padding + "    return 10 / value\n"
@@ -185,6 +186,51 @@ def test_named_source_frontend_resolves_without_line_search_and_reuses_verified_
         assert missing["error"]["code"] == "not_found"
         assert "gita_id" not in missing["error"]["message"]
         assert len(json.dumps(result, ensure_ascii=True)) <= 8000
+    finally:
+        e.close()
+
+
+@pytest.mark.parametrize("fixture_repo", ["nested", "large", "huge"], indirect=True)
+def test_path_only_source_retrieves_exact_indexed_file_and_all_continuations(fixture_repo):
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    e = Evidence({**config(indexed), "indexed_workflow": True, "integrated_source": True,
+                  "engine_frontend": True, "large_evidence_pages": True})
+    path = "src/code.py" if "src/code.py" in e.paths(e.head) else "code.py"
+    try:
+        result = e.execute("gita_review", {"operation": "source", "path": path})
+        assert "error" not in result, result
+        assert result["entity"]["names"] == ["<module>"]
+        assert result["coverage"]["lookup"] == "exact_indexed_file_root"
+        assert result["entity"]["span"]["start_byte"] == 0
+        assert result["entity"]["span"]["end_byte"] == len(e.blob(path, e.head))
+        chunks = [result["text"]]
+        while result.get("next_cursor"):
+            result = e.execute("continue_evidence", {"cursor": result["next_cursor"]})
+            assert "error" not in result and e.fits_response(result)
+            chunks.append(result["text"])
+        lines = "".join(chunks).splitlines()
+        assert [line.partition(": ")[2] for line in lines] == e.blob(
+            path, e.head).decode("utf8").splitlines()
+        if path.startswith("src/"):
+            refused = e.execute("gita_review", {"operation": "source", "path": "src"})
+            assert refused["error"]["code"] == "refused"
+    finally:
+        e.close()
+
+
+@pytest.mark.parametrize("fixture_repo", ["empty"], indirect=True)
+def test_path_only_empty_source_does_not_invent_a_line_or_receipt(fixture_repo):
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    e = Evidence({**config(indexed), "indexed_workflow": True, "integrated_source": True,
+                  "engine_frontend": True, "large_evidence_pages": True})
+    try:
+        result = e.execute("gita_review", {"operation": "source", "path": "empty.py"})
+        assert "error" not in result, result
+        assert result["text"] == "" and result["file_lines"] == 0
+        assert result["coverage"]["empty_source"] and result["coverage"]["complete_entity"]
+        assert "source_receipt" not in result
     finally:
         e.close()
 

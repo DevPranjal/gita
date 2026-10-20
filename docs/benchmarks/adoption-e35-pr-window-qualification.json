@@ -1,0 +1,97 @@
+{
+  "kind": "Whole inventories with explicit reviewed-PR indexed history window",
+  "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+  "parse_fingerprint": "0ba8cc3b4154458ff77f184b5033bdb0d116a6568b8ce9864acd5d92dd15cc9b",
+  "rows": [
+    {
+      "task": "82ec18705a16ae64998d181393c7f885543cc33b25921073d24ebecec40fbc15",
+      "repo": "https://github.com/superyyrrzz/ForgeMap",
+      "history_ready": false,
+      "indexed_anchor": "2ce83d91f981fc579ec53baf9bce4957fdc240fc",
+      "indexed_commits": [
+        1,
+        1
+      ],
+      "seconds": 23.062000000005355,
+      "preflight": {
+        "independent_occurrences_verified": 102,
+        "extraction_gaps": 2,
+        "broker_budget_gap_files": 0,
+        "index_status": {
+          "status": "built",
+          "seconds": 20.844000000011874,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "2ce83d91f981fc579ec53baf9bce4957fdc240fc",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      "complete_source_replays": []
+    },
+    {
+      "task": "bc277c0372a2c410587b86f47527f69bc7e76ae468a962c7fe668b452af88905",
+      "repo": "https://github.com/ardevd/jadx-collaboration",
+      "history_ready": true,
+      "indexed_anchor": "a9627c7cd6695e2389a68033c3985a0809f2978e",
+      "indexed_commits": [
+        3
+      ],
+      "seconds": 7.875,
+      "preflight": {
+        "independent_occurrences_verified": 371,
+        "extraction_gaps": 0,
+        "broker_budget_gap_files": 0,
+        "index_status": {
+          "status": "built",
+          "seconds": 4.10899999999674,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "a9627c7cd6695e2389a68033c3985a0809f2978e",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      "complete_source_replays": []
+    },
+    {
+      "task": "ee7f15418560e783cdc668536f3c4d8692e231a7f231876ddc86a2fac069e9e2",
+      "repo": "https://github.com/allan-mobley-jr/gimmes",
+      "history_ready": true,
+      "indexed_anchor": "08efd0bbc34fd29de2a4077f07d24f3dc02a63b6",
+      "indexed_commits": [
+        2
+      ],
+      "seconds": 20.84399999998277,
+      "preflight": {
+        "independent_occurrences_verified": 291,
+        "extraction_gaps": 0,
+        "broker_budget_gap_files": 0,
+        "index_status": {
+          "status": "built",
+          "seconds": 16.171999999991385,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "08efd0bbc34fd29de2a4077f07d24f3dc02a63b6",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      "complete_source_replays": []
+    }
+  ],
+  "paid_calls": 0,
+  "interpretation": "Narrower indexed history is a preparation profile, not an equivalent-work full-history speedup. Full raw history stays available."
+}

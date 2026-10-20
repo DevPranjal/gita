@@ -49,7 +49,9 @@ SCHEMAS = {
     "continue_evidence": schema({"cursor": CURSOR}, ("cursor",)),
     "gita_review": schema({
         "operation": {"type": "string", "enum": ["changes", "source", "context", "diff", "history", "raw_patch", "status"]},
-        "path": STRING, "line": INTEGER,
+        "path": {"type": "string", "description": "Exact file or a named lookup hint. "
+                 "For source, path alone (no token/line) retrieves the whole indexed file."},
+        "line": INTEGER,
         "token": {"type": "string", "description": "Prefer a simple name plus optional path, or a full EID. Separate captured scope components with :: in a qualified name."},
         "commit": STRING,
         "cursor": CURSOR, "force_full": FORCE_FULL}, ("operation",)),
@@ -317,6 +319,12 @@ class Evidence:
             if token:
                 require(line is None, "source accepts token or path/line, not both")
                 result = self.named_source(token, path, commit, cursor, force_full)
+            elif line is None and path:
+                checked_path(path)
+                require(path in self.members(self.commit(commit)),
+                        "Whole-file source requires an exact member file")
+                result = self.named_source("<module>", path, commit, cursor, force_full)
+                result["coverage"]["lookup"] = "exact_indexed_file_root"
             else:
                 require(path and line is not None, "source requires token or path/line")
                 result = self.entity_context(path, line, commit, cursor, force_full)
@@ -803,7 +811,7 @@ class Evidence:
                           and payload["byte_length"] == len(raw), "Named source bytes changed")
         lines = source_lines(blob)
         start, end = span["start_line"], span["end_line"]
-        text = "\n".join(f"{i}: {lines[i - 1]}" for i in range(start, end + 1))
+        text = "\n".join(f"{i}: {lines[i - 1]}" for i in range(start, end + 1)) if lines else ""
         result = self.page(text, "named_source", {
             "token": token, "path": path, "commit": commit, "occurrence": reference["id"]}, cursor)
         result.update(entity={"occurrence": reference["id"], "names": reference["names"],
@@ -817,6 +825,11 @@ class Evidence:
             source="indexed", exact_git_lines=True,
             complete_entity=not cursor and not result["truncated"],
             lookup="unique_name_locator_or_eid", ambiguity="refused_not_guessed")
+        if not lines:
+            require_integrity(not raw and span["start_byte"] == span["end_byte"] == 0,
+                              "Empty indexed source disagrees with its source span")
+            result["file_lines"] = 0
+            result["coverage"]["empty_source"] = True
         return result
 
     def entity_context(self, path: str, line: int, commit: str | None = None,

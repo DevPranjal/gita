@@ -96,7 +96,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
              judge_runtime_contracts: dict | None = None, judge_reviewed_source: bool = False,
              initial_context_format: str = "json", proof_before_reporting: bool = False,
              minimal_workflow: bool = False, indexed_preload: bool = True,
-             large_evidence_pages: bool = False) -> dict:
+             large_evidence_pages: bool = False, file_context_guidance: bool = False) -> dict:
     validate_settings(reviewer_model, reviewer_reasoning)
     parser_cache = os.environ.get("GITA_PARSER_CACHE")
     require(parser_cache is None or Path(parser_cache).is_absolute(),
@@ -114,6 +114,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
     require(type(minimal_workflow) is bool, "Minimal-workflow selection must be boolean")
     require(type(indexed_preload) is bool, "Indexed-preload selection must be boolean")
     require(type(large_evidence_pages) is bool, "Large-evidence-page selection must be boolean")
+    require(type(file_context_guidance) is bool, "File-context guidance must be boolean")
     if judge_runtime_contracts is not None:
         from .runtime_contracts import validate_contracts
         validate_contracts(judge_runtime_contracts)
@@ -176,6 +177,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "minimal_workflow": minimal_workflow,
             "indexed_preload": indexed_preload,
             "large_evidence_pages": large_evidence_pages,
+            "file_context_guidance": file_context_guidance,
             "reviewer_input_diagnostics": initial_context,
             "workflow_guidance": WORKFLOW_GUIDANCE if indexed_workflow and not minimal_workflow else {},
             "tool_schemas": {arm: inventory(arm) for arm in ("B", "H")},
@@ -217,7 +219,7 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
          judge_runtime_contracts: dict | None = None, judge_reviewed_source: bool = False,
          initial_context_format: str = "json", proof_before_reporting: bool = False,
          minimal_workflow: bool = False, indexed_preload: bool = True,
-         large_evidence_pages: bool = False) -> dict:
+         large_evidence_pages: bool = False, file_context_guidance: bool = False) -> dict:
     require(run_root.resolve() != root.resolve() and root.resolve() not in run_root.resolve().parents,
             "Run artifacts must live outside corpus root")
     for scope in scopes:
@@ -233,7 +235,7 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
                       judge_runtime_contracts=judge_runtime_contracts, judge_reviewed_source=judge_reviewed_source,
                       initial_context_format=initial_context_format, proof_before_reporting=proof_before_reporting,
                       minimal_workflow=minimal_workflow, indexed_preload=indexed_preload,
-                      large_evidence_pages=large_evidence_pages)
+                      large_evidence_pages=large_evidence_pages, file_context_guidance=file_context_guidance)
     body = {k: v for k, v in frozen.items() if k != "digest"}
     body["run_root_digest"] = digest(str(run_root.resolve()))
     if initial_context:
@@ -497,6 +499,19 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
                        "lines are explicitly referenced, not resent. Use force_full=true if you need those "
                        "lines repeated. Inspect new context, callers and guards as necessary; index source "
                        "is not an additional mandatory pass after complete raw source.")
+        if frozen.get("file_context_guidance", False):
+            source_choice = (
+                "Use gita_review(operation='source', path='<exact file>') with neither token nor line "
+                "for a whole indexed file; consume its continuations. Named source remains useful "
+                "when only one or two units are relevant. "
+                if config["engine_frontend"] else
+                "Use read_file with a suitable bounded range and consume its continuations. ")
+            prompt += (
+                "\nEvidence granularity: when investigating several related functions in the same "
+                "file, prefer one appropriately bounded file read over a sequence of tiny reads. "
+                + source_choice +
+                "Batch independent evidence requests when their targets are already known. "
+                "Do not fetch unrelated files or reread complete code just to satisfy this guidance.")
         if frozen.get("proof_before_reporting", False):
             prompt += "\n" + FINDING_CHECKS
         if frozen.get("initial_context"):

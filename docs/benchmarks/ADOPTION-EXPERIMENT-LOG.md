@@ -10,10 +10,10 @@ confirmation.
 
 Engineering changes are tested and committed; **no25-task model run is
 authorized**. All50 initial evidence packets passed offline preparation.
-The latest completed paid E34 pilot is promising:20.93% fewer H credits and
-34.55% fewer input tokens, equal judged precision and higher recall on three
-reused development cases. This is not confirmation; prospective transfer comes
-before25. E30 repairs Swift/PHP and qualifies all five formerly failing
+E34's reused-case pilot is promising, but E35's fresh transfer costs19.03% more
+despite higher recall and equal augmented precision. Lower cost has not
+transferred; E36 targets observed same-file lookup fragmentation. No25 or
+confirmation claim yet. E30 repairs Swift/PHP and qualifies all five formerly failing
 source requests. E31 adds the remaining eight plain-language/configuration
 adapters and tests actual files rather than declaring registration a win.
 Macro-heavy C, Astro and other real syntax/format gaps remain explicit.
@@ -2330,3 +2330,57 @@ contexts before inference; first pair checks transport only and all selected
 cases enter the cohort. No candidate edits or unchanged retries mid-cohort.
 Require a complete credible transfer result before committing to25; a
 favorable reused-task result alone is insufficient.
+
+### E35 completed: quality transfers, lower cost does not
+
+[All three prospective outcomes](adoption-e35-transfer3-results.json):
+B/H review credits64.03060/76.21306 (**H +19.03%**),
+input230,010/332,994 (**H +44.77%**), output8,019/11,655,
+model requests14/22. Judge93.50670 separately. Six valid reviews, all pairs
+scored without source supplements or retries.
+Pooled augmented P85.71%/85.71%, R19.35%/27.27%;
+grounded P83.33%/75.00%, R16.67%/20.00%.
+The quality direction transfers, but this is **not** a lower-cost transfer.
+
+[The descriptive six-case same-candidate aggregate](
+adoption-e34-e35-sixcase-summary.json) verifies identical harness/product
+fingerprints and review settings before pooling: credits188.80590/174.87588
+(**H -7.38%**), input1,044,918/866,321 (**H -17.09%**);
+pooled augmented P94.12%/94.74%, R21.18%/27.27% and grounded
+R19.28%/22.89%. Do not use this post-transfer descriptive aggregate to erase
+the fresh-stage cost regression or call it held-out confirmation.
+
+## E36: fix fragmented same-file evidence retrieval
+
+Trace audit shows14 source/context calls in the Kotlin case, **13 of them in
+Plugin.kt**, versus a baseline that can read related file context together.
+The existing indexed `<module>` source already supports whole-file retrieval.
+Expose an ergonomic source(path) form in the experimental unified facade,
+requiring an exact member file and preserving generation/commit/source checks.
+Directory hints do not silently become whole-file reads. Public MCP instructions
+document the existing `file::<module>` locator rather than inventing a shipped
+path parameter.
+
+Add an explicit, default-off, frozen file-context guidance flag for **both**
+arms: prefer an appropriately bounded file read when several related functions
+are needed, and batch known independent requests. H can use indexed source(path),
+B read_file. Single-function source remains available; no unrelated source is
+automatically injected or mandatory extra pass added.
+
+[No-model replay](adoption-e36-file-source-replay.json) retrieves all650 original
+Plugin.kt lines in three bounded calls including continuations, versus13
+fragmented same-file calls. This proves a retrieval mechanism, not a cost/quality
+win. Empty indexed file roots explicitly return zero lines and no fake receipt.
+Line-display tests compare original line contents separately from CRLF byte
+length, while the provider still validates original bytes before formatting.
+
+Freeze the same complete E35 three-case set19/11/18, seed20261022, with the
+new granularity capability/guidance and otherwise unchanged product/context/
+model/budgets. These are reused development cases, not another fresh transfer.
+No25 authorization until the complete quality/cost result supports it; retain
+all previous costs, source failures and negative outcomes.
+
+E36 validation:107 source/protocol/rendering regressions pass, including exact
+file roots, multi-page reconstruction, zero-byte files, directory refusal and
+attested per-arm granularity guidance. The feature uses the existing index;
+no parse-policy relabeling, grammar change or new implicit build is involved.

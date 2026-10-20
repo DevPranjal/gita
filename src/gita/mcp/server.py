@@ -49,6 +49,9 @@ SERVER_INSTRUCTIONS = """\
 Gita provides published indexed entity evidence.
 Start with gita_index(action="status"); build explicitly if needed.
 Use gita_source(entity="name", at="HEAD") for a unique indexed body in one call.
+For a whole indexed file, use entity="relative/path::<module>".
+When several related functions need inspection, a bounded whole-file request
+can avoid many small source round trips. Keep budgets and coverage explicit.
 Use gita_id to disambiguate names or select history/state and returned occurrences.
 Dotted qualified namespaces and directory/::Name locators are supported; never guess ambiguity.
 gita_entities lists a file's recorded occurrences.

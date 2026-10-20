@@ -162,6 +162,18 @@ def test_parser_cache_installation_is_frozen_and_cannot_drift(tmp_path, frozen_i
         campaign.verify_protocol(root)
 
 
+def test_file_context_guidance_is_explicit_and_frozen(tmp_path, frozen_inputs):
+    scopes, parsers = frozen_inputs
+    default = campaign.protocol(tmp_path, scopes, parsers, development_pilot=True)
+    enabled = campaign.protocol(tmp_path, scopes, parsers, development_pilot=True,
+                                file_context_guidance=True)
+    assert default["file_context_guidance"] is False
+    assert enabled["file_context_guidance"] is True and enabled["digest"] != default["digest"]
+    with pytest.raises(ProtocolError, match="File-context guidance"):
+        campaign.protocol(tmp_path, scopes, parsers, development_pilot=True,
+                          file_context_guidance="true")
+
+
 def test_raw_patch_through_frontend_is_not_counted_as_index_usage(tmp_path):
     path = tmp_path / "calls.jsonl"
     arguments = {"operation": "raw_patch"}
@@ -261,7 +273,8 @@ def initial_attempt(tmp_path, monkeypatch, request):
     selection = getattr(request, "param", ("json", False))
     mode, checks = selection[:2]
     minimal = selection[2] if len(selection) > 2 else False
-    frozen.update(initial_context_format=mode, proof_before_reporting=checks, minimal_workflow=minimal)
+    frozen.update(initial_context_format=mode, proof_before_reporting=checks, minimal_workflow=minimal,
+                  file_context_guidance=selection[3] if len(selection) > 3 else False)
     frozen["parser_cache"] = str(tmp_path / "frozen-parser-cache")
     write_json(tmp_path / "initial-context" / task["id"] / "H.json", packet)
     directory = tmp_path / "attempts" / "one"
@@ -275,6 +288,7 @@ def initial_attempt(tmp_path, monkeypatch, request):
         else:
             assert "Connected indexed history is unavailable" in prompt
             assert "Use operation='diff' with token/path" not in prompt
+        assert ("Evidence granularity:" in prompt) is frozen["file_context_guidance"]
         assert options["input_diagnostics"] is True
         assert options["native_credits"] == 60
         assert options["model"] == "gpt-5.6-sol" and options["reasoning"] == "medium"
@@ -318,6 +332,14 @@ def test_minimal_workflow_keeps_goal_checks_without_an_extra_index_navigation_pa
     assert campaign.validate_initial_delivery(directory, slot, frozen) == result["initial_evidence"]
     prompt = (directory / "prompt.txt").read_text(encoding="utf8")
     assert campaign.FINDING_CHECKS in prompt and "Source delivery:" not in prompt
+
+
+@pytest.mark.parametrize("initial_attempt", [("json", True, False, True)], indirect=True)
+def test_file_granularity_guidance_is_attested_in_native_prompt(initial_attempt):
+    directory, slot, frozen, result = initial_attempt
+    assert campaign.validate_initial_delivery(directory, slot, frozen) == result["initial_evidence"]
+    prompt = (directory / "prompt.txt").read_text(encoding="utf8")
+    assert "with neither token nor line" in prompt
 
 
 @pytest.mark.parametrize("artifact", [

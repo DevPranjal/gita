@@ -137,6 +137,10 @@ your client's `PATH`.
 
 An indexed investigation follows **index → identity → history/state → source**.
 Typed tools expose supported budgets, coverage and continuation cursors.
+For several related functions in one file, request its indexed root with
+`gita_source(entity="relative/path::<module>", scope="project")` instead of
+many tiny source lookups. Source remains complete-or-budget-error; select a
+suitable budget rather than assuming a large file will fit.
 `gita_history` is indexed by default. Legacy `gita_diff`, `gita_expand` and
 `gita_show` are absent from discovery unless the server starts with
 `GITA_ENABLE_LEGACY=1`. Reconstructing history additionally requires `legacy=true`.
