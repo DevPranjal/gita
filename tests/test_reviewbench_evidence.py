@@ -216,6 +216,51 @@ def test_named_source_directory_scope_registers_the_actual_member_path(fixture_r
         e.close()
 
 
+def test_context_resolves_importer_hint_globally_without_claiming_a_call_binding(fixture_repo):
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    e = Evidence({**config(indexed), "indexed_workflow": True,
+                  "integrated_source": True, "engine_frontend": True})
+    try:
+        result = e.execute("gita_review", {
+            "operation": "context", "token": "divide", "path": "importer.py"})
+        assert "error" not in result, result
+        assert result["entity"]["path"] == "code.py"
+        assert result["resolution"]["requested_path_hint"] == "importer.py"
+        assert result["resolution"]["scope"] == "global_published_name_match"
+        assert "not" in result["resolution"]["binding"] or "verify" in result["resolution"]["binding"]
+        assert "return 20 / value" in result["text"] and result["source_receipt"]
+    finally:
+        e.close()
+
+
+def test_context_raw_fallback_is_exact_explicit_and_reusable(fixture_repo, monkeypatch):
+    from gita.index.query import QueryError
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    e = Evidence({**config(indexed), "indexed_workflow": True,
+                  "integrated_source": True, "engine_frontend": True})
+
+    def unavailable(*args, **kwargs):
+        raise QueryError("not_found", "No published entity")
+
+    monkeypatch.setattr(e, "named_source", unavailable)
+    try:
+        result = e.execute("gita_review", {
+            "operation": "context", "token": "value", "path": "code.py"})
+        assert "error" not in result, result
+        assert result["provenance"]["source"] == "raw_literal_context_after_index_miss"
+        assert result["coverage"]["indexed_entity"] is False
+        assert result["resolution"]["kind"] == "literal_references_not_definitions"
+        assert "entity" not in result and "return 20 / value" in result["text"]
+        reused = e.execute("read_file", {"path": "code.py", "start_line": 1, "end_line": 2})
+        assert reused["coverage"]["reused_source_lines"] == 2
+        assert e.execute("gita_review", {
+            "operation": "context", "token": "value", "path": "../outside"})["error"]
+    finally:
+        e.close()
+
+
 @pytest.mark.parametrize("fixture_repo", ["default", "large"], indirect=True)
 def test_frontend_history_preserves_events_and_supplies_verified_code_patches(fixture_repo):
     _, scope, _ = fixture_repo

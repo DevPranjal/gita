@@ -1669,3 +1669,48 @@ source/raw allocations can consequently shrink relative to E21. This is an
 explicit evidence-selection change, not a free-token claim. Inspect the first
 native pair, then assess the entire three-case development cohort before25.
 No late filtering, reruns or inferred absence from omitted source.
+
+### E22 result: preserved precision/recall, token signal, slight credit regression
+
+[All three cases complete and score](adoption-e22-complete3-results.json).
+B/H credits105.37536/106.66390 (**1.22% higher H**), input681,961/584,625
+(**14.27% lower H**). Both pooled augmented precision100%;
+grounded recall40.74%/42.59%, augmented recall41.82%/43.64%.
+Judge credits95.81680 are separate. Better source discovery is consistent with
+this point signal, but cost superiority is not established. No25 authorization.
+
+The small Python case accounts for the unfavorable credit difference:
+H22.89280 versusB14.93532 and two refusals. A source-only replay shows that
+`send_request_to_open_ai` is uniquely published in a different provider file;
+the requested path was its importer, not its declaration. `DB_PATH` is a real
+literal constant but not a published indexed entity. Strict source lookup
+correctly refuses both requests as phrased, yet incurs an avoidable search/read
+round trip for a normal caller-oriented context request.
+
+## E23: explicit context lookup, without weakening strict source semantics
+
+Add a distinct `context(token,path_hint)` operation to the unified interface.
+Existing `source` remains strict. Context first tries the hinted indexed scope,
+then a unique global published name, explicitly disclosing a lexical match
+outside the hint rather than claiming import/caller binding. For an unindexed
+simple identifier in an exact member file, it can return bounded exact Git
+literal context, marked **raw references, not an indexed definition**.
+Ambiguity remains explicit, source/commit checks and safe pagination remain.
+
+Raw fallback is excluded from indexed-use accounting. Shared judge context
+retains the actual provider/raw-source path, not merely the original importer
+hint. Completed exact-line receipts also bind that actual path. No index
+rebuild, source parsing, caller-graph claim or manufactured constant identity.
+
+[Offline replay](adoption-e23-context-preflight.json) turns the two recorded
+refusals into one1,841-character verified indexed definition and one2,687-character
+explicit raw window. Original traces remain unchanged. Ten source/context/
+history tests and64 protocol/judge/model/rendering tests pass.
+This is prototype reviewer-interface work reusing production indexed source,
+not yet a separate public MCP context API or a demonstrated efficacy result.
+
+Prospective gate: the same three cases, starting with position4 to exercise the
+two diagnosed requests, then3/7 only if the canary's native receipts and joint
+cost/quality point gate pass. Same Sol/medium, native60/reserve90,600/400 ceilings,
+complete manifest/readable source/first-pass checks and strict source-grounded
+judging. No reroll on failure, no25 launch from offline query success.

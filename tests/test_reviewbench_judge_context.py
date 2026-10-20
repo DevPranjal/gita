@@ -20,12 +20,21 @@ def test_supporting_paths_union_both_arms_and_use_only_visible_preloads(tmp_path
         append_json(directory / "tools.jsonl", {
             "ok": True, "tool": "gita_review", "arguments": {"operation": "source", "token": "Foo"},
             "result": {"entity": {"path": "named.py"}}})
+        append_json(directory / "tools.jsonl", {
+            "ok": True, "tool": "gita_review",
+            "arguments": {"operation": "context", "token": "Bar", "path": "importer.py"},
+            "result": {"entity": {"path": "provider.py"}}})
+        append_json(directory / "tools.jsonl", {
+            "ok": True, "tool": "gita_review",
+            "arguments": {"operation": "context", "token": "VALUE", "path": "config.py"},
+            "result": {"source_location": {"path": "config.py"}}})
         write_json(directory / "initial_context.txt", {
             "current_source": {"blocks": [{"path": "visible.py"}]}, "related": {"omission": "on_demand"}})
         write_json(directory / "initial_context.json", {
             "related": {"sources": [{"path": "private_unused.py"}]}})
         rows.append((arm, {"identity": identity, "initial_evidence": {"packet_digest": "packet"}}))
-    assert judge.requested_source_paths(tmp_path, rows) == ["B.py", "H.py", "named.py", "visible.py"]
+    assert judge.requested_source_paths(tmp_path, rows) == [
+        "B.py", "H.py", "config.py", "named.py", "provider.py", "visible.py"]
 
 
 @pytest.fixture

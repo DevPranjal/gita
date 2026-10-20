@@ -319,6 +319,7 @@ def audit_calls(events: list[dict], path: Path, *, allow_empty: bool = False) ->
             "denied_over_budget": max(0, len(calls) - EVIDENCE_CALL_LIMIT), "indexed_calls": sum(
         call["tool"] not in COMMON_TOOLS
         and not (call["tool"] == "gita_review" and call["arguments"].get("operation") == "raw_patch")
+        and call["result"].get("provenance", {}).get("source") != "raw_literal_context_after_index_miss"
         for call in calls), "errors": sum(not call["ok"] for call in calls)}
 
 
@@ -433,7 +434,10 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
         if config["engine_frontend"] and scope.get("indexes"):
             prompt = prompt.replace(WORKFLOW_GUIDANCE["H"], (
                 "Gita evidence workflow: use gita_review(operation='changes') to start. "
-                "For relevant functions/classes use operation='source' with token (name or locator) "
+                "For dependencies or constants starting from a caller/importer, use operation='context' "
+                "with token and optional path hint; it returns a published definition or explicitly "
+                "labeled raw literal context, not a resolved call graph. "
+                "For strict functions/classes use operation='source' with token (name or locator) "
                 "and optional path: it resolves and returns source in one query, without a separate "
                 "line-number search. Alternatively supply path/line. Use operation='diff' "
                 "with token/path for persistent-entity before/after changes. This is a single "

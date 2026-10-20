@@ -172,9 +172,10 @@ def requested_source_paths(run_root: Path, rows: list[tuple[str, dict]]) -> list
                 continue
             tool, args, result = call["tool"], call["arguments"], call["result"]
             if (tool not in ("read_file", "entity_context", "source", "gita_review")
-                    or (tool == "gita_review" and args.get("operation") != "source")):
+                    or (tool == "gita_review" and args.get("operation") not in ("source", "context"))):
                 continue
-            path = (args.get("path") or result.get("entity", {}).get("path")
+            path = (result.get("entity", {}).get("path") or result.get("source_location", {}).get("path")
+                    or args.get("path")
                     or args.get("reference", {}).get("path"))
             if path:
                 checked_path(path)

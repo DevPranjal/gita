@@ -124,6 +124,19 @@ def test_raw_patch_through_frontend_is_not_counted_as_index_usage(tmp_path):
     assert campaign.audit_calls(events, path)["indexed_calls"] == 0
 
 
+def test_context_raw_fallback_is_not_counted_as_index_usage(tmp_path):
+    path = tmp_path / "calls.jsonl"
+    arguments = {"operation": "context", "token": "VALUE", "path": "config.py"}
+    result = {"text": "1: VALUE = 1", "provenance": {"source": "raw_literal_context_after_index_miss"}}
+    append_json(path, {"sequence": 1, "tool": "gita_review", "ok": True,
+                       "arguments": arguments, "argument_digest": digest(arguments),
+                       "result": result, "result_digest": digest(result)})
+    events = [{"type": "tool.execution_start", "data": {
+        "toolName": "review-gita_review", "arguments": arguments, "toolCallId": "call"}},
+        {"type": "tool.execution_complete", "data": {"toolCallId": "call"}}]
+    assert campaign.audit_calls(events, path)["indexed_calls"] == 0
+
+
 def test_initial_packets_are_frozen_by_task_and_arm(tmp_path, frozen_inputs, monkeypatch):
     from gita.eval.reviewbench import initial_context
     scopes, parsers = frozen_inputs
