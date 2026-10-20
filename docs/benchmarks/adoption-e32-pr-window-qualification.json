@@ -1,0 +1,124 @@
+{
+  "kind": "Whole inventories with explicit reviewed-PR indexed history window",
+  "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+  "parse_fingerprint": "0ba8cc3b4154458ff77f184b5033bdb0d116a6568b8ce9864acd5d92dd15cc9b",
+  "rows": [
+    {
+      "task": "3f4e836db70e52f2130f7c82f67af4af39f1091bb6d31a96258cb5d4add67a10",
+      "repo": "https://github.com/scottlz0310/Mcp-Docker",
+      "history_ready": true,
+      "indexed_anchor": "63baf3dbbc10d271710706f56150dd8425dd4b4a",
+      "indexed_commits": [
+        8
+      ],
+      "seconds": 14.078000000008615,
+      "preflight": {
+        "independent_occurrences_verified": 139,
+        "extraction_gaps": 3,
+        "broker_budget_gap_files": 0,
+        "index_status": {
+          "status": "built",
+          "seconds": 10.437000000005355,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "63baf3dbbc10d271710706f56150dd8425dd4b4a",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      "complete_source_replays": []
+    },
+    {
+      "task": "0362dfe9422a542cde29b9a429b4baa39d301262a128fccb0910d6801f939a86",
+      "repo": "https://github.com/superhighfives/pika",
+      "history_ready": true,
+      "indexed_anchor": "bdda75cbeeb8cd72a2cb197f93623c3e197cf49c",
+      "indexed_commits": [
+        5
+      ],
+      "seconds": 62.264999999984866,
+      "preflight": {
+        "independent_occurrences_verified": 1148,
+        "extraction_gaps": 4,
+        "broker_budget_gap_files": 0,
+        "index_status": {
+          "status": "built",
+          "seconds": 48.32799999997951,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "bdda75cbeeb8cd72a2cb197f93623c3e197cf49c",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      "complete_source_replays": [
+        {
+          "token": "ContentView",
+          "path": "Pika/Views/ContentView.swift",
+          "complete": true
+        },
+        {
+          "token": "swap",
+          "path": "Pika/Services/Eyedroppers.swift",
+          "complete": true
+        }
+      ]
+    },
+    {
+      "task": "d701ed5ae7001b5fe7c881acdda33cf7759293132014f6d71abcbc657eb36d27",
+      "repo": "https://github.com/wirechat/wirechat",
+      "history_ready": false,
+      "indexed_anchor": "7f645146da1285f3817a9dfcb04be0a53ee50ecd",
+      "indexed_commits": [
+        1,
+        1
+      ],
+      "seconds": 43.828000000008615,
+      "preflight": {
+        "independent_occurrences_verified": 816,
+        "extraction_gaps": 14,
+        "broker_budget_gap_files": 0,
+        "index_status": {
+          "status": "built",
+          "seconds": 23.125,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "7f645146da1285f3817a9dfcb04be0a53ee50ecd",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      "complete_source_replays": [
+        {
+          "token": "mount",
+          "path": "src/Livewire/Chat/Chat.php",
+          "complete": true
+        },
+        {
+          "token": "initializeConversation",
+          "path": "src/Livewire/Chat/Chat.php",
+          "complete": true
+        },
+        {
+          "token": "pushMessage",
+          "path": "src/Livewire/Chat/Chat.php",
+          "complete": true
+        }
+      ]
+    }
+  ],
+  "paid_calls": 0,
+  "interpretation": "Narrower indexed history is a preparation profile, not an equivalent-work full-history speedup. Full raw history stays available."
+}

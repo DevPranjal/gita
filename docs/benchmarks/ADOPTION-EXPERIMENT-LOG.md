@@ -2160,3 +2160,26 @@ reviewbench-language-coverage-e31.json) has registered adapters for214/219 task
 labels. This is **not** a214-task coverage or quality claim. Notebook/template/
 unknown labels and the actual C/Astro/syntax gaps are separately recorded.
 The original pre-change inventory is preserved.
+
+## E32: qualify the reviewed PR window before another paid comparison
+
+Freeze the E31 product and larger-page treatment on the same complete ordered
+positions21/16/22, seed20261021. Build fresh `rb-e32-*` contexts with full
+repository inventories but history bounded to effective merge base through HEAD.
+Endpoint-only tasks retain two explicit snapshots and unavailable connected
+history. Both arms retain the same full allowed raw Git graph, including the
+prior-history fallback. Record the narrower indexed window explicitly.
+
+This is a different preparation profile from the100-prior-commit cold E30
+rebuilds. Reduced preparation time must not be described as an equivalent-work
+whole-history speedup. It supplies the exact reviewed source and persistent
+identity through the PR's first-parent span, not arbitrary older indexed history.
+Do not relabel old contexts or claim that the remaining C/Astro/format gaps
+were repaired.
+
+Before inference, independently verify changed endpoint source and the five
+formerly missing Swift/PHP requests in the new contexts. Freeze identical raw
+initial packets in B/H, the same typed tools and source budgets, minimal workflow,
+Sol/medium reviewers and judges, native60/reserve90 and600/400 ceilings.
+All three cases stay in the cohort; first-pair checks are operational, not
+selection of a favorable outcome. No25 expansion from preparation readiness.
