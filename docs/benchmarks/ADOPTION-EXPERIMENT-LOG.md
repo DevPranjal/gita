@@ -10,10 +10,10 @@ confirmation.
 
 Engineering changes are tested and committed; **no25-task model run is
 authorized**. All50 initial evidence packets passed offline preparation.
-The latest complete E26 three-pair ablation saves17.83% review credits
-and40.53% input tokens with Gita, but loses recall. Precision is100% in both
-arms. All six reviews are valid; all three H sessions request indexed source,
-but successful queries must not be confused with fully delivered bodies.
+The latest E27 three-pair candidate has higher judged recall and8.45% lower
+input, but review credits are0.29% higher and only one H session requests indexed
+source. Precision is100% in both arms under a separate dependency-complete judge
+stage. This is a promising development signal, not a verified indexed win.
 Preserve all previous policies, source
 supplements and judging spend. Product correctness and useful tool uptake
 are not evidence that the requested joint benchmark target has been achieved.
@@ -1863,3 +1863,48 @@ three-case cohort, changing only the shared broker repair. Same Sol/medium,
 native60/reserve90,600/400 ceilings, no automatic retries or per-case selection.
 This tests the repair's effect; it is not guaranteed quality improvement.
 Keep25 blocked unless the joint cohort gate is supported.
+
+### E27 completed: quality signal, no indexed efficacy claim
+
+[All outcomes and both judge policies](adoption-e27-searchfix3-results.json)
+are retained. B/H review credits105.88706/106.19760 (**H +0.29%**),
+input677,264/620,034 (**H -8.45%**), output9,371/10,401.
+Original judging100.45050 credits; separate requested-source stage19.16320.
+All six reviews valid. Original policy scores two pairs and leaves one uncertain.
+
+The classifier specifically requested the Poetry lock and fixture definitions.
+The separate frozen input includes all39 tracked paths, all tracked Python
+source and the complete parsed lock, omitting only package wheel/sdist hash
+inventories. All dependencies and other fields remain. No candidate/matcher
+rerun or reference-guided reviewer input. With this symmetric evidence, all
+three pairs score: pooled augmented P100%/100%, R29.09%/44.64%;
+grounded R27.78%/42.59%; macro augmented R27.59%/52.04%.
+Original incomplete scores remain separately labeled. Supplement assembly
+initially failed the strict scorer because correspondences were not ordered
+by arm-local candidate index; production ordering was restored using the
+saved classifier answer, without another model invocation.
+
+H uses one successful complete indexed source query in one of three sessions;
+two source lookups fail. The other two H sessions request no indexed tools.
+Therefore the aggregate quality difference cannot be attributed to indexed
+history or source. Shared search repair, tool availability and model variation
+remain distinct possible influences. No strict credit-reduction win and no
+confirmation claim. Stop tuning these same three tasks.
+
+## E28: prospective unused-task transfer, unchanged E27 candidate
+
+Freeze the E27 implementation/settings before seeing new reviewer outcomes.
+Sample three positions with `random.Random(20261021).sample`, from the16 positions
+not previously selected in focused development pilots:
+`[1,2,5,9,10,11,12,13,14,16,18,19,21,22,23,24]`.
+The resulting ordered positions are **21,16,22**:
+Mcp-Docker, pika and wirechat. The last has endpoint indexed context but no
+connected history; retain it rather than selecting only history-ready tasks.
+These are unused by focused pilots, not a new held-out benchmark population.
+
+Same Sol/medium reviewers and judges, readable common raw preload,
+minimal symmetric goal, complete hunk manifest, first-pass checks and
+qualified on-demand H tools. Same600/400 review/judge ceilings,
+native60/reserve90. First pair checks operational validity, not favorable
+efficacy. Keep every selected case and all missing/failed slots. Do not
+promote to25 from a favorable subset or change the candidate mid-cohort.
