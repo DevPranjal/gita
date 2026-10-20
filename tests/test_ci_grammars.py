@@ -54,7 +54,7 @@ def test_ci_provisions_native_grammars_not_just_download_requests(job, monkeypat
     exec(command[2], {})
     expected = {"python"} if job == "index-qualification" else {
         "python", "javascript", "typescript", "tsx", "csharp", "cpp",
-        "go", "rust", "json", "yaml", "toml", "markdown",
+        "go", "rust", "swift", "php", "json", "yaml", "toml", "markdown",
     }
     assert installed == expected
 
@@ -87,6 +87,7 @@ else:
 assert evidence.parse_fingerprint() == before
 """
     environment = os.environ.copy()
+    environment.pop("GITA_PARSER_CACHE", None)
     environment["PYTHONPATH"] = str(Path(__file__).resolve().parents[1] / "src")
 
     def check(state):
@@ -99,6 +100,29 @@ assert evidence.parse_fingerprint() == before
     check("cold")
     copy_python_grammar_cache(Path(language_pack.cache_dir()), cache)
     check("warm")
+
+
+def test_explicit_cache_environment_is_used_in_a_fresh_process(tmp_path):
+    cache = tmp_path / "grammars"
+    copy_python_grammar_cache(Path(language_pack.cache_dir()), cache)
+    script = """
+from pathlib import Path
+import sys
+from gita.index.evidence import parse_evidence
+import tree_sitter_language_pack as pack
+assert Path(pack.cache_dir()) == Path(sys.argv[1])
+assert parse_evidence(b'def f():\\n    return 1\\n', b'app.py').result.complete
+"""
+    environment = os.environ.copy()
+    environment["GITA_PARSER_CACHE"] = str(cache)
+    environment["PYTHONPATH"] = str(Path(__file__).resolve().parents[1] / "src")
+    result = subprocess.run([sys.executable, "-c", script, str(cache)],
+                            env=environment, capture_output=True, text=True, timeout=60)
+    assert result.returncode == 0, result.stderr + result.stdout
+    environment["GITA_PARSER_CACHE"] = "relative-cache"
+    invalid = subprocess.run([sys.executable, "-c", "import gita.entities.parsers"],
+                             env=environment, capture_output=True, text=True, timeout=60)
+    assert invalid.returncode != 0 and "GITA_PARSER_CACHE must be an absolute" in invalid.stderr
 
 
 def test_qualification_artifacts_use_same_absolute_runner_temp_directory():

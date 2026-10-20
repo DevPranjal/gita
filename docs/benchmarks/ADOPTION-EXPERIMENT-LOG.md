@@ -10,10 +10,11 @@ confirmation.
 
 Engineering changes are tested and committed; **no25-task model run is
 authorized**. All50 initial evidence packets passed offline preparation.
-The E27 quality signal **did not transfer** to E28's three prospectively selected
-unused tasks. E28 H costs5.60% more credits, uses13.91% more input and has lower
-recall. Precision is100% in both arms under the custom judge. All six reviews
-and all three quality pairs are valid, but the joint objective remains unmet.
+The latest completed E29 pilot saves13.87% credits and19.55% input with H,
+but loses recall. E30 repairs the concrete Swift/PHP coverage gap and qualifies
+all five formerly failing named-source requests against newly built contexts.
+That is product readiness, not yet a new quality/cost win. The broader language
+audit finds eight more plain-language/configuration families to implement.
 Preserve all previous policies, source
 supplements and judging spend. Product correctness and useful tool uptake
 are not evidence that the requested joint benchmark target has been achieved.
@@ -2011,3 +2012,84 @@ its verified bounded retrieval path. These cases are now development reuse,
 not newly unseen transfer. First pair checks transport, not winning outcomes;
 retain all three cases, all failures and all source/history delivery counts.
 No25 authorization from no-model completeness or the canary alone.
+
+### E29 completed: lower cost, recall still fails
+
+[Complete results](adoption-e29-completepages3-results.json): B/H review
+credits146.08262/125.82628 (**H -13.87%**), input801,251/644,600
+(**H -19.55%**), output15,087/15,961. Judging138.31920 credits;
+transport canaries19.37326 separately. Six valid reviews, three scored pairs,
+no reviewer/judge retries or supplementary inputs.
+Pooled augmented P100%/100%, R25.86%/22.03%; grounded R18.87%/13.21%;
+macro augmented R24.36%/21.81%. Do not promote the efficiency point estimate
+while recall is lower.
+
+H requests three successful indexed history calls on Mcp-Docker.
+The Swift/PHP sessions attempt source/history/context queries but retrieve no
+indexed bodies. Direct published `entities_in` inspection shows zero entities
+for two real Swift files and the PHP chat class. All paths exist at HEAD.
+These extensions were absent from the language registry, not merely missing
+grammars in an otherwise complete index. Published generations and a connected
+history do not establish language/file coverage.
+
+## E30: real Swift/PHP extraction and cross-process grammar installation
+
+Register Swift and PHP in the shared legacy/index extraction rules. Recognize
+named classes/structs/enums/protocols, functions/methods, Swift initializers,
+deinitializers/subscripts/type aliases, PHP traits/properties/constants and
+assigned closures. Preserve literal whitespace and byte-exact source spans.
+Support bracketed PHP namespaces and one unbraced file namespace. Multiple
+unbraced namespaces produce an explicit unknown rather than incorrect names.
+Swift multi-binding properties remain owned by the enclosing entity rather
+than pretending a declaration is a single binding.
+
+Update installation documentation and CI's explicit grammar provisioning.
+Use an isolated copied native cache, leaving the existing shared13-grammar
+inventory untouched. Upstream1.14.3 `download()` reports requested names without
+materializing missing files; explicit `prefetch()` and native AST probes verify
+the new Swift/PHP grammars. No benchmark programs, tests or hooks are executed.
+
+The first broad validation passes189/191 cases; two F3 checks expose a real
+cross-process installation mismatch: the controlled CLI environment discards
+the selected cache. Add `GITA_PARSER_CACHE`, an explicit absolute cache shared
+by extraction, CLI/MCP and spawned parsing. Hash the cache-selection helper in
+the parser policy. The verification runner retains this installation setting;
+the benchmark freezes it and injects only that frozen value into its MCP
+environment instead of relaxing the native sandbox's general GITA-variable
+filter. A changed cache rejects protocol reuse. The54 focused rerun checks pass,
+including published identity/source/history for both new languages, F3,
+offline grammar behavior and frozen MCP configuration. Earlier103 extraction/
+provisioning checks passed; do not sum overlapping test counts.
+
+### Fresh contexts and exact failed-query replay
+
+[Independent qualification](adoption-e30-language-qualification.json)
+builds new `rb-e30-*` contexts; old generations are retained, never relabeled.
+The three previously uncovered target files now contain25/103/83 definitions
+respectively (**211 total**, including their file roots). Counts match fresh
+independent extraction; every published source span matches committed Git bytes.
+All five original source requests now complete: ContentView, swap, mount,
+initializeConversation and pushMessage. No paid inference.
+
+Cold bounded rebuild-plus-preflight wall times were546.375s (Mcp-Docker),
+922.250s (pika) and47.406s (wirechat endpoints). These are substantial, not a
+claim that whole-repository indexing is already fast enough. The prior map
+[readiness probe](adoption-e30-map-preflight.json) remains transport/readiness
+evidence only; no workflow-only paid trial was launched before fixing coverage.
+
+## E31: support the actual benchmark language mix, not only selected PRs
+
+The user requests all major benchmark languages. [Pinned manifest audit](
+reviewbench-language-coverage.json) reads only declared repository-language
+metadata, not reference findings. Swift/PHP were **not** the final gaps:
+even the25 starter contains Java, Shell, Kotlin, Ruby and Jupyter Notebook.
+The full219 has additional C, Dart, PowerShell and HCL tasks.
+
+Implement and independently test the remaining eight plain-language/config
+families: Java(7), Shell(7), Kotlin(4), HCL(2), C(1), Dart(1),
+PowerShell(1), Ruby(1). Notebooks(3) and Go templates(1) are mixed/container
+formats; plain Python/Go adapters are not sufficient. One task's declared
+language is unknown. These counts describe repository primary languages,
+not proof that every changed file uses that language or is covered.
+Keep actual changed-file coverage qualification separate from registration,
+and do not launch25 merely because all primary language names are listed.

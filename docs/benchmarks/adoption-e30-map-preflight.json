@@ -1,0 +1,28 @@
+{
+  "kind": "No-model capability-aware workflow preflight",
+  "rows": [
+    {
+      "task": "3f4e836db70e52f2130f7c82f67af4af39f1091bb6d31a96258cb5d4add67a10",
+      "pages": 1,
+      "characters": 6170,
+      "history_ready": true,
+      "errors": 0
+    },
+    {
+      "task": "0362dfe9422a542cde29b9a429b4baa39d301262a128fccb0910d6801f939a86",
+      "pages": 1,
+      "characters": 8277,
+      "history_ready": true,
+      "errors": 0
+    },
+    {
+      "task": "d701ed5ae7001b5fe7c881acdda33cf7759293132014f6d71abcbc657eb36d27",
+      "pages": 1,
+      "characters": 8079,
+      "history_ready": false,
+      "errors": 0
+    }
+  ],
+  "paid_calls": 0,
+  "interpretation": "Changes-map requests and continuations succeed with exact source verification, including endpoint-only fallback. This is readiness, not quality evidence."
+}

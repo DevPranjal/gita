@@ -63,7 +63,7 @@ Activate with `source .venv/bin/activate` on Linux/macOS, or
 
 ```sh
 python -m pip install -c constraints.txt -e ".[mcp]"
-python -c "from tree_sitter_language_pack import get_parser, downloaded_languages; names = ['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown']; [get_parser(name) for name in names]; assert set(names) <= set(downloaded_languages())"
+python -c "from gita.entities.parsers import get_parser; from tree_sitter_language_pack import downloaded_languages; names = ['python','javascript','typescript','tsx','csharp','cpp','go','rust','swift','php','json','yaml','toml','markdown']; [get_parser(name) for name in names]; assert set(names) <= set(downloaded_languages())"
 ```
 
 Grammar provisioning uses the network once; indexed operations then use local
@@ -151,9 +151,17 @@ Gita separates **what code is from what it is called and where it lives**.
 - **SQLite with immutable generations** stores evidence once for reuse, incremental updates and generation-pinned queries.
 - **Git remains the source of truth** for exact historical source. Indexed history preserves intermediate changes, including reverts; it is not a net endpoint diff.
 
-Indexed languages: Python, JavaScript, TypeScript/TSX, C#, C++, Go, Rust,
+Indexed languages: Python, JavaScript, TypeScript/TSX, C#, C++, Go, Rust, Swift, PHP,
 Markdown, JSON, YAML and TOML. Unsupported files and extraction gaps appear in
 coverage, not as proof that nothing exists.
+Swift multi-binding properties remain in their enclosing source rather than
+receiving guessed individual identities. PHP supports bracketed namespaces and
+one unbraced file namespace; multiple unbraced namespaces are an explicit coverage
+gap. Adding language rules changes the parse policy: rebuild into fresh index
+contexts rather than relabeling existing generations.
+For an isolated grammar installation, set `GITA_PARSER_CACHE` to an absolute
+grammar-cache directory before provisioning or starting Gita. CLI, MCP and parse
+workers inherit it; index queries and builds never download missing grammars.
 
 ## Try the local viewer
 

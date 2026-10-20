@@ -32,7 +32,7 @@ jobs:
         run: python -m pip install -c constraints.txt -e ".[dev,bench]"
       - name: Provision grammars
         # language-pack 1.14.3 download() alone does not materialize native files.
-        run: python -c "from tree_sitter_language_pack import get_parser, downloaded_languages; names = ['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown']; [get_parser(name) for name in names]; assert set(names) <= set(downloaded_languages()), downloaded_languages()"
+        run: python -c "from tree_sitter_language_pack import get_parser, downloaded_languages; names = ['python','javascript','typescript','tsx','csharp','cpp','go','rust','swift','php','json','yaml','toml','markdown']; [get_parser(name) for name in names]; assert set(names) <= set(downloaded_languages()), downloaded_languages()"
       - name: Test indexed default
         env:
           GITA_ENABLE_LEGACY: '0'

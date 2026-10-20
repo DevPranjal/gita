@@ -4,6 +4,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from importlib.metadata import version
 import json
+import os
 from pathlib import Path
 import random
 import secrets
@@ -97,6 +98,9 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
              minimal_workflow: bool = False, indexed_preload: bool = True,
              large_evidence_pages: bool = False) -> dict:
     validate_settings(reviewer_model, reviewer_reasoning)
+    parser_cache = os.environ.get("GITA_PARSER_CACHE")
+    require(parser_cache is None or Path(parser_cache).is_absolute(),
+            "Parser cache must be an absolute directory")
     validate_settings(judge_model, judge_reasoning)
     require(type(integrated_source) is bool and (not integrated_source or indexed_workflow),
             "Integrated source requires the explicit indexed workflow")
@@ -154,6 +158,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "judge_reviewed_source": judge_reviewed_source,
             "reasoning_effort": reviewer_reasoning or "auto-provider-default", "context": "default",
             "product_policy_digest": policy_digest(), "parsers": parsers,
+            "parser_cache": parser_cache,
             "source_delivery_sha256": file_digest(package.parents[1] / "source_delivery.py"),
             "named_source_adapter_sha256": file_digest(package.parents[1] / "mcp" / "tools.py"),
             "indexed_adapter_sha256": file_digest(package.parents[1] / "cli" / "indexed.py"),
@@ -264,6 +269,9 @@ def verify_protocol(run_root: Path, *, harness_root: Path | None = None) -> dict
     require(frozen["digest"] == digest({k: v for k, v in frozen.items() if k != "digest"}),
             "Protocol document tampered")
     reviewer_settings(frozen)
+    if "parser_cache" in frozen:
+        require(frozen["parser_cache"] == os.environ.get("GITA_PARSER_CACHE"),
+                "Parser cache environment changed; restore the frozen installation")
     require_integrity(frozen.get("run_root_digest") == digest(str(run_root.resolve())),
                       "Protocol belongs to a different run root; reseal a new protocol")
     require(frozen["product_policy_digest"] == policy_digest(), "Production policy changed; use new run root")
@@ -441,11 +449,14 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
               "large_evidence_pages": frozen.get("large_evidence_pages", False),
               "tool_log": str(directory / "tools.jsonl")}
     write_json(directory / "broker.json", config)
+    mcp_environment = {"PYTHONPATH": str(Path(__file__).resolve().parents[3]),
+                       "PYTHONIOENCODING": "utf-8"}
+    if frozen.get("parser_cache") is not None:
+        mcp_environment["GITA_PARSER_CACHE"] = frozen["parser_cache"]
     write_json(directory / "mcp.json", {"mcpServers": {"review": {
         "type": "local", "command": sys.executable,
         "args": ["-m", "gita.eval.reviewbench.evidence", str(directory / "broker.json")],
-        "env": {"PYTHONPATH": str(Path(__file__).resolve().parents[3]),
-                "PYTHONIOENCODING": "utf-8"}, "tools": [t["name"] for t in tool_inventory(config)]}}})
+        "env": mcp_environment, "tools": [t["name"] for t in tool_inventory(config)]}}})
     result = {"identity": identity, "status": "runtime_failed", "findings": None,
               "started": utc_now(), "usage": None}
     names = ["review-" + t["name"] for t in tool_inventory(config)]
@@ -621,6 +632,9 @@ def validate_receipt(path: Path, slot: dict, frozen: dict) -> dict:
             "broker.json", "events.jsonl", "usage.json", "tools.jsonl", "findings.json")),
             "A failed/missing-raw attempt cannot become a valid empty review")
         config = read_json(path / "broker.json")
+        if frozen.get("parser_cache") is not None:
+            require(read_json(path / "mcp.json")["mcpServers"]["review"]["env"].get("GITA_PARSER_CACHE")
+                    == frozen["parser_cache"], "Cached MCP parser cache differs from frozen installation")
         validate_broker_config(config, slot, frozen)
         require(parse_usage(read_json(path / "usage.json")) == row["usage"], "Cached usage changed")
         events = read_events(path / "events.jsonl",

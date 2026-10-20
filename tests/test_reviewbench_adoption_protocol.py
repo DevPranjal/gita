@@ -134,6 +134,21 @@ def test_large_evidence_pages_are_explicit_symmetric_and_receipt_bound(tmp_path,
                               large_evidence_pages=value)
 
 
+def test_parser_cache_installation_is_frozen_and_cannot_drift(tmp_path, frozen_inputs, monkeypatch):
+    scopes, parsers = frozen_inputs
+    cache = str(tmp_path / "grammars")
+    monkeypatch.setenv("GITA_PARSER_CACHE", cache)
+    monkeypatch.setattr(campaign, "preflight", lambda scope: None)
+    root = tmp_path / "run"
+    frozen = campaign.seal(tmp_path / "corpus", root, scopes, parsers, seed=1,
+                           development_pilot=True)
+    assert frozen["parser_cache"] == cache
+    assert campaign.verify_protocol(root) == frozen
+    monkeypatch.setenv("GITA_PARSER_CACHE", str(tmp_path / "other-grammars"))
+    with pytest.raises(ProtocolError, match="Parser cache environment changed"):
+        campaign.verify_protocol(root)
+
+
 def test_raw_patch_through_frontend_is_not_counted_as_index_usage(tmp_path):
     path = tmp_path / "calls.jsonl"
     arguments = {"operation": "raw_patch"}
@@ -234,10 +249,12 @@ def initial_attempt(tmp_path, monkeypatch, request):
     mode, checks = selection[:2]
     minimal = selection[2] if len(selection) > 2 else False
     frozen.update(initial_context_format=mode, proof_before_reporting=checks, minimal_workflow=minimal)
+    frozen["parser_cache"] = str(tmp_path / "frozen-parser-cache")
     write_json(tmp_path / "initial-context" / task["id"] / "H.json", packet)
     directory = tmp_path / "attempts" / "one"
 
     def invoke(path, prompt, names, mcp, **options):
+        assert read_json(mcp)["mcpServers"]["review"]["env"]["GITA_PARSER_CACHE"] == frozen["parser_cache"]
         assert ("gita_review(operation='source')" in prompt) is not minimal
         assert "entity_context" not in prompt
         if minimal:

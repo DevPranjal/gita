@@ -7,7 +7,7 @@ facts this module produced.
 
 from __future__ import annotations
 
-from tree_sitter_language_pack import get_parser
+from .parsers import get_parser
 
 from .languages import LanguageSpec, for_path
 from .sql import SQL_EXTENSIONS, extract_sql
@@ -32,12 +32,14 @@ _IDENTIFIER_NODES = frozenset({
 MODULE_ENTITY = "<module>"
 _NATIVE_LITERAL_NODES = frozenset({
     "string_literal", "char_literal", "raw_string_literal", "verbatim_string_literal", "string_content",
+    "string", "line_string_literal", "multi_line_string_literal", "encapsed_string", "heredoc", "nowdoc",
 })
 
-_LAYOUT_LANGUAGES = frozenset({"python", "javascript", "typescript", "tsx", "go", "rust"})
+_LAYOUT_LANGUAGES = frozenset({"python", "javascript", "typescript", "tsx", "go", "rust", "swift", "php"})
 _LITERAL_NODES = frozenset({
     "string", "string_literal", "raw_string_literal", "interpreted_string_literal",
     "template_string", "jsx_element", "jsx_fragment", "token_tree",
+    "line_string_literal", "multi_line_string_literal", "encapsed_string", "heredoc", "nowdoc",
 })
 
 
@@ -92,6 +94,18 @@ def _file_namespace(node, spec: LanguageSpec):
     if spec.name == "csharp" and node.type == "compilation_unit":
         return next((child for child in node.named_children
                      if child.type == "file_scoped_namespace_declaration"), None)
+    if spec.name == "php" and node.type == "program":
+        namespaces = [child for child in node.named_children if child.type == "namespace_definition"]
+        if len(namespaces) == 1 and namespaces[0].child_by_field_name("body") is None:
+            return namespaces[0]
+    return None
+
+
+def _unsupported_layout(node, spec: LanguageSpec) -> str | None:
+    if spec.name == "php":
+        namespaces = [child for child in node.named_children if child.type == "namespace_definition"]
+        if len(namespaces) > 1 and any(n.child_by_field_name("body") is None for n in namespaces):
+            return "multiple unbraced PHP namespaces require separate scope regions"
     return None
 
 
@@ -129,6 +143,21 @@ def _cpp_callable(node) -> bool:
 
 
 def _entity_kind(node, spec: LanguageSpec):
+    if spec.name == "swift":
+        if node.type == "class_declaration":
+            declaration = node.child_by_field_name("declaration_kind")
+            return {"struct": EntityKind.STRUCT, "enum": EntityKind.ENUM,
+                    "extension": EntityKind.IMPL}.get(_text(declaration), EntityKind.CLASS)
+        if node.type == "function_declaration" and node.parent is not None:
+            if node.parent.type in ("class_body", "enum_class_body", "protocol_body"):
+                return EntityKind.METHOD
+        if node.type == "property_declaration" and len(node.children_by_field_name("name")) != 1:
+            return None
+    if spec.name == "php":
+        if node.type == "namespace_definition" and node.child_by_field_name("body") is None:
+            return None
+        if _file_namespace(node, spec) is not None:
+            return EntityKind.NAMESPACE
     if spec.name == "csharp":
         if node.type == "record_declaration" and any(child.type == "struct" for child in node.children):
             return EntityKind.STRUCT
@@ -159,6 +188,14 @@ def _native_name(node, spec: LanguageSpec, read):
     namespace = _file_namespace(node, spec)
     if namespace is not None:
         return read(namespace.child_by_field_name("name"))
+    if spec.name == "swift" and node.type in ("deinit_declaration", "subscript_declaration"):
+        return "deinit" if node.type == "deinit_declaration" else "subscript"
+    if spec.name == "php":
+        if node.type == "property_element":
+            return read(node.child_by_field_name("name")).lstrip("$")
+        if node.type in spec.anonymous_nodes and node.parent is not None:
+            if node.parent.type == "assignment_expression":
+                return read(node.parent.child_by_field_name("left")).lstrip("$")
     if spec.name == "csharp":
         if node.type == "destructor_declaration":
             return "~" + read(node.child_by_field_name("name"))
@@ -245,7 +282,7 @@ def _tokens(node, spec: LanguageSpec, skip: frozenset[int] = frozenset()) -> lis
         current = stack.pop()
         if current.id in skip or current.type in spec.comment_nodes:
             continue
-        if spec.name in ("csharp", "cpp") and current.type in _NATIVE_LITERAL_NODES:
+        if spec.name in ("csharp", "cpp", "swift", "php") and current.type in _NATIVE_LITERAL_NODES:
             out.append(current.text.decode("utf8", "replace"))
             continue
         if current.child_count == 0:
@@ -287,7 +324,7 @@ def _own_and_body(node, spec: LanguageSpec,
             if in_body:
                 body.append(current)
             continue
-        if spec.name in ("csharp", "cpp") and current.type in _NATIVE_LITERAL_NODES:
+        if spec.name in ("csharp", "cpp", "swift", "php") and current.type in _NATIVE_LITERAL_NODES:
             text = current.text.decode("utf8", "replace")
             own.append(text)
             if in_body:
@@ -410,6 +447,9 @@ def extract(source: bytes, path: str, spec: LanguageSpec | None = None) -> Entit
         parse_error=root_node.has_error,
     )
     entity_tree.add(root)
+    if _unsupported_layout(root_node, spec) is not None:
+        entity_tree.parse_error = True
+        return entity_tree
 
     # Sibling names collide (overloads, repeated `it(...)` labels). Disambiguate
     # by document order so ids stay stable across revisions.

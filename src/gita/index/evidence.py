@@ -17,9 +17,9 @@ from pathlib import Path
 
 from tree_sitter import Node
 import tree_sitter_language_pack as language_pack
-from tree_sitter_language_pack import get_parser
+from gita.entities.parsers import get_parser
 
-from gita.entities import extractor, languages
+from gita.entities import extractor, languages, parsers
 from gita.entities.languages import LanguageSpec
 
 from . import model
@@ -35,6 +35,7 @@ _STRING_NODES = frozenset({
     "string", "string_literal", "raw_string_literal", "char_literal",
     "interpreted_string_literal", "raw_string", "template_string",
     "verbatim_string_literal", "interpolated_string_expression",
+    "line_string_literal", "multi_line_string_literal", "encapsed_string", "heredoc", "nowdoc",
 })
 _INTERPOLATION_NODES = frozenset({"interpolation", "template_substitution"})
 
@@ -143,7 +144,7 @@ def _artifacts() -> tuple:
             )
             artifacts.append(("grammar-cache", cached))
         for name, filename in (("adapter", __file__), ("extractor", extractor.__file__),
-                       ("languages", languages.__file__)):
+                       ("languages", languages.__file__), ("parsers", parsers.__file__)):
             artifacts.append((name, _artifact_digest(Path(filename))))
         artifacts.append(("parse-contract", _parse_contract_digest()))
     except IndexContractError:
@@ -464,6 +465,9 @@ def _parse_evidence(source: bytes, path: bytes, object_format: str,
     root = tree.root_node
     if root.has_error:
         return unknown(ParseStatus.PARSE_ERROR, "syntax tree contains errors")
+    unsupported_layout = extractor._unsupported_layout(root, spec)
+    if unsupported_layout is not None:
+        return unknown(ParseStatus.UNSUPPORTED_LANGUAGE, unsupported_layout)
     parse_id = content_id("par1", (fingerprint, blob.fields(), path))
     try:
         definitions, versions = _build(root, spec, source, parse_id, fingerprint, limits)
