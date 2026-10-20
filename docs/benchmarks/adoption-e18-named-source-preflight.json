@@ -1,0 +1,115 @@
+{
+  "kind": "No-model lookup replay on previously requested entity contexts; not an efficacy result",
+  "rows": [
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "ok": false,
+      "original_span_bytes": 538,
+      "named_characters": 0,
+      "truncated": null,
+      "error": "not_found",
+      "same_occurrence": false
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "ok": true,
+      "original_span_bytes": 862,
+      "named_characters": 1034,
+      "truncated": false,
+      "error": null,
+      "same_occurrence": true
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "ok": true,
+      "original_span_bytes": 2233,
+      "named_characters": 2767,
+      "truncated": false,
+      "error": null,
+      "same_occurrence": true
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "ok": true,
+      "original_span_bytes": 1935,
+      "named_characters": 2192,
+      "truncated": false,
+      "error": null,
+      "same_occurrence": true
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "ok": true,
+      "original_span_bytes": 2627,
+      "named_characters": 2932,
+      "truncated": false,
+      "error": null,
+      "same_occurrence": true
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "ok": false,
+      "original_span_bytes": 12331,
+      "named_characters": 0,
+      "truncated": null,
+      "error": "ambiguous",
+      "same_occurrence": false
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "ok": true,
+      "original_span_bytes": 488,
+      "named_characters": 544,
+      "truncated": false,
+      "error": null,
+      "same_occurrence": true
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "ok": true,
+      "original_span_bytes": 518,
+      "named_characters": 593,
+      "truncated": false,
+      "error": null,
+      "same_occurrence": true
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "ok": true,
+      "original_span_bytes": 885,
+      "named_characters": 1029,
+      "truncated": false,
+      "error": null,
+      "same_occurrence": true
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "ok": true,
+      "original_span_bytes": 14923,
+      "named_characters": 5617,
+      "truncated": true,
+      "error": null,
+      "same_occurrence": true
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "ok": true,
+      "original_span_bytes": 1518,
+      "named_characters": 1731,
+      "truncated": false,
+      "error": null,
+      "same_occurrence": true
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "ok": false,
+      "original_span_bytes": 3144,
+      "named_characters": 0,
+      "truncated": null,
+      "error": "not_found",
+      "same_occurrence": false
+    }
+  ],
+  "original_logs_unchanged": true,
+  "uses_public_production_source_adapter": true
+}

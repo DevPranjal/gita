@@ -1,0 +1,119 @@
+{
+  "kind": "No-model source completeness qualification",
+  "prior_protocol": "77accdeac0d1a7f01e4bdbd44996c068736580dbda717644f7a16b16daa798f5",
+  "rows": [
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arguments": {
+        "operation": "source",
+        "token": "AppProvider",
+        "path": "client/src/store.tsx"
+      },
+      "old_first_complete": false,
+      "new_first_complete": true,
+      "serialized_characters": 8225,
+      "embedded_json_characters": 8738,
+      "source_receipt": true
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arguments": {
+        "operation": "source",
+        "token": "WorkspaceManagerModal",
+        "path": "client/src/components/WorkspaceManagerModal.tsx"
+      },
+      "old_first_complete": true,
+      "new_first_complete": true,
+      "serialized_characters": 2972,
+      "embedded_json_characters": 3136,
+      "source_receipt": true
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arguments": {
+        "operation": "source",
+        "token": "SyncTab",
+        "path": "client/src/components/WorkspaceManagerModal.tsx"
+      },
+      "old_first_complete": false,
+      "new_first_complete": true,
+      "serialized_characters": 10135,
+      "embedded_json_characters": 10500,
+      "source_receipt": true
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arguments": {
+        "operation": "source",
+        "token": "HistoryTab",
+        "path": "client/src/components/WorkspaceManagerModal.tsx"
+      },
+      "old_first_complete": true,
+      "new_first_complete": true,
+      "serialized_characters": 4927,
+      "embedded_json_characters": 5178,
+      "source_receipt": true
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arguments": {
+        "operation": "source",
+        "token": "_load_avatar_infos_for_chat",
+        "path": "aafactory/src/aafactory/chat/interface.py"
+      },
+      "old_first_complete": true,
+      "new_first_complete": true,
+      "serialized_characters": 2261,
+      "embedded_json_characters": 2501,
+      "source_receipt": true
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arguments": {
+        "operation": "source",
+        "token": "FigletPanel",
+        "path": "FIGLet.VSCodeExtension/src/FigletPanel.ts"
+      },
+      "old_first_complete": false,
+      "new_first_complete": true,
+      "serialized_characters": 12969,
+      "embedded_json_characters": 13348,
+      "source_receipt": true
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arguments": {
+        "operation": "source",
+        "token": "SettingsApp",
+        "path": "FIGLet.VSCodeExtension/src/webview/SettingsApp.tsx"
+      },
+      "old_first_complete": false,
+      "new_first_complete": true,
+      "serialized_characters": 10859,
+      "embedded_json_characters": 11167,
+      "source_receipt": true
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arguments": {
+        "operation": "source",
+        "token": "FigletSettingsPanel",
+        "path": "FIGLet.VSCodeExtension/src/FigletSettingsPanel.ts"
+      },
+      "old_first_complete": false,
+      "new_first_complete": true,
+      "serialized_characters": 11480,
+      "embedded_json_characters": 11843,
+      "source_receipt": true
+    }
+  ],
+  "summary": {
+    "requests": 8,
+    "old_complete_first": 3,
+    "new_complete_first": 8,
+    "max_serialized": 12969,
+    "max_embedded": 13348
+  },
+  "paid_calls": 0,
+  "interpretation": "Larger bounded pages repair first-response completeness in recorded queries; native transport and quality/cost still require independent verification."
+}

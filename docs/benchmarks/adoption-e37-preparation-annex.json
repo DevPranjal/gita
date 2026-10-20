@@ -1,0 +1,15 @@
+{
+  "kind": "Preparation-only annex before any19 new native pairs",
+  "study_digest": "a2c4fa95727c68a7d5d1010d5a63e2a8e467bf35791c3cd1e6c02896f4e20d7d",
+  "max_indexed_history_commits": 20,
+  "per_attempt_timeout_seconds": 300,
+  "on_large_span": "explicit effective-base and HEAD snapshots; history/diff unavailable",
+  "on_connected_history_timeout": "one separately retained endpoint-snapshot attempt",
+  "on_endpoint_timeout": "retain task with raw fallback and no unverified index",
+  "on_non_timeout_failure": "stop for error/integrity inspection; no silent downgrade",
+  "raw_allowed_graph": "unchanged for both arms",
+  "retained_six_changed": false,
+  "source_annex_digest": "3480a92d9d782f148c7e985655c1d97aa2282e49cd5084e609d951ed027a1e4f",
+  "interrupted_source_preparation": "Original56-commit emdash preparation retained privately; no new native reviews.",
+  "digest": "6012852f07c297a6966766e2ce96de56b6caea126fcb1f4a2d39a5beffe7fd99"
+}

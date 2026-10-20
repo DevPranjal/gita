@@ -1,0 +1,177 @@
+{
+  "kind": "Post-adapter primary-language inventory with actual-file caveats",
+  "pin": "c17b05be9c90b85a1fc012ce39e455e2d09a7255",
+  "full_tasks": 219,
+  "rows": [
+    {
+      "primary_language": "TypeScript",
+      "full_tasks": 68,
+      "starter_tasks": 5,
+      "registered_in_current_worktree": true,
+      "adapter": "typescript",
+      "note": ""
+    },
+    {
+      "primary_language": "Python",
+      "full_tasks": 41,
+      "starter_tasks": 4,
+      "registered_in_current_worktree": true,
+      "adapter": "python",
+      "note": ""
+    },
+    {
+      "primary_language": "C#",
+      "full_tasks": 25,
+      "starter_tasks": 3,
+      "registered_in_current_worktree": true,
+      "adapter": "csharp",
+      "note": ""
+    },
+    {
+      "primary_language": "Go",
+      "full_tasks": 19,
+      "starter_tasks": 3,
+      "registered_in_current_worktree": true,
+      "adapter": "go",
+      "note": ""
+    },
+    {
+      "primary_language": "JavaScript",
+      "full_tasks": 15,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": true,
+      "adapter": "javascript",
+      "note": ""
+    },
+    {
+      "primary_language": "Rust",
+      "full_tasks": 11,
+      "starter_tasks": 2,
+      "registered_in_current_worktree": true,
+      "adapter": "rust",
+      "note": ""
+    },
+    {
+      "primary_language": "Java",
+      "full_tasks": 7,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": true,
+      "adapter": "java",
+      "note": ""
+    },
+    {
+      "primary_language": "Shell",
+      "full_tasks": 7,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": true,
+      "adapter": "bash",
+      "note": ""
+    },
+    {
+      "primary_language": "PHP",
+      "full_tasks": 7,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": true,
+      "adapter": "php",
+      "note": ""
+    },
+    {
+      "primary_language": "Kotlin",
+      "full_tasks": 4,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": true,
+      "adapter": "kotlin",
+      "note": ""
+    },
+    {
+      "primary_language": "Jupyter Notebook",
+      "full_tasks": 3,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": false,
+      "adapter": null,
+      "note": "Container or mixed format; not equivalent to a plain-language function adapter"
+    },
+    {
+      "primary_language": "Swift",
+      "full_tasks": 2,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": true,
+      "adapter": "swift",
+      "note": ""
+    },
+    {
+      "primary_language": "C++",
+      "full_tasks": 2,
+      "starter_tasks": 0,
+      "registered_in_current_worktree": true,
+      "adapter": "cpp",
+      "note": ""
+    },
+    {
+      "primary_language": "HCL",
+      "full_tasks": 2,
+      "starter_tasks": 0,
+      "registered_in_current_worktree": true,
+      "adapter": "hcl",
+      "note": ""
+    },
+    {
+      "primary_language": "C",
+      "full_tasks": 1,
+      "starter_tasks": 0,
+      "registered_in_current_worktree": true,
+      "adapter": "c",
+      "note": "",
+      "validation_note": "Basic C declaration, exact source and edit/move histories pass. The actual FreeRTOS tasks.c benchmark file fails parsing at both endpoints; explicit raw fallback, not full C-task coverage."
+    },
+    {
+      "primary_language": "Dart",
+      "full_tasks": 1,
+      "starter_tasks": 0,
+      "registered_in_current_worktree": true,
+      "adapter": "dart",
+      "note": ""
+    },
+    {
+      "primary_language": "PowerShell",
+      "full_tasks": 1,
+      "starter_tasks": 0,
+      "registered_in_current_worktree": true,
+      "adapter": "powershell",
+      "note": ""
+    },
+    {
+      "primary_language": "Ruby",
+      "full_tasks": 1,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": true,
+      "adapter": "ruby",
+      "note": ""
+    },
+    {
+      "primary_language": "Go Template",
+      "full_tasks": 1,
+      "starter_tasks": 0,
+      "registered_in_current_worktree": false,
+      "adapter": null,
+      "note": "Container or mixed format; not equivalent to a plain-language function adapter"
+    },
+    {
+      "primary_language": "unknown",
+      "full_tasks": 1,
+      "starter_tasks": 0,
+      "registered_in_current_worktree": false,
+      "adapter": null,
+      "note": "Language unknown in pinned repository metadata"
+    }
+  ],
+  "registered_primary_task_labels": 214,
+  "registered_is_not_full_coverage": true,
+  "actual_starter_audit": "reviewbench-e31-changed-file-coverage.json",
+  "actual_extra_task_audit": "reviewbench-e31-extra-language-coverage.json",
+  "limitations": [
+    "C macro-heavy FreeRTOS case remains a real parse gap.",
+    "Astro and other unsupported formats remain explicit, despite TypeScript primary-language registration.",
+    "Notebooks, Go templates and unknown-language labels are not silently counted as supported."
+  ]
+}

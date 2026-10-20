@@ -1,0 +1,232 @@
+{
+  "schema_version": 1,
+  "audit": "adoption-e8-semantic-judge",
+  "protocol": "cf8e342521e76dc04a7983e6db0d69f45f520f9547242b0449ad2a7ccfec0d2f",
+  "run": "runs/e8-solmedium-dev3",
+  "run_identifier_sha256": "c15d52b32aed270efbe8dea0d67d80bc387cd6b6577d0e25a5a87f0860d0d3e8",
+  "publication_identity_note": "Absolute artifact locations are replaced by stable relative IDs. identifier_sha256 values hash the original identifier's UTF-8 bytes, not artifact contents; content was not reread for this publication-only update. Git commit identities and the protocol digest remain unchanged.",
+  "method": "Bounded static inspection of eight existing candidate-reference edges, checking causal mechanism and user-visible impact against allowed HEAD Git objects. Existing labels and scores were not changed.",
+  "selection": "Purposive coverage of three tasks and eight distinct mechanisms, including B-only and H-only findings. Not random and not representative of negative decisions.",
+  "judgment_root": "reviewbench-grader-v1\\judgments\\cf8e342521e76dc04a7983e6db0d69f4",
+  "evidence_contract": {
+    "candidate_index": "Global index in the task's match-input.json; arm_candidate_index is local to scoring.json arms.",
+    "reference_index": "Opaque existing reference index, not a replacement label.",
+    "source": "Independently inspected repository source at the exact allowed HEAD; paths are repository-relative.",
+    "report_citations": "Task directory plus JSON pointer identifies the existing published decision. No reference message, reference-source metadata, or private reasoning is reproduced."
+  },
+  "tasks": [
+    {
+      "position": 6,
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "repository": "brianc/node-postgres",
+      "head": "b922f0ddfa3914cc7b05387cd12fc606bc658dc4",
+      "base": "c6028a875f953eff9e8e403622b0aac127d1b4a6",
+      "source_checkout": "sources/full25-index-v1/p06/repo",
+      "source_checkout_identifier_sha256": "6c12d4b6346ceda355dcc97b5d35a6e7adc236ae67345aad142a8ceb5f4927e6"
+    },
+    {
+      "position": 8,
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "repository": "brexhq/CrabTrap",
+      "head": "5ef0884c59b3ee1d5a986dd02686a8232570c80f",
+      "base": "b29930e93765700608313c0f0d32c4818734e158",
+      "source_checkout": "sources/full25-index-v1/p08/repo",
+      "source_checkout_identifier_sha256": "48533771daa6dd10752311e4eb7734c2abed78b100b2dbda2bcb169fdb5f886f"
+    },
+    {
+      "position": 17,
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "repository": "gagneurlab/PROTRIDER",
+      "head": "b462b109b630dd1e1a9a78088b18429d2baaae9b",
+      "base": "22740c695315543a1064915930f806abf5b058ce",
+      "source_checkout": "sources/full25-index-v1/p17/repo",
+      "source_checkout_identifier_sha256": "14d3ea38d86a7a28f4b26c7ae934438d73f0257c200c5653f6652259fd7b0b29"
+    }
+  ],
+  "edges": [
+    {
+      "id": "E01",
+      "position": 6,
+      "candidate_index": 0,
+      "arm": "B",
+      "arm_candidate_index": 0,
+      "reference_index": 23,
+      "existing_reference_label": "tp",
+      "existing_decision": "matched",
+      "verdict": "agree",
+      "confidence": "high",
+      "cause": "A runtime import points to a sibling module outside the package's explicit publish allowlist. The matched claims concern the same installation-time module-resolution failure.",
+      "source": [
+        {"path": "packages/pg-pool/index.js", "lines": [3, 3]},
+        {"path": "packages/pg-pool/package.json", "lines": [46, 50]}
+      ],
+      "report": "0b0800ed5659ae4f24efd65819c3ecd5\\correspondences.json#/0",
+      "qualification": "Package construction was not executed."
+    },
+    {
+      "id": "E02",
+      "position": 6,
+      "candidate_index": 1,
+      "arm": "B",
+      "arm_candidate_index": 1,
+      "reference_index": 4,
+      "existing_reference_label": "tp",
+      "existing_decision": "matched",
+      "verdict": "agree",
+      "confidence": "high",
+      "cause": "The supported object-query path can retain an absent callback; the tracing branch requires one, although event-based completion remains supported. Both claims identify that same observability gap.",
+      "source": [
+        {"path": "packages/pg/lib/client.js", "lines": [625, 634]},
+        {"path": "packages/pg/lib/client.js", "lines": [709, 737]},
+        {"path": "packages/pg/lib/query.js", "lines": [130, 149]}
+      ],
+      "report": "0b0800ed5659ae4f24efd65819c3ecd5\\correspondences.json#/1",
+      "qualification": "B-only reference coverage in this pair; not an unmatched H candidate or a demonstrated judge false negative."
+    },
+    {
+      "id": "E03",
+      "position": 6,
+      "candidate_index": 2,
+      "arm": "H",
+      "arm_candidate_index": 1,
+      "reference_index": 0,
+      "existing_reference_label": "tp",
+      "existing_decision": "matched",
+      "verdict": "agree",
+      "confidence": "high",
+      "cause": "The timer closes over the earlier callback and later overwrites the query callback. Its deferred error handler therefore cannot call the tracing completion wrapper. Matching different lines in that lifecycle is causally justified.",
+      "source": [
+        {"path": "packages/pg/lib/client.js", "lines": [650, 678]},
+        {"path": "packages/pg/lib/client.js", "lines": [721, 734]},
+        {"path": "packages/pg/lib/query.js", "lines": [130, 133]}
+      ],
+      "report": "0b0800ed5659ae4f24efd65819c3ecd5\\correspondences.json#/2",
+      "qualification": "H-only reference coverage in this pair; tracing events were not observed dynamically."
+    },
+    {
+      "id": "E04",
+      "position": 8,
+      "candidate_index": 0,
+      "arm": "B",
+      "arm_candidate_index": 0,
+      "reference_index": 4,
+      "existing_reference_label": "tp",
+      "existing_decision": "matched",
+      "verdict": "agree",
+      "confidence": "high",
+      "cause": "Live insertions alter ordered database offsets while pagination advances by a fixed page size and appends without deduplication. The common issue is overlap and duplicated rows, not simply shared location.",
+      "source": [
+        {"path": "web/src/hooks/useAuditLog.ts", "lines": [52, 61]},
+        {"path": "web/src/hooks/useAuditLog.ts", "lines": [67, 84]},
+        {"path": "web/src/stores/auditStore.ts", "lines": [33, 60]},
+        {"path": "internal/admin/pg_audit_reader.go", "lines": [386, 393]}
+      ],
+      "report": "0033d688d2959a5cd3aca33939508be3\\correspondences.json#/0",
+      "qualification": "The overlap mechanism is supported. Permanent omission additionally depends on the UI's stopping rule and is not necessary to establish this match; that stronger consequence was not certified."
+    },
+    {
+      "id": "E05",
+      "position": 8,
+      "candidate_index": 2,
+      "arm": "H",
+      "arm_candidate_index": 0,
+      "reference_index": 21,
+      "existing_reference_label": "tp",
+      "existing_decision": "matched",
+      "verdict": "agree",
+      "confidence": "high",
+      "cause": "Expansion fetches detail through a handler whose optional-store guard runs before method dispatch. Startup only supplies that store with the judge configured. The frontend and backend locations describe one blocked detail-access path.",
+      "source": [
+        {"path": "web/src/components/AuditTrail.tsx", "lines": [103, 120]},
+        {"path": "internal/admin/api.go", "lines": [1041, 1054]},
+        {"path": "cmd/gateway/main.go", "lines": [219, 225]}
+      ],
+      "report": "0033d688d2959a5cd3aca33939508be3\\correspondences.json#/2",
+      "qualification": "H-only reference coverage in this pair; deployment was not started."
+    },
+    {
+      "id": "E06",
+      "position": 8,
+      "candidate_index": 3,
+      "arm": "B",
+      "arm_candidate_index": 1,
+      "reference_index": 2,
+      "existing_reference_label": "tp",
+      "existing_decision": "matched",
+      "verdict": "agree",
+      "confidence": "high",
+      "cause": "A failed row query becomes nil, while the handler independently obtains a count, normalizes nil to an empty collection, and emits success. Database and response locations are the same failure-propagation defect.",
+      "source": [
+        {"path": "internal/admin/pg_audit_reader.go", "lines": [395, 412]},
+        {"path": "internal/admin/api.go", "lines": [325, 340]}
+      ],
+      "report": "0033d688d2959a5cd3aca33939508be3\\correspondences.json#/3",
+      "qualification": "B-only reference coverage in this pair. Scan/iteration handling broadens the candidate; agreement rests on the shared query-failure path, not an assertion that every additional consequence is identical."
+    },
+    {
+      "id": "E07",
+      "position": 17,
+      "candidate_index": 0,
+      "arm": "H",
+      "arm_candidate_index": 1,
+      "reference_index": 16,
+      "existing_reference_label": "tp",
+      "existing_decision": "matched",
+      "verdict": "agree",
+      "confidence": "high",
+      "cause": "Loading exceptions return no model, fallback creates a fresh model and latent dimension, then the training guard infers successful loading from file existence and the populated dimension. Both claims identify skipped training after failed loading.",
+      "source": [
+        {"path": "src/protrider/pipeline.py", "lines": [89, 91]},
+        {"path": "src/protrider/pipeline.py", "lines": [450, 491]},
+        {"path": "src/protrider/pipeline.py", "lines": [508, 512]}
+      ],
+      "report": "0083e3b9d289cf65d718cf844d29bac7\\correspondences.json#/0",
+      "qualification": "Conditional on loading failure, successful fallback, and training enabled; no model inference or training was run."
+    },
+    {
+      "id": "E08",
+      "position": 17,
+      "candidate_index": 2,
+      "arm": "H",
+      "arm_candidate_index": 0,
+      "reference_index": 0,
+      "existing_reference_label": "tp",
+      "existing_decision": "matched",
+      "verdict": "agree",
+      "confidence": "high",
+      "cause": "The non-finite branch assigns a different local name from the unconditional return. Both claims identify the same branch-local unbound-value exception; the exception-family naming difference does not change identity.",
+      "source": [
+        {"path": "src/protrider/model/model_helper.py", "lines": [73, 86]}
+      ],
+      "report": "0083e3b9d289cf65d718cf844d29bac7\\correspondences.json#/2",
+      "qualification": "No divergent training case was executed."
+    }
+  ],
+  "unmatched_and_arm_comparison": {
+    "published_candidate_counts": {"position_6": 4, "position_8": 4, "position_17": 7},
+    "published_unmatched_candidates": 0,
+    "classifications": "All three classifications.json files are empty arrays; all 15 global candidates have a nonempty correspondence.",
+    "sampled_b_only_coverage": ["E02", "E06"],
+    "sampled_h_only_coverage": ["E03", "E05", "E07"],
+    "interpretation": "Arm-only coverage describes emitted-review differences, not matching false negatives. No unmatched H candidate exists in these inputs to adjudicate. Unsampled reference misses were not independently assessed."
+  },
+  "summary": {
+    "audited_edges": 8,
+    "agree": 8,
+    "disagree": 0,
+    "uncertain": 0,
+    "existing_reference_labels_in_sample": {"tp": 8, "fp": 0},
+    "semantic_match_confidence": "high for these eight edges only",
+    "gate_certification": "insufficient_evidence",
+    "conclusion": "No semantic mismatch was found in this bounded positive-edge sample. E8 is not independently validated as a sole adoption gate: false-positive discrimination, rejected matches, unsampled misses, repeatability, and quality/cost claims remain untested."
+  },
+  "limits": [
+    "Eight purposively selected accepted edges across only three tasks; no statistical reliability estimate or whole-benchmark accuracy claim.",
+    "All sampled references already carry TP labels. No FP-labelled edge or negative matching decision was audited.",
+    "Static source tracing only; no applications, tests, package builds, model calls, network requests, or review reruns.",
+    "Published matching evidence was visible before independent source inspection; this was not a blinded audit.",
+    "No hidden reasoning was read; no reference messages or reference-source metadata are included in these outputs.",
+    "No labels were selected for replacement, no scores recomputed, and no source, tests, prompts, or pilot configuration changed.",
+    "No inference about E9 results, cost efficiency, or broader adoption readiness follows from these eight agreements."
+  ]
+}

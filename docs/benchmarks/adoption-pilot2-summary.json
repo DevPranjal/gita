@@ -1,0 +1,117 @@
+{
+  "stage": "E3 two-task development pilot; not confirmation",
+  "protocol": "ac873f7733f7f384e255169d2a58b1f92c8c32f2b8a61519795726fb284d5f58",
+  "tasks": 2,
+  "valid_reviews": 4,
+  "metrics": {
+    "B": {
+      "credits": 1.03981635,
+      "input_tokens": 225156,
+      "findings": 3,
+      "model_session_counts": {
+        "gpt-6-luna": 2
+      },
+      "quality_macro": {
+        "grounded_precision": 0.5,
+        "grounded_recall": 0.14646464646464646,
+        "augmented_precision": 0.5,
+        "augmented_recall": 0.14646464646464646,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 3,
+        "golden_tp_count": 20,
+        "matched_count": 3,
+        "matched_tp_count": 2,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 3
+      },
+      "quality_micro": {
+        "grounded_precision": 0.6666666666666666,
+        "grounded_recall": 0.15,
+        "augmented_precision": 0.6666666666666666,
+        "augmented_recall": 0.15,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 3,
+        "golden_tp_count": 20,
+        "matched_count": 3,
+        "matched_tp_count": 2,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 3
+      }
+    },
+    "H": {
+      "credits": 8.813205,
+      "input_tokens": 86971,
+      "findings": 3,
+      "model_session_counts": {
+        "claude-sonnet-5.5": 2
+      },
+      "quality_macro": {
+        "grounded_precision": 0.5,
+        "grounded_recall": 0.10101010101010101,
+        "augmented_precision": 0.5,
+        "augmented_recall": 0.10101010101010101,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 3,
+        "golden_tp_count": 20,
+        "matched_count": 3,
+        "matched_tp_count": 1,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 2
+      },
+      "quality_micro": {
+        "grounded_precision": 0.3333333333333333,
+        "grounded_recall": 0.1,
+        "augmented_precision": 0.3333333333333333,
+        "augmented_recall": 0.1,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 3,
+        "golden_tp_count": 20,
+        "matched_count": 3,
+        "matched_tp_count": 1,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 2
+      }
+    }
+  },
+  "H_usage": [
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "tools": {
+        "raw_diff": 2,
+        "read_file": 1
+      },
+      "errors": 0,
+      "indexed_source_successes": 0
+    },
+    {
+      "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+      "tools": {
+        "raw_diff": 1,
+        "change_context": 1,
+        "read_file": 2,
+        "entity_context": 2
+      },
+      "errors": 0,
+      "indexed_source_successes": 2
+    }
+  ],
+  "reviewer_credits": 9.85302135,
+  "judge_credits": 10.438659,
+  "interpretation": "Context volume and navigational errors decrease; quality/cost do not win. H routesClaude forbothPRs, B routesGPT forboth. No full25scale gate yet.",
+  "source_digests": {
+    "protocol": "375c2fa81385abf60c7ec19c90448492812aaa0a385a6def1ae83ce94fca1ed7",
+    "quality": "92ac7a6d4f78653ec70f39ce8a61669d578b45cb70b282dea108d1ff0082aa42"
+  }
+}

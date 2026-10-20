@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "label": "AUDITED-SENSITIVITY",
+  "official_score": false,
+  "scope": "All five existing E10 task rows per arm; arithmetic-only counterfactuals from the existing eight-decision audit. Not new official scores, replacement decisions, or gate approval.",
+  "input": {
+    "id": "adjudications/e10-new2/score-inputs.json",
+    "sha256": "196fadab667d8e96fd6248ced3a546d76dad170bf3cfe67f417fbcb2ce44627a"
+  },
+  "scorer": {
+    "pin": "c17b05be9c90b85a1fc012ce39e455e2d09a7255",
+    "implementation": "reviewbench-corpus-v1/upstream/scripts/eval/scorer.ts",
+    "sha256": "d155f1ca20d912f1a045d323c937dd7a8d63346ba6b6934366f88337afd5a754",
+    "resolver": "reviewbench-corpus-v1/upstream/scripts/lib/match-types.ts",
+    "resolver_sha256": "082ccf8a0e29b88cc043e435eccf04fbd31fb157268896ceaf6cbbf713339ad4",
+    "execution": "Existing pinned TypeScript resolveForScoring, scorePR, and aggregate executed directly with Node type stripping. Scenario inputs cloned and changed only in memory. Original complete aggregate output exactly matched existing quality.json for both arms."
+  },
+  "changes": [
+    {
+      "audit_decision": "N06",
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "H",
+      "local_candidate_index": 0,
+      "original_global_candidate_index": 5,
+      "score_pointer": "/H/2/classifications/1",
+      "original_label": "tp",
+      "sensitivity_label": "fp",
+      "applies_to": ["known_fp_flip_uncertain_optimistic", "known_fp_flip_uncertain_pessimistic"],
+      "audit_citation": "adoption-e10-novel-audit.json#/decisions/5",
+      "guard_citations": [
+        "src/protrider/pipeline.py:89-91",
+        "src/protrider/pipeline.py:450-491",
+        "src/protrider/pipeline.py:508-512",
+        "src/protrider/pipeline.py:538-549"
+      ],
+      "proof_summary": "Failed loading returns no model, fallback repopulates q, and the still-existing checkpoint makes the loaded-model flag true. Training is skipped, so its nested save cannot perform the credited overwrite."
+    },
+    {
+      "audit_decision": "N04",
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "H",
+      "local_candidate_index": 0,
+      "original_global_candidate_index": 2,
+      "score_pointer": "/H/0/classifications/0",
+      "original_label": "tp",
+      "optimistic_label": "tp",
+      "pessimistic_label": "fp",
+      "audit_verdict_unchanged": "uncertain",
+      "audit_citation": "adoption-e10-novel-audit.json#/decisions/3",
+      "source_citations": [
+        "packages/pg/lib/query.js:122-133",
+        "packages/pg/lib/client.js:721-734",
+        "packages/pg/lib/diagnostics.js:8-18"
+      ]
+    }
+  ],
+  "macro_denominators": {
+    "convention": "Arithmetic mean of non-null per-task ratios, not pooled micro ratios. Each of the four overall metrics has five non-null task contributions in both arms in every scenario.",
+    "grounded_precision": "matched TP candidate count / matched candidate count; null if no matched candidates.",
+    "grounded_recall": "unique covered reference TP count / reference TP count; null if no reference TPs.",
+    "augmented_precision": "(matched TP candidate count + unmatched TP count) / all candidate count; null if no candidates.",
+    "augmented_recall": "(unique covered reference TP count + unmatched TP count) / (reference TP count + unmatched TP count); null if denominator is zero.",
+    "counts_fixed": "Each arm has 11 candidates and 64 reference TPs across five tasks. Reference labels, correspondences, coverage, severity, category, task membership, and all B classifications are fixed.",
+    "important": "Changing unmatched TP status changes augmented recall's numerator and denominator. Grounded metrics do not depend on unmatched TP/FP status and remain identical across scenarios."
+  },
+  "scenarios": [
+    {
+      "id": "original_auto_all5",
+      "description": "Unmodified original automated results, retained as comparison only.",
+      "B": {"grounded_precision": 0.7333333333333333, "grounded_recall": 0.10124458874458875, "augmented_precision": 0.75, "augmented_recall": 0.14430863254392665, "novel_tp_count": 3},
+      "H": {"grounded_precision": 0.8, "grounded_recall": 0.09172077922077922, "augmented_precision": 0.9, "augmented_recall": 0.16391163184641447, "novel_tp_count": 5}
+    },
+    {
+      "id": "known_fp_flip_uncertain_optimistic",
+      "description": "N06 counterfactually FP; uncertain N04 remains TP.",
+      "B": {"grounded_precision": 0.7333333333333333, "grounded_recall": 0.10124458874458875, "augmented_precision": 0.75, "augmented_recall": 0.14430863254392665, "novel_tp_count": 3},
+      "H": {"grounded_precision": 0.8, "grounded_recall": 0.09172077922077922, "augmented_precision": 0.8333333333333333, "augmented_recall": 0.1560064935064935, "novel_tp_count": 4}
+    },
+    {
+      "id": "known_fp_flip_uncertain_pessimistic",
+      "description": "N06 and uncertain N04 counterfactually FP.",
+      "B": {"grounded_precision": 0.7333333333333333, "grounded_recall": 0.10124458874458875, "augmented_precision": 0.75, "augmented_recall": 0.14430863254392665, "novel_tp_count": 3},
+      "H": {"grounded_precision": 0.8, "grounded_recall": 0.09172077922077922, "augmented_precision": 0.7666666666666666, "augmented_recall": 0.14237012987012987, "novel_tp_count": 3}
+    }
+  ],
+  "uncertain_node_claim_handoff": {
+    "decision": "N04",
+    "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+    "arm": "H",
+    "local_candidate_index": 0,
+    "original_global_candidate_index": 2,
+    "builtin_module": "diagnostics_channel",
+    "api": "TracingChannel.traceCallback(fn, position, context, thisArg, ...args)",
+    "repository_expression": "queryChannel.traceCallback((tracedCb) => { query.callback = tracedCb; enqueue(); }, 0, context, null, enrichedCb)",
+    "callback_expression": "enrichedCb = (err, res) => { if (res) context.result = ...; return origCb(err, res); }",
+    "channel_creation": "dc.tracingChannel('pg:query')",
+    "runtime_feature_constraint": "Repository enables this path only when typeof dc.tracingChannel === 'function'. Built-in module access uses process.getBuiltInModule when available, otherwise require. No exact deployed Node runtime version or patch was established by the existing audit; do not infer one from the scorer's separate Node 22.19+ tooling requirement.",
+    "claim_brief": "An ordinary error-first callback error is forwarded without throwing; candidate claims this does not publish on the tracing error channel, so a failed-query error-channel test times out and subscribers miss the error.",
+    "verification_question": "Does the pinned Node runtime's traceCallback publish its error channel for a non-throwing callback's first Error argument, or only for thrown exceptions? Verify event behavior and version compatibility separately.",
+    "constraint": "No documentation fetch, runtime probe, corpus analysis, or verdict change was performed in this follow-up."
+  },
+  "limits": [
+    "AUDITED-SENSITIVITY is a labelled counterfactual calculation, not an official benchmark rerun or replacement.",
+    "Optimistic/pessimistic endpoints vary only N04 after the N06 flip; they are conditional sensitivity endpoints, not confidence intervals or bounds on all possible judge errors.",
+    "Existing eight-decision audit limitations remain in force. No additional corpus evidence was inspected.",
+    "Original score-inputs.json and quality.json were read only; no persistent labels, scores, correspondence decisions, or gate decisions were modified.",
+    "No new model calls, network access, reviewer runs, runtime claims verification, or source changes.",
+    "Only this report and its Markdown companion were written."
+  ]
+}

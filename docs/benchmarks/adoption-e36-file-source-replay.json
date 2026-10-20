@@ -1,0 +1,15 @@
+{
+  "kind": "No-model replacement of fragmented same-file lookups",
+  "task": "bc277c0372a2c410587b86f47527f69bc7e76ae468a962c7fe668b452af88905",
+  "path": "src/main/kotlin/uk/oshawk/jadx/collaboration/Plugin.kt",
+  "prior_same_file_source_context_queries": 13,
+  "whole_file_calls_including_continuations": 3,
+  "all_original_file_lines_verified": true,
+  "serialized_response_characters": [
+    15010,
+    15010,
+    5733
+  ],
+  "paid_calls": 0,
+  "interpretation": "Fewer retrieval round trips are possible without omitting source; actual agent cost/quality remains to be measured."
+}

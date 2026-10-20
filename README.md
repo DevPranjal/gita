@@ -28,6 +28,26 @@ It did **not** establish lower input-token use or equal quality: PRs with a
 reference match fell from 64 to 57, and cache behavior affected credit results.
 See [methodology, uncertainty and negative results](evals/RESULTS.md).
 
+Current index measurements are separate from those legacy review results:
+
+| Indexed workload | Before / after |
+| --- | --- |
+| Generated 10,000-file snapshot | 234 / 101 seconds |
+| Generated bounded history | 322 / 147 seconds |
+| Generated incremental append | 128 / 23 seconds |
+| Actual NumPy snapshot | 123 seconds; partial coverage, explicit 2 GiB storage budget |
+
+These are recorded observations, not whole-history or arbitrary-size guarantees.
+See [delta measurements and remaining costs](docs/index-delta-performance.md)
+and [NumPy coverage and failed first attempt](docs/benchmarks/numpy-snapshot-20261015.md).
+The [indexed ReviewBench experiment](docs/benchmarks/reviewbench-indexed.md)
+uses `auto`, frozen paired tools and native accounting; both development cohorts
+stopped with unknown usage. The [second cohort's 21 valid pairs](docs/benchmarks/reviewbench-auto-pilot2-stopped.md)
+remain conditional observations. [Quality scores now cover all 21 completed pairs](docs/benchmarks/reviewbench-auto-indexed-quality.md):
+slightly higher grounded recall but lower augmented precision, with low indexed-tool
+adoption and wide uncertainty. No causal indexing benefit or general savings claim
+is established.
+
 ## Install
 
 Requires **Git and Python 3.11+**. Install from source:
@@ -43,11 +63,13 @@ Activate with `source .venv/bin/activate` on Linux/macOS, or
 
 ```sh
 python -m pip install -c constraints.txt -e ".[mcp]"
-python -c "from tree_sitter_language_pack import download; download(['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown'])"
+python -c "from gita.entities.parsers import get_parser; from tree_sitter_language_pack import downloaded_languages; names = ['python','javascript','typescript','tsx','csharp','cpp','go','rust','swift','php','java','kotlin','c','ruby','bash','powershell','hcl','dart','json','yaml','toml','markdown']; [get_parser(name) for name in names]; assert set(names) <= set(downloaded_languages())"
 ```
 
 Grammar provisioning uses the network once; indexed operations then use local
 Git objects. Omit `[mcp]` for CLI-only use.
+Provisioning loads each parser and checks its installed inventory: a successful
+`download()` request alone does not prove native grammar files are available.
 
 ## Use from the CLI
 
@@ -90,9 +112,15 @@ helpers remain available to the index.
 
 This is the first feature-flag increment, not complete retirement. Legacy code
 still ships; query parity, independent verification, endpoint comparison and
-index qualification remain follow-up work. Parser/matcher policy and storage
-formats are unchanged by this increment; an already-incompatible index still
-requires explicit handling.
+full index qualification remain follow-up work. The first S2 increment adds an
+[offline correctness-gated benchmark](verify/README.md#offline-s2-qualification)
+and publication recovery/equivalence campaigns. First-parent tree deltas carry
+complete inventories and identity populations forward; bounded decoding caches
+and ordered overlap validation reduce repeated work. Global copy/ambiguity guards
+and atomic publication remain enforced. Reopen hydration and checkpoint copying
+still have whole-population costs. The parser/builder fingerprints **change**, so previously
+built indexes require an explicit rebuild under this interpretation. No arbitrary
+repository size, independent product F4 verification, or complete S2 delivery is claimed.
 
 ## Connect an agent
 
@@ -109,6 +137,10 @@ your client's `PATH`.
 
 An indexed investigation follows **index → identity → history/state → source**.
 Typed tools expose supported budgets, coverage and continuation cursors.
+For several related functions in one file, request its indexed root with
+`gita_source(entity="relative/path::<module>", scope="project")` instead of
+many tiny source lookups. Source remains complete-or-budget-error; select a
+suitable budget rather than assuming a large file will fit.
 `gita_history` is indexed by default. Legacy `gita_diff`, `gita_expand` and
 `gita_show` are absent from discovery unless the server starts with
 `GITA_ENABLE_LEGACY=1`. Reconstructing history additionally requires `legacy=true`.
@@ -123,9 +155,26 @@ Gita separates **what code is from what it is called and where it lives**.
 - **SQLite with immutable generations** stores evidence once for reuse, incremental updates and generation-pinned queries.
 - **Git remains the source of truth** for exact historical source. Indexed history preserves intermediate changes, including reverts; it is not a net endpoint diff.
 
-Indexed languages: Python, JavaScript, TypeScript/TSX, C#, C++, Go, Rust,
-Markdown, JSON, YAML and TOML. Unsupported files and extraction gaps appear in
+Indexed languages: Python, JavaScript, TypeScript/TSX, C#, C/C++, Go, Rust, Swift,
+PHP, Java, Kotlin, Ruby, Bash, PowerShell and Dart; configuration/document adapters
+cover HCL/Terraform, Markdown, JSON, YAML and TOML. Unsupported files and extraction gaps appear in
 coverage, not as proof that nothing exists.
+Swift multi-binding properties remain in their enclosing source rather than
+receiving guessed individual identities. PHP supports bracketed namespaces and
+one unbraced file namespace; multiple unbraced namespaces are an explicit coverage
+gap. Adding language rules changes the parse policy: rebuild into fresh index
+contexts rather than relabeling existing generations.
+For an isolated grammar installation, set `GITA_PARSER_CACHE` to an absolute
+grammar-cache directory before provisioning or starting Gita. CLI, MCP and parse
+workers inherit it; index queries and builds never download missing grammars.
+Support is structural, not a compiler or runtime binding model. Dart callables
+join their exact signature/body regions; unrecognized members remain in enclosing
+source. HCL identities retain the existing conservative small-body/copy guards:
+a tiny value moved to another file need not retain its identity. Notebooks and Go
+templates are not covered merely by the Python/Go adapters.
+Macro-heavy C can still have explicit parse gaps: the FreeRTOS benchmark's
+`tasks.c` is not fully indexed. Registration is not a promise that every file
+or dialect parses; gaps retain raw Git fallback rather than guessed identities.
 
 ## Try the local viewer
 

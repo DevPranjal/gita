@@ -1,0 +1,235 @@
+{
+  "kind": "E16 headroom-only qualification; three development pairs",
+  "protocol": "0787c8ed098fe2ea9aaafc9b02765598d0c0aeaa18209eda4b8d5fa60fc2cc20",
+  "source_commit": "42d27a4c3b21979a1ae9f1a0cedf86ad60de54ce",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "native_session_credit_setting": 60,
+  "session_reservation": 90,
+  "initial_packets_identical_to_e15": true,
+  "complete_pairs": 3,
+  "all_attempt_costs": {
+    "B": {
+      "credits": 111.14753999999999,
+      "input_tokens": 778160,
+      "output_tokens": 8306,
+      "reasoning_tokens": 4879
+    },
+    "H": {
+      "credits": 128.22336,
+      "input_tokens": 778376,
+      "output_tokens": 9566,
+      "reasoning_tokens": 6362
+    }
+  },
+  "judge_credits": 46.9973,
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 0.9166666666666666,
+        "grounded_recall": 0.14042207792207792,
+        "augmented_precision": 0.9166666666666666,
+        "augmented_recall": 0.14042207792207792,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 7,
+        "golden_tp_count": 48,
+        "matched_count": 7,
+        "matched_tp_count": 6,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 7
+      },
+      "micro": {
+        "grounded_precision": 0.8571428571428571,
+        "grounded_recall": 0.14583333333333334,
+        "augmented_precision": 0.8571428571428571,
+        "augmented_recall": 0.14583333333333334,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 7,
+        "golden_tp_count": 48,
+        "matched_count": 7,
+        "matched_tp_count": 6,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 7
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 0.8888888888888888,
+        "grounded_recall": 0.134018759018759,
+        "augmented_precision": 0.9166666666666666,
+        "augmented_recall": 0.14772727272727273,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.08333333333333333,
+        "candidate_count": 8,
+        "golden_tp_count": 48,
+        "matched_count": 7,
+        "matched_tp_count": 6,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 6
+      },
+      "micro": {
+        "grounded_precision": 0.8571428571428571,
+        "grounded_recall": 0.125,
+        "augmented_precision": 0.875,
+        "augmented_recall": 0.14285714285714285,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.125,
+        "candidate_count": 8,
+        "golden_tp_count": 48,
+        "matched_count": 7,
+        "matched_tp_count": 6,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 6
+      }
+    }
+  },
+  "rows": [
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "B",
+      "status": "valid",
+      "credits": 22.15988,
+      "input_tokens": 102522,
+      "output_tokens": 1976,
+      "reasoning_tokens": 1207,
+      "findings": 1,
+      "tool_audit": {
+        "evidence_calls": 15,
+        "executed_call_attempts": 15,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "native_cap_warning": false,
+      "native60_observed": false,
+      "wall_seconds": 51.0
+    },
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "H",
+      "status": "valid",
+      "credits": 27.34576,
+      "input_tokens": 92573,
+      "output_tokens": 3687,
+      "reasoning_tokens": 3003,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 10,
+        "executed_call_attempts": 10,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "native_cap_warning": false,
+      "native60_observed": false,
+      "wall_seconds": 57.296999999991385
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "H",
+      "status": "valid",
+      "credits": 50.53384,
+      "input_tokens": 303735,
+      "output_tokens": 2277,
+      "reasoning_tokens": 1180,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 23,
+        "executed_call_attempts": 23,
+        "denied_over_budget": 0,
+        "indexed_calls": 3,
+        "errors": 0
+      },
+      "indexed_operations": {
+        "source": 3
+      },
+      "native_cap_warning": false,
+      "native60_observed": true,
+      "wall_seconds": 64.90599999998813
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "B",
+      "status": "valid",
+      "credits": 39.03322,
+      "input_tokens": 276242,
+      "output_tokens": 2669,
+      "reasoning_tokens": 1210,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 31,
+        "executed_call_attempts": 31,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "native_cap_warning": false,
+      "native60_observed": true,
+      "wall_seconds": 55.875
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "H",
+      "status": "valid",
+      "credits": 50.34376,
+      "input_tokens": 382068,
+      "output_tokens": 3602,
+      "reasoning_tokens": 2179,
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 23,
+        "executed_call_attempts": 23,
+        "denied_over_budget": 0,
+        "indexed_calls": 8,
+        "errors": 0
+      },
+      "indexed_operations": {
+        "source": 8
+      },
+      "native_cap_warning": false,
+      "native60_observed": true,
+      "wall_seconds": 69.09399999998277
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "B",
+      "status": "valid",
+      "credits": 49.95444,
+      "input_tokens": 399396,
+      "output_tokens": 3661,
+      "reasoning_tokens": 2462,
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 21,
+        "executed_call_attempts": 21,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "native_cap_warning": false,
+      "native60_observed": true,
+      "wall_seconds": 82.0460000000021
+    }
+  ],
+  "interpretation": "All reviews valid and scored; original budget truncation addressed. Grounded and pooled augmented H recall are still lower: strict scale gate not met. No25-run authorized.",
+  "engineering_check": "An external diagnostic incorrectly required an optional usage-info frame; existing valid reviews reused without rerun.",
+  "limitations": [
+    "Small repeatedly used development sample, not held-out confirmation.",
+    "Custom Copilot semantic judging with pinned official arithmetic, not official upstream judge.",
+    "More headroom is not an efficiency optimization and increases possible spend."
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "kind": "E24 minimal workflow technical integrity stop, retained permanently",
+  "protocol": "aa2262f19fd8f95da14835d665171f7639f46611f9b34fc8fe1a9b8362c566ff",
+  "source_commit": "c0dbe05d4b91964243cce8fa367defdafc8a7b26",
+  "rows": [
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "B",
+      "status": "valid",
+      "credits": 49.80834,
+      "input_tokens": 339807,
+      "output_tokens": 3551,
+      "error": null,
+      "findings": 8
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "H",
+      "status": "valid",
+      "credits": 45.80622,
+      "input_tokens": 272687,
+      "output_tokens": 3915,
+      "error": null,
+      "findings": 9
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "B",
+      "status": "valid",
+      "credits": 20.08188,
+      "input_tokens": 113896,
+      "output_tokens": 3000,
+      "error": null,
+      "findings": 3
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "H",
+      "status": "integrity_failed",
+      "credits": 25.93136,
+      "input_tokens": 164823,
+      "output_tokens": 3308,
+      "error": "Corrupt indexed evidence; campaign integrity gate",
+      "findings": null
+    }
+  ],
+  "reviewer_spent": 141.6278,
+  "judge_spent": 61.9264,
+  "completed_quality_pairs": 1,
+  "conditional_first_pair_scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 0.875,
+        "grounded_recall": 0.3611111111111111,
+        "augmented_precision": 0.875,
+        "augmented_recall": 0.3611111111111111,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 8,
+        "golden_tp_count": 36,
+        "matched_count": 8,
+        "matched_tp_count": 7,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 13
+      },
+      "micro": {
+        "grounded_precision": 0.875,
+        "grounded_recall": 0.3611111111111111,
+        "augmented_precision": 0.875,
+        "augmented_recall": 0.3611111111111111,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 8,
+        "golden_tp_count": 36,
+        "matched_count": 8,
+        "matched_tp_count": 7,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 13
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 0.875,
+        "grounded_recall": 0.3888888888888889,
+        "augmented_precision": 0.8888888888888888,
+        "augmented_recall": 0.40540540540540543,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.1111111111111111,
+        "candidate_count": 9,
+        "golden_tp_count": 36,
+        "matched_count": 8,
+        "matched_tp_count": 7,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 14
+      },
+      "micro": {
+        "grounded_precision": 0.875,
+        "grounded_recall": 0.3888888888888889,
+        "augmented_precision": 0.8888888888888888,
+        "augmented_recall": 0.40540540540540543,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.1111111111111111,
+        "candidate_count": 9,
+        "golden_tp_count": 36,
+        "matched_count": 8,
+        "matched_tp_count": 7,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 14
+      }
+    }
+  },
+  "cause": "Read-file delivery ledger attempted to parse an actual empty file as a numbered source line, classifying legitimate empty evidence as corrupt. Independent Git-byte replay confirmed both files are empty.",
+  "interpretation": "No efficacy claim for interrupted cohort. Do not clear the terminal stop, rewrite invalid review, retry in same root or exclude its measured cost.",
+  "fix": "Validate exact empty bytes and explicit file_lines/empty_source, do not create line receipts. Forged empty response for nonempty source remains terminal integrity failure."
+}

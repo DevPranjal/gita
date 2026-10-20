@@ -1,0 +1,2004 @@
+{
+  "elapsed_seconds": 501.5102317999117,
+  "end_to_end_elapsed_seconds": 532.4167209998704,
+  "final_frozen_source_and_index_recheck": "passed all three, including original indexes",
+  "finalized_at": "2026-10-15T15:25:56.210375+00:00",
+  "frozen_scope_sha256": "5176c7ee767acaf99406dce756b677c0d408f827cb7792745b1bb50f62fc8b63",
+  "independent_final_verification": "passed for all history-ready scopes",
+  "limitations": [
+    "No independently authored entity-lineage oracle for real repositories",
+    "Source byte checks sample members; endpoint preflight reparses changed files",
+    "No fallback, repair, or changes to frozen raw scope or original indexes"
+  ],
+  "limits": {
+    "max_storage_bytes": 2147483648,
+    "per_repository_supervisor_seconds": 300,
+    "total_seconds": 1200,
+    "workers": 2
+  },
+  "no_corpus_execution": true,
+  "no_models": true,
+  "no_network": true,
+  "owned_root": "artifacts/connected-history-pilot",
+  "positions": [
+    0,
+    3,
+    6
+  ],
+  "preparation_script_sha256": {
+    "prepare.py": "8359959de6d346cd14fdd3ca14184b3d346b1f1b5f474256cab7414f6fc586fa",
+    "verify_connected.py": "7d92e101b6fe8a4ba110a581e09473fe6e82bceacec67f21096a59edd00e98bd",
+    "worker.py": "4809e4c3e1b6cfed4d5a3d6ffd043df92b39ea14f4c1a570c266958fa42a0166"
+  },
+  "raw_history_policy": "unchanged for both arms; derived index bounded to 8 prior ancestors",
+  "readiness_summary": [
+    {
+      "build_seconds": 40.664628400001675,
+      "build_status": "partial",
+      "failure": null,
+      "history_ready": true,
+      "indexed_commits": 18,
+      "partial_coverage": [
+        {
+          "category": "extraction",
+          "omitted": 0,
+          "reason": "complete",
+          "records": 157
+        },
+        {
+          "category": "extraction",
+          "omitted": 0,
+          "reason": "removed",
+          "records": 4
+        },
+        {
+          "category": "extraction",
+          "omitted": null,
+          "reason": "unsupported_language",
+          "records": 90
+        },
+        {
+          "category": "matching",
+          "omitted": null,
+          "reason": "candidate_limit",
+          "records": 6
+        },
+        {
+          "category": "source_availability",
+          "omitted": null,
+          "reason": "unchecked_cached_source",
+          "records": 83
+        }
+      ],
+      "persisted_index_bytes": 93298688,
+      "position": 0,
+      "preflight": {
+        "broker_budget_gap_files": 0,
+        "extraction_gaps": 0,
+        "independent_occurrences_verified": 774,
+        "index_status": {
+          "anchor": "6e9fd231ed8190119c811d595e287302ef2917db",
+          "broker_budget_gap_files": 0,
+          "max_storage_bytes": 2147483648,
+          "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+          "prior_ancestors": 8,
+          "raw_history_unchanged": true,
+          "scope_digest_semantics": "retained frozen raw-source scope identity",
+          "seconds": 92.00381259992719,
+          "status": "connected_history_built",
+          "supervisor_wall_limit_seconds": 300,
+          "workers": 2
+        }
+      },
+      "prior_ancestors": 8,
+      "receipt": "artifacts/connected-history-pilot/p00/readiness.json",
+      "scope": "artifacts/connected-history-pilot/p00/scope.json",
+      "source_coherence": "passed",
+      "status": "passed",
+      "supervised_seconds": 92.87696140026674,
+      "task": "PierreJanineh/TechDebtMCP"
+    },
+    {
+      "build_seconds": 262.3698018998839,
+      "build_status": "partial",
+      "failure": {
+        "code": "deadline",
+        "message": "owned child tree stopped"
+      },
+      "history_ready": false,
+      "indexed_commits": 17,
+      "partial_coverage": [
+        {
+          "category": "extraction",
+          "omitted": 0,
+          "reason": "complete",
+          "records": 117
+        },
+        {
+          "category": "extraction",
+          "omitted": null,
+          "reason": "parse_error",
+          "records": 34
+        },
+        {
+          "category": "extraction",
+          "omitted": 0,
+          "reason": "removed",
+          "records": 4
+        },
+        {
+          "category": "extraction",
+          "omitted": null,
+          "reason": "unsupported_language",
+          "records": 476
+        },
+        {
+          "category": "matching",
+          "omitted": null,
+          "reason": "candidate_limit",
+          "records": 11
+        },
+        {
+          "category": "source_availability",
+          "omitted": null,
+          "reason": "unchecked_cached_source",
+          "records": 479
+        }
+      ],
+      "persisted_index_bytes": 421866504,
+      "position": 3,
+      "preflight": null,
+      "prior_ancestors": 8,
+      "reason": "Build published a partial connected generation, but the 300-second supervisor stopped verification. It is not exposed in scope.indexes and is not ready; no endpoint fallback or retry.",
+      "receipt": "artifacts/connected-history-pilot/p03/readiness.json",
+      "scope": "artifacts/connected-history-pilot/p03/scope.json",
+      "source_coherence": "not_completed",
+      "status": "timeout",
+      "supervised_seconds": 300.1334426999092,
+      "task": "cmik/apilix"
+    },
+    {
+      "build_seconds": 47.0605410002172,
+      "build_status": "partial",
+      "failure": null,
+      "history_ready": true,
+      "indexed_commits": 16,
+      "partial_coverage": [
+        {
+          "category": "extraction",
+          "omitted": 0,
+          "reason": "complete",
+          "records": 371
+        },
+        {
+          "category": "extraction",
+          "omitted": 0,
+          "reason": "removed",
+          "records": 5
+        },
+        {
+          "category": "extraction",
+          "omitted": null,
+          "reason": "unsupported_language",
+          "records": 528
+        },
+        {
+          "category": "matching",
+          "omitted": null,
+          "reason": "candidate_limit",
+          "records": 10
+        },
+        {
+          "category": "source_availability",
+          "omitted": null,
+          "reason": "unchecked_cached_source",
+          "records": 493
+        }
+      ],
+      "persisted_index_bytes": 70639616,
+      "position": 6,
+      "preflight": {
+        "broker_budget_gap_files": 0,
+        "extraction_gaps": 0,
+        "independent_occurrences_verified": 383,
+        "index_status": {
+          "anchor": "d90db86ed9eedb66ef69d71ea99dd9e9f0a3cf7c",
+          "broker_budget_gap_files": 0,
+          "max_storage_bytes": 2147483648,
+          "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+          "prior_ancestors": 8,
+          "raw_history_unchanged": true,
+          "scope_digest_semantics": "retained frozen raw-source scope identity",
+          "seconds": 84.05970160011202,
+          "status": "connected_history_built",
+          "supervisor_wall_limit_seconds": 300,
+          "workers": 2
+        }
+      },
+      "prior_ancestors": 8,
+      "receipt": "artifacts/connected-history-pilot/p06/readiness.json",
+      "scope": "artifacts/connected-history-pilot/p06/scope.json",
+      "source_coherence": "passed",
+      "status": "passed",
+      "supervised_seconds": 84.95658289967105,
+      "task": "brianc/node-postgres"
+    }
+  ],
+  "receipts": [
+    {
+      "ambiguity_boundaries": {
+        "exact_duplicate_blob_groups": [],
+        "git_rename_copy_candidates": [],
+        "interpretation": "Git similarity is a candidate hint, not entity identity truth; duplicate blobs prohibit assuming unique copy lineage"
+      },
+      "anchor": "6e9fd231ed8190119c811d595e287302ef2917db",
+      "boundary": "eight_prior_ancestors",
+      "chain": [
+        "6e9fd231ed8190119c811d595e287302ef2917db",
+        "cdb5f262601522dc3e5859d699a6f4622b725763",
+        "7e2ca58e105a388eb68754c139542ad4df6058b5",
+        "4a163a8a9e4d6b15bb65071b2b8261956fbfc482",
+        "5e08fd4b82efc917f65492bab98e81e0497c7f5a",
+        "0b3db5182947d08d7a8f295af970bf933c7df617",
+        "3826d40adc87ba6c12a07da43eaf9fbc71b4886a",
+        "f3bd4edc8ddfb8898036888f8a2a143737fa538a",
+        "ea0385c7349bbaee04456c57bf0ec3f217d63532",
+        "3d3ccc3158a95e3bd82dec8be3c6ba5600afbfc7",
+        "f46eb8c37d5dc2d0fb06149830173b62d93bef1c",
+        "922827bd73327645ca95d6ebe481caceab4b836b",
+        "7960410d2f68c69f939fe4c62a524aa75ae5ef52",
+        "8d34422def0ce00806a4191851696408d3e4817d",
+        "a196969f310d26d1ff549c78fff3f01a2694cb94",
+        "df32f4328408a713fbda459f14bd971c15e905a0",
+        "bb50585f52739a730b7e6d18d13047380e9a204e",
+        "16a54f0f85a9091f220418850eac6b4122782be5"
+      ],
+      "elapsed_seconds": 100.4779586000368,
+      "frozen_allowed_history_and_graph_unchanged": true,
+      "history_ready": true,
+      "independent_connected_verification": {
+        "ambiguous_or_similarity_links_promoted_to_accepted": 0,
+        "event_parent_edges_checked": 226,
+        "exact_event_occurrence_git_tree_blob_span_checks": 50,
+        "independent_first_parent_chain": true,
+        "limitations": "Verifies persistence, connectivity and source coherence; not an independent entity-identity ground truth",
+        "multi_event_named_entity_histories": [
+          {
+            "commits": [
+              "bb50585f52739a730b7e6d18d13047380e9a204e",
+              "922827bd73327645ca95d6ebe481caceab4b836b",
+              "f3bd4edc8ddfb8898036888f8a2a143737fa538a",
+              "4a163a8a9e4d6b15bb65071b2b8261956fbfc482",
+              "7e2ca58e105a388eb68754c139542ad4df6058b5",
+              "cdb5f262601522dc3e5859d699a6f4622b725763",
+              "6e9fd231ed8190119c811d595e287302ef2917db"
+            ],
+            "eid": "oeid1_869dfde4b6be82f123bb4fd0e150b04a5be5499f7e4fe7f44cad781da367759b",
+            "events": 7
+          },
+          {
+            "commits": [
+              "3d3ccc3158a95e3bd82dec8be3c6ba5600afbfc7",
+              "ea0385c7349bbaee04456c57bf0ec3f217d63532",
+              "f3bd4edc8ddfb8898036888f8a2a143737fa538a",
+              "4a163a8a9e4d6b15bb65071b2b8261956fbfc482",
+              "7e2ca58e105a388eb68754c139542ad4df6058b5",
+              "cdb5f262601522dc3e5859d699a6f4622b725763",
+              "6e9fd231ed8190119c811d595e287302ef2917db"
+            ],
+            "eid": "oeid1_a4a7f71c56b5c7a0df04ed2817ca0ed11c408dba1bf3ad3bb8a76f16d4212821",
+            "events": 7
+          },
+          {
+            "commits": [
+              "bb50585f52739a730b7e6d18d13047380e9a204e",
+              "a196969f310d26d1ff549c78fff3f01a2694cb94",
+              "8d34422def0ce00806a4191851696408d3e4817d",
+              "7960410d2f68c69f939fe4c62a524aa75ae5ef52",
+              "922827bd73327645ca95d6ebe481caceab4b836b",
+              "6e9fd231ed8190119c811d595e287302ef2917db"
+            ],
+            "eid": "oeid1_40359a5679a9284684cd60c08b510f694581539904d5e137453b64d1a9b5820e",
+            "events": 6
+          },
+          {
+            "commits": [
+              "df32f4328408a713fbda459f14bd971c15e905a0",
+              "8d34422def0ce00806a4191851696408d3e4817d",
+              "7960410d2f68c69f939fe4c62a524aa75ae5ef52",
+              "922827bd73327645ca95d6ebe481caceab4b836b",
+              "3d3ccc3158a95e3bd82dec8be3c6ba5600afbfc7",
+              "6e9fd231ed8190119c811d595e287302ef2917db"
+            ],
+            "eid": "oeid1_5848f2eb7e50b154c74d79f0efdc1f24d596f45396b885355ab95ee21108c796",
+            "events": 6
+          },
+          {
+            "commits": [
+              "bb50585f52739a730b7e6d18d13047380e9a204e",
+              "a196969f310d26d1ff549c78fff3f01a2694cb94",
+              "8d34422def0ce00806a4191851696408d3e4817d",
+              "7960410d2f68c69f939fe4c62a524aa75ae5ef52",
+              "922827bd73327645ca95d6ebe481caceab4b836b",
+              "6e9fd231ed8190119c811d595e287302ef2917db"
+            ],
+            "eid": "oeid1_639b93a51cb1d3d4c59896396d1485e91c832ddc7869735bdbf5ba8bfdc1a0ab",
+            "events": 6
+          },
+          {
+            "commits": [
+              "bb50585f52739a730b7e6d18d13047380e9a204e",
+              "922827bd73327645ca95d6ebe481caceab4b836b",
+              "4a163a8a9e4d6b15bb65071b2b8261956fbfc482",
+              "cdb5f262601522dc3e5859d699a6f4622b725763",
+              "6e9fd231ed8190119c811d595e287302ef2917db"
+            ],
+            "eid": "oeid1_3400e36e5193b1cfdd281efed306bd191bc03801a358cec90309e41eb4e8cba9",
+            "events": 5
+          },
+          {
+            "commits": [
+              "3d3ccc3158a95e3bd82dec8be3c6ba5600afbfc7",
+              "ea0385c7349bbaee04456c57bf0ec3f217d63532",
+              "f3bd4edc8ddfb8898036888f8a2a143737fa538a",
+              "7e2ca58e105a388eb68754c139542ad4df6058b5",
+              "cdb5f262601522dc3e5859d699a6f4622b725763"
+            ],
+            "eid": "oeid1_4ed03ff5aa714fa96b6eb7e286420876cb7068ef4626fc055322046f81c8013a",
+            "events": 5
+          },
+          {
+            "commits": [
+              "df32f4328408a713fbda459f14bd971c15e905a0",
+              "7960410d2f68c69f939fe4c62a524aa75ae5ef52",
+              "922827bd73327645ca95d6ebe481caceab4b836b",
+              "3d3ccc3158a95e3bd82dec8be3c6ba5600afbfc7",
+              "6e9fd231ed8190119c811d595e287302ef2917db"
+            ],
+            "eid": "oeid1_de808106770c7fa9bb2af850ebb70a2555cce2b553a288a127a28238277c61f8",
+            "events": 5
+          }
+        ],
+        "seconds": 14.445698000025004,
+        "status": "passed"
+      },
+      "no_checkout_files": true,
+      "original_git_inventory_digest": "7288d5f2ce1cb2fc5faace41f8cacbe7393a7b2427b2b09e130bcecf06ab0e69",
+      "original_git_metadata_and_indexes_unchanged": true,
+      "original_repo": "artifacts/frozen-source/p00/repo",
+      "owned_repo": "artifacts/connected-history-pilot/p00/repo",
+      "owned_total_bytes": 93888485,
+      "persisted_index_files_bytes": {
+        "index.sqlite": 93265920,
+        "index.sqlite-shm": 32768,
+        "index.sqlite-wal": 0
+      },
+      "persisted_index_total_bytes": 93298688,
+      "position": 0,
+      "prior_ancestors": 8,
+      "raw_allowed_count": 101,
+      "reached_effective_base": true,
+      "readiness_summary": {
+        "build_seconds": 40.664628400001675,
+        "build_status": "partial",
+        "failure": null,
+        "history_ready": true,
+        "indexed_commits": 18,
+        "partial_coverage": [
+          {
+            "category": "extraction",
+            "omitted": 0,
+            "reason": "complete",
+            "records": 157
+          },
+          {
+            "category": "extraction",
+            "omitted": 0,
+            "reason": "removed",
+            "records": 4
+          },
+          {
+            "category": "extraction",
+            "omitted": null,
+            "reason": "unsupported_language",
+            "records": 90
+          },
+          {
+            "category": "matching",
+            "omitted": null,
+            "reason": "candidate_limit",
+            "records": 6
+          },
+          {
+            "category": "source_availability",
+            "omitted": null,
+            "reason": "unchecked_cached_source",
+            "records": 83
+          }
+        ],
+        "persisted_index_bytes": 93298688,
+        "position": 0,
+        "preflight": {
+          "broker_budget_gap_files": 0,
+          "extraction_gaps": 0,
+          "independent_occurrences_verified": 774,
+          "index_status": {
+            "anchor": "6e9fd231ed8190119c811d595e287302ef2917db",
+            "broker_budget_gap_files": 0,
+            "max_storage_bytes": 2147483648,
+            "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+            "prior_ancestors": 8,
+            "raw_history_unchanged": true,
+            "scope_digest_semantics": "retained frozen raw-source scope identity",
+            "seconds": 92.00381259992719,
+            "status": "connected_history_built",
+            "supervisor_wall_limit_seconds": 300,
+            "workers": 2
+          }
+        },
+        "prior_ancestors": 8,
+        "receipt": "artifacts/connected-history-pilot/p00/readiness.json",
+        "scope": "artifacts/connected-history-pilot/p00/scope.json",
+        "source_coherence": "passed",
+        "status": "passed",
+        "supervised_seconds": 92.87696140026674,
+        "task": "PierreJanineh/TechDebtMCP"
+      },
+      "source_copy_seconds": 2.9679812001995742,
+      "supervised_result": {
+        "build_seconds": 40.664628400001675,
+        "build_status": "partial",
+        "cached_files": 83,
+        "commits": 18,
+        "coverage": [
+          {
+            "category": "extraction",
+            "omitted": 0,
+            "reason": "complete",
+            "records": 157
+          },
+          {
+            "category": "extraction",
+            "omitted": 0,
+            "reason": "removed",
+            "records": 4
+          },
+          {
+            "category": "extraction",
+            "omitted": null,
+            "reason": "unsupported_language",
+            "records": 90
+          },
+          {
+            "category": "matching",
+            "omitted": null,
+            "reason": "candidate_limit",
+            "records": 6
+          },
+          {
+            "category": "source_availability",
+            "omitted": null,
+            "reason": "unchecked_cached_source",
+            "records": 83
+          }
+        ],
+        "elapsed_seconds": 92.0053487000987,
+        "failures": [],
+        "history_events_verification": {
+          "event_count": 179,
+          "exact_query_source_checks": 162,
+          "history_sample_counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "history_samples": 12,
+          "independent_sql_event_count": 179,
+          "lineage_truth": "not independently established; matching ambiguity retained"
+        },
+        "history_ready": true,
+        "indexes": [
+          {
+            "build_status": "partial",
+            "commits": [
+              "6e9fd231ed8190119c811d595e287302ef2917db",
+              "cdb5f262601522dc3e5859d699a6f4622b725763",
+              "7e2ca58e105a388eb68754c139542ad4df6058b5",
+              "4a163a8a9e4d6b15bb65071b2b8261956fbfc482",
+              "5e08fd4b82efc917f65492bab98e81e0497c7f5a",
+              "0b3db5182947d08d7a8f295af970bf933c7df617",
+              "3826d40adc87ba6c12a07da43eaf9fbc71b4886a",
+              "f3bd4edc8ddfb8898036888f8a2a143737fa538a",
+              "ea0385c7349bbaee04456c57bf0ec3f217d63532",
+              "3d3ccc3158a95e3bd82dec8be3c6ba5600afbfc7",
+              "f46eb8c37d5dc2d0fb06149830173b62d93bef1c",
+              "922827bd73327645ca95d6ebe481caceab4b836b",
+              "7960410d2f68c69f939fe4c62a524aa75ae5ef52",
+              "8d34422def0ce00806a4191851696408d3e4817d",
+              "a196969f310d26d1ff549c78fff3f01a2694cb94",
+              "df32f4328408a713fbda459f14bd971c15e905a0",
+              "bb50585f52739a730b7e6d18d13047380e9a204e",
+              "16a54f0f85a9091f220418850eac6b4122782be5"
+            ],
+            "context": "ctx1_853d29f5e400a2724ece5c3aabf2cfb60a03b7d135161b6fcdf2a224450175ad",
+            "generation": "gen1_2ccabfa207be4078818f8c39c5eb8a97",
+            "scope": "rb-connected",
+            "tip": "16a54f0f85a9091f220418850eac6b4122782be5"
+          }
+        ],
+        "limits": {
+          "max_storage_bytes": 2147483648,
+          "workers": 2
+        },
+        "lineage_link_statuses": [
+          {
+            "method": "exact_own",
+            "reason": "strict_policy",
+            "records": 9,
+            "status": "accepted"
+          },
+          {
+            "method": "structural_locator",
+            "reason": "strict_policy",
+            "records": 1571,
+            "status": "accepted"
+          },
+          {
+            "method": "exact_body",
+            "reason": "duplicate_or_retained_source",
+            "records": 7,
+            "status": "ambiguous"
+          },
+          {
+            "method": "exact_own",
+            "reason": "duplicate_or_retained_source",
+            "records": 177,
+            "status": "ambiguous"
+          },
+          {
+            "method": "similarity",
+            "reason": "competing_candidates",
+            "records": 4,
+            "status": "ambiguous"
+          },
+          {
+            "method": "structural_locator",
+            "reason": "copy_or_swap",
+            "records": 39,
+            "status": "ambiguous"
+          },
+          {
+            "method": "similarity",
+            "reason": "normalized_token_similarity",
+            "records": 3,
+            "status": "candidate"
+          }
+        ],
+        "parse_statuses": {
+          "complete": 157,
+          "unsupported_language": 7
+        },
+        "parsed_files": 164,
+        "preflight": {
+          "broker_budget_gap_files": 0,
+          "extraction_gaps": 0,
+          "independent_occurrences_verified": 774,
+          "index_status": {
+            "anchor": "6e9fd231ed8190119c811d595e287302ef2917db",
+            "broker_budget_gap_files": 0,
+            "max_storage_bytes": 2147483648,
+            "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+            "prior_ancestors": 8,
+            "raw_history_unchanged": true,
+            "scope_digest_semantics": "retained frozen raw-source scope identity",
+            "seconds": 92.00381259992719,
+            "status": "connected_history_built",
+            "supervisor_wall_limit_seconds": 300,
+            "workers": 2
+          }
+        },
+        "resources": {
+          "cleanup_complete": true,
+          "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+          "main_sampled_peak_bytes": 93265920,
+          "observed_tree_cpu_seconds": 72.640625,
+          "owned_identities": 537,
+          "rss_tree_sampled_peak_bytes": 389894144,
+          "sample_interval_seconds": 0.05,
+          "samples": 1198,
+          "temp_spool_bytes": null,
+          "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+          "unavailable": [],
+          "wal_sampled_peak_bytes": 94076112
+        },
+        "returncode": 0,
+        "row_counts": {
+          "event": 7112,
+          "file_state": 251,
+          "generation_event": 7112,
+          "lineage": 6724,
+          "lineage_link": 1810,
+          "membership": 18
+        },
+        "scope_path": "artifacts/connected-history-pilot/p00/scope.json",
+        "source_verification": {
+          "canonical_digest": "64feb9deeb2780239ea874a2e37a7a40de0d962ac1076b442821fcadf2507a1d",
+          "exact_member_scope": "passed",
+          "git_blob_and_source_digest_checks": 144,
+          "git_member_tree_entry_checks": 144,
+          "independent_python_ast_span_checks": 0,
+          "inventory_completeness": "not independently established",
+          "lineage_truth": "not independently established for these real repositories",
+          "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+          "python_span_examples": [],
+          "sql_foreign_keys": "passed",
+          "sql_integrity": "passed",
+          "stored_contracts": "passed"
+        },
+        "stage": "complete",
+        "status": "passed",
+        "storage": {
+          ".git\\gita\\index.sqlite": 93265920,
+          ".git\\gita\\index.sqlite-shm": 32768,
+          ".git\\gita\\index.sqlite-wal": 0
+        },
+        "supervised_seconds": 92.87696140026674
+      },
+      "task": "PierreJanineh/TechDebtMCP",
+      "task_id": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942"
+    },
+    {
+      "ambiguity_boundaries": {
+        "exact_duplicate_blob_groups": [
+          {
+            "commit": "84bd3f70d19c4b27095c61c14a31cb6c67c0b309",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "99a8f9e2e2bf7491f836509fd3a74f7adc10e4d0",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "7a3122c3d910b7d51b972f334f3e7060941b6f77",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "cd0e8fee7b40b158a23ecda88b2b9a212375dd23",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "15a96ba20d5eb45a7f58389bfa3e4ceeb2c00f55",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "590b3ad35c42c2f1412149ee930ea339aa6b2e4d",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "cee195ea0f8f81086fa403874d05e22c7c945175",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "4fe23e22e3937c38cb859a3b9c00b193bb309aa1",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "c8b6a1ef4c5ee99530e98b2571f331589db82033",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "f610848e9f4b9ba7db38eeb696b9bd6faa02e6d4",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "6538dda25bf04ca4ff58f468751709bf66b3ddeb",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "78c946b9e0ae6cc6416d69a87baf1e7890ab82cf",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "05aba6beeee8ed7cb6fcd8e9d763327512fb3958",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "c04767d0be3758a1085d5ae3144a992dea618281",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "a06802e0407ab13fd6cae5b875bde378a5ca59dc",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "0c34439aeebedc646d76d90db6b79a5c54b4cb8f",
+            "groups": [
+              {
+                "blob": "565f9d356edc9cbd3517f497f5049d9465c46f5e",
+                "paths": [
+                  "client/public/apilix.svg",
+                  "client/src/assets/apilix1.svg"
+                ]
+              },
+              {
+                "blob": "340ef18dd9ef91043b28ef73dbdc15ad7e50cb69",
+                "paths": [
+                  "client/public/apilix2.svg",
+                  "client/src/assets/apilix.svg"
+                ]
+              },
+              {
+                "blob": "e6c67e5f745468b3ffcd3889e17db6d975a77536",
+                "paths": [
+                  "client/public/favicon.ico",
+                  "public/icon.ico"
+                ]
+              }
+            ]
+          }
+        ],
+        "git_rename_copy_candidates": [],
+        "interpretation": "Git similarity is a candidate hint, not entity identity truth; duplicate blobs prohibit assuming unique copy lineage"
+      },
+      "anchor": "5ee6a9928ba6b810aede08e1e30eb8d9dc9b0251",
+      "boundary": "eight_prior_ancestors",
+      "chain": [
+        "5ee6a9928ba6b810aede08e1e30eb8d9dc9b0251",
+        "84bd3f70d19c4b27095c61c14a31cb6c67c0b309",
+        "99a8f9e2e2bf7491f836509fd3a74f7adc10e4d0",
+        "7a3122c3d910b7d51b972f334f3e7060941b6f77",
+        "cd0e8fee7b40b158a23ecda88b2b9a212375dd23",
+        "15a96ba20d5eb45a7f58389bfa3e4ceeb2c00f55",
+        "590b3ad35c42c2f1412149ee930ea339aa6b2e4d",
+        "cee195ea0f8f81086fa403874d05e22c7c945175",
+        "4fe23e22e3937c38cb859a3b9c00b193bb309aa1",
+        "c8b6a1ef4c5ee99530e98b2571f331589db82033",
+        "f610848e9f4b9ba7db38eeb696b9bd6faa02e6d4",
+        "6538dda25bf04ca4ff58f468751709bf66b3ddeb",
+        "78c946b9e0ae6cc6416d69a87baf1e7890ab82cf",
+        "05aba6beeee8ed7cb6fcd8e9d763327512fb3958",
+        "c04767d0be3758a1085d5ae3144a992dea618281",
+        "a06802e0407ab13fd6cae5b875bde378a5ca59dc",
+        "0c34439aeebedc646d76d90db6b79a5c54b4cb8f"
+      ],
+      "elapsed_seconds": 307.81419169995934,
+      "frozen_allowed_history_and_graph_unchanged": true,
+      "history_ready": false,
+      "no_checkout_files": true,
+      "original_git_inventory_digest": "b9fbc49cdf7f1768739635baa0efc18e2cb037f5e782edd8c1aac1c065717d63",
+      "original_git_metadata_and_indexes_unchanged": true,
+      "original_repo": "artifacts/frozen-source/p03/repo",
+      "owned_repo": "artifacts/connected-history-pilot/p03/repo",
+      "owned_total_bytes": 426871899,
+      "persisted_index_files_bytes": {
+        "index.sqlite": 209973248,
+        "index.sqlite-shm": 425984,
+        "index.sqlite-wal": 211467272
+      },
+      "persisted_index_total_bytes": 421866504,
+      "position": 3,
+      "prior_ancestors": 8,
+      "raw_allowed_count": 63,
+      "reached_effective_base": true,
+      "readiness_summary": {
+        "build_seconds": 262.3698018998839,
+        "build_status": "partial",
+        "failure": {
+          "code": "deadline",
+          "message": "owned child tree stopped"
+        },
+        "history_ready": false,
+        "indexed_commits": 17,
+        "partial_coverage": [
+          {
+            "category": "extraction",
+            "omitted": 0,
+            "reason": "complete",
+            "records": 117
+          },
+          {
+            "category": "extraction",
+            "omitted": null,
+            "reason": "parse_error",
+            "records": 34
+          },
+          {
+            "category": "extraction",
+            "omitted": 0,
+            "reason": "removed",
+            "records": 4
+          },
+          {
+            "category": "extraction",
+            "omitted": null,
+            "reason": "unsupported_language",
+            "records": 476
+          },
+          {
+            "category": "matching",
+            "omitted": null,
+            "reason": "candidate_limit",
+            "records": 11
+          },
+          {
+            "category": "source_availability",
+            "omitted": null,
+            "reason": "unchecked_cached_source",
+            "records": 479
+          }
+        ],
+        "persisted_index_bytes": 421866504,
+        "position": 3,
+        "preflight": null,
+        "prior_ancestors": 8,
+        "reason": "Build published a partial connected generation, but the 300-second supervisor stopped verification. It is not exposed in scope.indexes and is not ready; no endpoint fallback or retry.",
+        "receipt": "artifacts/connected-history-pilot/p03/readiness.json",
+        "scope": "artifacts/connected-history-pilot/p03/scope.json",
+        "source_coherence": "not_completed",
+        "status": "timeout",
+        "supervised_seconds": 300.1334426999092,
+        "task": "cmik/apilix"
+      },
+      "source_copy_seconds": 3.1087736999616027,
+      "supervised_result": {
+        "build_seconds": 262.3698018998839,
+        "build_status": "partial",
+        "cached_files": 479,
+        "commits": 17,
+        "completed_seconds": null,
+        "coverage": [
+          {
+            "category": "extraction",
+            "omitted": 0,
+            "reason": "complete",
+            "records": 117
+          },
+          {
+            "category": "extraction",
+            "omitted": null,
+            "reason": "parse_error",
+            "records": 34
+          },
+          {
+            "category": "extraction",
+            "omitted": 0,
+            "reason": "removed",
+            "records": 4
+          },
+          {
+            "category": "extraction",
+            "omitted": null,
+            "reason": "unsupported_language",
+            "records": 476
+          },
+          {
+            "category": "matching",
+            "omitted": null,
+            "reason": "candidate_limit",
+            "records": 11
+          },
+          {
+            "category": "source_availability",
+            "omitted": null,
+            "reason": "unchecked_cached_source",
+            "records": 479
+          }
+        ],
+        "error": {
+          "code": "deadline",
+          "message": "owned child tree stopped"
+        },
+        "failures": [],
+        "history_ready": false,
+        "indexes": [
+          {
+            "build_status": "partial",
+            "commits": [
+              "5ee6a9928ba6b810aede08e1e30eb8d9dc9b0251",
+              "84bd3f70d19c4b27095c61c14a31cb6c67c0b309",
+              "99a8f9e2e2bf7491f836509fd3a74f7adc10e4d0",
+              "7a3122c3d910b7d51b972f334f3e7060941b6f77",
+              "cd0e8fee7b40b158a23ecda88b2b9a212375dd23",
+              "15a96ba20d5eb45a7f58389bfa3e4ceeb2c00f55",
+              "590b3ad35c42c2f1412149ee930ea339aa6b2e4d",
+              "cee195ea0f8f81086fa403874d05e22c7c945175",
+              "4fe23e22e3937c38cb859a3b9c00b193bb309aa1",
+              "c8b6a1ef4c5ee99530e98b2571f331589db82033",
+              "f610848e9f4b9ba7db38eeb696b9bd6faa02e6d4",
+              "6538dda25bf04ca4ff58f468751709bf66b3ddeb",
+              "78c946b9e0ae6cc6416d69a87baf1e7890ab82cf",
+              "05aba6beeee8ed7cb6fcd8e9d763327512fb3958",
+              "c04767d0be3758a1085d5ae3144a992dea618281",
+              "a06802e0407ab13fd6cae5b875bde378a5ca59dc",
+              "0c34439aeebedc646d76d90db6b79a5c54b4cb8f"
+            ],
+            "context": "ctx1_6dde086f313e32d32cb565df945e5ef4033868659ae91df9c054d154c19a95dc",
+            "generation": "gen1_c3deb8bcf8a44c69968f4b4a2e64ed0f",
+            "scope": "rb-connected",
+            "tip": "0c34439aeebedc646d76d90db6b79a5c54b4cb8f"
+          }
+        ],
+        "limits": {
+          "max_storage_bytes": 2147483648,
+          "workers": 2
+        },
+        "lineage_link_statuses": [
+          {
+            "method": "exact_own",
+            "reason": "strict_policy",
+            "records": 34,
+            "status": "accepted"
+          },
+          {
+            "method": "exact_subtree",
+            "reason": "strict_policy",
+            "records": 4,
+            "status": "accepted"
+          },
+          {
+            "method": "structural_locator",
+            "reason": "strict_policy",
+            "records": 6859,
+            "status": "accepted"
+          },
+          {
+            "method": "exact_body",
+            "reason": "duplicate_or_retained_source",
+            "records": 294,
+            "status": "ambiguous"
+          },
+          {
+            "method": "exact_own",
+            "reason": "copy_or_swap",
+            "records": 1,
+            "status": "ambiguous"
+          },
+          {
+            "method": "exact_own",
+            "reason": "duplicate_or_retained_source",
+            "records": 105,
+            "status": "ambiguous"
+          },
+          {
+            "method": "exact_subtree",
+            "reason": "duplicate_or_retained_source",
+            "records": 14,
+            "status": "ambiguous"
+          },
+          {
+            "method": "similarity",
+            "reason": "competing_candidates",
+            "records": 37,
+            "status": "ambiguous"
+          },
+          {
+            "method": "structural_locator",
+            "reason": "copy_or_swap",
+            "records": 962,
+            "status": "ambiguous"
+          },
+          {
+            "method": "similarity",
+            "reason": "normalized_token_similarity",
+            "records": 2,
+            "status": "candidate"
+          },
+          {
+            "method": "exact_own",
+            "reason": "incomplete_population",
+            "records": 11,
+            "status": "rejected"
+          }
+        ],
+        "parse_statuses": {
+          "complete": 116,
+          "parse_error": 3,
+          "unsupported_language": 29
+        },
+        "parsed_files": 148,
+        "resources": {
+          "cleanup_complete": true,
+          "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+          "main_sampled_peak_bytes": 209973248,
+          "observed_tree_cpu_seconds": 290.21875,
+          "owned_identities": 68,
+          "rss_tree_sampled_peak_bytes": 406142976,
+          "sample_interval_seconds": 0.05,
+          "samples": 3744,
+          "temp_spool_bytes": null,
+          "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+          "unavailable": [],
+          "wal_sampled_peak_bytes": 211467272
+        },
+        "returncode": 15,
+        "row_counts": {
+          "event": 16467,
+          "file_state": 631,
+          "generation_event": 16467,
+          "lineage": 12796,
+          "lineage_link": 8323,
+          "membership": 17
+        },
+        "stage": "verification",
+        "status": "timeout",
+        "supervised_seconds": 300.1334426999092
+      },
+      "task": "cmik/apilix",
+      "task_id": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e"
+    },
+    {
+      "ambiguity_boundaries": {
+        "exact_duplicate_blob_groups": [
+          {
+            "commit": "f0f01ec5825c188365ea41dd63470f7df4b1d2ad",
+            "groups": [
+              {
+                "blob": "c915ce09b6dbca0596dd84677add5d059fde24a4",
+                "paths": [
+                  "packages/pg/test/integration/client/test-helper.js",
+                  "packages/pg/test/integration/connection-pool/test-helper.js"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "9e8274ffa895e44dcdd0bb80129c1ffbad054eb6",
+            "groups": [
+              {
+                "blob": "c915ce09b6dbca0596dd84677add5d059fde24a4",
+                "paths": [
+                  "packages/pg/test/integration/client/test-helper.js",
+                  "packages/pg/test/integration/connection-pool/test-helper.js"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "cb2fce58cce443c7dddd308381377689c94c8b36",
+            "groups": [
+              {
+                "blob": "c915ce09b6dbca0596dd84677add5d059fde24a4",
+                "paths": [
+                  "packages/pg/test/integration/client/test-helper.js",
+                  "packages/pg/test/integration/connection-pool/test-helper.js"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "ad36e3c9e80fae771d636328420cebe7d544baae",
+            "groups": [
+              {
+                "blob": "c915ce09b6dbca0596dd84677add5d059fde24a4",
+                "paths": [
+                  "packages/pg/test/integration/client/test-helper.js",
+                  "packages/pg/test/integration/connection-pool/test-helper.js"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "0c7040e3fc011125d02e5539d1aabc5e2d57e541",
+            "groups": [
+              {
+                "blob": "c915ce09b6dbca0596dd84677add5d059fde24a4",
+                "paths": [
+                  "packages/pg/test/integration/client/test-helper.js",
+                  "packages/pg/test/integration/connection-pool/test-helper.js"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "1c8c7107a0e31309a2cc58edb00ec05bca7c3fd7",
+            "groups": [
+              {
+                "blob": "c915ce09b6dbca0596dd84677add5d059fde24a4",
+                "paths": [
+                  "packages/pg/test/integration/client/test-helper.js",
+                  "packages/pg/test/integration/connection-pool/test-helper.js"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "c9070cc8d526fca65780cedc25c1966b57cf7532",
+            "groups": [
+              {
+                "blob": "c915ce09b6dbca0596dd84677add5d059fde24a4",
+                "paths": [
+                  "packages/pg/test/integration/client/test-helper.js",
+                  "packages/pg/test/integration/connection-pool/test-helper.js"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "c6028a875f953eff9e8e403622b0aac127d1b4a6",
+            "groups": [
+              {
+                "blob": "c915ce09b6dbca0596dd84677add5d059fde24a4",
+                "paths": [
+                  "packages/pg/test/integration/client/test-helper.js",
+                  "packages/pg/test/integration/connection-pool/test-helper.js"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "b7f80acc89aaa354e0664580d88abfea8fb4ba2f",
+            "groups": [
+              {
+                "blob": "c915ce09b6dbca0596dd84677add5d059fde24a4",
+                "paths": [
+                  "packages/pg/test/integration/client/test-helper.js",
+                  "packages/pg/test/integration/connection-pool/test-helper.js"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "91ace72b01d1194d2f816e66e0c796c7c58b8e30",
+            "groups": [
+              {
+                "blob": "c915ce09b6dbca0596dd84677add5d059fde24a4",
+                "paths": [
+                  "packages/pg/test/integration/client/test-helper.js",
+                  "packages/pg/test/integration/connection-pool/test-helper.js"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "5b50561d177235048c540f4c9325e93a2a4f37f4",
+            "groups": [
+              {
+                "blob": "c915ce09b6dbca0596dd84677add5d059fde24a4",
+                "paths": [
+                  "packages/pg/test/integration/client/test-helper.js",
+                  "packages/pg/test/integration/connection-pool/test-helper.js"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "73c9946611fe1080a339de9bc3706c5bae3767f6",
+            "groups": [
+              {
+                "blob": "c915ce09b6dbca0596dd84677add5d059fde24a4",
+                "paths": [
+                  "packages/pg/test/integration/client/test-helper.js",
+                  "packages/pg/test/integration/connection-pool/test-helper.js"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "c31eab5b5a7b63288ffc808a85d6cec715ad8d96",
+            "groups": [
+              {
+                "blob": "c915ce09b6dbca0596dd84677add5d059fde24a4",
+                "paths": [
+                  "packages/pg/test/integration/client/test-helper.js",
+                  "packages/pg/test/integration/connection-pool/test-helper.js"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "3957e3c402adfba20e3972026fb7d98e8d20305b",
+            "groups": [
+              {
+                "blob": "c915ce09b6dbca0596dd84677add5d059fde24a4",
+                "paths": [
+                  "packages/pg/test/integration/client/test-helper.js",
+                  "packages/pg/test/integration/connection-pool/test-helper.js"
+                ]
+              }
+            ]
+          },
+          {
+            "commit": "b922f0ddfa3914cc7b05387cd12fc606bc658dc4",
+            "groups": [
+              {
+                "blob": "c915ce09b6dbca0596dd84677add5d059fde24a4",
+                "paths": [
+                  "packages/pg/test/integration/client/test-helper.js",
+                  "packages/pg/test/integration/connection-pool/test-helper.js"
+                ]
+              }
+            ]
+          }
+        ],
+        "git_rename_copy_candidates": [],
+        "interpretation": "Git similarity is a candidate hint, not entity identity truth; duplicate blobs prohibit assuming unique copy lineage"
+      },
+      "anchor": "d90db86ed9eedb66ef69d71ea99dd9e9f0a3cf7c",
+      "boundary": "eight_prior_ancestors",
+      "chain": [
+        "d90db86ed9eedb66ef69d71ea99dd9e9f0a3cf7c",
+        "f0f01ec5825c188365ea41dd63470f7df4b1d2ad",
+        "9e8274ffa895e44dcdd0bb80129c1ffbad054eb6",
+        "cb2fce58cce443c7dddd308381377689c94c8b36",
+        "ad36e3c9e80fae771d636328420cebe7d544baae",
+        "0c7040e3fc011125d02e5539d1aabc5e2d57e541",
+        "1c8c7107a0e31309a2cc58edb00ec05bca7c3fd7",
+        "c9070cc8d526fca65780cedc25c1966b57cf7532",
+        "c6028a875f953eff9e8e403622b0aac127d1b4a6",
+        "b7f80acc89aaa354e0664580d88abfea8fb4ba2f",
+        "91ace72b01d1194d2f816e66e0c796c7c58b8e30",
+        "5b50561d177235048c540f4c9325e93a2a4f37f4",
+        "73c9946611fe1080a339de9bc3706c5bae3767f6",
+        "c31eab5b5a7b63288ffc808a85d6cec715ad8d96",
+        "3957e3c402adfba20e3972026fb7d98e8d20305b",
+        "b922f0ddfa3914cc7b05387cd12fc606bc658dc4"
+      ],
+      "elapsed_seconds": 92.19550839997828,
+      "frozen_allowed_history_and_graph_unchanged": true,
+      "history_ready": true,
+      "independent_connected_verification": {
+        "ambiguous_or_similarity_links_promoted_to_accepted": 0,
+        "event_parent_edges_checked": 593,
+        "exact_event_occurrence_git_tree_blob_span_checks": 50,
+        "independent_first_parent_chain": true,
+        "limitations": "Verifies persistence, connectivity and source coherence; not an independent entity-identity ground truth",
+        "multi_event_named_entity_histories": [
+          {
+            "commits": [
+              "c31eab5b5a7b63288ffc808a85d6cec715ad8d96",
+              "73c9946611fe1080a339de9bc3706c5bae3767f6",
+              "5b50561d177235048c540f4c9325e93a2a4f37f4",
+              "91ace72b01d1194d2f816e66e0c796c7c58b8e30",
+              "b7f80acc89aaa354e0664580d88abfea8fb4ba2f"
+            ],
+            "eid": "oeid1_0c00938630c5854dfa827d960d329df913070d77928bcee3afde593e937ec671",
+            "events": 5
+          },
+          {
+            "commits": [
+              "c31eab5b5a7b63288ffc808a85d6cec715ad8d96",
+              "73c9946611fe1080a339de9bc3706c5bae3767f6",
+              "5b50561d177235048c540f4c9325e93a2a4f37f4",
+              "91ace72b01d1194d2f816e66e0c796c7c58b8e30",
+              "b7f80acc89aaa354e0664580d88abfea8fb4ba2f"
+            ],
+            "eid": "oeid1_a81bba4d2cde669a395ad11edd74a3ea2271fbd46cfe61888056a75f8f81dc0d",
+            "events": 5
+          },
+          {
+            "commits": [
+              "b922f0ddfa3914cc7b05387cd12fc606bc658dc4",
+              "3957e3c402adfba20e3972026fb7d98e8d20305b",
+              "73c9946611fe1080a339de9bc3706c5bae3767f6",
+              "b7f80acc89aaa354e0664580d88abfea8fb4ba2f",
+              "d90db86ed9eedb66ef69d71ea99dd9e9f0a3cf7c"
+            ],
+            "eid": "oeid1_b5c8300dc66f5cef32cfcf26cec9c9dcc796feacb292c8c7397d9c30598ce9b6",
+            "events": 5
+          },
+          {
+            "commits": [
+              "c31eab5b5a7b63288ffc808a85d6cec715ad8d96",
+              "73c9946611fe1080a339de9bc3706c5bae3767f6",
+              "91ace72b01d1194d2f816e66e0c796c7c58b8e30",
+              "b7f80acc89aaa354e0664580d88abfea8fb4ba2f"
+            ],
+            "eid": "oeid1_255c5022e6217b0ab655aee92213fd2fda3c777a1318cd4ba01923582a77cce6",
+            "events": 4
+          },
+          {
+            "commits": [
+              "b922f0ddfa3914cc7b05387cd12fc606bc658dc4",
+              "73c9946611fe1080a339de9bc3706c5bae3767f6",
+              "b7f80acc89aaa354e0664580d88abfea8fb4ba2f",
+              "d90db86ed9eedb66ef69d71ea99dd9e9f0a3cf7c"
+            ],
+            "eid": "oeid1_32297332b350e3b310efb51ad9763fbfa53835e0fde84cecc7cc3ff79e5b9419",
+            "events": 4
+          },
+          {
+            "commits": [
+              "c31eab5b5a7b63288ffc808a85d6cec715ad8d96",
+              "73c9946611fe1080a339de9bc3706c5bae3767f6",
+              "91ace72b01d1194d2f816e66e0c796c7c58b8e30",
+              "b7f80acc89aaa354e0664580d88abfea8fb4ba2f"
+            ],
+            "eid": "oeid1_4ad4efe6e98b5f0aa6d55a469ae2b8e1f42b4a160c822b8feb7b8ac4ddaf96a2",
+            "events": 4
+          },
+          {
+            "commits": [
+              "c31eab5b5a7b63288ffc808a85d6cec715ad8d96",
+              "73c9946611fe1080a339de9bc3706c5bae3767f6",
+              "91ace72b01d1194d2f816e66e0c796c7c58b8e30",
+              "b7f80acc89aaa354e0664580d88abfea8fb4ba2f"
+            ],
+            "eid": "oeid1_5644715cc99cc8faf6da8289640a46cac52bd11f1372a49e6a81264444060bf0",
+            "events": 4
+          },
+          {
+            "commits": [
+              "3957e3c402adfba20e3972026fb7d98e8d20305b",
+              "73c9946611fe1080a339de9bc3706c5bae3767f6",
+              "b7f80acc89aaa354e0664580d88abfea8fb4ba2f",
+              "d90db86ed9eedb66ef69d71ea99dd9e9f0a3cf7c"
+            ],
+            "eid": "oeid1_83bf2392ced40ae0768a48987bd3d00da4f5296a9e3bf775b8b004682fdb0d2d",
+            "events": 4
+          }
+        ],
+        "seconds": 16.460791199933738,
+        "status": "passed"
+      },
+      "no_checkout_files": true,
+      "original_git_inventory_digest": "640a31733098b42cef0793669f340d495cc977fa44e7b2a28a47ed90baba32a9",
+      "original_git_metadata_and_indexes_unchanged": true,
+      "original_repo": "artifacts/frozen-source/p06/repo",
+      "owned_repo": "artifacts/connected-history-pilot/p06/repo",
+      "owned_total_bytes": 71522626,
+      "persisted_index_files_bytes": {
+        "index.sqlite": 70606848,
+        "index.sqlite-shm": 32768,
+        "index.sqlite-wal": 0
+      },
+      "persisted_index_total_bytes": 70639616,
+      "position": 6,
+      "prior_ancestors": 8,
+      "raw_allowed_count": 108,
+      "reached_effective_base": true,
+      "readiness_summary": {
+        "build_seconds": 47.0605410002172,
+        "build_status": "partial",
+        "failure": null,
+        "history_ready": true,
+        "indexed_commits": 16,
+        "partial_coverage": [
+          {
+            "category": "extraction",
+            "omitted": 0,
+            "reason": "complete",
+            "records": 371
+          },
+          {
+            "category": "extraction",
+            "omitted": 0,
+            "reason": "removed",
+            "records": 5
+          },
+          {
+            "category": "extraction",
+            "omitted": null,
+            "reason": "unsupported_language",
+            "records": 528
+          },
+          {
+            "category": "matching",
+            "omitted": null,
+            "reason": "candidate_limit",
+            "records": 10
+          },
+          {
+            "category": "source_availability",
+            "omitted": null,
+            "reason": "unchecked_cached_source",
+            "records": 493
+          }
+        ],
+        "persisted_index_bytes": 70639616,
+        "position": 6,
+        "preflight": {
+          "broker_budget_gap_files": 0,
+          "extraction_gaps": 0,
+          "independent_occurrences_verified": 383,
+          "index_status": {
+            "anchor": "d90db86ed9eedb66ef69d71ea99dd9e9f0a3cf7c",
+            "broker_budget_gap_files": 0,
+            "max_storage_bytes": 2147483648,
+            "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+            "prior_ancestors": 8,
+            "raw_history_unchanged": true,
+            "scope_digest_semantics": "retained frozen raw-source scope identity",
+            "seconds": 84.05970160011202,
+            "status": "connected_history_built",
+            "supervisor_wall_limit_seconds": 300,
+            "workers": 2
+          }
+        },
+        "prior_ancestors": 8,
+        "receipt": "artifacts/connected-history-pilot/p06/readiness.json",
+        "scope": "artifacts/connected-history-pilot/p06/scope.json",
+        "source_coherence": "passed",
+        "status": "passed",
+        "supervised_seconds": 84.95658289967105,
+        "task": "brianc/node-postgres"
+      },
+      "source_copy_seconds": 2.9275491000153124,
+      "supervised_result": {
+        "build_seconds": 47.0605410002172,
+        "build_status": "partial",
+        "cached_files": 493,
+        "commits": 16,
+        "coverage": [
+          {
+            "category": "extraction",
+            "omitted": 0,
+            "reason": "complete",
+            "records": 371
+          },
+          {
+            "category": "extraction",
+            "omitted": 0,
+            "reason": "removed",
+            "records": 5
+          },
+          {
+            "category": "extraction",
+            "omitted": null,
+            "reason": "unsupported_language",
+            "records": 528
+          },
+          {
+            "category": "matching",
+            "omitted": null,
+            "reason": "candidate_limit",
+            "records": 10
+          },
+          {
+            "category": "source_availability",
+            "omitted": null,
+            "reason": "unchecked_cached_source",
+            "records": 493
+          }
+        ],
+        "elapsed_seconds": 84.06150369998068,
+        "failures": [],
+        "history_events_verification": {
+          "event_count": 558,
+          "exact_query_source_checks": 128,
+          "history_sample_counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            2
+          ],
+          "history_samples": 12,
+          "independent_sql_event_count": 558,
+          "lineage_truth": "not independently established; matching ambiguity retained"
+        },
+        "history_ready": true,
+        "indexes": [
+          {
+            "build_status": "partial",
+            "commits": [
+              "d90db86ed9eedb66ef69d71ea99dd9e9f0a3cf7c",
+              "f0f01ec5825c188365ea41dd63470f7df4b1d2ad",
+              "9e8274ffa895e44dcdd0bb80129c1ffbad054eb6",
+              "cb2fce58cce443c7dddd308381377689c94c8b36",
+              "ad36e3c9e80fae771d636328420cebe7d544baae",
+              "0c7040e3fc011125d02e5539d1aabc5e2d57e541",
+              "1c8c7107a0e31309a2cc58edb00ec05bca7c3fd7",
+              "c9070cc8d526fca65780cedc25c1966b57cf7532",
+              "c6028a875f953eff9e8e403622b0aac127d1b4a6",
+              "b7f80acc89aaa354e0664580d88abfea8fb4ba2f",
+              "91ace72b01d1194d2f816e66e0c796c7c58b8e30",
+              "5b50561d177235048c540f4c9325e93a2a4f37f4",
+              "73c9946611fe1080a339de9bc3706c5bae3767f6",
+              "c31eab5b5a7b63288ffc808a85d6cec715ad8d96",
+              "3957e3c402adfba20e3972026fb7d98e8d20305b",
+              "b922f0ddfa3914cc7b05387cd12fc606bc658dc4"
+            ],
+            "context": "ctx1_f31c65f5c77d39af7dc4384b52b5031cf82c705cc328b0cc7c99039dc70f53fd",
+            "generation": "gen1_924325255bee4126bef389a68f17fd5c",
+            "scope": "rb-connected",
+            "tip": "b922f0ddfa3914cc7b05387cd12fc606bc658dc4"
+          }
+        ],
+        "limits": {
+          "max_storage_bytes": 2147483648,
+          "workers": 2
+        },
+        "lineage_link_statuses": [
+          {
+            "method": "exact_own",
+            "reason": "strict_policy",
+            "records": 57,
+            "status": "accepted"
+          },
+          {
+            "method": "exact_subtree",
+            "reason": "strict_policy",
+            "records": 38,
+            "status": "accepted"
+          },
+          {
+            "method": "structural_locator",
+            "reason": "strict_policy",
+            "records": 1056,
+            "status": "accepted"
+          },
+          {
+            "method": "exact_body",
+            "reason": "duplicate_or_retained_source",
+            "records": 347,
+            "status": "ambiguous"
+          },
+          {
+            "method": "exact_own",
+            "reason": "duplicate_or_retained_source",
+            "records": 802,
+            "status": "ambiguous"
+          },
+          {
+            "method": "exact_subtree",
+            "reason": "duplicate_or_retained_source",
+            "records": 35,
+            "status": "ambiguous"
+          },
+          {
+            "method": "similarity",
+            "reason": "competing_candidates",
+            "records": 24,
+            "status": "ambiguous"
+          },
+          {
+            "method": "structural_locator",
+            "reason": "copy_or_swap",
+            "records": 74,
+            "status": "ambiguous"
+          },
+          {
+            "method": "exact_body",
+            "reason": "stub",
+            "records": 1,
+            "status": "rejected"
+          }
+        ],
+        "parse_statuses": {
+          "complete": 370,
+          "unsupported_language": 36
+        },
+        "parsed_files": 406,
+        "preflight": {
+          "broker_budget_gap_files": 0,
+          "extraction_gaps": 0,
+          "independent_occurrences_verified": 383,
+          "index_status": {
+            "anchor": "d90db86ed9eedb66ef69d71ea99dd9e9f0a3cf7c",
+            "broker_budget_gap_files": 0,
+            "max_storage_bytes": 2147483648,
+            "policy_digest": "d796bb8516449e59706d477b07f98749ebab56067e8e9dab28459c16850fdd5f",
+            "prior_ancestors": 8,
+            "raw_history_unchanged": true,
+            "scope_digest_semantics": "retained frozen raw-source scope identity",
+            "seconds": 84.05970160011202,
+            "status": "connected_history_built",
+            "supervisor_wall_limit_seconds": 300,
+            "workers": 2
+          }
+        },
+        "resources": {
+          "cleanup_complete": true,
+          "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+          "main_sampled_peak_bytes": 70606848,
+          "observed_tree_cpu_seconds": 68.59375,
+          "owned_identities": 413,
+          "rss_tree_sampled_peak_bytes": 365731840,
+          "sample_interval_seconds": 0.05,
+          "samples": 1041,
+          "temp_spool_bytes": null,
+          "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+          "unavailable": [],
+          "wal_sampled_peak_bytes": 71284272
+        },
+        "returncode": 0,
+        "row_counts": {
+          "event": 4637,
+          "file_state": 904,
+          "generation_event": 4637,
+          "lineage": 4217,
+          "lineage_link": 2434,
+          "membership": 16
+        },
+        "scope_path": "artifacts/connected-history-pilot/p06/scope.json",
+        "source_verification": {
+          "canonical_digest": "e91b4becabc1ecec29b37a4e5c745525163926c0019711bfab2c3d8f2edc5391",
+          "exact_member_scope": "passed",
+          "git_blob_and_source_digest_checks": 128,
+          "git_member_tree_entry_checks": 128,
+          "independent_python_ast_span_checks": 0,
+          "inventory_completeness": "not independently established",
+          "lineage_truth": "not independently established for these real repositories",
+          "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+          "python_span_examples": [],
+          "sql_foreign_keys": "passed",
+          "sql_integrity": "passed",
+          "stored_contracts": "passed"
+        },
+        "stage": "complete",
+        "status": "passed",
+        "storage": {
+          ".git\\gita\\index.sqlite": 70606848,
+          ".git\\gita\\index.sqlite-shm": 32768,
+          ".git\\gita\\index.sqlite-wal": 0
+        },
+        "supervised_seconds": 84.95658289967105
+      },
+      "task": "brianc/node-postgres",
+      "task_id": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871"
+    }
+  ],
+  "schema_version": 1,
+  "scopes": "artifacts/connected-history-pilot/scopes.json",
+  "source_checkout": ".",
+  "source_revision": "d0a924d8a1a11634fe86173149f937ac907be277",
+  "source_runtime_file_hashes": {
+    "src\\gita\\entities\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src\\gita\\entities\\extractor.py": "8cfcbead6ae9e374da170a1dc1d4380f1b8d0aa1b351d32f20ae131691473cef",
+    "src\\gita\\entities\\languages.py": "96e8ad5de4a2a2e1ed6394b73cfa7a30b3af8fe8cbea3de4dcf1dbb645df1e7b",
+    "src\\gita\\entities\\model.py": "566ffadb4364519a247eadebe9d95f52a82952c639586450c68f0505648295e0",
+    "src\\gita\\entities\\sql.py": "9bb3061f73d99ce87622c4b6e4a7f16f942d2e532caa97333c85a4447de0b74e",
+    "src\\gita\\entities\\store.py": "f4b4de1b70ac4a39d67300910c7412464f3daf41a030f53421008c76783e5196",
+    "src\\gita\\index\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src\\gita\\index\\builder.py": "dc70a75fd7e281e7e6bb977b8cdea3b8aa5dee7eff0e78bcb8033e77c7971689",
+    "src\\gita\\index\\compare.py": "8ad3d20e91fb5bef93e577b6902899fe2e715342d27c2c36edf6df8414e13ff1",
+    "src\\gita\\index\\evidence.py": "a89f95ca939bc5293a04272f6343d2fcfbb4b1e751da9adfbc786ce378b6ca3c",
+    "src\\gita\\index\\matching.py": "17a7958ebd4f7c137f9538c054501167739f6f5f43e73642461d24fd2c344295",
+    "src\\gita\\index\\model.py": "18f6dadf1afee6ea208425de5a39722f2f46803067da75b9c2035718538c9529",
+    "src\\gita\\index\\query.py": "27ebaaf6c7236c62a663c5cf5084514a6cd239825987918ee3466cbe4843a07b",
+    "src\\gita\\index\\schema.py": "e158d8dd05cd8195441fd25223577482b7b5bdf3bcf69bfd7c73c85f9ebd3426",
+    "src\\gita\\index\\store.py": "5c079d61d45c3eb45b86b744ad8156a0ec167c43fe6cac70983ae9fc36d00c39",
+    "src\\gita\\index\\worker.py": "2269c108a21ee6e412d83813e28d3b205ebb80b100ca62b5cc8d335eb44963f7",
+    "src\\gita\\vcs\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src\\gita\\vcs\\git.py": "a740e0547b466d1b12064d24c445862f6a58fb8c38c1c8329e910aa4f59f7249"
+  },
+  "status": "complete",
+  "study": "bounded connected-history development pilot",
+  "wall_seconds_since_task_timestamp": 859.344375
+}

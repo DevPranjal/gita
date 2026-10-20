@@ -1,0 +1,28 @@
+{
+  "kind": "No-model exact replay of three real refusals after query-only core lookup fix",
+  "rows": [
+    {
+      "operation": "source",
+      "previous_error": "not_found",
+      "now_error": null,
+      "status": "ambiguous",
+      "characters": 137
+    },
+    {
+      "operation": "history",
+      "previous_error": "refused",
+      "now_error": null,
+      "status": "ok",
+      "characters": 0
+    },
+    {
+      "operation": "diff",
+      "previous_error": "refused",
+      "now_error": null,
+      "status": "source_or_history_returned",
+      "characters": 1649
+    }
+  ],
+  "original_log_unchanged": true,
+  "corpus_programs_executed": false
+}

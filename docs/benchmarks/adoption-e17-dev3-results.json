@@ -1,0 +1,226 @@
+{
+  "kind": "E17 on-demand dependencies; three development pairs",
+  "quality_status": "Provisional: known Node external-contract classification error in both arms; separate symmetric policy correction required.",
+  "protocol": "65ffaa2fb12203f2ff969310afa72ad31852dfdec9ff98866cfeef53cd730226",
+  "source_commit": "080f8177e3a26f653489c3df32f901d6f5369386",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "native_session_credit_setting": 60,
+  "session_reservation": 90,
+  "complete_pairs": 3,
+  "all_attempt_costs": {
+    "B": {
+      "credits": 120.94146,
+      "input_tokens": 717836,
+      "output_tokens": 10908,
+      "reasoning_tokens": 7294
+    },
+    "H": {
+      "credits": 114.18016,
+      "input_tokens": 635734,
+      "output_tokens": 10760,
+      "reasoning_tokens": 7038
+    }
+  },
+  "judge_credits": 56.6445,
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 0.8333333333333334,
+        "grounded_recall": 0.13897907647907648,
+        "augmented_precision": 0.9333333333333332,
+        "augmented_recall": 0.20138888888888887,
+        "novel_tp_count": 4,
+        "novel_tp_yield": 0.3111111111111111,
+        "candidate_count": 11,
+        "golden_tp_count": 48,
+        "matched_count": 7,
+        "matched_tp_count": 6,
+        "unmatched_count": 4,
+        "unmatched_tp_count": 4,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 6
+      },
+      "micro": {
+        "grounded_precision": 0.8571428571428571,
+        "grounded_recall": 0.125,
+        "augmented_precision": 0.9090909090909091,
+        "augmented_recall": 0.19230769230769232,
+        "novel_tp_count": 4,
+        "novel_tp_yield": 0.36363636363636365,
+        "candidate_count": 11,
+        "golden_tp_count": 48,
+        "matched_count": 7,
+        "matched_tp_count": 6,
+        "unmatched_count": 4,
+        "unmatched_tp_count": 4,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 6
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 0.9166666666666666,
+        "grounded_recall": 0.15936147186147184,
+        "augmented_precision": 0.9444444444444445,
+        "augmented_recall": 0.20440821256038647,
+        "novel_tp_count": 3,
+        "novel_tp_yield": 0.19444444444444442,
+        "candidate_count": 11,
+        "golden_tp_count": 48,
+        "matched_count": 8,
+        "matched_tp_count": 7,
+        "unmatched_count": 3,
+        "unmatched_tp_count": 3,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 7
+      },
+      "micro": {
+        "grounded_precision": 0.875,
+        "grounded_recall": 0.14583333333333334,
+        "augmented_precision": 0.9090909090909091,
+        "augmented_recall": 0.19607843137254902,
+        "novel_tp_count": 3,
+        "novel_tp_yield": 0.2727272727272727,
+        "candidate_count": 11,
+        "golden_tp_count": 48,
+        "matched_count": 8,
+        "matched_tp_count": 7,
+        "unmatched_count": 3,
+        "unmatched_tp_count": 3,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 7
+      }
+    }
+  },
+  "rows": [
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "B",
+      "status": "valid",
+      "credits": 29.1199,
+      "input_tokens": 163656,
+      "output_tokens": 3180,
+      "reasoning_tokens": 2397,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 11,
+        "executed_call_attempts": 11,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "initial_characters": 50629,
+      "wall_seconds": 104.10900000002584
+    },
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "H",
+      "status": "valid",
+      "credits": 31.54102,
+      "input_tokens": 146722,
+      "output_tokens": 4802,
+      "reasoning_tokens": 3740,
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 15,
+        "executed_call_attempts": 15,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "initial_characters": 55804,
+      "wall_seconds": 91.39099999997416
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "H",
+      "status": "valid",
+      "credits": 37.4105,
+      "input_tokens": 255336,
+      "output_tokens": 2549,
+      "reasoning_tokens": 1347,
+      "findings": 1,
+      "tool_audit": {
+        "evidence_calls": 31,
+        "executed_call_attempts": 31,
+        "denied_over_budget": 0,
+        "indexed_calls": 4,
+        "errors": 2
+      },
+      "indexed_operations": {
+        "source": 3
+      },
+      "initial_characters": 58947,
+      "wall_seconds": 58.71799999999348
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "B",
+      "status": "valid",
+      "credits": 41.68492,
+      "input_tokens": 272997,
+      "output_tokens": 3410,
+      "reasoning_tokens": 1918,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 33,
+        "executed_call_attempts": 33,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "initial_characters": 59008,
+      "wall_seconds": 67.125
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "H",
+      "status": "valid",
+      "credits": 45.22864,
+      "input_tokens": 233676,
+      "output_tokens": 3409,
+      "reasoning_tokens": 1951,
+      "findings": 6,
+      "tool_audit": {
+        "evidence_calls": 25,
+        "executed_call_attempts": 25,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "initial_characters": 80408,
+      "wall_seconds": 68.53100000001723
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "B",
+      "status": "valid",
+      "credits": 50.13664,
+      "input_tokens": 281183,
+      "output_tokens": 4318,
+      "reasoning_tokens": 2979,
+      "findings": 5,
+      "tool_audit": {
+        "evidence_calls": 24,
+        "executed_call_attempts": 24,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "initial_characters": 80409,
+      "wall_seconds": 84.70300000000861
+    }
+  ],
+  "limitations": [
+    "Small repeatedly used development sample; not held-out confirmation or confidence-bound noninferiority.",
+    "Custom Copilot semantic judge and pinned official arithmetic, not official upstream judge.",
+    "Related definitions retained privately but NOT delivered in initial native prompt.",
+    "Independent review/judge stochasticity remains; do not compare cross-experiment baseline changes as treatment causality."
+  ]
+}

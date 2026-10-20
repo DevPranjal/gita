@@ -1,0 +1,214 @@
+{
+  "kind": "E25 fresh post-empty-source-fix three-case qualification",
+  "protocol": "7fc35a424cd8cfad28d00d94ff762bba33cd31e37c947f87ee286e8b21c92b39",
+  "source_commit": "136c9baf5e99f9385b2ee1e74d3e0e0455bdec14",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "rows": [
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "B",
+      "status": "valid",
+      "credits": 43.82988,
+      "input_tokens": 223157,
+      "output_tokens": 3610,
+      "reasoning_tokens": 2163,
+      "cache_write_tokens": 60170,
+      "findings": 8,
+      "tool_audit": {
+        "evidence_calls": 24,
+        "executed_call_attempts": 24,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {}
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "H",
+      "status": "valid",
+      "credits": 46.61944,
+      "input_tokens": 273417,
+      "output_tokens": 4172,
+      "reasoning_tokens": 1960,
+      "cache_write_tokens": 59418,
+      "findings": 9,
+      "tool_audit": {
+        "evidence_calls": 28,
+        "executed_call_attempts": 28,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {}
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "B",
+      "status": "valid",
+      "credits": 18.33622,
+      "input_tokens": 87976,
+      "output_tokens": 2197,
+      "reasoning_tokens": 664,
+      "cache_write_tokens": 22645,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 22,
+        "executed_call_attempts": 22,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {}
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "H",
+      "status": "valid",
+      "credits": 17.08556,
+      "input_tokens": 94950,
+      "output_tokens": 2109,
+      "reasoning_tokens": 691,
+      "cache_write_tokens": 19700,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 17,
+        "executed_call_attempts": 17,
+        "denied_over_budget": 0,
+        "indexed_calls": 2,
+        "errors": 1
+      },
+      "indexed_operations": {
+        "source": 1
+      }
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arm": "H",
+      "status": "valid",
+      "credits": 50.3784,
+      "input_tokens": 237364,
+      "output_tokens": 5992,
+      "reasoning_tokens": 3641,
+      "cache_write_tokens": 62814,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 32,
+        "executed_call_attempts": 32,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 1
+      },
+      "indexed_operations": {}
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arm": "B",
+      "status": "valid",
+      "credits": 39.08362,
+      "input_tokens": 232712,
+      "output_tokens": 3552,
+      "reasoning_tokens": 1842,
+      "cache_write_tokens": 49271,
+      "findings": 7,
+      "tool_audit": {
+        "evidence_calls": 29,
+        "executed_call_attempts": 29,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {}
+    }
+  ],
+  "review_totals": {
+    "B": {
+      "credits": 101.24972,
+      "input_tokens": 543845,
+      "output_tokens": 9359
+    },
+    "H": {
+      "credits": 114.0834,
+      "input_tokens": 605731,
+      "output_tokens": 12273
+    }
+  },
+  "judge_credits": 128.0795,
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 0.9523809523809524,
+        "grounded_recall": 0.4259259259259259,
+        "augmented_precision": 0.9583333333333334,
+        "augmented_recall": 0.44354354354354353,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.08928571428571429,
+        "candidate_count": 17,
+        "golden_tp_count": 54,
+        "matched_count": 15,
+        "matched_tp_count": 14,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 19
+      },
+      "micro": {
+        "grounded_precision": 0.9333333333333333,
+        "grounded_recall": 0.35185185185185186,
+        "augmented_precision": 0.9411764705882353,
+        "augmented_recall": 0.375,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.11764705882352941,
+        "candidate_count": 17,
+        "golden_tp_count": 54,
+        "matched_count": 15,
+        "matched_tp_count": 14,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 19
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 0.9629629629629629,
+        "grounded_recall": 0.28703703703703703,
+        "augmented_precision": 0.9629629629629629,
+        "augmented_recall": 0.3409090909090909,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.2222222222222222,
+        "candidate_count": 14,
+        "golden_tp_count": 54,
+        "matched_count": 12,
+        "matched_tp_count": 11,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 19
+      },
+      "micro": {
+        "grounded_precision": 0.9166666666666666,
+        "grounded_recall": 0.35185185185185186,
+        "augmented_precision": 0.9285714285714286,
+        "augmented_recall": 0.375,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.14285714285714285,
+        "candidate_count": 14,
+        "golden_tp_count": 54,
+        "matched_count": 12,
+        "matched_tp_count": 11,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 19
+      }
+    }
+  },
+  "interpretation": "All3pairs operationally valid and scored; quality spread differs by task. Equal pooled recall does not erase lower macro recall; retain all metrics and do not promote an aggregate win.",
+  "limitations": [
+    "No resumption or erasure of the original E24 terminal stop.",
+    "Earlier-used development cases, not independent confirmation.",
+    "Same official pinned arithmetic with custom source-grounded Copilot judge."
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "kind": "E18 production named-source interface two-case navigation pilot",
+  "protocol": "792dfaa187aaaa86525e2bf9378e06c8e4b2ebeece81f33b57e181f002aaa3e8",
+  "source_commit": "641f374adaf015757b913b690cbb19ae3f1aec24",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "review_totals": {
+    "B": {
+      "credits": 61.12936,
+      "input_tokens": 371805,
+      "output_tokens": 5053
+    },
+    "H": {
+      "credits": 63.06894,
+      "input_tokens": 370684,
+      "output_tokens": 6979
+    }
+  },
+  "judge_credits": 65.5283,
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 0.5,
+        "grounded_recall": 0.08333333333333333,
+        "augmented_precision": 0.5,
+        "augmented_recall": 0.08333333333333333,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 3,
+        "golden_tp_count": 16,
+        "matched_count": 3,
+        "matched_tp_count": 1,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      },
+      "micro": {
+        "grounded_precision": 0.3333333333333333,
+        "grounded_recall": 0.0625,
+        "augmented_precision": 0.3333333333333333,
+        "augmented_recall": 0.0625,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 3,
+        "golden_tp_count": 16,
+        "matched_count": 3,
+        "matched_tp_count": 1,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 0.5,
+        "grounded_recall": 0.08333333333333333,
+        "augmented_precision": 0.75,
+        "augmented_recall": 0.18831168831168832,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.5,
+        "candidate_count": 4,
+        "golden_tp_count": 16,
+        "matched_count": 2,
+        "matched_tp_count": 1,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      },
+      "micro": {
+        "grounded_precision": 0.5,
+        "grounded_recall": 0.0625,
+        "augmented_precision": 0.75,
+        "augmented_recall": 0.16666666666666666,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.5,
+        "candidate_count": 4,
+        "golden_tp_count": 16,
+        "matched_count": 2,
+        "matched_tp_count": 1,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      }
+    }
+  },
+  "rows": [
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "B",
+      "status": "valid",
+      "credits": 49.60668,
+      "input_tokens": 335635,
+      "output_tokens": 3831,
+      "findings": 2,
+      "tools": {
+        "evidence_calls": 25,
+        "executed_call_attempts": 25,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "named_source_requests": 0,
+      "named_source_bodies": 0,
+      "ambiguity_queries": 0
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "H",
+      "status": "valid",
+      "credits": 40.06906,
+      "input_tokens": 239085,
+      "output_tokens": 4087,
+      "findings": 2,
+      "tools": {
+        "evidence_calls": 26,
+        "executed_call_attempts": 26,
+        "denied_over_budget": 0,
+        "indexed_calls": 7,
+        "errors": 0
+      },
+      "named_source_requests": 7,
+      "named_source_bodies": 7,
+      "ambiguity_queries": 0
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "arm": "H",
+      "status": "valid",
+      "credits": 22.99988,
+      "input_tokens": 131599,
+      "output_tokens": 2892,
+      "findings": 2,
+      "tools": {
+        "evidence_calls": 24,
+        "executed_call_attempts": 24,
+        "denied_over_budget": 0,
+        "indexed_calls": 6,
+        "errors": 3
+      },
+      "named_source_requests": 1,
+      "named_source_bodies": 0,
+      "ambiguity_queries": 0
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "arm": "B",
+      "status": "valid",
+      "credits": 11.52268,
+      "input_tokens": 36170,
+      "output_tokens": 1222,
+      "findings": 1,
+      "tools": {
+        "evidence_calls": 7,
+        "executed_call_attempts": 7,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "named_source_requests": 0,
+      "named_source_bodies": 0,
+      "ambiguity_queries": 0
+    }
+  ],
+  "limitations": [
+    "Two earlier-used development tasks, not held-out or noninferiority confidence-bound evidence.",
+    "Same shared complete-supporting-source judge profile for both arms; no manual supplementation or reviewer retry.",
+    "Known source bytes and observed named-tool usage do not independently prove the performance effect."
+  ]
+}

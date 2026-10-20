@@ -15,11 +15,11 @@ from hashlib import blake2b, file_digest, new as new_hash
 from importlib.metadata import distribution
 from pathlib import Path
 
-from tree_sitter import Node
+from gita.entities.syntax import SyntaxNode as Node, children as syntax_children
 import tree_sitter_language_pack as language_pack
-from tree_sitter_language_pack import get_parser
+from gita.entities.parsers import get_parser
 
-from gita.entities import extractor, languages
+from gita.entities import extractor, languages, parsers, syntax
 from gita.entities.languages import LanguageSpec
 
 from . import model
@@ -35,6 +35,9 @@ _STRING_NODES = frozenset({
     "string", "string_literal", "raw_string_literal", "char_literal",
     "interpreted_string_literal", "raw_string", "template_string",
     "verbatim_string_literal", "interpolated_string_expression",
+    "line_string_literal", "multi_line_string_literal", "encapsed_string", "heredoc", "nowdoc",
+    "string_lit", "regex", "regex_literal", "heredoc_body",
+    "heredoc_template",
 })
 _INTERPOLATION_NODES = frozenset({"interpolation", "template_substitution"})
 
@@ -143,7 +146,8 @@ def _artifacts() -> tuple:
             )
             artifacts.append(("grammar-cache", cached))
         for name, filename in (("adapter", __file__), ("extractor", extractor.__file__),
-                       ("languages", languages.__file__)):
+                       ("languages", languages.__file__), ("parsers", parsers.__file__),
+                       ("syntax", syntax.__file__)):
             artifacts.append((name, _artifact_digest(Path(filename))))
         artifacts.append(("parse-contract", _parse_contract_digest()))
     except IndexContractError:
@@ -266,7 +270,7 @@ def _locate(root: Node, spec: LanguageSpec, maximum: int) -> list:
         located.append((root, 0, (0,)))
         child_counts = [1, 0]
         parent = 1
-    stack = [(iter(root.children), parent)]
+    stack = [(iter(syntax_children(root, spec.name)), parent)]
     while stack:
         children, parent = stack[-1]
         node = next(children, None)
@@ -283,7 +287,7 @@ def _locate(root: Node, spec: LanguageSpec, maximum: int) -> list:
             located.append((node, parent, discriminator))
             parent = len(located) - 1
             child_counts.append(0)
-        stack.append((iter(node.children), parent))
+        stack.append((iter(syntax_children(node, spec.name)), parent))
     return located
 
 
@@ -322,7 +326,7 @@ def _tokens(node: Node, spec: LanguageSpec, source: bytes, *,
             continue
         items = []
         cursor = current.start_byte
-        for child in current.children:
+        for child in syntax_children(current, spec.name):
             if cursor < child.start_byte:
                 items.append(((cursor, child.start_byte), in_body, in_literal))
             items.append((child, in_body, in_literal))
@@ -377,6 +381,10 @@ def _build(root: Node, spec: LanguageSpec, source: bytes, parse_id: str,
         synthetic = parent_index is None
         parent = None if synthetic else definitions[parent_index]
         kind = "module" if synthetic else extractor._entity_kind(node, spec).value
+        # The index reserves module for a synthetic file root. Named Rust mod
+        # items (including out-of-line declarations) are real namespace bindings.
+        if not synthetic and kind == "module":
+            kind = "namespace"
         if synthetic:
             span = SourceSpan(0, len(source), 1, 1 + source[:-1].count(b"\n") if source else 1)
             names = ("<module>",)
@@ -460,6 +468,9 @@ def _parse_evidence(source: bytes, path: bytes, object_format: str,
     root = tree.root_node
     if root.has_error:
         return unknown(ParseStatus.PARSE_ERROR, "syntax tree contains errors")
+    unsupported_layout = extractor._unsupported_layout(root, spec)
+    if unsupported_layout is not None:
+        return unknown(ParseStatus.UNSUPPORTED_LANGUAGE, unsupported_layout)
     parse_id = content_id("par1", (fingerprint, blob.fields(), path))
     try:
         definitions, versions = _build(root, spec, source, parse_id, fingerprint, limits)

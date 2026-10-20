@@ -3625,7 +3625,7 @@ class TestIncrementalBuilder:
             assert inventories == list(suffix)
             assert advances == list(enumerate(suffix, start=3))
             assert set(calls["commit"]) == set(suffix)
-            assert calls["iter_tree"] == list(suffix)
+            assert calls["iter_tree"] == [], "suffix inventory must use tree deltas, not complete enumeration"
             assert parsed_sources == [(relocated, b"new.py")]
             assert (extended.commits, extended.parsed_files, extended.cached_files) == (5, 1, 2)
             assert self._generation_rows(store, original) == frozen

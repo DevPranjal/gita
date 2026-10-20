@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "review_method": "Read public Git source; mark function keyword through its closing brace, excluding surrounding comments. Compute UTF-8 byte offsets and SHA-256 independently of the production parser.",
+  "spans": [
+    {
+      "repository": "express",
+      "commit": "a419aa7350389a275ab45fde2e849ed1f02449ef",
+      "path": "lib/express.js",
+      "name": "createApplication",
+      "start_byte": 660,
+      "end_byte": 1227,
+      "source_span_sha256": "1700da5f6e24bf4f2e1aebc8e286c182d18de0477e41c835d99db5705517f354"
+    },
+    {
+      "repository": "ripgrep",
+      "commit": "3fce3b5bb0236da2df6d99672afb8a719642eca7",
+      "path": "crates/core/main.rs",
+      "name": "main",
+      "start_byte": 1530,
+      "end_byte": 2575,
+      "source_span_sha256": "efac214d642ab7afa042a871705bcfb4f22994eb7badecb948e89670a3df1837"
+    }
+  ]
+}
