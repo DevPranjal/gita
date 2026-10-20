@@ -10,8 +10,8 @@ confirmation.
 
 Engineering changes are tested and committed; **no25-task model run is
 authorized**. All50 initial evidence packets passed offline preparation.
-The latest completed paid E32 pilot saves11.77% credits with H, but input is0.57%
-higher and recall is lower. E30 repairs Swift/PHP and qualifies all five formerly failing
+The latest completed paid E33 pilot saves2.66% credits with H, but input is2.81%
+higher and precision/recall are lower. E30 repairs Swift/PHP and qualifies all five formerly failing
 source requests. E31 adds the remaining eight plain-language/configuration
 adapters and tests actual files rather than declaring registration a win.
 Macro-heavy C, Astro and other real syntax/format gaps remain explicit.
@@ -2228,3 +2228,52 @@ false plus the necessary discovery enforcement. Sol/medium all review/judge,
 native60/reserve90,600/400 ceilings; exact first pair is operational only.
 No unchanged-review retry, per-case winner selection or25 expansion before
 the complete cohort quality/cost result.
+
+### E33 completed: instruction alone does not establish a win
+
+[All costs and both judge stages](adoption-e33-indexworkflow3-results.json):
+B/H review credits124.62396/121.31098 (**H -2.66%**),
+input684,579/703,800 (**H +2.81%**), output11,463/12,830.
+All six reviews valid. Original judging140.17770 credits scores two pairs;
+the third classifier requests the complete Chat.php methods and query helpers.
+
+A separate frozen source stage validates and replaces only three same-HEAD
+numbered windows with the complete committed Chat.php. No other evidence is
+removed, no review/matcher is rerun, and context176397 stays within180000.
+Additional judging25.68870 credits. The two outstanding classifications both
+resolve TP; original incomplete grading is preserved.
+Full pooled augmented P91.67%/83.33%, R25.00%/21.43%;
+grounded R20.75%/16.98%. No25 expansion or successful-outcome claim.
+
+Only PHP requests indexed source (nine successful calls); Go/Swift remain raw.
+The source ledger elides71 previously delivered lines in PHP, zero in the other
+sessions. This treatment-side harness behavior is separate from persistent
+identity/history; do not attribute every cost difference to indexing.
+
+### Confirmed preload interaction
+
+Actual prompt construction places a later instruction after the workflow:
+"Begin with this evidence; do not repeat a start/map/source call merely to
+satisfy the workflow above." The shared packet can contain100k characters of
+raw/source evidence and a complete changed-hunk manifest. Avoiding a redundant
+map is consistent with that instruction, not proof that the map is broken.
+E33 therefore did not isolate a genuinely tool-led first investigation.
+Source selection and finding completeness remain hypotheses, not established
+causes of the precision/recall losses.
+
+## E34: tool-led review without automatic code preloading
+
+Use the same frozen product, qualified PR-window contexts, complete ordered
+three development cases21/16/22, seed20261021 and capability-aware B/H workflow.
+Set `initial_context=False` for **both** arms. Supply no preselected code,
+packet map, reference clues or initial source windows. Both obtain all evidence
+through their allowed tools with the same40-call budget and16k response profile.
+H's first indexed changed-code map now supplies actual missing initial evidence,
+rather than a duplicate of a large shared packet. Raw fallback is retained.
+
+This tests an ordinary tool-led agent workflow, closer to the legacy AACR
+interaction pattern, not a model upgrade, guaranteed efficacy improvement or
+held-out confirmation. Same Sol/medium reviewers and judges, first-pass checks,
+native60/reserve90 and600/400 phase ceilings. Keep all three cases and all
+cost/quality outcomes; no unchanged retry, irrelevant history quota or25
+authorization based only on greater tool use.
