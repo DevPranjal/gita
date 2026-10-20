@@ -10,10 +10,11 @@ confirmation.
 
 Engineering changes are tested and committed; **no25-task model run is
 authorized**. All50 initial evidence packets passed offline preparation.
-The latest complete E25 three-pair pilot costs12.68% more review credits
-and11.38% more input tokens with Gita. Pooled augmented recall is equal,
-but precision and macro recall are lower. All six reviews are valid; meaningful
-on-demand indexed uptake remains low. Preserve all previous policies, source
+The latest complete E26 three-pair ablation saves17.83% review credits
+and40.53% input tokens with Gita, but loses recall. Precision is100% in both
+arms. All six reviews are valid; all three H sessions request indexed source,
+but successful queries must not be confused with fully delivered bodies.
+Preserve all previous policies, source
 supplements and judging spend. Product correctness and useful tool uptake
 are not evidence that the requested joint benchmark target has been achieved.
 
@@ -1815,3 +1816,50 @@ transport only; keep all three outcomes regardless of per-case direction.
 No adaptive task selection, extra verifier, reference-guided source selection,
 unchanged-review retry or25 expansion. This ablation tests a mechanism; it
 does not promise a win or qualify as independent confirmation.
+
+### E26 completed: efficiency and adoption improve, recall does not
+
+[Full cohort results](adoption-e26-common-preload3-results.json):
+B/H review credits108.68900/89.30794 (**H -17.83%**),
+input715,110/425,290 (**H -40.53%**), output10,142/9,229.
+Judge spend127.26220 separately. Six valid reviews, all three pairs scored.
+Both pooled and macro augmented precision100%.
+Pooled grounded recall42.59%/33.33%, augmented recall45.61%/34.55%;
+macro augmented recall52.61%/37.59%. Joint objective fails.
+All three H sessions request indexed tools; eight successful source queries
+and two source lookup failures. No history/diff advantage is established.
+Identical preloads do not establish source selection as the cause of prior
+recall losses. Do not rerun unchanged reviewers or expand to25.
+
+Trace audit without reference labels reveals two concrete evidence-use problems:
+recursive path filters silently omit zero-depth members; and five of eight
+successful source queries return partial bodies with explicit continuations.
+The latter is an incomplete-delivery observation, not proof that a missing
+finding was caused by pagination. Actual continuation consumption needs separate
+accounting; success counts alone overstate complete indexed evidence delivery.
+
+## E27: repair shared search/list path semantics before more inference
+
+An authored Git fixture reproduces the real failure: `src/**/*.py` returns no
+match for `src/code.py`. The broker uses `fnmatch`, whose `**/` requires at least
+one slash. A literal directory such as `src` also returns no member. These
+are shared B/H broker defects, not evidence of incomplete entity indexes.
+
+One shared path predicate preserves every prior fnmatch match, supports
+zero-or-more complete `**` components with bounded iterative matching, and
+accepts literal directories. Search/list both report `coverage.matched_files`,
+distinguishing an empty path scope from no literal content matches.
+Descriptions document these semantics. Both arms get the same repair.
+No index rebuild, goldens, target-program execution or hidden source supplement.
+
+[Exact no-model replay](adoption-e27-search-replay.json) recovers four
+`insertBanner(` and three `lastFontUsed` matches for H's previous empty queries,
+and four `defaultFont` matches for B's directory query. Existing exact-file and
+nested glob results remain unchanged. Original E26 receipts/judgments stay fixed.
+The failing repro preceded the fix;92 evidence/protocol/readable tests pass.
+
+Next small qualification uses the same frozen E26 design and complete ordered
+three-case cohort, changing only the shared broker repair. Same Sol/medium,
+native60/reserve90,600/400 ceilings, no automatic retries or per-case selection.
+This tests the repair's effect; it is not guaranteed quality improvement.
+Keep25 blocked unless the joint cohort gate is supported.

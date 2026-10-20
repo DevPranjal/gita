@@ -7,7 +7,7 @@ import pytest
 
 from gita.eval.reviewbench.common import (ProtocolError, digest, git, pr_identity,
                                          task_identity, validate_findings)
-from gita.eval.reviewbench.evidence import Evidence, inventory
+from gita.eval.reviewbench.evidence import Evidence, inventory, matches_path
 from gita.eval.reviewbench.preparation import build_indexes, preflight, source_scope
 
 
@@ -51,6 +51,41 @@ def fixture_repo(tmp_path, request):
 
 def config(scope, arm="H"):
     return {**scope, "arm": arm, "cursor_secret": secrets.token_hex(32)}
+
+
+@pytest.mark.parametrize(("path", "pattern", "expected"), [
+    ("root.py", "**/*.py", True),
+    ("src/deep/code.py", "src/**/*.py", True),
+    ("src/a/b/code.py", "**/a/**/code.py", True),
+    ("src/code.py", "src/**/nested/**/*.py", False),
+    ("src/code.ts", "src/**/*.py", False),
+    ("src2/code.py", "src", False),
+    ("src/code.py", "src/no.py", False),
+    ("src/deep/code.py", "*.py", True),
+    ("src/code.py", "src/[a-z]*.py", True),
+])
+def test_path_filter_preserves_existing_globs_and_recursive_boundaries(path, pattern, expected):
+    assert matches_path(path, pattern) is expected
+
+
+@pytest.mark.parametrize("fixture_repo", ["nested"], indirect=True)
+@pytest.mark.parametrize("pattern", ["src/**/*.py", "**/code.py", "src", "src/"])
+@pytest.mark.parametrize("arm", ["B", "H"])
+def test_recursive_path_filters_include_zero_depth_and_directory_members(fixture_repo, pattern, arm):
+    _, scope, _ = fixture_repo
+    e = Evidence(config(scope, arm))
+    try:
+        found = e.execute("search", {"text": "return", "path": pattern})
+        assert "src/code.py:2:    return 20 / value" in found["text"]
+        assert found["coverage"]["matched_files"] == 1
+        listed = e.execute("list_files", {"pattern": pattern})
+        assert listed["text"] == "src/code.py"
+        assert listed["coverage"]["matched_files"] == 1
+        assert "SECRET_FUTURE_LABEL" not in found["text"]
+        empty = e.execute("search", {"text": "return", "path": "absent/**/*.py"})
+        assert empty["text"] == "" and empty["coverage"]["matched_files"] == 0
+    finally:
+        e.close()
 
 
 def test_entity_context_returns_exact_named_source_without_copying_references(fixture_repo, monkeypatch):

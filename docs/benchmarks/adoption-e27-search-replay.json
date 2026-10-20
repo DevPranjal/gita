@@ -1,0 +1,92 @@
+{
+  "kind": "No-model exact committed search replay",
+  "prior_protocol": "77accdeac0d1a7f01e4bdbd44996c068736580dbda717644f7a16b16daa798f5",
+  "rows": [
+    {
+      "arm": "H",
+      "arguments": {
+        "commit": "1d0b6642fcf5ca31fc308c3d603b19ab02ea249e",
+        "text": "insertBanner(",
+        "path": "FIGLet.VSCodeExtension/src/**/*.ts"
+      },
+      "old_match_lines": 0,
+      "new_match_lines": 4,
+      "matched_files": 15,
+      "new_response_digest": "320315bdce05d48f756374b4ddb81255caaa5f1dba3c75437d5b84b4107e0816"
+    },
+    {
+      "arm": "H",
+      "arguments": {
+        "commit": "1d0b6642fcf5ca31fc308c3d603b19ab02ea249e",
+        "text": "defaultFont",
+        "path": "FIGLet.VSCodeExtension/src/**/*.tsx"
+      },
+      "old_match_lines": 1,
+      "new_match_lines": 1,
+      "matched_files": 4,
+      "new_response_digest": "a08e9ee258faf90f10e7ec973053c625fd97bfc5feb33c64aebc4e646a82696c"
+    },
+    {
+      "arm": "H",
+      "arguments": {
+        "commit": "1d0b6642fcf5ca31fc308c3d603b19ab02ea249e",
+        "text": "lastFontUsed",
+        "path": "FIGLet.VSCodeExtension/src/**/*"
+      },
+      "old_match_lines": 0,
+      "new_match_lines": 3,
+      "matched_files": 22,
+      "new_response_digest": "40d8b94a4dde19edd77540cb30cffcae4f3b2a1cc030451d15bc1093ea02b068"
+    },
+    {
+      "arm": "H",
+      "arguments": {
+        "commit": "1d0b6642fcf5ca31fc308c3d603b19ab02ea249e",
+        "text": "PortableCommandAlias",
+        "path": "**/*"
+      },
+      "old_match_lines": 1,
+      "new_match_lines": 1,
+      "matched_files": 200,
+      "new_response_digest": "361e69c1695c56b5b696bb25cb8a39fd92c0dcc5718a2128d46dc64b2665f87f"
+    },
+    {
+      "arm": "B",
+      "arguments": {
+        "text": "selectedFont",
+        "path": "FIGLet.VSCodeExtension/src/webview/SettingsApp.tsx",
+        "commit": "1d0b6642fcf5ca31fc308c3d603b19ab02ea249e"
+      },
+      "old_match_lines": 5,
+      "new_match_lines": 5,
+      "matched_files": 1,
+      "new_response_digest": "9717dce11adb8421842ac5cfaef4a064839bb439943bea38c483c295d5b7f9fe"
+    },
+    {
+      "arm": "B",
+      "arguments": {
+        "text": "defaultFont",
+        "path": "FIGLet.VSCodeExtension/src",
+        "commit": "1d0b6642fcf5ca31fc308c3d603b19ab02ea249e"
+      },
+      "old_match_lines": 0,
+      "new_match_lines": 4,
+      "matched_files": 22,
+      "new_response_digest": "865d574eb1e8dc144aac1c3178f2dc6938540ee8e02d6a8cfa9d9095f2ed1603"
+    },
+    {
+      "arm": "B",
+      "arguments": {
+        "text": "msg.default",
+        "path": "FIGLet.VSCodeExtension/src/**/*.tsx",
+        "commit": "1d0b6642fcf5ca31fc308c3d603b19ab02ea249e"
+      },
+      "old_match_lines": 2,
+      "new_match_lines": 2,
+      "matched_files": 4,
+      "new_response_digest": "69f6739042f9f8f96c21e0b482794fc2fcb82ec2419e1b4f609c2532e7f26b16"
+    }
+  ],
+  "paid_calls": 0,
+  "interpretation": "Shared broker glob semantics missed zero-depth recursive members and literal directory scopes. Both arms repaired symmetrically. This does not prove the cause of all recall losses or change prior reviews/judgments."
+}

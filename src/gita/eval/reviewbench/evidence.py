@@ -68,8 +68,10 @@ SCHEMAS = {
 DESCRIPTIONS = {
     "raw_diff": "Exact effective-merge-base to review-head unified Git patch. Optional member path.",
     "read_file": "Exact source lines at an allowed commit. Default head; same history scope in both arms.",
-    "search": "Literal search across all tracked text source at an allowed commit; optional path glob.",
-    "list_files": "List every tracked member path at an allowed commit; optional glob.",
+    "search": "Literal search across tracked text at an allowed commit; optional path glob or directory. "
+              "**/ includes zero directory levels. Coverage reports matching tracked files.",
+    "list_files": "List tracked paths at an allowed commit; optional glob or directory. "
+                  "**/ includes zero directory levels. Coverage reports matching tracked files.",
     "commit_log": "Ordered allowed commits only, with subjects and parents qualified at the scope boundary.",
     "file_history": "Raw Git changes for a member path over the same declared allowed commit graph.",
     "continue_evidence": "Continue any previously issued next_cursor without copying the original tool arguments. Cursor must belong to this session. Preferred for all paginated evidence.",
@@ -111,6 +113,26 @@ def tool_inventory(config: dict) -> list[dict]:
     if config.get("indexed_workflow") and not config.get("indexes"):
         return [tool for tool in tools if tool["name"] in COMMON_TOOLS + ("index_status",)]
     return tools
+
+
+def matches_path(path: str, pattern: str) -> bool:
+    if fnmatch.fnmatchcase(path, pattern):
+        return True
+    if not any(c in pattern for c in "*?["):
+        return path.startswith(pattern.rstrip("/") + "/")
+    if "**" not in pattern.split("/"):
+        return False
+    parts = path.split("/")
+    positions = {0}
+    for component in pattern.split("/"):
+        if component == "**":
+            positions = set(range(min(positions), len(parts) + 1)) if positions else set()
+        else:
+            positions = {i + 1 for i in positions
+                         if i < len(parts) and fnmatch.fnmatchcase(parts[i], component)}
+        if not positions:
+            return False
+    return len(parts) in positions
 
 
 class Evidence:
@@ -334,9 +356,12 @@ class Evidence:
     def list_files(self, pattern: str = "*", commit: str | None = None, cursor: str = "") -> dict:
         commit = self.commit(commit)
         require(type(pattern) is str and len(pattern) <= 500, "Invalid path glob")
-        text = "\n".join(p for p in self.paths(commit) if fnmatch.fnmatchcase(p, pattern))
-        return {**self.page(text, "list_files", {"pattern": pattern, "commit": commit}, cursor),
-                "provenance": self.provenance(commit)}
+        members = [p for p in self.paths(commit) if matches_path(p, pattern)]
+        result = {**self.page("\n".join(members), "list_files",
+                             {"pattern": pattern, "commit": commit}, cursor),
+                  "provenance": self.provenance(commit)}
+        result["coverage"]["matched_files"] = len(members)
+        return result
 
     def search(self, text: str, pattern: str = "*", commit: str | None = None,
                cursor: str = "", path: str | None = None) -> dict:
@@ -348,6 +373,7 @@ class Evidence:
         require(type(text) is str and 0 < len(text) <= 500 and not any(c in text for c in "\0\r\n"),
                 "Expected a nonempty literal single-line query")
         require(type(pattern) is str and len(pattern) <= 500, "Invalid path glob")
+        members = [p for p in self.paths(commit) if matches_path(p, pattern)]
         # Git grep reads only one fixed tree and does not interpret the literal as an option.
         found = git(self.repo, "grep", "-n", "-I", "-F", "-e", text, commit,
                     "--", accepted=(0, 1)).decode("utf8", "replace")
@@ -360,13 +386,15 @@ class Evidence:
                 raise ProtocolError("Search emitted unexpected revision")
             relative = line[len(prefix):]
             # Path membership is verified independently of git grep's rendering.
-            for path in self.paths(commit):
-                if relative.startswith(path + ":") and fnmatch.fnmatchcase(path, pattern):
+            for path in members:
+                if relative.startswith(path + ":"):
                     matches.append(relative)
                     break
-        return {**self.page("\n".join(matches), "search",
-                           {"text": text, "pattern": pattern, "commit": commit}, cursor),
-                "provenance": self.provenance(commit)}
+        result = {**self.page("\n".join(matches), "search",
+                             {"text": text, "pattern": pattern, "commit": commit}, cursor),
+                  "provenance": self.provenance(commit)}
+        result["coverage"]["matched_files"] = len(members)
+        return result
 
     def commit_log(self, cursor: str = "") -> dict:
         rows = []
