@@ -1635,3 +1635,37 @@ Hardware/software details are recorded. The proposed small-repository250ms
 warm-call diagnostic is met for this named scope; five opens are descriptive,
 not a confidence-backed latency SLA. This does not establish large-repository
 indexing speed or review quality, and excludes rendering/model time.
+
+## E22: complete changed-range discovery under the unchanged budget
+
+The initial packet now retains every textual Git `--unified=0` hunk, aligned
+to the complete changed-file inventory. Each range has an explicit delivered
+coverage code computed from unions of **visible current-source blocks only**.
+Same-file membership and unused private related bodies do not count as coverage.
+Zero-count/deletion ranges are adjacent-context-only, never deleted identity.
+Shared legends provide exact decoding and valid raw/source locators for both arms.
+
+First real full25 offline qualification was48/50: the408-file/1,360-hunk task
+could not fit verbose manifest objects. It was not dropped and the100,000
+budget was not raised. Inventory-aligned delta rows and shared defaults retain
+all coordinates plus per-hunk coverage compactly. The compressed representation
+has an explicit stateful decoding legend; no coordinate guessing is required.
+Both `raw_diff(path)` and unified `gita_review(operation='raw_patch',path=path)`
+are named; `read_file` is available in both arms.
+
+[Corrected full25 qualification](adoption-e22-manifest-qualification.json)
+is **50/50 ready**, with identical B/H inventories/raw patches.
+The largest packet is98,931 serialized characters, including all1,360 hunks;
+the affected manifest alone is14,505 characters.37 owned manifest/rendering
+tests and96 integrated context/protocol/model/judge tests pass. Existing
+readable source and receipt tamper/CRLF checks remain in force.
+
+Prospective comparison: same declared positions3/4/7 and seed20261020 as E21,
+no task substitution after quality inspection. Keep readable evidence,
+first-pass finding checks, on-demand related source, fixed Sol/medium,
+native60/reserve90 and600/400 phase ceilings unchanged. Complete manifest
+metadata consumes budget before source allocation equally in both arms;
+source/raw allocations can consequently shrink relative to E21. This is an
+explicit evidence-selection change, not a free-token claim. Inspect the first
+native pair, then assess the entire three-case development cohort before25.
+No late filtering, reruns or inferred absence from omitted source.

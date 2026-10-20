@@ -141,6 +141,11 @@ def test_outermost_callable_not_module_or_class_and_no_query_parse(harness, monk
     assert blocks[1]["entities"] == [{"name": "outer", "span": outer["span"],
                                      "generation": "generation", "complete": True}]
     assert harness.session.entities_in.call_args.kwargs["at"].digest.hex() == HEAD
+    baseline = build()
+    assert baseline["raw_patch"] == packet["raw_patch"]
+    assert baseline["inventory"] == packet["inventory"]
+    assert baseline["changed_hunks"] == packet["changed_hunks"]
+    assert baseline["current_source"]["blocks"] != packet["current_source"]["blocks"]
 
 
 @pytest.mark.parametrize("kind", ["module", "class", "unsupported_language"])

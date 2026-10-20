@@ -15,6 +15,7 @@ from .related_source import _priority, related_sources
 
 _CALLABLES = frozenset({"function", "method", "constructor", "accessor"})
 _HUNKS = re.compile(r"(?m)^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@")
+_HUNK_RANGES = re.compile(r"(?m)^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 
 
 def serialize_context(packet: dict) -> str:
@@ -188,6 +189,93 @@ def _size_key(value: dict) -> str:
     return serialize_context(value)
 
 
+def _change_manifest(evidence: Evidence, paths: list[str], head_members: dict) -> dict:
+    """Keep every exact Git hunk, independently of source selection and indexing."""
+    files = []
+    for path in sorted(paths):
+        patch = git(evidence.repo, "diff", "--no-ext-diff", "--no-textconv", "--unified=0",
+                    evidence.base, evidence.head, "--", ":(literal)" + path)
+        hunks = []
+        head_lines = None
+        for match in _HUNK_RANGES.finditer(patch.decode("utf8", "surrogateescape")):
+            old, removed, start, count = (int(match[1]), int(match[2] or "1"),
+                                          int(match[3]), int(match[4] or "1"))
+            hunk = {"base": [old, removed], "head": [start, count],
+                    "preload": "not-in-preload"}
+            if not count:
+                if head_lines is None:
+                    raw = evidence.blob(path, evidence.head) if path in head_members else b""
+                    head_lines = raw.count(b"\n") + int(bool(raw) and not raw.endswith(b"\n"))
+                hunk.update({"head_context": "adjacent-context-only",
+                             "adjacent_line": max(1, min(start, head_lines)) if head_lines else None})
+            hunks.append(hunk)
+        files.append({"path": path, "hunks": hunks})
+    return {"complete": True, "range_format": "[start,count] from Git --unified=0",
+            "locators": {"raw": "raw_diff(path) or gita_review(operation='raw_patch',path=path)",
+                         "source": "read_file(path,commit=head,start_line=start,end_line=start+count-1); "
+                                   "zero-count: adjacent_line only, if non-null"},
+            "coverage": "preload covers current_source.blocks only, not related bodies that may be hidden; "
+                        "zero-count covers adjacent context only, never deleted entity identity; "
+                        "no hunks means no textual hunk",
+            "files": files}
+
+
+def _compact_manifest(manifest: dict, paths: list[str]) -> dict:
+    """Lossless numeric rows share inventory paths and default repeated counts."""
+    files = {file["path"]: file["hunks"] for file in manifest["files"]}
+    groups = []
+    for path in paths:
+        rows, previous_end, offset = [], 0, 0
+        for hunk in files[path]:
+            old, removed = hunk["base"]
+            start, count = hunk["head"]
+            expected = old + offset + int(not removed) - int(not count)
+            row = [old - previous_end, removed, count - removed,
+                   start - expected, hunk.get("adjacent_line")]
+            defaults = [None, 1, 0, 0, None]
+            while len(row) > 1 and row[-1] == defaults[len(row) - 1]:
+                row.pop()
+            rows.append(row)
+            previous_end, offset = old + removed, offset + count - removed
+        groups.append(rows)
+    return {key: value for key, value in manifest.items() if key != "files"} | {
+        "row_fields": ["base_skip", "base_count", "count_delta",
+                       "head_adjust", "adjacent_line"],
+        "row_defaults": [None, 1, 0, 0, None],
+        "preload_values": ["not-in-preload", "partial", "full"],
+        "preload": "0" * sum(map(len, groups)),
+        "decode": "hunks[i] uses inventory[i].path; reset base_end=offset=0 per file. "
+                  "base_start=base_end+base_skip; head_count=base_count+count_delta; "
+                  "head_start=base_start+offset+(base_count==0)-(head_count==0)+head_adjust; "
+                  "then base_end=base_start+base_count; offset+=count_delta. "
+                  "Omitted trailing fields use row_defaults. head_count=0 is adjacent-context-only. "
+                  "preload characters index preload_values, one per hunk in file/row order.",
+        "hunks": groups}
+
+
+def _manifest_coverage(manifest: dict, sources: list[dict]) -> None:
+    spans: dict[str, list[tuple[int, int]]] = {}
+    for source in sources:
+        span = source.get("span") or source
+        if "path" in source and "start_line" in span and "end_line" in span:
+            spans.setdefault(source["path"], []).append((span["start_line"], span["end_line"]))
+    for file in manifest["files"]:
+        for hunk in file["hunks"]:
+            start, count = hunk["head"]
+            if not count:
+                start, count = hunk["adjacent_line"], 1
+            if start is None:
+                continue
+            end, covered, cursor = start + count - 1, 0, start
+            for low, high in sorted(spans.get(file["path"], [])):
+                low, high = max(cursor, low), min(end, high)
+                if low <= high:
+                    covered += high - low + 1
+                    cursor = high + 1
+            hunk["preload"] = ("full" if covered == count else
+                               "partial" if covered else "not-in-preload")
+
+
 def _select_blocks(current: dict, candidates: list[dict], budget: int) -> None:
     """Rank disjoint HEAD blocks globally; headers have zero changed-line gain."""
     coverage = current["coverage"]
@@ -208,8 +296,10 @@ def _select_blocks(current: dict, candidates: list[dict], budget: int) -> None:
 def build_initial_context(scope: dict, *, indexed: bool, max_characters: int = 100000) -> dict:
     """Build initial B/H evidence from vetted scope without exposing scope secrets.
 
-    Inventory and raw patch allocation are arm-independent. HEAD blocks and related
-    sources are whole units; omissions and coverage gaps never establish absence.
+    Inventory, complete changed-hunk map and raw allocation are arm-independent.
+    Reserve the map before source allocation; coverage describes current-source
+    spans only, never related bodies that presentation may hide or file membership.
+    Omissions and gaps never establish absence.
     """
     require(type(indexed) is bool, "indexed must be boolean")
     require(type(max_characters) is int and max_characters > 0,
@@ -222,6 +312,7 @@ def build_initial_context(scope: dict, *, indexed: bool, max_characters: int = 1
             evidence.repo, "diff", "--no-ext-diff", "--no-textconv", "--name-only", "-z",
             evidence.base, evidence.head).split(b"\0") if p]
         head_members, base_members = evidence.members(evidence.head), evidence.members(evidence.base)
+        manifest = _change_manifest(evidence, paths, head_members)
         inventory = []
         for path in paths:
             inventory.append({"path": path, "base": list(base_members[path]) if path in base_members else None,
@@ -233,15 +324,18 @@ def build_initial_context(scope: dict, *, indexed: bool, max_characters: int = 1
                                 "absence_claim": False}}
         related = {"view": "related", "omission": "whole_section_exceeds_budget"}
         packet = {"version": 1, "base": evidence.base, "head": evidence.head,
-                  "inventory": inventory, "raw_patch": None, "current_source": current,
+                  "inventory": inventory, "changed_hunks": _compact_manifest(manifest, paths),
+                  "raw_patch": None, "current_source": current,
                   "related": related,
                   "budget": {"max_characters": max_characters,
-                             "allocation": "remaining: raw 45%, HEAD 35%, related 20%"},
+                             "allocation": "after inventory/complete hunk map: raw 45%, HEAD 35%, related 20%"},
                   "coverage": {"absence_claim": False,
                                "limitations": "Bounded evidence; omitted or unresolved is not absent."}}
         # Reserve fixed container/coverage growth before splitting the remaining budget.
         remaining = max_characters - _size(packet) - 512
-        require(remaining >= 1000, "Inventory/container exceeds meaningful initial-context budget")
+        require(remaining >= 1000,
+                "Complete changed-hunk manifest/inventory/container exceeds meaningful initial-context budget; "
+                "refusing rather than dropping paths or hunks")
         raw_budget, head_budget = int(remaining * .45), int(remaining * .35)
         related_budget = remaining - raw_budget - head_budget
         raw = git(evidence.repo, "diff", "--no-ext-diff", "--no-textconv", "--unified=3",
@@ -251,6 +345,7 @@ def build_initial_context(scope: dict, *, indexed: bool, max_characters: int = 1
         if indexed and any(evidence.head in row["commits"] for row in evidence.config.get("indexes", [])):
             session = evidence._index(evidence.head)
         candidates = []
+        hunks_by_path = {file["path"]: file["hunks"] for file in manifest["files"]}
         for path in sorted(paths, key=_priority):
             if path not in head_members:
                 continue
@@ -259,10 +354,7 @@ def build_initial_context(scope: dict, *, indexed: bool, max_characters: int = 1
                 current["coverage"]["gaps"]["binary_HEAD_raw_patch_only"] = (
                     current["coverage"]["gaps"].get("binary_HEAD_raw_patch_only", 0) + 1)
                 continue
-            patch = git(evidence.repo, "diff", "--no-ext-diff", "--no-textconv", "--unified=0",
-                        evidence.base, evidence.head, "--", ":(literal)" + path)
-            anchors = [(int(m[1]), int(m[2] or "1"))
-                       for m in _HUNKS.finditer(patch.decode("utf8", "surrogateescape"))]
+            anchors = [tuple(hunk["head"]) for hunk in hunks_by_path[path]]
             try:
                 blocks, gaps = _blocks(evidence, path, content, anchors, session, indexed)
             except UnicodeError:
@@ -287,6 +379,11 @@ def build_initial_context(scope: dict, *, indexed: bool, max_characters: int = 1
                 break
             # The helper budgets sources, not per-symbol/candidate status metadata.
             source_budget = max(2, source_budget // 2)
+        _manifest_coverage(manifest, current["blocks"])
+        by_path = {file["path"]: file["hunks"] for file in manifest["files"]}
+        statuses = packet["changed_hunks"]["preload_values"]
+        packet["changed_hunks"]["preload"] = "".join(
+            str(statuses.index(hunk["preload"])) for path in paths for hunk in by_path[path])
         require(_size(current) <= head_budget, "HEAD coverage metadata exceeds section budget")
         require(len(serialize_context(packet)) <= max_characters, "Initial-context serialization exceeds budget")
         return packet
