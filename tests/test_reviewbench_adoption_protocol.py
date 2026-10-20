@@ -147,6 +147,7 @@ def test_initial_packets_are_frozen_by_task_and_arm(tmp_path, frozen_inputs, mon
     frozen = campaign.seal(tmp_path / "corpus", root, scopes, parsers, seed=1,
                            development_pilot=True, initial_context=True)
     assert frozen["initial_context"] and frozen["reviewer_input_diagnostics"]
+    assert frozen["indexed_preload"] is True
     assert set(frozen["initial_context_digests"]) == {"0", "6"}
     assert campaign.verify_protocol(root) == frozen
     target = root / "initial-context" / "0" / "H.json"
@@ -156,6 +157,37 @@ def test_initial_packets_are_frozen_by_task_and_arm(tmp_path, frozen_inputs, mon
     target.unlink()
     with pytest.raises(ProtocolError, match="file missing"):
         campaign.verify_protocol(root)
+
+
+def test_common_raw_preload_is_identical_and_frozen(tmp_path, frozen_inputs, monkeypatch):
+    from gita.eval.reviewbench import initial_context
+    scopes, parsers = frozen_inputs
+    monkeypatch.setattr(campaign, "preflight", lambda scope: None)
+    monkeypatch.setattr(initial_context, "build_initial_context",
+                        lambda scope, **kw: {"task": scope["task"]["id"], **kw})
+    root = tmp_path / "run"
+    frozen = campaign.seal(tmp_path / "corpus", root, scopes, parsers, seed=1,
+                           development_pilot=True, initial_context=True, indexed_preload=False)
+    assert frozen["indexed_preload"] is False
+    assert campaign.verify_protocol(root) == frozen
+    for task, arms in frozen["initial_context_digests"].items():
+        assert arms["B"] == arms["H"]
+        assert read_json(root / "initial-context" / task / "H.json")["indexed"] is False
+    for invalid in (None, 0, "false"):
+        with pytest.raises(ProtocolError, match="Indexed-preload"):
+            campaign.protocol(tmp_path, scopes, parsers, development_pilot=True,
+                              indexed_preload=invalid)
+
+
+def test_common_preload_refuses_nondeterministic_evidence(tmp_path, frozen_inputs, monkeypatch):
+    from gita.eval.reviewbench import initial_context
+    scopes, parsers = frozen_inputs
+    monkeypatch.setattr(campaign, "preflight", lambda scope: None)
+    packets = iter([{"text": "first"}, {"text": "different"}])
+    monkeypatch.setattr(initial_context, "build_initial_context", lambda *a, **kw: next(packets))
+    with pytest.raises(ProtocolError, match="Common raw preload"):
+        campaign.seal(tmp_path / "corpus", tmp_path / "run", scopes, parsers, seed=1,
+                      development_pilot=True, initial_context=True, indexed_preload=False)
 
 
 @pytest.fixture

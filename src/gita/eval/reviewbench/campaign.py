@@ -94,7 +94,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
              native_session_credits: int = SESSION_CREDITS, initial_related: bool = True,
              judge_runtime_contracts: dict | None = None, judge_reviewed_source: bool = False,
              initial_context_format: str = "json", proof_before_reporting: bool = False,
-             minimal_workflow: bool = False) -> dict:
+             minimal_workflow: bool = False, indexed_preload: bool = True) -> dict:
     validate_settings(reviewer_model, reviewer_reasoning)
     validate_settings(judge_model, judge_reasoning)
     require(type(integrated_source) is bool and (not integrated_source or indexed_workflow),
@@ -107,6 +107,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
     require(initial_context_format in ("json", "readable-v1"), "Unknown initial evidence format")
     require(type(proof_before_reporting) is bool, "Finding-check selection must be boolean")
     require(type(minimal_workflow) is bool, "Minimal-workflow selection must be boolean")
+    require(type(indexed_preload) is bool, "Indexed-preload selection must be boolean")
     if judge_runtime_contracts is not None:
         from .runtime_contracts import validate_contracts
         validate_contracts(judge_runtime_contracts)
@@ -166,6 +167,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "initial_context_format": initial_context_format,
             "proof_before_reporting": proof_before_reporting,
             "minimal_workflow": minimal_workflow,
+            "indexed_preload": indexed_preload,
             "reviewer_input_diagnostics": initial_context,
             "workflow_guidance": WORKFLOW_GUIDANCE if indexed_workflow and not minimal_workflow else {},
             "tool_schemas": {arm: inventory(arm) for arm in ("B", "H")},
@@ -203,7 +205,7 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
          native_session_credits: int = SESSION_CREDITS, initial_related: bool = True,
          judge_runtime_contracts: dict | None = None, judge_reviewed_source: bool = False,
          initial_context_format: str = "json", proof_before_reporting: bool = False,
-         minimal_workflow: bool = False) -> dict:
+         minimal_workflow: bool = False, indexed_preload: bool = True) -> dict:
     require(run_root.resolve() != root.resolve() and root.resolve() not in run_root.resolve().parents,
             "Run artifacts must live outside corpus root")
     for scope in scopes:
@@ -218,7 +220,7 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
                       native_session_credits=native_session_credits, initial_related=initial_related,
                       judge_runtime_contracts=judge_runtime_contracts, judge_reviewed_source=judge_reviewed_source,
                       initial_context_format=initial_context_format, proof_before_reporting=proof_before_reporting,
-                      minimal_workflow=minimal_workflow)
+                      minimal_workflow=minimal_workflow, indexed_preload=indexed_preload)
     body = {k: v for k, v in frozen.items() if k != "digest"}
     body["run_root_digest"] = digest(str(run_root.resolve()))
     if initial_context:
@@ -228,13 +230,18 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
             task = scope["task"]["id"]
             body["initial_context_digests"][task] = {}
             for arm in ("B", "H"):
-                packet = build_initial_context(scope, indexed=arm == "H", max_characters=100_000)
+                packet = build_initial_context(scope, indexed=arm == "H" and indexed_preload,
+                                               max_characters=100_000)
                 body["initial_context_digests"][task][arm] = digest(packet)
                 target = run_root / "initial-context" / task / (arm + ".json")
                 if target.exists():
                     require(read_json(target) == packet, "Existing initial evidence changed")
                 else:
                     write_json(target, packet)
+            if not indexed_preload:
+                require(body["initial_context_digests"][task]["B"]
+                        == body["initial_context_digests"][task]["H"],
+                        "Common raw preload differs between arms")
     frozen = {**body, "digest": digest(body)}
     if (run_root / "protocol.json").exists():
         require(read_json(run_root / "protocol.json") == frozen, "Existing run protocol mismatch")

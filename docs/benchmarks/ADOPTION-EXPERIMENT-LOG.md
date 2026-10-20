@@ -10,12 +10,11 @@ confirmation.
 
 Engineering changes are tested and committed; **no25-task model run is
 authorized**. All50 initial evidence packets passed offline preparation.
-The latest one-pair canary reduces review credits22.47% and input48.99%,
-but does not preserve precision. Its history-rendering change was not actually
-used by that reviewer session; five indexed source queries were used.
-The separate stricter-equivalence/source-complete policy still finds one TP
-per arm, with one B FP versus two H FP. Preserve both policies, all source
-supplements and all judging spend. Product correctness and useful tool uptake
+The latest complete E25 three-pair pilot costs12.68% more review credits
+and11.38% more input tokens with Gita. Pooled augmented recall is equal,
+but precision and macro recall are lower. All six reviews are valid; meaningful
+on-demand indexed uptake remains low. Preserve all previous policies, source
+supplements and judging spend. Product correctness and useful tool uptake
 are not evidence that the requested joint benchmark target has been achieved.
 
 ## 2026-10-15: E0, diagnose before another paid run
@@ -1783,3 +1782,36 @@ the same three cases3/4/7 and minimal workflow candidate, not a ledger reset.
 Keep all measured E24 costs and missing slots in its report. Same Sol/medium,
 native60/reserve90,600/400 phase ceilings and unchanged source-grounded judging.
 No25 inference until a valid complete small cohort meets the joint gate.
+
+### E25 completed: operational recovery, negative efficacy result
+
+[All three paired outcomes](adoption-e25-emptyfix3-results.json) are retained.
+Six valid reviews, no terminal stop, all three pairs scored. B/H review credits
+101.24972/114.08340 (**H +12.68%**), input543,845/605,731 (**H +11.38%**),
+output9,359/12,273. Judging costs128.07950 separately.
+Pooled augmented precision94.12%/92.86%, recall37.50%/37.50%;
+macro augmented precision95.83%/96.30%, recall44.35%/34.09%.
+Equal pooled recall does not erase the per-task/macro loss.
+Only one H session requested indexed tools (two attempts, one successful source).
+The other two used no indexed calls. This is not evidence of a history advantage.
+The empty-source repair is operationally validated; the treatment fails the
+joint efficacy objective. No25 expansion and no rerun of unchanged reviewers.
+
+## E26: separate source preloading from on-demand indexed tools
+
+E25 still conflates different source selection with tool availability: B receives
+raw HEAD windows, H receives selected indexed callable bodies. Whether that
+selection hurts review coverage is a hypothesis, not an established cause.
+Freeze a controlled ablation with **identical raw initial packets in both arms**.
+The explicit `indexed_preload=False` setting is hashed into the protocol;
+sealing refuses unequal B/H packet digests. Default behavior remains unchanged.
+Both keep the complete hunk manifest, same budget, readable rendering and
+first-pass checks. H retains its qualified indexed tools on demand, B does not.
+Raw preload is not counted as indexed usage.
+
+Use the same ordered three development cases3/4/7, Sol/medium for both reviewers
+and judges, native60/reserve90,600/400 phase ceilings. First pair validates
+transport only; keep all three outcomes regardless of per-case direction.
+No adaptive task selection, extra verifier, reference-guided source selection,
+unchanged-review retry or25 expansion. This ablation tests a mechanism; it
+does not promise a win or qualify as independent confirmation.
