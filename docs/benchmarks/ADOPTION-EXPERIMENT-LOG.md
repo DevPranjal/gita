@@ -10,10 +10,10 @@ confirmation.
 
 Engineering changes are tested and committed; **no25-task model run is
 authorized**. All50 initial evidence packets passed offline preparation.
-The latest E27 three-pair candidate has higher judged recall and8.45% lower
-input, but review credits are0.29% higher and only one H session requests indexed
-source. Precision is100% in both arms under a separate dependency-complete judge
-stage. This is a promising development signal, not a verified indexed win.
+The E27 quality signal **did not transfer** to E28's three prospectively selected
+unused tasks. E28 H costs5.60% more credits, uses13.91% more input and has lower
+recall. Precision is100% in both arms under the custom judge. All six reviews
+and all three quality pairs are valid, but the joint objective remains unmet.
 Preserve all previous policies, source
 supplements and judging spend. Product correctness and useful tool uptake
 are not evidence that the requested joint benchmark target has been achieved.
@@ -1908,3 +1908,52 @@ qualified on-demand H tools. Same600/400 review/judge ceilings,
 native60/reserve90. First pair checks operational validity, not favorable
 efficacy. Keep every selected case and all missing/failed slots. Do not
 promote to25 from a favorable subset or change the candidate mid-cohort.
+
+### E28 completed: prospective transfer fails; do not expand
+
+[All selected transfer outcomes](adoption-e28-transfer3-results.json) are
+retained, including the endpoint-only task. B/H review credits112.14360/118.42238
+(**H +5.60%**), input566,638/645,440 (**H +13.91%**), output14,215/14,915.
+Judge spend114.06620 separately. Six valid reviews, all three pairs scored;
+no supplementary judge inputs or model retries required.
+
+Pooled augmented P100%/100%, R23.21%/21.43%;
+grounded R18.87%/16.98%; macro augmented R22.86%/20.27%.
+This does not meet either the efficiency or quality objective. Do not average
+it away with E27's favorable reused-task result or run25 on that basis.
+
+Meaningful indexed history was actually used in one H session: two history
+queries returned four events with three code-bearing patches. One history page
+still had a continuation. The other two H sessions requested no indexed tools.
+Neither requested named indexed source. This is better evidence of real history
+use than status-only counts, but not a demonstrated aggregate quality/cost gain.
+
+### Completed source bodies, not just successful requests
+
+[E26 cursor-consumption audit](adoption-e26-source-delivery-audit.json)
+follows actual issued source cursors through later successful tool calls.
+Eight successful named-source requests yielded three complete first responses
+and **four complete bodies after continuations**. Four remained partial.
+One class request consumed a second page but still did not finish its body.
+No source execution, new inference or reference labels were used in this audit.
+Partial evidence was explicitly flagged, not incorrect Git bytes; whether
+more conspicuous presentation improves completion is still untested.
+
+### Latest complete pilots at a glance
+
+Values are B/H; precision/recall below are pooled augmented values.
+These adaptive experiments must not be pooled into a claimed confirmation win.
+
+| Trial | Review credits | Input tokens | Precision | Recall | H sessions requesting indexed tools |
+|---|---:|---:|---:|---:|---:|
+| E25 | 101.25 / 114.08 | 543,845 / 605,731 | 94.12% / 92.86% | 37.50% / 37.50% | 1/3 |
+| E26 | 108.69 / 89.31 | 715,110 / 425,290 | 100% / 100% | 45.61% / 34.55% | 3/3 |
+| E27, dependency-complete judge stage | 105.89 / 106.20 | 677,264 / 620,034 | 100% / 100% | 29.09% / 44.64% | 1/3 |
+| E28, prospective transfer | 112.14 / 118.42 | 566,638 / 645,440 | 100% / 100% | 23.21% / 21.43% | 1/3 |
+
+These four trials cost855.98070 review credits and489.02160 judge credits
+(including E27's requested-source stage), total1345.00230. Earlier experiments,
+technical stops and indexing/preparation costs remain separately retained;
+this is not an all-project cost total. No paid process or25-task campaign
+is left running after this transfer check. Further paid comparisons need a
+new, independently verified mechanism, not another unchanged reroll.
