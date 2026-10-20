@@ -1957,3 +1957,57 @@ technical stops and indexing/preparation costs remain separately retained;
 this is not an all-project cost total. No paid process or25-task campaign
 is left running after this transfer check. Further paid comparisons need a
 new, independently verified mechanism, not another unchanged reroll.
+
+## E29: complete source delivery within verified native transport bounds
+
+The source-consumption audit establishes an actionable delivery problem, not
+just low tool counts. Add an explicit `large_evidence_pages` profile, default
+false. The frozen protocol binds it identically to B/H broker configuration.
+Historical8000-character responses/6000-character pages remain the default.
+The new profile allows16000 serialized ASCII characters and14000 source
+characters, additionally bounding the JSON-embedded string to20000 characters
+so escaping cannot bypass the transport margin. Paginated results remain
+lossless; oversized nonpaginated metadata fails explicitly.
+
+[No-model replay](adoption-e29-complete-source-replay.json) completes all
+eight recorded named bodies in their first response, versus three previously.
+Largest response12969 serialized characters/13348 embedded characters.
+Source bytes, generation and complete-line receipts are independently verified.
+Both arms receive the same larger raw/source page allowance; initial100k
+preload allocation is unchanged. This is not an asymmetric context-budget gift.
+
+### Native qualification found and fixed a second budget boundary
+
+The first authored canary failed during Windows parser-worker setup because
+its launcher lacked a spawn-safe main guard. Preserve that zero-inference-cost
+preparation root; use a guarded launcher and fresh roots thereafter.
+
+[The next native attempt](adoption-e29-native-transport.json) proves recovery
+of hidden source tails but is **not** a clean named-source qualification:
+the public adapter's inner6000-token whole-answer budget refuses a heavily
+escaped body before the frontend can paginate. Three tool errors and8.85450
+credits are retained. A passing final answer does not erase those errors.
+
+Separate bounded local retrieval from agent disclosure: only the larger-page
+profile requests64000 adapter tokens internally; each model-visible result
+still obeys16000 serialized/20000 embedded characters. Public MCP defaults and
+the original small-page profile remain unchanged. A failing authored regression
+reproduces the inner refusal before the fix.
+
+[Fresh clean native qualification](adoption-e29-native-transport-v3.json):
+Sol/medium, four calls, zero errors; unpredictable ASCII and escaped-source tail
+markers recovered exactly, no source execution or builtin view access.
+Largest responses14055 serialized and19052 embedded characters. Cost10.51876
+credits, separately from review/judging efficacy. This is transport evidence,
+not benchmark quality.96 broader regressions passed before the inner-budget
+fix;12 focused named-source/profile/escaping tests pass after it.
+
+### Prospectively frozen efficacy check
+
+Retain E28's complete ordered positions21/16/22, seed20261021, unchanged common
+raw preload, minimal symmetric goal, Sol/medium review/judging and600/400 phase
+ceilings/native60/reserve90. Change only the explicit larger-page profile and
+its verified bounded retrieval path. These cases are now development reuse,
+not newly unseen transfer. First pair checks transport, not winning outcomes;
+retain all three cases, all failures and all source/history delivery counts.
+No25 authorization from no-model completeness or the canary alone.

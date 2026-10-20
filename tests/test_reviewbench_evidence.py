@@ -7,7 +7,7 @@ import pytest
 
 from gita.eval.reviewbench.common import (ProtocolError, digest, git, pr_identity,
                                          task_identity, validate_findings)
-from gita.eval.reviewbench.evidence import Evidence, inventory, matches_path
+from gita.eval.reviewbench.evidence import Evidence, MAX_TOOL_WIRE_CHARS, inventory, matches_path
 from gita.eval.reviewbench.preparation import build_indexes, preflight, source_scope
 
 
@@ -23,6 +23,8 @@ def fixture_repo(tmp_path, request):
     source.parent.mkdir(parents=True, exist_ok=True)
     duplicate = getattr(request, "param", None) == "duplicate"
     padding = ("    # " + "x" * 80 + "\n") * 100 if getattr(request, "param", None) == "large" else ""
+    if getattr(request, "param", None) == "escaped":
+        padding = ("    # " + '\\"' * 45 + "\n") * 99
     source.write_text("def divide(value):\n" + padding + "    return 10 / value\n"
                       + ("\ndef divide(other):\n    return 30 / other\n" if duplicate else ""),
                       encoding="utf8")
@@ -208,6 +210,71 @@ def test_named_source_ambiguity_returns_actionable_eids_without_selecting_source
         assert "error" not in selected, selected
         assert selected["coverage"]["complete_entity"]
         assert "return 20 / value" in selected["text"] or "return 40 / other" in selected["text"]
+    finally:
+        e.close()
+
+
+@pytest.mark.parametrize("fixture_repo", ["large"], indirect=True)
+def test_large_pages_deliver_complete_named_source_with_verified_receipt(fixture_repo):
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    e = Evidence({**config(indexed), "indexed_workflow": True,
+                  "integrated_source": True, "engine_frontend": True,
+                  "large_evidence_pages": True})
+    try:
+        result = e.execute("gita_review", {"operation": "source", "token": "divide"})
+        assert "error" not in result, result
+        assert result["coverage"]["complete_entity"] and not result["truncated"]
+        assert result["next_cursor"] is None and result["source_receipt"]
+        assert 8000 < len(json.dumps(result, ensure_ascii=True)) <= 16000
+        assert len(json.dumps(json.dumps(result, ensure_ascii=True))) <= MAX_TOOL_WIRE_CHARS
+        assert "return 20 / value" in result["text"]
+    finally:
+        e.close()
+
+
+@pytest.mark.parametrize("large", [False, True])
+def test_page_budget_bounds_embedded_wire_escaping_without_losing_bytes(fixture_repo, large):
+    _, scope, _ = fixture_repo
+    e = Evidence({**config(scope), "large_evidence_pages": large})
+    try:
+        text = ('\\\\"' + chr(0x1F600)) * 6000
+        pages, cursor = [], ""
+        while True:
+            result = e.page(text, "wire_probe", {}, cursor)
+            assert e.fits_response(result)
+            assert len(json.dumps(json.dumps(result, ensure_ascii=True))) <= MAX_TOOL_WIRE_CHARS
+            pages.append(result["text"])
+            cursor = result["next_cursor"]
+            if cursor is None:
+                break
+        assert "".join(pages) == text
+    finally:
+        e.close()
+
+
+@pytest.mark.parametrize("fixture_repo", ["escaped"], indirect=True)
+def test_large_named_source_separates_local_retrieval_and_wire_page_budgets(fixture_repo):
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    e = Evidence({**config(indexed), "indexed_workflow": True,
+                  "integrated_source": True, "engine_frontend": True,
+                  "large_evidence_pages": True})
+    try:
+        first = e.execute("gita_review", {"operation": "source", "token": "divide"})
+        assert "error" not in first, first
+        assert first["truncated"] and first["next_cursor"]
+        pieces = [first["text"]]
+        cursor = first["next_cursor"]
+        while cursor:
+            result = e.execute("continue_evidence", {"cursor": cursor})
+            assert "error" not in result and e.fits_response(result), result
+            pieces.append(result["text"])
+            cursor = result["next_cursor"]
+        assert "return 20 / value" in "".join(pieces)
+        lines = "".join(pieces).split("\n")
+        assert "\n".join(line.partition(": ")[2] for line in lines) + "\n" == e.blob(
+            "code.py", e.head).decode("utf8")
     finally:
         e.close()
 

@@ -110,6 +110,30 @@ def test_frontend_is_explicit_and_cannot_bypass_integrated_profile(tmp_path, fro
     assert "gita_review" not in h and "raw_diff" in h
 
 
+def test_large_evidence_pages_are_explicit_symmetric_and_receipt_bound(tmp_path, frozen_inputs):
+    scopes, parsers = frozen_inputs
+    default = campaign.protocol(tmp_path, scopes, parsers, development_pilot=True)
+    large = campaign.protocol(tmp_path, scopes, parsers, development_pilot=True,
+                              large_evidence_pages=True)
+    assert default["large_evidence_pages"] is False
+    assert default["broker_output"]["max_serialized_ascii_characters"] == 8000
+    assert large["broker_output"]["max_serialized_ascii_characters"] == 16000
+    assert large["broker_output"]["raw_initial_characters"] == 14000
+    assert large["digest"] != default["digest"]
+    scope = {"repo": "source"}
+    frozen = {"scope_digests": {"task": digest(scope)}, "large_evidence_pages": True}
+    for arm in ("B", "H"):
+        config = {**scope, "arm": arm, "large_evidence_pages": True}
+        campaign.validate_broker_config(config, {"task": "task", "arm": arm}, frozen)
+        with pytest.raises(ProtocolError, match="evidence-page profile"):
+            campaign.validate_broker_config({**config, "large_evidence_pages": False},
+                                            {"task": "task", "arm": arm}, frozen)
+    for value in (1, "true", None):
+        with pytest.raises(ProtocolError, match="Large-evidence-page"):
+            campaign.protocol(tmp_path, scopes, parsers, development_pilot=True,
+                              large_evidence_pages=value)
+
+
 def test_raw_patch_through_frontend_is_not_counted_as_index_usage(tmp_path):
     path = tmp_path / "calls.jsonl"
     arguments = {"operation": "raw_patch"}

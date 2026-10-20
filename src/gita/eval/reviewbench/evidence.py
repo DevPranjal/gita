@@ -20,6 +20,7 @@ from .common import (EVIDENCE_CALL_LIMIT, EvidenceBudgetError, IntegrityError, P
 
 PAGE_CHARS = 6000
 MAX_RESPONSE_CHARS = 8000
+MAX_TOOL_WIRE_CHARS = 20000
 COMMON_TOOLS = ("raw_diff", "read_file", "search", "list_files", "commit_log", "file_history",
                 "continue_evidence")
 INDEX_TOOLS = ("change_context", "index_status", "entities", "entity_context", "entity_diff", "id", "state", "source", "history", "events")
@@ -138,6 +139,10 @@ def matches_path(path: str, pattern: str) -> bool:
 class Evidence:
     def __init__(self, config: dict):
         self.config = config
+        large_pages = config.get("large_evidence_pages", False)
+        require(type(large_pages) is bool, "Large-evidence-page selection must be boolean")
+        self.max_response_chars = 16000 if large_pages else MAX_RESPONSE_CHARS
+        self.page_chars = 14000 if large_pages else PAGE_CHARS
         self.repo = Path(config["repo"])
         self.base = oid(config["effective_base"])
         self.head = oid(config["task"]["head"])
@@ -249,11 +254,16 @@ class Evidence:
         except (ValueError, KeyError, TypeError) as error:
             raise ProtocolError("Invalid cursor") from error
 
+    def fits_response(self, result: dict, *, reserve: int = 0) -> bool:
+        serialized = json.dumps(result, ensure_ascii=True)
+        return (len(serialized) <= self.max_response_chars - reserve
+                and len(json.dumps(serialized, ensure_ascii=True)) <= MAX_TOOL_WIRE_CHARS - reserve)
+
     def page(self, text: str, name: str, arguments: dict, cursor: str = "") -> dict:
         binding = digest([self.config["scope_digest"], name, arguments, digest(text)])
         offset = 0 if not cursor else self._decode(cursor, binding)["offset"]
         require(type(offset) is int and 0 <= offset <= len(text), "Invalid continuation offset")
-        end = min(len(text), offset + PAGE_CHARS)
+        end = min(len(text), offset + self.page_chars)
         low, high, best = offset + 1, end, None
         while True:
             result = {"text": text[offset:end], "next_cursor": self._encode(
@@ -261,7 +271,7 @@ class Evidence:
                 "coverage": {"source": "git", "total_characters": len(text),
                              "shown_characters": end - offset},
                 "omitted": {"characters": len(text) - end}, "truncated": end < len(text)}
-            if len(json.dumps(result, ensure_ascii=True)) <= MAX_RESPONSE_CHARS - 2000:
+            if self.fits_response(result, reserve=2000):
                 best = result
                 low = end + 1
             else:
@@ -627,7 +637,7 @@ class Evidence:
             result.setdefault("coverage", {"status": "generation_qualified"})
             result.setdefault("omitted", {"count": 0})
             result.setdefault("next_cursor", result.get("page", {}).get("next_cursor"))
-            if len(json.dumps(result, ensure_ascii=True)) <= MAX_RESPONSE_CHARS:
+            if self.fits_response(result):
                 break
             if name == "state" or limit <= 1:
                 raise EvidenceBudgetError("Indexed evidence output limit; narrow request")
@@ -646,7 +656,7 @@ class Evidence:
         events = []
         for event in result["results"]:
             patch = _event_patch(session, event)
-            if len(json.dumps(patch, ensure_ascii=True)) > PAGE_CHARS:
+            if len(json.dumps(patch, ensure_ascii=True)) > self.page_chars:
                 patch = {"patch_status": "omitted:source_patch_budget",
                          "omitted_patch_characters": len(patch.get("patch", ""))}
             events.append({
@@ -715,7 +725,7 @@ class Evidence:
     def named_source(self, token: str, path: str = "", commit: str | None = None,
                      cursor: str = "", force_full: bool = False) -> dict:
         from ...index.query import QueryError
-        from ...mcp.tools import source_tool
+        from ...mcp.tools import DEFAULT_BUDGET, source_tool
         require(type(token) is str and bool(token), "Named source requires a nonempty token")
         require(type(force_full) is bool, "force_full must be boolean")
         if path:
@@ -730,7 +740,9 @@ class Evidence:
                 selector += "/"
             locator = selector + "::" + token
         response = source_tool(str(self.repo), entity=locator, at=commit,
-                               scope=session.scope, generation=session.generation)
+                               scope=session.scope, generation=session.generation,
+                               budget=(4 * self.max_response_chars
+                                       if self.max_response_chars > MAX_RESPONSE_CHARS else DEFAULT_BUDGET))
         if response.get("error"):
             error = response["error"]
             if error["code"] == "ambiguous":
@@ -913,7 +925,7 @@ class Evidence:
         span = reference["span"]
         require_integrity(source == self.blob(reference["path"], commit)[span["start_byte"]:span["end_byte"]],
                           "Returned indexed source changed after verification")
-        if len(source) > PAGE_CHARS:
+        if len(source) > self.page_chars:
             raise EvidenceBudgetError("Exact indexed source exceeds source-output cap")
         return {"text": source.decode("utf8", "strict"), "reference": reference,
                 "provenance": {**self.provenance(commit), "generation": session.generation,
@@ -990,7 +1002,7 @@ class Evidence:
                            and arguments["operation"] in ("source", "context") else name)
             pending = (None if name == "continue_evidence" else
                        self._prepare_source_delivery(source_name, arguments, result))
-            if len(json.dumps(result, ensure_ascii=True)) > MAX_RESPONSE_CHARS:
+            if not self.fits_response(result):
                 raise EvidenceBudgetError(
                     "Evidence exceeds safe SDK output budget; narrow the request or use raw source lines")
             if pending is not None:
