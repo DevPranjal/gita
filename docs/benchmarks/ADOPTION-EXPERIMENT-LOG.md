@@ -10,8 +10,10 @@ confirmation.
 
 Engineering changes are tested and committed; **no25-task model run is
 authorized**. All50 initial evidence packets passed offline preparation.
-The latest completed paid E33 pilot saves2.66% credits with H, but input is2.81%
-higher and precision/recall are lower. E30 repairs Swift/PHP and qualifies all five formerly failing
+The latest completed paid E34 pilot is promising:20.93% fewer H credits and
+34.55% fewer input tokens, equal judged precision and higher recall on three
+reused development cases. This is not confirmation; prospective transfer comes
+before25. E30 repairs Swift/PHP and qualifies all five formerly failing
 source requests. E31 adds the remaining eight plain-language/configuration
 adapters and tests actual files rather than declaring registration a win.
 Macro-heavy C, Astro and other real syntax/format gaps remain explicit.
@@ -2277,3 +2279,54 @@ held-out confirmation. Same Sol/medium reviewers and judges, first-pass checks,
 native60/reserve90 and600/400 phase ceilings. Keep all three cases and all
 cost/quality outcomes; no unchanged retry, irrelevant history quota or25
 authorization based only on greater tool use.
+
+### E34 completed: first promising complete tool-led cohort
+
+[Full results and both judge stages](adoption-e34-toolled3-results.json):
+B/H review credits124.77530/98.66282 (**H -20.93%**),
+input814,908/533,327 (**H -34.55%**), output13,362/14,129;
+model requests30/25 and API seconds242.389/218.316.
+All six reviews valid. Original judging100.46370 credits scores two pairs,
+leaving one classifier uncertain because non-English localization tables
+were not supplied.
+
+The separate frozen source stage supplies all eight complete locale tables.
+Only duplicate numbered windows already represented by exact complete files
+are removed, with every replaced line verified against Git. Source context179689
+stays within180000, no budget increase or information filtering. Original
+matching/reviews and uncertain grading remain. Additional judge cost30.80370.
+An independent source/API sanity check confirms the candidate's missing-key
+mechanism is consistent with Apple's published CFBundle string lookup
+implementation; no macOS execution or reclassification was performed.
+
+Complete pooled grounded P100%/100%, R20.75%/24.53%;
+augmented P100%/100%, R22.22%/27.27%.
+Macro grounded R19.91%/23.18%; macro augmented R21.31%/26.30%.
+This is a joint point-estimate signal, not a confidence-bound confirmation or
+an official leaderboard result.
+
+All three H sessions request the indexed map. Swift additionally requests
+four indexed sources and an entity delta; PHP requests three indexed sources.
+Six indexed source first responses are complete. One PHP map request is
+refused before a corrected successful request; retain the tool error.
+The session ledger references74 already delivered lines across H, versus zero
+in B. Therefore this is evidence for the **whole Gita-enabled workflow package**,
+not isolated attribution to persistent history or an unmodified public MCP
+installation. All adaptive prior failures remain visible.
+
+## E35: unchanged-candidate prospective transfer
+
+Freeze E34's product, no-preload tool-led workflow, proof checks, page limits
+and reviewed-PR preparation profile. Sample once with seed20261022 from the
+13 positions not previously used in focused pilots:
+`[1,2,5,9,10,11,12,13,14,18,19,23,24]`.
+The ordered result is **19,11,18**: ForgeMap, jadx-collaboration and gimmes.
+Do not inspect labels or outcomes when selecting. Retain endpoint-only
+preparation rather than selecting only connected-history tasks.
+
+Same Sol/medium reviewers/judges, native60/reserve90,600/400 phase ceilings
+and full raw history in both arms. Prepare and independently verify the new
+contexts before inference; first pair checks transport only and all selected
+cases enter the cohort. No candidate edits or unchanged retries mid-cohort.
+Require a complete credible transfer result before committing to25; a
+favorable reused-task result alone is insufficient.
