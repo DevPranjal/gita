@@ -55,6 +55,7 @@ def test_ci_provisions_native_grammars_not_just_download_requests(job, monkeypat
     expected = {"python"} if job == "index-qualification" else {
         "python", "javascript", "typescript", "tsx", "csharp", "cpp",
         "go", "rust", "swift", "php", "json", "yaml", "toml", "markdown",
+        "java", "kotlin", "c", "ruby", "bash", "powershell", "hcl", "dart",
     }
     assert installed == expected
 

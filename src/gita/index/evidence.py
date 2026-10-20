@@ -15,11 +15,11 @@ from hashlib import blake2b, file_digest, new as new_hash
 from importlib.metadata import distribution
 from pathlib import Path
 
-from tree_sitter import Node
+from gita.entities.syntax import SyntaxNode as Node, children as syntax_children
 import tree_sitter_language_pack as language_pack
 from gita.entities.parsers import get_parser
 
-from gita.entities import extractor, languages, parsers
+from gita.entities import extractor, languages, parsers, syntax
 from gita.entities.languages import LanguageSpec
 
 from . import model
@@ -36,6 +36,8 @@ _STRING_NODES = frozenset({
     "interpreted_string_literal", "raw_string", "template_string",
     "verbatim_string_literal", "interpolated_string_expression",
     "line_string_literal", "multi_line_string_literal", "encapsed_string", "heredoc", "nowdoc",
+    "string_lit", "regex", "regex_literal", "heredoc_body",
+    "heredoc_template",
 })
 _INTERPOLATION_NODES = frozenset({"interpolation", "template_substitution"})
 
@@ -144,7 +146,8 @@ def _artifacts() -> tuple:
             )
             artifacts.append(("grammar-cache", cached))
         for name, filename in (("adapter", __file__), ("extractor", extractor.__file__),
-                       ("languages", languages.__file__), ("parsers", parsers.__file__)):
+                       ("languages", languages.__file__), ("parsers", parsers.__file__),
+                       ("syntax", syntax.__file__)):
             artifacts.append((name, _artifact_digest(Path(filename))))
         artifacts.append(("parse-contract", _parse_contract_digest()))
     except IndexContractError:
@@ -267,7 +270,7 @@ def _locate(root: Node, spec: LanguageSpec, maximum: int) -> list:
         located.append((root, 0, (0,)))
         child_counts = [1, 0]
         parent = 1
-    stack = [(iter(root.children), parent)]
+    stack = [(iter(syntax_children(root, spec.name)), parent)]
     while stack:
         children, parent = stack[-1]
         node = next(children, None)
@@ -284,7 +287,7 @@ def _locate(root: Node, spec: LanguageSpec, maximum: int) -> list:
             located.append((node, parent, discriminator))
             parent = len(located) - 1
             child_counts.append(0)
-        stack.append((iter(node.children), parent))
+        stack.append((iter(syntax_children(node, spec.name)), parent))
     return located
 
 
@@ -323,7 +326,7 @@ def _tokens(node: Node, spec: LanguageSpec, source: bytes, *,
             continue
         items = []
         cursor = current.start_byte
-        for child in current.children:
+        for child in syntax_children(current, spec.name):
             if cursor < child.start_byte:
                 items.append(((cursor, child.start_byte), in_body, in_literal))
             items.append((child, in_body, in_literal))

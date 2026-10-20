@@ -1,0 +1,145 @@
+{
+  "kind": "All five pinned C/Dart/PowerShell/HCL tasks outside starter25",
+  "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+  "parse_fingerprint": "0ba8cc3b4154458ff77f184b5033bdb0d116a6568b8ce9864acd5d92dd15cc9b",
+  "rows": [
+    {
+      "task": "ab2a513cf1daf22ac38d25546791961c0e0a0334dab477fb7f8431d93416d2f1",
+      "repo": "https://github.com/FreeRTOS/FreeRTOS-Kernel",
+      "primary_language": "C",
+      "changed_paths": 1,
+      "endpoint_files": 2,
+      "status_counts": {
+        "parse_error": 2
+      },
+      "language_counts": {
+        "c": 2
+      },
+      "named_definitions": 0,
+      "seconds": 11.828999999997905,
+      "gaps": [
+        {
+          "path": "tasks.c",
+          "commit": "f1043c49d59944353291654c175852bd17b34f99",
+          "language": "c",
+          "status": "parse_error",
+          "definitions": 0,
+          "named_definitions": 0,
+          "diagnostics": [
+            "syntax tree contains errors"
+          ]
+        },
+        {
+          "path": "tasks.c",
+          "commit": "c926adcf6e0be826e3313fc503a92b53a78f8ef8",
+          "language": "c",
+          "status": "parse_error",
+          "definitions": 0,
+          "named_definitions": 0,
+          "diagnostics": [
+            "syntax tree contains errors"
+          ]
+        }
+      ]
+    },
+    {
+      "task": "c67f7916beb41d5f60c2c9e08328edfa6f1cfd506e7bd5ef10d922f40eac781a",
+      "repo": "https://github.com/NKUST-ITC/NKUST-AP-Flutter",
+      "primary_language": "Dart",
+      "changed_paths": 4,
+      "endpoint_files": 7,
+      "status_counts": {
+        "complete": 7
+      },
+      "language_counts": {
+        "dart": 7
+      },
+      "named_definitions": 174,
+      "seconds": 11.875,
+      "gaps": []
+    },
+    {
+      "task": "1dc9349c59565544eb4d36b5727df3b2aeabeec588cedff9cb17b39b865e7ac6",
+      "repo": "https://github.com/andresharpe/dotbot",
+      "primary_language": "PowerShell",
+      "changed_paths": 5,
+      "endpoint_files": 10,
+      "status_counts": {
+        "complete": 8,
+        "unsupported_language": 2
+      },
+      "language_counts": {
+        "powershell": 2,
+        "unregistered": 2,
+        "javascript": 6
+      },
+      "named_definitions": 292,
+      "seconds": 12.703000000008615,
+      "gaps": [
+        {
+          "path": "workflows/default/systems/ui/static/css/sidebar.css",
+          "commit": "3aca583499731814d73c2da1d78248dd102f0977",
+          "language": null,
+          "status": "unsupported_language",
+          "definitions": 0,
+          "named_definitions": 0,
+          "diagnostics": [
+            "no registered byte adapter for extension"
+          ]
+        },
+        {
+          "path": "workflows/default/systems/ui/static/css/sidebar.css",
+          "commit": "cf5016a1a8c829b1a685ffd3b98292b64f31813f",
+          "language": null,
+          "status": "unsupported_language",
+          "definitions": 0,
+          "named_definitions": 0,
+          "diagnostics": [
+            "no registered byte adapter for extension"
+          ]
+        }
+      ]
+    },
+    {
+      "task": "8d99ba2bf5d339d4dac378d19f0a18945be1f810fa729aa5a582314990b57b47",
+      "repo": "https://github.com/cds-snc/notification-terraform",
+      "primary_language": "HCL",
+      "changed_paths": 118,
+      "endpoint_files": 229,
+      "status_counts": {
+        "complete": 229
+      },
+      "language_counts": {
+        "hcl": 225,
+        "bash": 4
+      },
+      "named_definitions": 7068,
+      "seconds": 30.60899999999674,
+      "gaps": []
+    },
+    {
+      "task": "2c325df058d73d0ffcb5d44ab555debd7a5af04c075d30310034342d9e8abb35",
+      "repo": "https://github.com/hackforla/devops-security",
+      "primary_language": "HCL",
+      "changed_paths": 3,
+      "endpoint_files": 5,
+      "status_counts": {
+        "complete": 5
+      },
+      "language_counts": {
+        "hcl": 4,
+        "json": 1
+      },
+      "named_definitions": 53,
+      "seconds": 7.921999999991385,
+      "gaps": []
+    }
+  ],
+  "paid_calls": 0,
+  "reference_findings_used": false,
+  "corpus_programs_executed": false,
+  "limitations": [
+    "Changed-file parse/extraction coverage is not a model quality or cost result.",
+    "All parse errors and unsupported files remain explicit; no task was dropped."
+  ]
+}

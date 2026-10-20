@@ -10,11 +10,12 @@ confirmation.
 
 Engineering changes are tested and committed; **no25-task model run is
 authorized**. All50 initial evidence packets passed offline preparation.
-The latest completed E29 pilot saves13.87% credits and19.55% input with H,
-but loses recall. E30 repairs the concrete Swift/PHP coverage gap and qualifies
-all five formerly failing named-source requests against newly built contexts.
-That is product readiness, not yet a new quality/cost win. The broader language
-audit finds eight more plain-language/configuration families to implement.
+The latest completed paid E29 pilot saves13.87% credits and19.55% input with H,
+but loses recall. E30 repairs Swift/PHP and qualifies all five formerly failing
+source requests. E31 adds the remaining eight plain-language/configuration
+adapters and tests actual files rather than declaring registration a win.
+Macro-heavy C, Astro and other real syntax/format gaps remain explicit.
+These are product improvements, not yet a new quality/cost win.
 Preserve all previous policies, source
 supplements and judging spend. Product correctness and useful tool uptake
 are not evidence that the requested joint benchmark target has been achieved.
@@ -2093,3 +2094,69 @@ language is unknown. These counts describe repository primary languages,
 not proof that every changed file uses that language or is covered.
 Keep actual changed-file coverage qualification separate from registration,
 and do not launch25 merely because all primary language names are listed.
+
+### E31 implemented: eight adapters, actual source and conservative identity
+
+Add Java, Kotlin, C, Ruby, Bash, PowerShell, Dart and HCL/Terraform to the shared
+extraction/byte-index rules. Include Java/Kotlin package scope, C declarator
+names/prototypes/function macros, Ruby module/class/method bindings, Kotlin
+properties, PowerShell declarations and HCL block/attribute addresses.
+Update CLI provisioning, CI, quickstart, technical boundaries and README.
+Explicitly provision native grammars in a fresh23-grammar cache; retain the
+previous15-grammar E30 installation and original shared13-grammar cache.
+
+Dart requires a real source projection: its grammar splits signatures and bodies
+into siblings. One typed, byte-preserving projection joins only directly paired
+regions (allowing intervening comments), retains exact original span/line data
+and projects nested local functions under the correct callable. Shared traversal
+keeps inner-body edits out of outer owned tokens. Unrecognized members remain
+in enclosing source, not falsely complete header-only bodies.
+
+Initial tests catch phantom Ruby entities from unnamed `class`/`module` keyword
+tokens; those are excluded. A tiny HCL value does not survive a cross-file move
+under the existing minimum-body/copy guards. Do not lower the guards to pass:
+substantive HCL evidence preserves edit/move identity, while a separate regression
+requires conservative re-observation for the tiny value. A multiline-literal
+probe catches HCL heredoc whitespace being lost; preserve that literal as bytes
+and test both legacy and indexed token evidence.
+
+The broad extraction/publication/query/compare/protocol run passes264 checks.
+After the final heredoc correction,44 focused adapter checks pass. These overlap;
+do not sum them into a unique total. The adapter tests verify declarations,
+parents, exact source digests, significant literal whitespace, real SQLite
+publication, exact historical source and edit/move identity in all eight
+families, plus conservative tiny-HCL handling. No corpus program is executed.
+
+### E31 actual-file coverage, including all failures
+
+[All25 changed-file endpoint audit](reviewbench-e31-changed-file-coverage.json):
+1261 file endpoints;1110 complete parses,126 unsupported extensions/formats,
+25 parse errors. Every emitted definition's source-span digest is checked
+against original Git bytes. The25 parse errors are22 TypeScript,1 TSX and2 Swift.
+Unsupported files include58 Astro endpoints as well as assets, templates,
+Dockerfiles, CSS, SQL and other formats. Retain every file in the denominator.
+The audit takes143.734s with no paid inference; it is not an index-build SLA.
+
+[All five additional C/Dart/PowerShell/HCL tasks](
+reviewbench-e31-extra-language-coverage.json) are sourced from the pinned official
+mirrors, with no labels, future fixes, corpus execution or task selection:
+- Dart:7/7 endpoints parse;174 named definitions.
+- PowerShell-primary task:8/10 endpoints parse, including both PowerShell
+  endpoints and six JavaScript endpoints; two CSS endpoints are unsupported.
+- HCL tasks:234/234 endpoints parse, including229 HCL,4 Bash and1 JSON.
+- C:both FreeRTOS `tasks.c` endpoints fail whole-file parsing. This is a real
+  remaining gap, not a successful C benchmark qualification.
+
+Bounded diagnosis verifies original bytes and LF line endings. Native C reports
+55/56 syntax errors; C++ compatibility parsing still reports33/34 errors.
+Macro-heavy declarations and preprocessing prevent a whole-file proof.
+Do not accept a compatibility parse with errors, preprocess/execute the corpus,
+or publish selected declarations as a complete population to hide the failure.
+The basic C adapter works in authored publication tests, but raw fallback remains
+necessary for this benchmark task.
+
+[Post-implementation primary-language inventory](
+reviewbench-language-coverage-e31.json) has registered adapters for214/219 task
+labels. This is **not** a214-task coverage or quality claim. Notebook/template/
+unknown labels and the actual C/Astro/syntax gaps are separately recorded.
+The original pre-change inventory is preserved.
