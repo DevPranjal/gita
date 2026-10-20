@@ -2437,3 +2437,109 @@ retained separately, not erased or mixed into comparative per-arm review cost.
 Report macro/pooled quality, all model/native partitions, true indexed use,
 raw fallback, preparation time, missingness and repository-clustered uncertainty.
 If the full25 does not establish the target, report that result honestly.
+
+### E37 preparation interruption and user-requested six-pair flow audit
+
+Before any new E37 reviewers started, bounded preparation completed12 of19
+continuation cases, including one explicitly recorded timeout/raw fallback.
+The next case, Rust nebula, failed independent name/id conformance. Published
+definitions were present, but fully qualified locators such as
+`context.rs::fmt::Debug for CredentialContext::fmt` did not resolve when a
+captured scope itself contained `::` and spaces. The gate stopped the study;
+the failing case was not silently downgraded.
+
+The query fix compares escaped canonical name payloads for compound literal
+scopes, retaining parameterization, exact path restrictions and ambiguity.
+Five authored regressions failed before the fix. The focused name lookup,
+Rust/delta and review-evidence suite then passed103 tests. Original published
+generations and the failed preparation attempt remain intact. Full source
+requalification and a new-policy retained-review attestation are still
+required before sealing/running the remaining19 pairs.
+
+The user then requested a pause to understand the six completed pairs rather
+than advance the study. An offline interactive HTML explainer was produced in
+session artifacts: generalized Git/Gita investigation stages, actual request
+examples, indexed-vs-raw operation counts, cost contributions, known/new issue
+metrics, and optional per-pair request/final-comment details. It makes no new
+reviewer/judge calls, exposes no private model reasoning and does not assign
+fictional stage-specific credit prices.
+
+The trace audit found that the earlier source-only attestation had appended
+replay calls to the original broker log destinations. The report recovers
+each original native byte prefix by its receipt-bound SHA-256: all12 prefixes
+match, with278 native calls included and278 later replay calls excluded.
+All other native receipt-bound artifacts also hash-match. Neither original
+receipts nor logs were rewritten for this report. Replay helper configurations
+now exclude the original `tool_log` destination. Strict historical validation
+and the full-study collector must account for these appended tails before
+study continuation; do not blindly count the current whole log as native use.
+
+Measured native activity is120 Git calls versus158 Gita calls. Gita requests:
+six successful change maps (eight requested),18 source requests, seven context
+requests, one structural diff, and33 raw-patch requests. Raw patches are exact
+Git fallback, not indexed evidence. There are zero explicit indexed-history
+requests; change maps can still use indexed lineage/diff previews internally.
+Seventeen source responses and five context responses are marked complete
+entity delivery. Candidate-only responses are not equated with full source.
+The H delivery layer reports77 reused source lines, including reuse from raw
+reads; this is not a persistent-ID-only effect.
+
+The PHP pair saves15.58026 credits, more than the six-pair net13.93002-credit
+saving. It uses more tool calls (36 to42) but fewer model requests (11 to8).
+The Kotlin pair makes14 named source/context requests,13 into one file,
+costs4.21482 more credits and has unchanged known coverage/new-TP count.
+ForgeMap returns less tool text but doubles model requests (five to10) and
+costs3.41744 more credits. Extra known-issue coverage comes from Go (six to
+seven), Swift (three to four) and Python (zero to one), not every task.
+These observations support workflow/granularity hypotheses, not isolated
+causal attribution to any one Gita feature.
+
+The report's totals match the existing six-case result, and browser checks
+cover all three cohort filters, five flow stages, all278 request rows,
+theme switching, and390px/1280px layouts. No new native reviews or judges
+were started. Full25 execution remains paused at the user's request.
+
+### E37 continuation resumed with explicit query-fix and native-version freeze
+
+On the user's subsequent instruction, resumed without introducing a new
+reviewer workflow. The repaired query replays all278 original native evidence
+results identically across12 retained reviews; prompts and typed discovery
+schemas also match exactly. A detached historical product snapshot, with
+the original exact newline bytes, validates all12 original receipts against
+separate native-artifact views. Views contain the exact receipt-hashed log
+prefix, not edited original logs. Every original replay tail is preserved
+and its whole-file hash is bound in the historical validation report.
+
+Requalified all19 continuation cases:18 have published, independently checked
+indexes and one retains the original timeout/raw fallback. The Rust case
+reuses its already-published immutable endpoint generations after the query
+repair; no costly rebuild or silent relabeling. The first requalification
+helper stopped on a circular JSON reference caused by retaining a live
+`index_status` dictionary in a nested validation record. A separate v2
+preparation root uses a deep snapshot; the failed root remains, no model
+credits consumed. Existing grammar fingerprints and generations are unchanged.
+
+Before any new reviewers, froze `adoption-e37-queryfix-annex.json`: new product
+fingerprint, exact retained-evidence attestation, historical receipt validation,
+all19 qualified scopes and parser manifest. The six original protocols and
+primary outcomes remain unchanged. This is explicitly **not** byte-identical
+product source across all25; it is a pre-model query correctness repair with
+verified equivalence of every observed retained evidence response. It remains
+a development measurement, not held-out confirmation.
+
+Sealing caught shared CLI drift from1.0.97 to1.0.100. Did not relax the gate or
+change the shared installation. Downloaded the official1.0.97 Windows archive,
+verified its published SHA-256, and selected an isolated frozen executable
+with self-update disabled. An initial version probe auto-updated its isolated
+copy; it was retained and not used for the study. A second isolated copy
+reports1.0.97 with stable executable SHA-256
+`682eb8de6a433ad5a1f5b291183c90e4b05239d58f5f0345acc89279da4f0735`.
+All19 per-case protocols then sealed successfully. New native reviews and
+judgments are now running in fixed population order with Sol/medium.
+
+Collector verification covers percentile interpolation, positive gates,
+uncertainty crossing the recall margin, incomplete fixed populations, and
+refusal to claim lower cost when credits rise (five checks pass). The final
+collector will verify receipt bindings, exact native views, judge provenance,
+delivery bounds, complete-population clustered uncertainty and both quality/
+efficiency routes. Supplemental judge costs remain separately visible.

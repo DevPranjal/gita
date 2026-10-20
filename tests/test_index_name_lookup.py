@@ -70,3 +70,31 @@ def test_explicit_directory_selector_never_selects_a_file_with_the_same_name():
 def test_literal_names_remain_parameterized_and_lossless(names, token):
     expected = [] if token.startswith("absent") else [0]
     assert matches(token, [(b"file", names)]) == expected
+
+
+@pytest.mark.parametrize("names", [
+    ("fmt::Debug for CredentialContext", "fmt"),
+    ("std::fmt::Display for SimpleError", "fmt"),
+    ("impl<T> crate::Trait<T> for Store<T>", "read"),
+    ("scope.with.dots", 'name","with\\escapes'),
+    ("scope", "na\u00efve::Trait for Store", "read"),
+    ("scope", "value\nwith\x00controls", "read"),
+])
+def test_compound_literal_scopes_resolve_without_splitting_their_names(names):
+    rows = [(b"src/context.rs", names), (b"elsewhere.rs", names)]
+    token = "::".join(names)
+    assert matches(token, rows) == [0, 1]
+    assert matches("src/context.rs::" + token, rows, locator=True) == [0]
+
+
+def test_compound_literal_display_names_preserve_ambiguity():
+    rows = [(b"a.rs", ("std::fmt::Debug for Store", "fmt")),
+            (b"b.rs", ("std", "fmt::Debug for Store", "fmt"))]
+    assert matches("std::fmt::Debug for Store::fmt", rows) == [0, 1]
+
+
+def test_escaped_tuple_delimiters_cannot_impersonate_structural_boundaries():
+    rows = [(b"a.rs", ("scope", 'name","part', "read")),
+            (b"b.rs", ("scope", "name", "part", "read"))]
+    assert matches('scope::name","part::read', rows) == [0]
+    assert matches("scope::name::part::read", rows) == [1]

@@ -535,6 +535,17 @@ class IndexSession:
 					"length(definition.names_json) - ?), '\",\"', '.'), '::', '.') = ?)"
 				)
 				parameters += (len(prefix) + 1, len(prefix) + len(suffix), qualified)
+			elif "::" in text or "." in text:
+				prefix, suffix = _dump(("_gita_name_",)).split("_gita_name_")
+				encoded = _dump((text,))[len(prefix):-len(suffix)]
+				# Compare escaped payloads so literal quotes cannot become tuple boundaries.
+				for separator in ("::", "."):
+					if separator in text:
+						predicate = (
+							f"({predicate} OR replace(substr(definition.names_json, ?, "
+							"length(definition.names_json) - ?), '\",\"', ?) = ?)"
+						)
+						parameters += (len(prefix) + 1, len(prefix) + len(suffix), separator, encoded)
 			return predicate, parameters
 
 		if locator:
