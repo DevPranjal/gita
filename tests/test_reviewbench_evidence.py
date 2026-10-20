@@ -195,7 +195,7 @@ def test_path_only_source_retrieves_exact_indexed_file_and_all_continuations(fix
     _, scope, _ = fixture_repo
     indexed = build_indexes(scope)
     e = Evidence({**config(indexed), "indexed_workflow": True, "integrated_source": True,
-                  "engine_frontend": True, "large_evidence_pages": True})
+                  "engine_frontend": True, "large_evidence_pages": True, "file_source_enabled": True})
     path = "src/code.py" if "src/code.py" in e.paths(e.head) else "code.py"
     try:
         result = e.execute("gita_review", {"operation": "source", "path": path})
@@ -224,7 +224,7 @@ def test_path_only_empty_source_does_not_invent_a_line_or_receipt(fixture_repo):
     _, scope, _ = fixture_repo
     indexed = build_indexes(scope)
     e = Evidence({**config(indexed), "indexed_workflow": True, "integrated_source": True,
-                  "engine_frontend": True, "large_evidence_pages": True})
+                  "engine_frontend": True, "large_evidence_pages": True, "file_source_enabled": True})
     try:
         result = e.execute("gita_review", {"operation": "source", "path": "empty.py"})
         assert "error" not in result, result

@@ -449,6 +449,7 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
               "integrated_source": frozen.get("integrated_source", False) and slot["arm"] == "H",
               "engine_frontend": frozen.get("engine_frontend", False) and slot["arm"] == "H",
               "large_evidence_pages": frozen.get("large_evidence_pages", False),
+              "file_source_enabled": frozen.get("file_context_guidance", False) and slot["arm"] == "H",
               "tool_log": str(directory / "tools.jsonl")}
     write_json(directory / "broker.json", config)
     mcp_environment = {"PYTHONPATH": str(Path(__file__).resolve().parents[3]),
@@ -585,6 +586,10 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
 
 def validate_broker_config(config: dict, slot: dict, frozen: dict) -> None:
     require(config["arm"] == slot["arm"], "Cached broker arm mismatch")
+    require(type(config.get("file_source_enabled", False)) is bool
+            and config.get("file_source_enabled", False) == (
+                frozen.get("file_context_guidance", False) and slot["arm"] == "H"),
+            "Cached file-source profile mismatch")
     require(type(config.get("large_evidence_pages", False)) is bool
             and config.get("large_evidence_pages", False) == frozen.get("large_evidence_pages", False),
             "Cached evidence-page profile mismatch")
@@ -604,7 +609,8 @@ def validate_broker_config(config: dict, slot: dict, frozen: dict) -> None:
                 "Cached broker workflow/protocol mismatch")
     original_scope = {k: v for k, v in config.items()
                       if k not in ("arm", "cursor_secret", "tool_log", "indexed_workflow",
-                                   "integrated_source", "engine_frontend", "large_evidence_pages")}
+                                   "integrated_source", "engine_frontend", "large_evidence_pages",
+                                   "file_source_enabled")}
     require(digest(original_scope) == frozen["scope_digests"][slot["task"]],
             "Cached broker scope/protocol mismatch")
 

@@ -2384,3 +2384,56 @@ E36 validation:107 source/protocol/rendering regressions pass, including exact
 file roots, multi-page reconstruction, zero-byte files, directory refusal and
 attested per-arm granularity guidance. The feature uses the existing index;
 no parse-policy relabeling, grammar change or new implicit build is involved.
+
+### E36 rejected; preserve the tool-led default
+
+[All E36 outcomes](adoption-e36-filecontext3-results.json):
+B/H credits59.44324/53.92186 (**H -9.29%**),
+input171,197/211,270 (**H +23.41%**), output10,274/7,835.
+Judge69.21700. All six reviews valid, all three pairs scored.
+Augmented P85.71%/80.00%, R18.75%/12.50%.
+Grounded R13.33%/6.67%. Reject this guidance; cheaper but less complete is
+not the goal. Do not choose favorable E36 per-task rows.
+
+Keep the whole-file convenience behind its explicit profile. The default
+tool schema, instruction prompt and actual evidence for the E34/E35 tool-led
+candidate must remain equivalent, rather than silently promoting the rejected
+variant. The whole-file empty-source handling remains a correctness fix.
+
+## E37: fixed full25 development study, not a guaranteed efficiency claim
+
+The unchanged candidate improved recall in both E34 and fresh E35, but fresh
+cost rose. Across all six same-candidate cases, the descriptive joint point
+estimate is lower-cost/higher-recall. That is enough to justify a bounded
+larger **development measurement**, not an efficiency confirmation or a claim
+that the fresh-stage cost gate passed. Stop tuning those six outcomes.
+
+Freeze every starter task exactly once for this candidate: retain all six
+E34/E35 primary pairs, including higher-cost transfer rows, then execute all
+19 remaining cases in fixed population order. Do not retry unchanged reviews,
+select cheaper per-case variants or relabel original protocol identities.
+The six retained pairs are from adaptive development, so the resulting25-task
+study is not held-out or leaderboard confirmation.
+
+Before reuse, source-only attestation checks12 original native receipts,
+exact current-vs-original instruction bytes, exact typed tool schemas and
+every replayed evidence-result digest. All12 reviews pass, with zero new
+model invocations. Dry-run instruction generation is not a native attempt.
+Original raw artifacts, source protocols and the localization-complete judging
+stage remain separately pinned.
+
+All19 new cases use the same tool-led, no-preload, no-file-guidance profile,
+Sol/medium reviewers/judges, native60/reserve90, identical source budgets and
+explicit PR-window preparation. Seal one fixed pair per native protocol so an
+ordinary case failure does not hide later independent tasks. Every case and
+missing/invalid slot remains in the25-task accounting; integrity or unknown
+spend stops the whole study. No automatic retries.
+
+Primary study ceilings, including retained pairs:2500 review credits and1500
+judge credits. Each new pair is capped at200 review/200 judge credits and is
+started only with enough remaining global budget. Source-only preparation and
+retained-pair attestation cost no credits. R&D spend from rejected variants is
+retained separately, not erased or mixed into comparative per-arm review cost.
+Report macro/pooled quality, all model/native partitions, true indexed use,
+raw fallback, preparation time, missingness and repository-clustered uncertainty.
+If the full25 does not establish the target, report that result honestly.

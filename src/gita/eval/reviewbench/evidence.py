@@ -49,9 +49,7 @@ SCHEMAS = {
     "continue_evidence": schema({"cursor": CURSOR}, ("cursor",)),
     "gita_review": schema({
         "operation": {"type": "string", "enum": ["changes", "source", "context", "diff", "history", "raw_patch", "status"]},
-        "path": {"type": "string", "description": "Exact file or a named lookup hint. "
-                 "For source, path alone (no token/line) retrieves the whole indexed file."},
-        "line": INTEGER,
+        "path": STRING, "line": INTEGER,
         "token": {"type": "string", "description": "Prefer a simple name plus optional path, or a full EID. Separate captured scope components with :: in a qualified name."},
         "commit": STRING,
         "cursor": CURSOR, "force_full": FORCE_FULL}, ("operation",)),
@@ -122,6 +120,10 @@ def tool_inventory(config: dict) -> list[dict]:
                 shape = {**shape, "properties": {
                     **properties, "operation": {
                         **properties["operation"], "enum": review_operations(config)}}}
+                if config.get("file_source_enabled"):
+                    shape["properties"]["path"] = {
+                        "type": "string", "description": "Exact file or a named lookup hint. "
+                        "For source, path alone (no token/line) retrieves the whole indexed file."}
             description = DESCRIPTIONS[name]
             if name == "gita_review" and config.get("history_ready") is not True:
                 description += " Connected indexed history is unavailable; diff/history operations are not exposed."
@@ -161,6 +163,8 @@ class Evidence:
         require(type(large_pages) is bool, "Large-evidence-page selection must be boolean")
         self.max_response_chars = 16000 if large_pages else MAX_RESPONSE_CHARS
         self.page_chars = 14000 if large_pages else PAGE_CHARS
+        require(type(config.get("file_source_enabled", False)) is bool,
+                "File-source selection must be boolean")
         self.repo = Path(config["repo"])
         self.base = oid(config["effective_base"])
         self.head = oid(config["task"]["head"])
@@ -319,7 +323,7 @@ class Evidence:
             if token:
                 require(line is None, "source accepts token or path/line, not both")
                 result = self.named_source(token, path, commit, cursor, force_full)
-            elif line is None and path:
+            elif line is None and path and self.config.get("file_source_enabled"):
                 checked_path(path)
                 require(path in self.members(self.commit(commit)),
                         "Whole-file source requires an exact member file")
