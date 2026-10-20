@@ -65,6 +65,19 @@ def test_review_profile_matches_capabilities_without_hiding_raw_fallback():
     assert {"entity_context", "change_context", "id", "index_status"} <= gaps
 
 
+@pytest.mark.parametrize("ready", [False, True])
+def test_unified_operations_match_connected_history_without_mutating_shared_schema(ready):
+    from gita.eval.reviewbench.evidence import SCHEMAS, tool_inventory
+    original = list(SCHEMAS["gita_review"]["properties"]["operation"]["enum"])
+    tools = tool_inventory({"arm": "H", "engine_frontend": True,
+                            "history_ready": ready, "indexes": [{}]})
+    shape = next(t["inputSchema"] for t in tools if t["name"] == "gita_review")
+    operations = shape["properties"]["operation"]["enum"]
+    assert ("diff" in operations) is ready and ("history" in operations) is ready
+    assert {"changes", "source", "context", "raw_patch", "status"} <= set(operations)
+    assert SCHEMAS["gita_review"]["properties"]["operation"]["enum"] == original
+
+
 def test_workflow_metadata_is_bound_separately_from_immutable_source_scope():
     scope = {"repo": "source", "history_ready": True}
     slot = {"task": "task", "arm": "H"}
@@ -259,6 +272,9 @@ def initial_attempt(tmp_path, monkeypatch, request):
         assert "entity_context" not in prompt
         if minimal:
             assert "All evidence tools are optional" in prompt and "Gita evidence workflow:" not in prompt
+        else:
+            assert "Connected indexed history is unavailable" in prompt
+            assert "Use operation='diff' with token/path" not in prompt
         assert options["input_diagnostics"] is True
         assert options["native_credits"] == 60
         assert options["model"] == "gpt-5.6-sol" and options["reasoning"] == "medium"

@@ -465,6 +465,13 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
                                indexed_workflow=(frozen.get("indexed_workflow", False)
                                                  and not frozen.get("minimal_workflow", False)))
         if config["engine_frontend"] and scope.get("indexes") and not frozen.get("minimal_workflow", False):
+            temporal_guidance = (
+                "Use operation='diff' with token/path for persistent-entity before/after changes. "
+                "Use operation='history' only for a concrete temporal question. "
+                if scope.get("history_ready") is True else
+                "Connected indexed history is unavailable for these endpoint snapshots; "
+                "diff/history operations are not exposed. Use raw_patch for before/after changes "
+                "and common file_history/commit_log for a concrete temporal question. ")
             prompt = prompt.replace(WORKFLOW_GUIDANCE["H"], (
                 "Gita evidence workflow: use gita_review(operation='changes') to start. "
                 "For dependencies or constants starting from a caller/importer, use operation='context' "
@@ -472,13 +479,11 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
                 "labeled raw literal context, not a resolved call graph. "
                 "For strict functions/classes use operation='source' with token (name or locator) "
                 "and optional path: it resolves and returns source in one query, without a separate "
-                "line-number search. Alternatively supply path/line. Use operation='diff' "
-                "with token/path for persistent-entity before/after changes. This is a single "
+                "line-number search. Alternatively supply path/line. " + temporal_guidance + "This is a single "
                 "review interface, not an extra pass: use operation='raw_patch' for ordinary "
                 "Git patches of new/unsupported/ambiguous or file-level changes. Raw patch "
                 "content and complete pagination remain available; there is no minimum indexed "
                 "call quota. read_file/search provide imports, callers and other raw context. "
-                "Use operation='history' only for a concrete temporal question. "
                 "Do not repeat complete source merely because two interfaces can return it. "
                 "Coverage gaps are not evidence of absence."))
         if frozen.get("indexed_workflow") and slot["arm"] == "H" and not scope.get("indexes"):

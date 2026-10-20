@@ -104,11 +104,27 @@ def inventory(arm: str, *, workflow: bool = False, history_ready: bool = True) -
             for name in names]
 
 
+def review_operations(config: dict) -> list[str]:
+    return [op for op in SCHEMAS["gita_review"]["properties"]["operation"]["enum"]
+            if config.get("history_ready") is True or op not in ("diff", "history")]
+
+
 def tool_inventory(config: dict) -> list[dict]:
     if config.get("engine_frontend") and config["arm"] == "H" and config.get("indexes"):
         names = tuple(name for name in COMMON_TOOLS if name != "raw_diff") + ("gita_review",)
-        return [{"name": name, "description": DESCRIPTIONS[name], "inputSchema": SCHEMAS[name]}
-                for name in names]
+        tools = []
+        for name in names:
+            shape = SCHEMAS[name]
+            if name == "gita_review":
+                properties = shape["properties"]
+                shape = {**shape, "properties": {
+                    **properties, "operation": {
+                        **properties["operation"], "enum": review_operations(config)}}}
+            description = DESCRIPTIONS[name]
+            if name == "gita_review" and config.get("history_ready") is not True:
+                description += " Connected indexed history is unavailable; diff/history operations are not exposed."
+            tools.append({"name": name, "description": description, "inputSchema": shape})
+        return tools
     tools = inventory(config["arm"], workflow=config.get("indexed_workflow", False),
                       history_ready=config.get("history_ready", False))
     if config.get("indexed_workflow") and not config.get("indexes"):
@@ -291,8 +307,8 @@ class Evidence:
     def gita_review(self, operation: str, path: str = "", line: int | None = None,
                     token: str = "", commit: str | None = None, cursor: str = "",
                     force_full: bool = False) -> dict:
-        require(operation in SCHEMAS["gita_review"]["properties"]["operation"]["enum"],
-                "Unknown review operation")
+        require(operation in review_operations(self.config),
+                "Review operation unavailable for this index preparation")
         if operation == "changes":
             require(line is None and not token and commit is None and not force_full,
                     "changes accepts only path and cursor")

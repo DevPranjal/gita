@@ -10,8 +10,8 @@ confirmation.
 
 Engineering changes are tested and committed; **no25-task model run is
 authorized**. All50 initial evidence packets passed offline preparation.
-The latest completed paid E29 pilot saves13.87% credits and19.55% input with H,
-but loses recall. E30 repairs Swift/PHP and qualifies all five formerly failing
+The latest completed paid E32 pilot saves11.77% credits with H, but input is0.57%
+higher and recall is lower. E30 repairs Swift/PHP and qualifies all five formerly failing
 source requests. E31 adds the remaining eight plain-language/configuration
 adapters and tests actual files rather than declaring registration a win.
 Macro-heavy C, Astro and other real syntax/format gaps remain explicit.
@@ -2183,3 +2183,48 @@ initial packets in B/H, the same typed tools and source budgets, minimal workflo
 Sol/medium reviewers and judges, native60/reserve90 and600/400 ceilings.
 All three cases stay in the cohort; first-pair checks are operational, not
 selection of a favorable outcome. No25 expansion from preparation readiness.
+
+### E32 completed: coverage repair is real; recall parity still not established
+
+[All paired outcomes](adoption-e32-languages3-results.json): B/H review
+credits128.26860/113.17166 (**H -11.77%**), input523,582/526,561
+(**H +0.57%**), output13,564/14,529. Judging124.79220 separately.
+Six valid reviews, all three pairs scored, no supplementary judging or retries.
+Initial packet digests match B/H and the E29 packets exactly.
+Pooled augmented P100%/100%, R26.32%/21.82%;
+grounded R20.75%/18.87%; macro augmented R25.84%/21.65%.
+No strict quality/cost win and no25 expansion.
+
+The Go session makes four successful indexed history calls with seven
+code-bearing patches. Swift/PHP sessions request no indexed tools despite the
+qualified repaired bodies. That is observed availability versus adoption, not
+evidence that the repaired queries return incorrect source.
+
+Native accounting also differs: B/H cache-write48,936/92,359 and uncached
+input160,241/57,128. Do not attribute measured credit savings to lower total
+input (which did not fall), or extrapolate provider-cache partitions into an
+intrinsic Gita pricing claim.
+
+## E33: capability-aware index-first workflow, not an indexed-call quota
+
+E32's optional minimal profile still follows mostly raw navigation. Test the
+existing index-first workflow on the repaired product: start with the real
+indexed changed-code map, then select source/entity deltas and use raw fallback
+where appropriate. Both arms retain the same objective, first-pass proof checks,
+raw initial evidence, source allowances and allowed commits. B receives its
+explicit raw workflow; H its capability-aware indexed workflow. No mandatory
+history calls, no additional verifier or late filtering, and no finding quota.
+
+Readiness audit finds that the unified facade advertised diff/history even for
+endpoint-only preparation, unlike the older separate-tool profile. Filter its
+operation enum without mutating shared schemas, enforce availability before
+querying, and make descriptions/coaching explicitly direct endpoint snapshots
+to raw before/after and history tools. Do not coach unavailable operations.
+This is part of the candidate, not a retrospective alteration of E32.
+
+Freeze the same complete three development cases21/16/22, seed20261021,
+E32 qualified contexts and larger-page profile, changing minimal-workflow to
+false plus the necessary discovery enforcement. Sol/medium all review/judge,
+native60/reserve90,600/400 ceilings; exact first pair is operational only.
+No unchanged-review retry, per-case winner selection or25 expansion before
+the complete cohort quality/cost result.

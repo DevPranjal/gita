@@ -55,6 +55,24 @@ def config(scope, arm="H"):
     return {**scope, "arm": arm, "cursor_secret": secrets.token_hex(32)}
 
 
+def test_endpoint_profile_refuses_temporal_operations_before_querying(fixture_repo, monkeypatch):
+    _, scope, _ = fixture_repo
+    e = Evidence({**config(scope), "indexes": [{"scope": "unused"}],
+                  "history_ready": False, "indexed_workflow": True,
+                  "integrated_source": True, "engine_frontend": True})
+    try:
+        def forbidden(*args, **kwargs):
+            raise AssertionError("Unavailable temporal query was executed")
+        monkeypatch.setattr(e, "entity_diff", forbidden)
+        monkeypatch.setattr(e, "history", forbidden)
+        for operation in ("diff", "history"):
+            result = e.execute("gita_review", {"operation": operation, "token": "divide"})
+            assert result["error"]["code"] == "refused"
+            assert "unavailable" in result["error"]["message"]
+    finally:
+        e.close()
+
+
 @pytest.mark.parametrize(("path", "pattern", "expected"), [
     ("root.py", "**/*.py", True),
     ("src/deep/code.py", "src/**/*.py", True),
