@@ -1714,3 +1714,42 @@ two diagnosed requests, then3/7 only if the canary's native receipts and joint
 cost/quality point gate pass. Same Sol/medium, native60/reserve90,600/400 ceilings,
 complete manifest/readable source/first-pass checks and strict source-grounded
 judging. No reroll on failure, no25 launch from offline query success.
+
+### E23 canary: cheaper, equally precise, but official coverage still lower
+
+[Original stopped canary](adoption-e23-canary-results.json): B/H credits
+14.64438/12.33132 (**15.80% lower H**), input70,615/45,542
+(**35.51% lower H**), both augmented precision100% and two TP findings.
+Official grounded/augmented reference recall33.33%/22.22%. Direct audit of
+all four correspondences shows B's broader second finding also covers the
+separate reference about a mock side effect mutating global history.
+Do not replace official coverage with equal finding counts or rematch until
+it passes. The original continuation gate remains failed; other two cases
+are not run under that protocol.
+
+### Native cost partitions identify a different overhead than total input
+
+E22 H's lower total input is mostly fewer cache-read tokens. B/H cache-write
+tokens128,442/133,857, output9,496/10,841 and model requests20/21 explain why
+lower cumulative input did not yield lower native credits. Actual measured
+credits remain primary; do not model all input tokens as equally priced.
+
+## E24: remove asymmetric navigation coaching, retain all capabilities
+
+The unified interface now documents source/context/diff/history itself.
+The reviewer prompt still contains substantially more H-specific navigation
+coaching and receipt instructions than B, even after the shared preload and
+finding checks. Test a minimal availability profile: same base review goal,
+same first-pass checks and initial-evidence instructions for both arms, with
+tools described by their frozen typed schemas. No H-only mandatory start/map/
+source workflow or extra receipt paragraph. All tools, index checks, raw fallback,
+source content, complete manifest and resource ceilings remain unchanged.
+
+This explicit protocol flag defaults off for historical replay. Assess the
+same complete three-case set3/4/7 under one prospectively frozen protocol;
+first native pair is a transport/integrity canary, not a per-PR winner selector.
+Keep all three outcomes for the joint cohort gate. Same Sol/medium,
+native60/reserve90,600/400 phase ceilings and source-grounded judge policy.
+No more optimistic label reinterpretation or late filtering; no25 authorization
+without the cohort outcome. This tests actual interaction overhead and choice,
+not an assertion that a shorter prompt guarantees quality.

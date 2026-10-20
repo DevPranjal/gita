@@ -174,14 +174,18 @@ def initial_attempt(tmp_path, monkeypatch, request):
               "budgets": {"session_native_credits": 60},
               "initial_context_digests": {task["id"]: {"H": digest(packet)}},
               "indexed_workflow": True, "integrated_source": True, "engine_frontend": True}
-    mode, checks = getattr(request, "param", ("json", False))
-    frozen.update(initial_context_format=mode, proof_before_reporting=checks)
+    selection = getattr(request, "param", ("json", False))
+    mode, checks = selection[:2]
+    minimal = selection[2] if len(selection) > 2 else False
+    frozen.update(initial_context_format=mode, proof_before_reporting=checks, minimal_workflow=minimal)
     write_json(tmp_path / "initial-context" / task["id"] / "H.json", packet)
     directory = tmp_path / "attempts" / "one"
 
     def invoke(path, prompt, names, mcp, **options):
-        assert "gita_review(operation='source')" in prompt
+        assert ("gita_review(operation='source')" in prompt) is not minimal
         assert "entity_context" not in prompt
+        if minimal:
+            assert "All evidence tools are optional" in prompt and "Gita evidence workflow:" not in prompt
         assert options["input_diagnostics"] is True
         assert options["native_credits"] == 60
         assert options["model"] == "gpt-5.6-sol" and options["reasoning"] == "medium"
@@ -217,6 +221,14 @@ def test_readable_native_prompt_and_first_pass_checks_are_attested(initial_attem
     assert campaign.validate_initial_delivery(directory, slot, frozen) == result["initial_evidence"]
     assert (directory / "initial_rendered.txt").is_file()
     assert (directory / "initial_context.txt").read_text(encoding="utf8").startswith("{")
+
+
+@pytest.mark.parametrize("initial_attempt", [("readable-v1", True, True)], indirect=True)
+def test_minimal_workflow_keeps_goal_checks_without_an_extra_index_navigation_pass(initial_attempt):
+    directory, slot, frozen, result = initial_attempt
+    assert campaign.validate_initial_delivery(directory, slot, frozen) == result["initial_evidence"]
+    prompt = (directory / "prompt.txt").read_text(encoding="utf8")
+    assert campaign.FINDING_CHECKS in prompt and "Source delivery:" not in prompt
 
 
 @pytest.mark.parametrize("artifact", [
@@ -323,3 +335,13 @@ def test_readable_evidence_and_finding_checks_are_explicit_protocol_changes(tmp_
     assert old["initial_context_format"] == "json" and not old["proof_before_reporting"]
     assert changed["proof_before_reporting"] and changed["initial_context_format"] == "readable-v1"
     assert "recovery/retry" in campaign.FINDING_CHECKS and "fixed safe values" in campaign.FINDING_CHECKS
+
+
+def test_minimal_workflow_is_frozen_without_hiding_tools(tmp_path, frozen_inputs):
+    scopes, parsers = frozen_inputs
+    old = campaign.protocol(tmp_path, scopes, parsers, development_pilot=True, indexed_workflow=True)
+    new = campaign.protocol(tmp_path, scopes, parsers, development_pilot=True,
+                            indexed_workflow=True, minimal_workflow=True)
+    assert not old["minimal_workflow"] and new["minimal_workflow"]
+    assert old["digest"] != new["digest"] and new["workflow_guidance"] == {}
+    assert old["task_tool_schemas"] == new["task_tool_schemas"]

@@ -93,7 +93,8 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
              engine_frontend: bool = False, initial_context: bool = False,
              native_session_credits: int = SESSION_CREDITS, initial_related: bool = True,
              judge_runtime_contracts: dict | None = None, judge_reviewed_source: bool = False,
-             initial_context_format: str = "json", proof_before_reporting: bool = False) -> dict:
+             initial_context_format: str = "json", proof_before_reporting: bool = False,
+             minimal_workflow: bool = False) -> dict:
     validate_settings(reviewer_model, reviewer_reasoning)
     validate_settings(judge_model, judge_reasoning)
     require(type(integrated_source) is bool and (not integrated_source or indexed_workflow),
@@ -105,6 +106,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
     require(type(judge_reviewed_source) is bool, "Judge reviewed-source selection must be boolean")
     require(initial_context_format in ("json", "readable-v1"), "Unknown initial evidence format")
     require(type(proof_before_reporting) is bool, "Finding-check selection must be boolean")
+    require(type(minimal_workflow) is bool, "Minimal-workflow selection must be boolean")
     if judge_runtime_contracts is not None:
         from .runtime_contracts import validate_contracts
         validate_contracts(judge_runtime_contracts)
@@ -163,8 +165,9 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "initial_related": initial_related,
             "initial_context_format": initial_context_format,
             "proof_before_reporting": proof_before_reporting,
+            "minimal_workflow": minimal_workflow,
             "reviewer_input_diagnostics": initial_context,
-            "workflow_guidance": WORKFLOW_GUIDANCE if indexed_workflow else {},
+            "workflow_guidance": WORKFLOW_GUIDANCE if indexed_workflow and not minimal_workflow else {},
             "tool_schemas": {arm: inventory(arm) for arm in ("B", "H")},
             "task_tool_schemas": {
                 s["task"]["id"]: {arm: tool_inventory({
@@ -199,7 +202,8 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
          engine_frontend: bool = False, initial_context: bool = False,
          native_session_credits: int = SESSION_CREDITS, initial_related: bool = True,
          judge_runtime_contracts: dict | None = None, judge_reviewed_source: bool = False,
-         initial_context_format: str = "json", proof_before_reporting: bool = False) -> dict:
+         initial_context_format: str = "json", proof_before_reporting: bool = False,
+         minimal_workflow: bool = False) -> dict:
     require(run_root.resolve() != root.resolve() and root.resolve() not in run_root.resolve().parents,
             "Run artifacts must live outside corpus root")
     for scope in scopes:
@@ -213,7 +217,8 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
                       engine_frontend=engine_frontend, initial_context=initial_context,
                       native_session_credits=native_session_credits, initial_related=initial_related,
                       judge_runtime_contracts=judge_runtime_contracts, judge_reviewed_source=judge_reviewed_source,
-                      initial_context_format=initial_context_format, proof_before_reporting=proof_before_reporting)
+                      initial_context_format=initial_context_format, proof_before_reporting=proof_before_reporting,
+                      minimal_workflow=minimal_workflow)
     body = {k: v for k, v in frozen.items() if k != "digest"}
     body["run_root_digest"] = digest(str(run_root.resolve()))
     if initial_context:
@@ -430,8 +435,9 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
     names = ["review-" + t["name"] for t in tool_inventory(config)]
     try:
         prompt = review_prompt(scope["task"], arm=slot["arm"],
-                               indexed_workflow=frozen.get("indexed_workflow", False))
-        if config["engine_frontend"] and scope.get("indexes"):
+                               indexed_workflow=(frozen.get("indexed_workflow", False)
+                                                 and not frozen.get("minimal_workflow", False)))
+        if config["engine_frontend"] and scope.get("indexes") and not frozen.get("minimal_workflow", False):
             prompt = prompt.replace(WORKFLOW_GUIDANCE["H"], (
                 "Gita evidence workflow: use gita_review(operation='changes') to start. "
                 "For dependencies or constants starting from a caller/importer, use operation='context' "
@@ -452,7 +458,7 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
             prompt += ("\nPreparation notice: no qualified index is available for this task. "
                        "The indexed workflow above is unavailable here; use the common raw "
                        "Git tools directly. Do not infer that missing indexed evidence means no issues.")
-        if config["integrated_source"]:
+        if config["integrated_source"] and not frozen.get("minimal_workflow", False):
             source_tool = "gita_review(operation='source')" if config["engine_frontend"] else "entity_context"
             prompt += (f"\nSource delivery: {source_tool} gives exact numbered source near your location. "
                        f"read_file and {source_tool} share a verified delivery ledger: previously delivered "
