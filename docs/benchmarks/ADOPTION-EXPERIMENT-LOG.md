@@ -8,12 +8,23 @@ confirmation.
 
 ## Current status: joint quality/operational gates remain open
 
-Engineering changes are tested and committed; **no25-task model run is
-authorized**. All50 initial evidence packets passed offline preparation.
+Engineering changes are tested; **E37's fixed25-task development study is
+complete:50/50 valid reviews and25/25 judged pairs**. Gita uses9.62% fewer
+review credits and16.76% fewer input tokens, with higher point-estimate recall
+and pooled precision. Quality noninferiority is not established: the paired
+intervals cross the frozen recall/precision margins, and warm elapsed is1.11%
+higher. Do not turn the point estimates into a passed joint quality gate.
+All six E34/E35 pairs were retained and the remaining19 executed once each.
+A pre-model Rust query correctness repair has an explicit
+annex and exact replay equivalence for all retained native evidence. All19
+continuation source preparations qualified, including one recorded timeout/raw
+fallback. Reviewer and judge remain GPT-5.6 Sol/medium on isolated CLI1.0.97.
 E34's reused-case pilot is promising, but E35's fresh transfer costs19.03% more
 despite higher recall and equal augmented precision. Lower cost has not
-transferred; E36 targets observed same-file lookup fragmentation. No25 or
-confirmation claim yet. E30 repairs Swift/PHP and qualifies all five formerly failing
+transferred in E35 alone; the new19 continuation saves10.18% credits, with only
+a0.52pp macro reference-recall increase. E36's same-file guidance variant was
+rejected for lower recall. The full25 remains development evidence, not
+held-out/leaderboard confirmation. E30 repairs Swift/PHP and qualifies all five formerly failing
 source requests. E31 adds the remaining eight plain-language/configuration
 adapters and tests actual files rather than declaring registration a win.
 Macro-heavy C, Astro and other real syntax/format gaps remain explicit.
@@ -2543,3 +2554,69 @@ refusal to claim lower cost when credits rise (five checks pass). The final
 collector will verify receipt bindings, exact native views, judge provenance,
 delivery bounds, complete-population clustered uncertainty and both quality/
 efficiency routes. Supplemental judge costs remain separately visible.
+
+### E37 complete: robust cost direction, unresolved quality-preservation gates
+
+Results: [full25 machine-readable report](adoption-e37-full25-results.json),
+[completion binding](adoption-e37-completion.json). All50 primary reviews are
+valid and all25 pairs are scored. No missing judgments, automatic retries,
+new supplementary judge calls or unresolved spend. All19 new pairs ran once
+in the fixed original population order; all six original pairs remain.
+
+| Full25 metric | Git B | Gita H |
+|---|---:|---:|
+| Reviewer credits | 950.09944 | 858.65378 |
+| Input tokens | 6,297,473 | 5,241,728 |
+| Model requests | 225 | 229 |
+| Mean per-PR grounded recall (primary) | 20.93% | 22.38% |
+| Pooled grounded recall | 20.45% | 21.59% |
+| Pooled grounded precision | 89.23% | 92.31% |
+| Pooled augmented recall | 23.50% | 25.41% |
+| Pooled augmented precision | 91.14% | 91.76% |
+| Known TP reference issues covered | 72/352 | 76/352 |
+| Additional accepted TP findings | 14 | 18 |
+| Sum of warm review seconds | 2,272.376 | 2,297.528 |
+
+Credits fall9.62485% and input16.76458%. The paired10,000-draw whole-repository
+bootstrap (25 repository clusters, fixed seed20261023) gives95% intervals:
+credit reduction[1.99%,16.11%], input reduction[0.84%,29.76%], macro grounded
+recall difference[-4.41pp,+6.69pp], pooled augmented precision
+difference[-4.00pp,+4.82pp]. Cost/input intervals exclude zero in this
+development population. Quality intervals do not establish the frozen
+1.62511pp recall/3pp precision noninferiority margins. Warm elapsed rises1.11%.
+Operational, useful-baseline, FP/PR, input-reduction and actual-credit gates
+pass; the overall quality-preserving efficiency/quality-improvement gate is
+**not established**, not a pass. F1 fields are explicitly harmonic means of
+the named aggregated precision/recall, not relabeled official macro-F1.
+
+The19 new pairs are reported separately from the adaptive six:
+B761.29354 versus H683.77790 review credits (10.18% lower), B5,252,555 versus
+H4,375,407 input tokens (16.70% lower), macro grounded recall22.41% to22.93%,
+pooled augmented precision90.32% to90.91%, known coverage56 to57 of269.
+Unlike E35 alone, the larger continuation does transfer cost savings, but
+the primary quality point-estimate gain is small and not a confidence result.
+
+Meaningful adoption is no longer near zero:23 successful change-map requests,
+93 source requests,14 indexed-context requests, one explicit structural diff,
+three explicit indexed-history requests,96 complete indexed-source first
+responses and382 reused source lines. Keep93 raw-patch calls and four raw
+context fallbacks separate from indexed use. Source errors12, map errors9
+and one context error remain visible. Complete-source counts exclude
+candidate-only replies; reuse may include raw reads, not just persistent IDs.
+
+Total primary comparative reviewer cost is1,808.75322 credits; judge cost
+946.63820 including retained source-complete stages. No new source supplements
+were needed for the19 continuation pairs. These judge and preparation costs
+are not smuggled into or excluded from a claimed end-to-end cost ratio: the
+headline comparison is explicitly reviewer credits. All preparation stages,
+timeout/raw fallback, errors and known timings stay in the report. An exact
+source snapshot and manifest preserve completed-study verification before
+any next experiment changes the harness.
+
+Post-run refusal audit also identifies a preparation defect in the recovered
+Rust scope: the private recovery helper omitted `build_status` from both
+already-published endpoint descriptors. Independent source/name checks passed,
+but the first `changes` request returned a missing-key error. This was an
+observed operational tool refusal, not falsified source. Keep the original
+valid review and score unchanged; do not rerun/relabel that pair to remove
+the defect. The following E38 preparation guard addresses the blind spot.
