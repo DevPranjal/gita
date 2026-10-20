@@ -1623,3 +1623,15 @@ does not establish cost superiority or the strict noise/recall margins.
 These are descriptive intervals on adaptively used development data, not
 post-selection-valid confirmation. Five PRs also cannot satisfy the S4
 requirement of known TP delivery on at least20 confirmation PRs.
+
+### Independent native-query usability measurement
+
+[A published4,354-definition LANdalf scope](indexed-query-qualification-20261020.json)
+is measured with100 calls per operation across five fresh sessions, exact pinned
+HEAD and generation, without rebuilding or executing project code.
+Warm native p95: qualified resolution113.42ms, state82.64ms, first history
+page111.10ms. Five fresh opens range up to749.65ms, median249.58ms.
+Hardware/software details are recorded. The proposed small-repository250ms
+warm-call diagnostic is met for this named scope; five opens are descriptive,
+not a confidence-backed latency SLA. This does not establish large-repository
+indexing speed or review quality, and excludes rendering/model time.
