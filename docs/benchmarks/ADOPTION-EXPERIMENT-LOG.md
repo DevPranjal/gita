@@ -6,7 +6,7 @@ Do not change preserved review/judgment artifacts or leak reference labels into
 reviewer-facing inputs. The 25-task starter is development data, not held-out
 confirmation.
 
-## Current status: E20 quality gate remains failed
+## Current status: joint quality/operational gates remain open
 
 Engineering changes are tested and committed; **no25-task model run is
 authorized**. All50 initial evidence packets passed offline preparation.
@@ -1753,3 +1753,33 @@ native60/reserve90,600/400 phase ceilings and source-grounded judge policy.
 No more optimistic label reinterpretation or late filtering; no25 authorization
 without the cohort outcome. This tests actual interaction overhead and choice,
 not an assertion that a shorter prompt guarantees quality.
+
+### E24 technical stop: legitimate empty source was misclassified as corruption
+
+[The interrupted cohort](adoption-e24-stopped-results.json) has141.62780
+measured review credits across four attempted sessions. Only the first pair is
+fully quality-scored; its favorable H cost/quality is conditional, not a cohort
+win. The third task is unstarted. The terminal stop is retained permanently.
+
+The failing H calls read two real empty `__init__.py` files. `read_file` correctly
+returned empty text and zero lines, but the shared delivery ledger split `""`
+into a purported unnumbered line and raised integrity. This is a harness
+empty-source handling defect, **not false indexed bytes**. It must be fixed
+rather than ignored, and the interrupted review is not retroactively made valid.
+
+## E25: validate exact empty source without fabricating line receipts
+
+Read-file coverage now explicitly records whether committed bytes are empty.
+The delivery ledger accepts an empty response only when independently read Git
+source has zero lines, response `file_lines` is zero and the producer marks empty
+source. It creates no line receipt. A forged empty response for nonempty committed
+source still raises terminal integrity.
+
+[Exact no-model replay](adoption-e25-empty-source-replay.json) confirms both
+stopped queries now return truthful empty evidence and no receipt, without
+altering old logs or the original terminal gate. Twelve focused source/history/
+empty/context tests pass. Resume only through a fresh protocol/run root with
+the same three cases3/4/7 and minimal workflow candidate, not a ledger reset.
+Keep all measured E24 costs and missing slots in its report. Same Sol/medium,
+native60/reserve90,600/400 phase ceilings and unchanged source-grounded judging.
+No25 inference until a valid complete small cohort meets the joint gate.

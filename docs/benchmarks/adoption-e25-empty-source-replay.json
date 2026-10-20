@@ -1,0 +1,22 @@
+{
+  "kind": "No-model exact replay of terminal E24 false-integrity source responses",
+  "rows": [
+    {
+      "path": "aafactory/src/__init__.py",
+      "empty_bytes_verified": true,
+      "file_lines": 0,
+      "source_receipt_created": false,
+      "empty_source": true
+    },
+    {
+      "path": "aafactory/src/aafactory/__init__.py",
+      "empty_bytes_verified": true,
+      "file_lines": 0,
+      "source_receipt_created": false,
+      "empty_source": true
+    }
+  ],
+  "original_integrity_stop_retained": true,
+  "original_log_unchanged": true,
+  "limits": "Fix validates actual empty Git bytes; nonempty mismatches remain terminal integrity failures."
+}

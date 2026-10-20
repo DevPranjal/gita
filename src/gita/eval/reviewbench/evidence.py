@@ -328,6 +328,7 @@ class Evidence:
         except UnicodeDecodeError:
             lossy = True
         result["coverage"].update(text_encoding="utf8_replace" if lossy else "utf8", lossy_decoding=lossy)
+        result["coverage"]["empty_source"] = len(source) == 0
         return result
 
     def list_files(self, pattern: str = "*", commit: str | None = None, cursor: str = "") -> dict:
@@ -904,6 +905,11 @@ class Evidence:
                 else arguments.get("path"))
         require_integrity(type(path) is str and bool(path), "Reusable source path missing")
         lines = source_lines(self.blob(path, commit))
+        if result.get("text") == "":
+            require_integrity(not lines and result.get("file_lines") == 0
+                              and result.get("coverage", {}).get("empty_source") is True,
+                              "Empty reusable response disagrees with committed source")
+            return None
         numbered = {}
         for displayed in result["text"].split("\n"):
             number, separator, text = displayed.partition(": ")

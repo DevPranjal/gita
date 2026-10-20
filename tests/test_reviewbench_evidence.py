@@ -26,7 +26,11 @@ def fixture_repo(tmp_path, request):
     source.write_text("def divide(value):\n" + padding + "    return 10 / value\n"
                       + ("\ndef divide(other):\n    return 30 / other\n" if duplicate else ""),
                       encoding="utf8")
-    git(repository, "add", "--", relative)
+    extras = []
+    if getattr(request, "param", None) == "empty":
+        (repository / "empty.py").write_bytes(b"")
+        extras.append("empty.py")
+    git(repository, "add", "--", relative, *extras)
     git(repository, "commit", "--no-gpg-sign", "-m", "base")
     base = git(repository, "rev-parse", "HEAD").decode().strip()
     source.write_text("def divide(value):\n" + padding.replace("x", "y") + "    return 20 / value\n"
@@ -257,6 +261,35 @@ def test_context_raw_fallback_is_exact_explicit_and_reusable(fixture_repo, monke
         assert reused["coverage"]["reused_source_lines"] == 2
         assert e.execute("gita_review", {
             "operation": "context", "token": "value", "path": "../outside"})["error"]
+    finally:
+        e.close()
+
+
+@pytest.mark.parametrize("fixture_repo", ["empty"], indirect=True)
+def test_empty_committed_file_is_valid_evidence_without_a_fake_line_receipt(fixture_repo):
+    _, scope, _ = fixture_repo
+    for arm in ("B", "H"):
+        e = Evidence({**config(scope, arm), "integrated_source": arm == "H"})
+        try:
+            result = e.execute("read_file", {"path": "empty.py", "start_line": 1, "end_line": 80})
+            assert "error" not in result, result
+            assert result["text"] == "" and result["file_lines"] == 0
+            assert result["coverage"]["empty_source"] is True
+            assert "source_receipt" not in result
+            assert result["blob"] == e.members(e.head)["empty.py"][1]
+        finally:
+            e.close()
+
+
+def test_fabricated_empty_response_for_nonempty_git_source_still_stops_integrity(fixture_repo, monkeypatch):
+    _, scope, _ = fixture_repo
+    e = Evidence({**config(scope), "integrated_source": True})
+    monkeypatch.setattr(e, "read_file", lambda **kwargs: {
+        "text": "", "file_lines": 0, "coverage": {"empty_source": True},
+        "truncated": False, "next_cursor": None, "omitted": {"characters": 0}})
+    try:
+        result = e.execute("read_file", {"path": "code.py"})
+        assert result["error"]["code"] == "integrity"
     finally:
         e.close()
 
