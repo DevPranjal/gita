@@ -2620,3 +2620,43 @@ but the first `changes` request returned a missing-key error. This was an
 observed operational tool refusal, not falsified source. Keep the original
 valid review and score unchanged; do not rerun/relabel that pair to remove
 the defect. The following E38 preparation guard addresses the blind spot.
+
+## E38: remove observed change-map contract failures, without rerunning full25
+
+The complete-study refusal audit found eight `changes(commit=<exact task
+HEAD>)` refusals, including two retained pairs and six continuation pairs.
+These requests did not ask for different evidence: they redundantly repeated
+the already-fixed PR HEAD. The shared operation schema exposes a `commit`
+selector for other operations, making this a predictable API trap.
+
+Accept the exact fixed HEAD for `changes`, while retaining refusal for base,
+out-of-scope/future, malformed or genuinely different revisions. The supplied
+selector never retargets the review. Preserve all other selector restrictions,
+response budgets, explicit gaps and raw fallback. Update the tool description
+to make that contract discoverable. This is an experimental review-facade
+repair, not a new public MCP tool or persistent-identity algorithm.
+
+Also strengthen independent preparation: require `ready`/`partial` published
+coverage metadata for every configured generation and verify actual
+change-map rendering as well as entity/name/source consistency. The private
+generation-recovery helper now derives its omitted coverage field using the
+published coverage rows and shared uncovered-category predicate, rather than
+assuming a successful build means full coverage. No published generation or
+original E37 scope is edited.
+
+Three authored regressions fail before the change: redundant HEAD request,
+missing map metadata, and an injected model-facing map refusal. After repair,
+110 source/evidence/protocol/readable-output tests pass. The
+[source-only replay](adoption-e38-map-contract-replay.json) reproduces all
+eight real refused requests: eight failures become zero, and each repaired
+response exactly matches the implicit fixed-HEAD request under identical
+cursor secrets. All responses remain inside the unchanged wire bound.
+The original Rust scope now fails preparation explicitly; a distinct scope
+with coverage read from its published generations passes and delivers a map.
+
+E38 makes zero model invocations and consumes zero credits. It establishes
+the narrower correctness/UX improvement, not a new precision/recall or credit
+effect. Do not replace E37's native outcomes, add hypothetical savings, or
+launch another full25 merely because these deterministic replays pass.
+The remaining uncertainty is quality preservation across the broader task
+population, not basic first-attempt delivery or near-zero indexed adoption.

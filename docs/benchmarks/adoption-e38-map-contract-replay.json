@@ -1,0 +1,125 @@
+{
+  "kind": "E38 source-only map-contract replay, not a new efficacy benchmark",
+  "source_study": "a2c4fa95727c68a7d5d1010d5a63e2a8e467bf35791c3cd1e6c02896f4e20d7d",
+  "redundant_head_refusals_before": 8,
+  "redundant_head_refusals_after": 0,
+  "replays": [
+    {
+      "task": "d701ed5ae7001b5fe7c881acdda33cf7759293132014f6d71abcbc657eb36d27",
+      "original_call": 1,
+      "original_error": "changes accepts only path and cursor",
+      "original_result_digest": "76337ea0638dc6c4047b9b1b5f28ad5ceb53a915b916c7eb0f648a1102ac7e05",
+      "repaired_response_digest": "45db2505ce8cf15793261cb2ecc5f11ab1d7bd0e859c954224b028921d49b394",
+      "matches_implicit_fixed_head": true,
+      "wire_characters": 6300
+    },
+    {
+      "task": "82ec18705a16ae64998d181393c7f885543cc33b25921073d24ebecec40fbc15",
+      "original_call": 1,
+      "original_error": "changes accepts only path and cursor",
+      "original_result_digest": "76337ea0638dc6c4047b9b1b5f28ad5ceb53a915b916c7eb0f648a1102ac7e05",
+      "repaired_response_digest": "c9df57800382839d091c0a864db8352c751c257a2c701cca2afb579625a03c9a",
+      "matches_implicit_fixed_head": true,
+      "wire_characters": 1094
+    },
+    {
+      "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+      "original_call": 1,
+      "original_error": "changes accepts only path and cursor",
+      "original_result_digest": "76337ea0638dc6c4047b9b1b5f28ad5ceb53a915b916c7eb0f648a1102ac7e05",
+      "repaired_response_digest": "06dd449b0c3d98d7cdc0f0c6d085d366686f5828126e61175db638e3dc1beb3d",
+      "matches_implicit_fixed_head": true,
+      "wire_characters": 5019
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "original_call": 1,
+      "original_error": "changes accepts only path and cursor",
+      "original_result_digest": "76337ea0638dc6c4047b9b1b5f28ad5ceb53a915b916c7eb0f648a1102ac7e05",
+      "repaired_response_digest": "ef009faccd35c8661b1a9ffad38d54d976c265c0b0000ce67760af6a62d25b99",
+      "matches_implicit_fixed_head": true,
+      "wire_characters": 1092
+    },
+    {
+      "task": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+      "original_call": 1,
+      "original_error": "changes accepts only path and cursor",
+      "original_result_digest": "76337ea0638dc6c4047b9b1b5f28ad5ceb53a915b916c7eb0f648a1102ac7e05",
+      "repaired_response_digest": "aa8794fea3eea62894cf38df1d76aea9ddcf182a4ec7bb4698ca8e876072f1fa",
+      "matches_implicit_fixed_head": true,
+      "wire_characters": 8436
+    },
+    {
+      "task": "7d1bf7158fd26470fa90ae3afa30ab61088ae3c62444c7c15a5001d978ec23a5",
+      "original_call": 1,
+      "original_error": "changes accepts only path and cursor",
+      "original_result_digest": "76337ea0638dc6c4047b9b1b5f28ad5ceb53a915b916c7eb0f648a1102ac7e05",
+      "repaired_response_digest": "77ff5bf7fdc27166d7a265d3dc5869535f77464e10b8628d7f1d81b510022681",
+      "matches_implicit_fixed_head": true,
+      "wire_characters": 3825
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "original_call": 1,
+      "original_error": "changes accepts only path and cursor",
+      "original_result_digest": "76337ea0638dc6c4047b9b1b5f28ad5ceb53a915b916c7eb0f648a1102ac7e05",
+      "repaired_response_digest": "1b5b3870aebc8936fca51df213476373c971fec1c0bccdf760b85d04534763f7",
+      "matches_implicit_fixed_head": true,
+      "wire_characters": 5635
+    },
+    {
+      "task": "b673f3f386cf657bbc269b622ce6a14389e41cd0d0427b48254c43c2ccd38956",
+      "original_call": 1,
+      "original_error": "changes accepts only path and cursor",
+      "original_result_digest": "76337ea0638dc6c4047b9b1b5f28ad5ceb53a915b916c7eb0f648a1102ac7e05",
+      "repaired_response_digest": "1ff8ac670405a9fd08c998fb1b3f60a54c37606526dd32003798a1063c92efee",
+      "matches_implicit_fixed_head": true,
+      "wire_characters": 3076
+    }
+  ],
+  "rust_preparation": {
+    "original_missing_metadata_rejected": true,
+    "coverage_read_from_published_generation": true,
+    "generation_ids_unchanged": true,
+    "preflight": {
+      "independent_occurrences_verified": 2236,
+      "extraction_gaps": 0,
+      "broker_budget_gap_files": 0,
+      "change_map_verified": true,
+      "index_status": {
+        "status": "built",
+        "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+        "seconds": 246.67199999999139,
+        "scope_policy": "reviewed_PR_window",
+        "raw_history_unchanged": true,
+        "old_generations_retained": true,
+        "original_qualification_failed": "Independent name/id query conformance failed",
+        "original_failure_sha256": "748835c17c9e0133483e837a19551cb7bbbe46352ee8285a695cd2182d6cf9a8",
+        "broker_budget_gap_files": 0,
+        "postbuild_query_validation": {
+          "policy_digest": "1bbb8b4600cbfd3ccd8e0750e367ef5ca8cbc1d56c3d41ea6c1b67bcd9e51c8e",
+          "preflight": {
+            "independent_occurrences_verified": 2236,
+            "extraction_gaps": 0,
+            "broker_budget_gap_files": 0,
+            "index_status": {
+              "status": "built",
+              "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+              "seconds": 246.67199999999139,
+              "scope_policy": "reviewed_PR_window",
+              "raw_history_unchanged": true,
+              "old_generations_retained": true,
+              "original_qualification_failed": "Independent name/id query conformance failed",
+              "original_failure_sha256": "748835c17c9e0133483e837a19551cb7bbbe46352ee8285a695cd2182d6cf9a8",
+              "broker_budget_gap_files": 0
+            }
+          }
+        }
+      }
+    },
+    "successful_map_digest": "7d070c83eef43371125dbc164df98c66f43ed87cd148ed2098bdf609065c68cb"
+  },
+  "model_invocations": 0,
+  "credits": 0,
+  "interpretation": "Original full25 outcomes stay unchanged. This verifies removal of observed contract failures, not additional credit savings or quality improvement."
+}

@@ -765,6 +765,42 @@ def test_real_index_preflight_and_source_ref_tamper(fixture_repo):
     evidence.close()
 
 
+def test_review_change_map_accepts_redundant_fixed_head_without_retargeting(fixture_repo):
+    _, scope, future = fixture_repo
+    indexed = build_indexes(scope)
+    evidence = Evidence({**config(indexed), "indexed_workflow": True,
+                         "integrated_source": True, "engine_frontend": True})
+    try:
+        original = evidence.execute("gita_review", {"operation": "changes"})
+        repeated_head = evidence.execute("gita_review", {
+            "operation": "changes", "commit": scope["task"]["head"]})
+        assert "error" not in repeated_head, repeated_head
+        assert repeated_head == original
+        for revision in (scope["effective_base"], future, "not-an-object-id"):
+            refused = evidence.execute("gita_review", {"operation": "changes", "commit": revision})
+            assert refused["error"]
+            assert refused["coverage"]["status"] == "unavailable"
+    finally:
+        evidence.close()
+
+
+def test_preflight_rejects_missing_change_map_metadata_before_review(fixture_repo):
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    del indexed["indexes"][0]["build_status"]
+    with pytest.raises(ProtocolError, match="coverage metadata"):
+        preflight(indexed)
+
+
+def test_preflight_checks_actual_change_map_delivery(fixture_repo, monkeypatch):
+    _, scope, _ = fixture_repo
+    indexed = build_indexes(scope)
+    monkeypatch.setattr(Evidence, "change_context",
+                        lambda *args, **kwargs: {"error": {"message": "authored map refusal"}})
+    with pytest.raises(ProtocolError, match="change.map"):
+        preflight(indexed)
+
+
 def test_consistent_wrong_index_query_fails_independent_oracle(fixture_repo, monkeypatch):
     _, scope, _ = fixture_repo
     indexed = build_indexes(scope)

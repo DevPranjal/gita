@@ -76,7 +76,7 @@ DESCRIPTIONS = {
     "commit_log": "Ordered allowed commits only, with subjects and parents qualified at the scope boundary.",
     "file_history": "Raw Git changes for a member path over the same declared allowed commit graph.",
     "continue_evidence": "Continue any previously issued next_cursor without copying the original tool arguments. Cursor must belong to this session. Preferred for all paginated evidence.",
-    "gita_review": "Code evidence: context(token,path?) uses path as a hint, finds a published definition even when imported from elsewhere, or returns explicitly RAW literal context for unindexed names/constants. This is lexical evidence, not a resolved caller graph. source(token,path?) is strict indexed function/class lookup; source(path,line) gives enclosing context. changes=changed-code map; diff(token,path)=entity endpoint diff; history(token,path)=verified code-change ledger; status=coverage. raw_patch(path?) is exact Git fallback. Ambiguity is explicit; no parsing/build. Use continue_evidence for pages.",
+    "gita_review": "Code evidence: context(token,path?) uses path as a hint, finds a published definition even when imported from elsewhere, or returns explicitly RAW literal context for unindexed names/constants. This is lexical evidence, not a resolved caller graph. source(token,path?) is strict indexed function/class lookup; source(path,line) gives enclosing context. changes=changed-code map for the fixed PR (optional commit may repeat its HEAD, never retarget it); diff(token,path)=entity endpoint diff; history(token,path)=verified code-change ledger; status=coverage. raw_patch(path?) is exact Git fallback. Ambiguity is explicit; no parsing/build. Use continue_evidence for pages.",
     "index_status": "Optional: inspect prebuilt index readiness and gaps. For named-function context, entities(path) or id(name) -> state/source can retrieve exact entity evidence instead of whole files. Raw Git fallback is valid. No build or mutation.",
     "change_context": "Gita review starting point: indexed changed-code map plus up to two verified persistent-entity source-diff previews when connected history permits. Returns actual code evidence, locations and explicit gaps; use entity_diff/entity_context for more. Not a complete semantic PR diff.",
     "entities": "Indexed file entities with exact occurrence references, coverage and opaque continuation.",
@@ -316,8 +316,10 @@ class Evidence:
         require(operation in review_operations(self.config),
                 "Review operation unavailable for this index preparation")
         if operation == "changes":
-            require(line is None and not token and commit is None and not force_full,
-                    "changes accepts only path and cursor")
+            require(line is None and not token and not force_full,
+                    "changes accepts path, cursor and an optional fixed HEAD commit")
+            require(commit is None or self.commit(commit) == self.head,
+                    "changes cannot retarget the fixed PR; commit must equal its HEAD")
             result = self.change_context(path, cursor)
         elif operation == "source":
             if token:

@@ -156,6 +156,9 @@ def preflight(scope: dict) -> dict:
     from ...index.model import GitOid
     require_integrity(scope["index_preparation"]["status"] != "integrity_failed",
             "Indexed source/query integrity failure blocks scientific campaign")
+    require_integrity(all(index.get("build_status") in ("ready", "partial")
+                          for index in scope["indexes"]),
+                      "Published index coverage metadata missing or invalid")
     evidence = Evidence({**scope, "arm": "H", "cursor_secret": secrets.token_hex(32)})
     verified = 0
     gaps = 0
@@ -224,9 +227,16 @@ def preflight(scope: dict) -> dict:
                     require_integrity(state["state"] == "present" and state["occurrence"] == reference,
                             "Independent state query conformance failed")
                 verified += len(returned)
+        change_map = evidence.change_context()
+        require_integrity(type(change_map) is dict and "error" not in change_map
+                          and type(change_map.get("text")) is str
+                          and change_map.get("availability", {}).get("published_coverage") ==
+                          [index["build_status"] for index in scope["indexes"]],
+                          "Model-facing change-map conformance failed")
         scope["index_preparation"]["broker_budget_gap_files"] = broker_budget_gaps
         return {"independent_occurrences_verified": verified, "extraction_gaps": gaps,
                 "broker_budget_gap_files": broker_budget_gaps,
+                "change_map_verified": True,
                 "index_status": scope["index_preparation"]}
     finally:
         evidence.close()
