@@ -96,7 +96,8 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
              judge_runtime_contracts: dict | None = None, judge_reviewed_source: bool = False,
              initial_context_format: str = "json", proof_before_reporting: bool = False,
              minimal_workflow: bool = False, indexed_preload: bool = True,
-             large_evidence_pages: bool = False, file_context_guidance: bool = False) -> dict:
+             large_evidence_pages: bool = False, file_context_guidance: bool = False,
+             size_aware_source: bool = False) -> dict:
     validate_settings(reviewer_model, reviewer_reasoning)
     parser_cache = os.environ.get("GITA_PARSER_CACHE")
     require(parser_cache is None or Path(parser_cache).is_absolute(),
@@ -115,6 +116,8 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
     require(type(indexed_preload) is bool, "Indexed-preload selection must be boolean")
     require(type(large_evidence_pages) is bool, "Large-evidence-page selection must be boolean")
     require(type(file_context_guidance) is bool, "File-context guidance must be boolean")
+    require(type(size_aware_source) is bool and (not size_aware_source or integrated_source),
+            "Size-aware source requires integrated source delivery")
     if judge_runtime_contracts is not None:
         from .runtime_contracts import validate_contracts
         validate_contracts(judge_runtime_contracts)
@@ -178,6 +181,7 @@ def protocol(root: Path, scopes: list[dict], parsers: dict, *, seed: int = 20261
             "indexed_preload": indexed_preload,
             "large_evidence_pages": large_evidence_pages,
             "file_context_guidance": file_context_guidance,
+            "size_aware_source": size_aware_source,
             "reviewer_input_diagnostics": initial_context,
             "workflow_guidance": WORKFLOW_GUIDANCE if indexed_workflow and not minimal_workflow else {},
             "tool_schemas": {arm: inventory(arm) for arm in ("B", "H")},
@@ -219,7 +223,8 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
          judge_runtime_contracts: dict | None = None, judge_reviewed_source: bool = False,
          initial_context_format: str = "json", proof_before_reporting: bool = False,
          minimal_workflow: bool = False, indexed_preload: bool = True,
-         large_evidence_pages: bool = False, file_context_guidance: bool = False) -> dict:
+         large_evidence_pages: bool = False, file_context_guidance: bool = False,
+         size_aware_source: bool = False) -> dict:
     require(run_root.resolve() != root.resolve() and root.resolve() not in run_root.resolve().parents,
             "Run artifacts must live outside corpus root")
     for scope in scopes:
@@ -235,7 +240,8 @@ def seal(root: Path, run_root: Path, scopes: list[dict], parsers: dict, *, seed:
                       judge_runtime_contracts=judge_runtime_contracts, judge_reviewed_source=judge_reviewed_source,
                       initial_context_format=initial_context_format, proof_before_reporting=proof_before_reporting,
                       minimal_workflow=minimal_workflow, indexed_preload=indexed_preload,
-                      large_evidence_pages=large_evidence_pages, file_context_guidance=file_context_guidance)
+                      large_evidence_pages=large_evidence_pages, file_context_guidance=file_context_guidance,
+                      size_aware_source=size_aware_source)
     body = {k: v for k, v in frozen.items() if k != "digest"}
     body["run_root_digest"] = digest(str(run_root.resolve()))
     if initial_context:
@@ -451,6 +457,8 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
               "large_evidence_pages": frozen.get("large_evidence_pages", False),
               "file_source_enabled": frozen.get("file_context_guidance", False) and slot["arm"] == "H",
               "tool_log": str(directory / "tools.jsonl")}
+    if frozen.get("size_aware_source", False):
+        config["size_aware_source"] = slot["arm"] == "H"
     write_json(directory / "broker.json", config)
     mcp_environment = {"PYTHONPATH": str(Path(__file__).resolve().parents[3]),
                        "PYTHONIOENCODING": "utf-8"}
@@ -586,6 +594,10 @@ def attempt(scope: dict, slot: dict, frozen: dict, directory: Path,
 
 def validate_broker_config(config: dict, slot: dict, frozen: dict) -> None:
     require(config["arm"] == slot["arm"], "Cached broker arm mismatch")
+    require(type(config.get("size_aware_source", False)) is bool
+            and config.get("size_aware_source", False) == (
+                frozen.get("size_aware_source", False) and slot["arm"] == "H"),
+            "Cached source representation policy mismatch")
     require(type(config.get("file_source_enabled", False)) is bool
             and config.get("file_source_enabled", False) == (
                 frozen.get("file_context_guidance", False) and slot["arm"] == "H"),
@@ -610,7 +622,7 @@ def validate_broker_config(config: dict, slot: dict, frozen: dict) -> None:
     original_scope = {k: v for k, v in config.items()
                       if k not in ("arm", "cursor_secret", "tool_log", "indexed_workflow",
                                    "integrated_source", "engine_frontend", "large_evidence_pages",
-                                   "file_source_enabled")}
+                                   "file_source_enabled", "size_aware_source")}
     require(digest(original_scope) == frozen["scope_digests"][slot["task"]],
             "Cached broker scope/protocol mismatch")
 

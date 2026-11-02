@@ -9,6 +9,7 @@ import hmac
 import json
 import re
 import difflib
+from copy import deepcopy
 from pathlib import Path
 import time
 from typing import Any
@@ -165,6 +166,9 @@ class Evidence:
         self.page_chars = 14000 if large_pages else PAGE_CHARS
         require(type(config.get("file_source_enabled", False)) is bool,
                 "File-source selection must be boolean")
+        require(type(config.get("size_aware_source", False)) is bool
+                and (not config.get("size_aware_source") or config.get("integrated_source") is True),
+                "Size-aware source requires integrated source delivery")
         self.repo = Path(config["repo"])
         self.base = oid(config["effective_base"])
         self.head = oid(config["task"]["head"])
@@ -1000,6 +1004,11 @@ class Evidence:
         delivery = self.source_delivery.render(
             key, numbered, start=start, end=end, force_full=arguments.get("force_full", False))
         receipt = f"evidence-call-{self.calls}"
+        result["provenance"] = {key: value for key, value in result["provenance"].items()
+                                if key in ("commit", "generation", "identity_context", "source")}
+        result["source_receipt"] = receipt
+        full_result = (deepcopy(result) if delivery.previously_delivered_ranges
+                       and self.config.get("size_aware_source", False) else None)
         if delivery.previously_delivered_ranges:
             result["text"] = "\n".join(f"{line.number}: {line.text}" for line in delivery.new_lines)
             if not result["text"]:
@@ -1012,10 +1021,15 @@ class Evidence:
                 newly_delivered_lines=len(delivery.new_lines),
                 complete_entity=False, source_available_across_receipts=True)
             result["omitted"]["already_delivered_lines"] = result["coverage"]["reused_source_lines"]
-        result["provenance"] = {key: value for key, value in result["provenance"].items()
-                                if key in ("commit", "generation", "identity_context", "source")}
         result["coverage"]["shown_characters"] = len(result["text"])
-        result["source_receipt"] = receipt
+        if full_result is not None:
+            full_result["coverage"]["shown_characters"] = len(full_result["text"])
+            compact = json.dumps(result, ensure_ascii=True)
+            full = json.dumps(full_result, ensure_ascii=True)
+            if (len(compact) >= len(full)
+                    or len(json.dumps(compact, ensure_ascii=True)) > len(json.dumps(full, ensure_ascii=True))):
+                result.clear()
+                result.update(full_result)
         return key, {line.number: line.text for line in delivery.new_lines}, receipt
 
     def execute(self, name: str, arguments: dict, request_id: str | None = None) -> dict:

@@ -560,6 +560,38 @@ def test_integrated_source_reuses_only_completed_exact_lines_and_can_replay(fixt
         e.close()
 
 
+@pytest.mark.parametrize("fixture_repo", [None, "large", "escaped"], indirect=True)
+def test_size_aware_source_never_expands_full_transport(fixture_repo):
+    _, scope, _ = fixture_repo
+    arguments = {"path": "code.py", "start_line": 1}
+    adaptive = Evidence({**config(scope), "integrated_source": True, "size_aware_source": True,
+                         "large_evidence_pages": True})
+    full = Evidence({**config(scope), "integrated_source": True, "large_evidence_pages": True})
+    try:
+        arguments["end_line"] = min(50, len(adaptive.blob("code.py", scope["task"]["head"]).splitlines()))
+        first = adaptive.execute("read_file", arguments)
+        assert "error" not in first
+        assert "error" not in full.execute("read_file", arguments)
+        response = adaptive.execute("read_file", arguments)
+        replay = full.execute("read_file", {**arguments, "force_full": True})
+        assert "error" not in response and "error" not in replay
+        compact_json, full_json = (json.dumps(r, ensure_ascii=True) for r in (response, replay))
+        assert len(compact_json) <= len(full_json)
+        assert len(json.dumps(compact_json)) <= len(json.dumps(full_json))
+        if arguments["end_line"] == 2 or first.get("truncated"):
+            assert response["text"] == replay["text"]
+            assert "previously_delivered" not in response
+        else:
+            assert response["coverage"]["reused_source_lines"] == arguments["end_line"]
+        replay_again = adaptive.execute("read_file", {**arguments, "force_full": True})
+        assert replay_again["text"] == replay["text"]
+        base = adaptive.execute("read_file", {**arguments, "commit": scope["effective_base"]})
+        assert "previously_delivered" not in base
+    finally:
+        adaptive.close()
+        full.close()
+
+
 def test_truncated_source_is_not_registered_as_delivered(fixture_repo, monkeypatch):
     _, scope, _ = fixture_repo
     e = Evidence({**config(scope), "integrated_source": True})

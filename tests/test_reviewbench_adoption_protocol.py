@@ -92,6 +92,27 @@ def test_workflow_metadata_is_bound_separately_from_immutable_source_scope():
             campaign.validate_broker_config(changed, slot, frozen)
 
 
+def test_size_aware_source_is_opt_in_and_bound_to_broker_scope(tmp_path, frozen_inputs):
+    scopes, parsers = frozen_inputs
+    with pytest.raises(ProtocolError, match="Size-aware"):
+        campaign.protocol(tmp_path, scopes, parsers, development_pilot=True,
+                          size_aware_source=True)
+    options = dict(development_pilot=True, indexed_workflow=True, integrated_source=True)
+    before = campaign.protocol(tmp_path, scopes, parsers, **options)
+    after = campaign.protocol(tmp_path, scopes, parsers, size_aware_source=True, **options)
+    assert before["size_aware_source"] is False
+    assert after["size_aware_source"] is True and before["digest"] != after["digest"]
+    scope = {"repo": "source", "history_ready": True}
+    frozen = {"indexed_workflow": True, "integrated_source": True,
+              "size_aware_source": True, "scope_digests": {"task": digest(scope)}}
+    config = {**scope, "arm": "H", "cursor_secret": "secret", "tool_log": "calls",
+              "indexed_workflow": True, "integrated_source": True, "size_aware_source": True}
+    slot = {"task": "task", "arm": "H"}
+    campaign.validate_broker_config(config, slot, frozen)
+    with pytest.raises(ProtocolError, match="representation policy"):
+        campaign.validate_broker_config({**config, "size_aware_source": False}, slot, frozen)
+
+
 def test_integrated_source_setting_is_explicit_and_scope_bound(tmp_path, frozen_inputs):
     scopes, parsers = frozen_inputs
     frozen = campaign.protocol(tmp_path, scopes, parsers, development_pilot=True,

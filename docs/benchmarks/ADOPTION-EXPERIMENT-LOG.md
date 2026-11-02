@@ -2660,3 +2660,178 @@ effect. Do not replace E37's native outcomes, add hypothetical savings, or
 launch another full25 merely because these deterministic replays pass.
 The remaining uncertainty is quality preservation across the broader task
 population, not basic first-attempt delivery or near-zero indexed adoption.
+
+## Paper draft: indexed-only scope and new AACR extraction qualification
+
+At the author's request, prepared an indexed-Gita systems-paper first draft,
+attributed solely to Pranjal Gulati. The draft uses the existing E37 full25
+indexed ReviewBench study and does not relabel the older135-pair non-indexed
+AACR review result as evidence of indexing. That historical comparison is
+isolated as excluded background, with no pooling or transferred savings claim.
+
+To supply current indexed-substrate evidence on AACR, ran a read-only
+changed-file endpoint qualification over the frozen196-task manifest at
+dataset commit `68a569759289a83654a59d06db2a72910edf0a4a`. Existing pinned
+comparison sources are available for185 tasks;11 remain unavailable.
+All3,453 changed-file endpoints stay in the coverage denominator:
+2,682 complete,244 unsupported and527 parse errors. The isolated byte-evidence
+extractor emits332,838 non-root named definitions, including structural fields
+from supported data/configuration files; this is not a function count.
+Every emitted definition's source digest matches its original committed
+byte slice. Runtime662.204 seconds, zero model invocations. These are
+extraction/applicability results, not full-repository index builds, lineage
+accuracy, or indexed-agent AACR precision/recall/credit results.
+
+Parser fingerprint
+`0ba8cc3b4154458ff77f184b5033bdb0d116a6568b8ce9864acd5d92dd15cc9b`;
+product-policy digest
+`1bbb8b4600cbfd3ccd8e0750e367ef5ca8cbc1d56c3d41ea6c1b67bcd9e51c8e`.
+The code and full per-task counts are in the paper bundle, with source
+checksums and a read-only reproduction command. No repository programs,
+tests, builds, hooks, original native logs or published generations were
+executed or modified.
+
+The paper package contains a17-page PDF, editable Markdown, offline HTML,
+seven reproducible figures with vector versions, four explicitly scoped
+analytical equations,12 verified references, a claim-evidence ledger and
+five-dimension author self-review. Source-only invariant arguments are not
+presented as mechanized verification or semantic matching guarantees.
+The package rebuilds independently from the archived result exports.
+Validation covers all headline/F1 arithmetic, input hashes, AACR denominators,
+table-caption placement, citation numbering, PDF geometry, figure loading,
+offline operation and mobile layout. Venue/submission research is deferred
+to the later task requested by the author.
+
+### Conference-style replacement after author feedback
+
+The author rejected the report-style PDF and requested a genuine
+arXiv/ICLR/NeurIPS-style manuscript. A distinct revision under
+`paper/conference` now compiles with real LaTeX and the unmodified official
+NeurIPS2025 style in `preprint` mode. It is not a claim of conference
+acceptance. The original draft remains preserved.
+
+The10-page replacement uses a tighter systems argument, native TikZ
+architecture, paired per-PR credit scatter/clustered intervals, compact
+booktabs tables, and standard citations/bibliography. All illustrations
+embedded in the PDF are vector graphics. Decorative amortization/exposure
+equations and specification-style pseudo-theory were removed; one scoring
+definition equation remains only in the appendix. Internal reverse-outline
+and adversarial review notes are outside the manuscript.
+
+AACR measurements now appear in the main comparison, alongside their
+separate quality definition. The author's new statement that the AACR run
+was indexed conflicts with the retained revision/tool summary. Both are
+recorded in source provenance, with the indexed attribution explicitly
+author-reported and unresolved; no measurement, old protocol or product
+revision was rewritten to satisfy the assumption. The AACR effect is
+not pooled into the verified indexed ReviewBench estimate.
+
+All10 compiled pages were rendered and inspected. Automated checks find
+zero raster images, overfull boxes, undefined citations/references,
+out-of-margin text spans or BibTeX warnings. Standard nonfatal underfull
+layout warnings remain; there are no missing glyphs. The source archive
+regenerates its vector assets and compiles/validates independently of
+the repository. No model evaluation or corpus execution was performed
+for this presentation revision.
+
+## E39-E41: research-led controls and an opt-in delivery improvement
+
+The author requested primary agent-efficiency literature, new experiments
+where useful, a more natural research story, and a two-column paper.
+Read primary full-text sections of Agentless, AgentDiet (PACMSE/FSE2026),
+The Complexity Trap (DL4C at NeurIPS2025), and SWE-Pruner. The revised
+story distinguishes producer-side versioned evidence from incoming-context
+pruning and trajectory compaction; these works are not reported as
+head-to-head measured baselines on Gita's review tasks.
+
+### E39: fixed-query source-delivery intervention
+
+Frozen before execution, all25 native E37 treatment trajectories are
+replayed,708 requests including errors and raw fallback. Retained native
+log prefixes are receipt-hash verified; replay tails are not agent calls.
+Every original evidence-result digest replays identically from the
+preserved E37 product source. The control forces the source ledger to
+replay all requested lines instead of suppressing previous delivery.
+Tools, arguments, selectors, order and output budgets stay fixed.
+No new reviewer or judge calls are made.
+
+| Representation | Serialized characters | JSON-string wire characters |
+|---|---:|---:|
+| Full source replay | 2,680,451 | 2,835,941 |
+| Recorded receipts | 2,671,266 | 2,826,782 |
+| Size-aware fixed-query choice | 2,668,917 | 2,824,168 |
+
+Both original and full-replay conditions retain26 refusals. Recorded
+receipt elision reduces serialized output by only0.34267%, not16.8%.
+These are character counts, not billed tokens, credits or an adaptive
+agent ablation. There are35 receipt-bearing replies;15 expand serialized
+output versus full replay, across10 cases. Metadata overhead can exceed
+the code omitted. This constrains attribution: do not call the full25
+credit/input effect an isolated measured duplicate-suppression benefit.
+
+The deterministic size-aware rule selects a receipt only if serialized
+size strictly decreases and wire size does not increase; otherwise it
+sends the exact requested source. Its total improvement over recorded
+receipts is small, not a new headline model-efficiency result.
+The source-only replay took895.828 seconds and consumed zero model credits.
+Full results: [E39](adoption-e39-delivery-intervention.json).
+
+### E40: authored historical identity qualification
+
+Frozen48 histories: eight motifs in each of Python, TypeScript, Go, Rust,
+Java and PHP, with four snapshots each. Logical identities are assigned
+before source rendering. Motifs include edit, rename, move, retained copy,
+delete/reintroduce, revert, ambiguous relocation, and copying followed by
+deleting the original. These are parser-input snippets, not complete
+buildable projects or proofs of runtime semantic equivalence.
+
+All426 callable observations, including stable sentinels, are checked
+against exact original source bytes. The frozen all-callable analysis has
+540 correct same-EID pairs, zero incorrect same-EID pairs and48 missed
+continuities (91.84% equality recall). Because sentinels make that easier,
+the paper uses a transparent secondary target-only analysis: exclude every
+preassigned sentinel, leaving300 positive and168 negative cross-snapshot
+target pairs. Gita has252 correct matches, zero false joins and48 misses:
+100% precision and84% recall on this authored suite. This is not a
+real-world tracking-accuracy claim.
+
+On the identical target observations, name keys have264 correct/168 false
+matches; path/name keys192 correct/12 false; exact callable-content keys
+162 correct/114 false. These are representation counterexamples, not
+competitive tracker baselines. Missed Gita continuity occurs in retained
+copy and ambiguous relocation motifs and is counted, not relabeled.
+
+The first helper stopped on a missing display-only `kind` field after
+building one case; this zero-credit failure remains preserved. The
+separate corrected run resolves exact occurrence names without expecting
+that field. All48 histories complete in285.031 seconds, zero model calls.
+Full original analysis: [E40](adoption-e40-evolution-qualification.json).
+Target-only decomposition and observations are in the paper bundle.
+
+### E41: implemented size-aware source delivery
+
+Added programmatic `size_aware_source=True` to ReviewBench protocol/sealing,
+attempt configuration and receipt validation. It requires integrated
+source delivery, applies to the H arm, and defaults to false. The default
+profile and all preserved native-study outcomes remain unchanged.
+The public source API and indexed identity/matching algorithm are unchanged.
+
+The opt-in broker compares full and receipt-bearing representations after
+the same exact source validation and normalization. It sends a receipt
+only when both transport comparisons permit it. Full replay, source
+revision isolation, complete registration, partial-page refusal to
+register, and the original budget bounds remain intact.
+
+147 focused evidence, protocol, readable-output and source-ledger checks
+pass. The initial escaped-source test incorrectly assumed its first page
+was complete; corrected the test to honor the real truncation contract
+rather than weakening partial-page registration. A separate implementation
+replay over all25 trajectories verifies all318 source/context/read-file
+requests against the frozen E39 representation predictions by exact
+result digest. New model calls/credits: zero.
+Results: [E41](adoption-e41-size-aware-source.json).
+
+No long paid campaign is launched to claim an efficacy gain from a small
+deterministic payload improvement. The research revision preserves the
+full25 model result, adds the narrower controls, explains the remaining
+causal/quality limits, and uses an official two-column preprint style.

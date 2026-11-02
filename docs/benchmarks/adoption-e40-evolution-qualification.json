@@ -1,0 +1,563 @@
+{
+  "kind": "E40 controlled authored evolution qualification",
+  "protocol": "c53a68b847e12be33e963cd5fffa352ce8caf2e6dd5a816745bef38f7124cef1",
+  "histories": 48,
+  "snapshots": 192,
+  "source_observations_verified": 426,
+  "counts": {
+    "true_positive": 540,
+    "true_negative": 870,
+    "missed_continuity": 48
+  },
+  "accepted_link_precision": 1.0,
+  "continuity_recall": 0.9183673469387755,
+  "seconds": 285.030999999959,
+  "model_calls": 0,
+  "limitations": [
+    "real-world lineage accuracy",
+    "compiler semantics",
+    "review quality/cost"
+  ],
+  "cases": [
+    {
+      "case": "python-edit",
+      "language": "python",
+      "scenario": "edit",
+      "build_status": "ready",
+      "seconds": 3.8130000000819564,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "python-rename",
+      "language": "python",
+      "scenario": "rename",
+      "build_status": "ready",
+      "seconds": 4.1560000001918525,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "python-move",
+      "language": "python",
+      "scenario": "move",
+      "build_status": "ready",
+      "seconds": 3.922000000020489,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "python-retained_copy",
+      "language": "python",
+      "scenario": "retained_copy",
+      "build_status": "ready",
+      "seconds": 4.234000000171363,
+      "counts": {
+        "true_positive": 13,
+        "true_negative": 30,
+        "missed_continuity": 2
+      }
+    },
+    {
+      "case": "python-delete_reintroduce",
+      "language": "python",
+      "scenario": "delete_reintroduce",
+      "build_status": "partial",
+      "seconds": 3.327999999979511,
+      "counts": {
+        "true_negative": 11,
+        "true_positive": 7
+      }
+    },
+    {
+      "case": "python-revert",
+      "language": "python",
+      "scenario": "revert",
+      "build_status": "partial",
+      "seconds": 3.703999999910593,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "python-ambiguous_relocation",
+      "language": "python",
+      "scenario": "ambiguous_relocation",
+      "build_status": "ready",
+      "seconds": 4.812000000150874,
+      "counts": {
+        "missed_continuity": 6,
+        "true_negative": 36,
+        "true_positive": 12
+      }
+    },
+    {
+      "case": "python-copy_then_delete_original",
+      "language": "python",
+      "scenario": "copy_then_delete_original",
+      "build_status": "ready",
+      "seconds": 4.265999999828637,
+      "counts": {
+        "true_positive": 10,
+        "true_negative": 20
+      }
+    },
+    {
+      "case": "typescript-edit",
+      "language": "typescript",
+      "scenario": "edit",
+      "build_status": "ready",
+      "seconds": 4.030999999959022,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "typescript-rename",
+      "language": "typescript",
+      "scenario": "rename",
+      "build_status": "ready",
+      "seconds": 3.6410000000614673,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "typescript-move",
+      "language": "typescript",
+      "scenario": "move",
+      "build_status": "ready",
+      "seconds": 4.062999999849126,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "typescript-retained_copy",
+      "language": "typescript",
+      "scenario": "retained_copy",
+      "build_status": "ready",
+      "seconds": 4.516000000061467,
+      "counts": {
+        "true_positive": 13,
+        "true_negative": 30,
+        "missed_continuity": 2
+      }
+    },
+    {
+      "case": "typescript-delete_reintroduce",
+      "language": "typescript",
+      "scenario": "delete_reintroduce",
+      "build_status": "partial",
+      "seconds": 3.5160000000614673,
+      "counts": {
+        "true_negative": 11,
+        "true_positive": 7
+      }
+    },
+    {
+      "case": "typescript-revert",
+      "language": "typescript",
+      "scenario": "revert",
+      "build_status": "partial",
+      "seconds": 4.016000000061467,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "typescript-ambiguous_relocation",
+      "language": "typescript",
+      "scenario": "ambiguous_relocation",
+      "build_status": "ready",
+      "seconds": 5.1560000001918525,
+      "counts": {
+        "missed_continuity": 6,
+        "true_negative": 36,
+        "true_positive": 12
+      }
+    },
+    {
+      "case": "typescript-copy_then_delete_original",
+      "language": "typescript",
+      "scenario": "copy_then_delete_original",
+      "build_status": "ready",
+      "seconds": 4.344000000040978,
+      "counts": {
+        "true_positive": 10,
+        "true_negative": 20
+      }
+    },
+    {
+      "case": "go-edit",
+      "language": "go",
+      "scenario": "edit",
+      "build_status": "ready",
+      "seconds": 3.75,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "go-rename",
+      "language": "go",
+      "scenario": "rename",
+      "build_status": "ready",
+      "seconds": 3.5619999999180436,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "go-move",
+      "language": "go",
+      "scenario": "move",
+      "build_status": "ready",
+      "seconds": 3.702999999979511,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "go-retained_copy",
+      "language": "go",
+      "scenario": "retained_copy",
+      "build_status": "ready",
+      "seconds": 4.641000000061467,
+      "counts": {
+        "true_positive": 13,
+        "true_negative": 30,
+        "missed_continuity": 2
+      }
+    },
+    {
+      "case": "go-delete_reintroduce",
+      "language": "go",
+      "scenario": "delete_reintroduce",
+      "build_status": "partial",
+      "seconds": 3.672000000020489,
+      "counts": {
+        "true_negative": 11,
+        "true_positive": 7
+      }
+    },
+    {
+      "case": "go-revert",
+      "language": "go",
+      "scenario": "revert",
+      "build_status": "partial",
+      "seconds": 3.953999999910593,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "go-ambiguous_relocation",
+      "language": "go",
+      "scenario": "ambiguous_relocation",
+      "build_status": "ready",
+      "seconds": 4.687000000150874,
+      "counts": {
+        "missed_continuity": 6,
+        "true_negative": 36,
+        "true_positive": 12
+      }
+    },
+    {
+      "case": "go-copy_then_delete_original",
+      "language": "go",
+      "scenario": "copy_then_delete_original",
+      "build_status": "ready",
+      "seconds": 4.1719999997876585,
+      "counts": {
+        "true_positive": 10,
+        "true_negative": 20
+      }
+    },
+    {
+      "case": "rust-edit",
+      "language": "rust",
+      "scenario": "edit",
+      "build_status": "ready",
+      "seconds": 3.8910000000614673,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "rust-rename",
+      "language": "rust",
+      "scenario": "rename",
+      "build_status": "ready",
+      "seconds": 3.969000000040978,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "rust-move",
+      "language": "rust",
+      "scenario": "move",
+      "build_status": "ready",
+      "seconds": 3.844000000040978,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "rust-retained_copy",
+      "language": "rust",
+      "scenario": "retained_copy",
+      "build_status": "ready",
+      "seconds": 4.578999999910593,
+      "counts": {
+        "true_positive": 13,
+        "true_negative": 30,
+        "missed_continuity": 2
+      }
+    },
+    {
+      "case": "rust-delete_reintroduce",
+      "language": "rust",
+      "scenario": "delete_reintroduce",
+      "build_status": "partial",
+      "seconds": 3.9840000001713634,
+      "counts": {
+        "true_negative": 11,
+        "true_positive": 7
+      }
+    },
+    {
+      "case": "rust-revert",
+      "language": "rust",
+      "scenario": "revert",
+      "build_status": "partial",
+      "seconds": 4.0149999998975545,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "rust-ambiguous_relocation",
+      "language": "rust",
+      "scenario": "ambiguous_relocation",
+      "build_status": "ready",
+      "seconds": 4.734000000171363,
+      "counts": {
+        "missed_continuity": 6,
+        "true_negative": 36,
+        "true_positive": 12
+      }
+    },
+    {
+      "case": "rust-copy_then_delete_original",
+      "language": "rust",
+      "scenario": "copy_then_delete_original",
+      "build_status": "ready",
+      "seconds": 4.891000000061467,
+      "counts": {
+        "true_positive": 10,
+        "true_negative": 20
+      }
+    },
+    {
+      "case": "java-edit",
+      "language": "java",
+      "scenario": "edit",
+      "build_status": "ready",
+      "seconds": 4.6399999998975545,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "java-rename",
+      "language": "java",
+      "scenario": "rename",
+      "build_status": "ready",
+      "seconds": 3.7810000001918525,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "java-move",
+      "language": "java",
+      "scenario": "move",
+      "build_status": "ready",
+      "seconds": 4.422000000020489,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "java-retained_copy",
+      "language": "java",
+      "scenario": "retained_copy",
+      "build_status": "ready",
+      "seconds": 6.031999999890104,
+      "counts": {
+        "true_positive": 13,
+        "true_negative": 30,
+        "missed_continuity": 2
+      }
+    },
+    {
+      "case": "java-delete_reintroduce",
+      "language": "java",
+      "scenario": "delete_reintroduce",
+      "build_status": "partial",
+      "seconds": 4.358999999938533,
+      "counts": {
+        "true_negative": 11,
+        "true_positive": 7
+      }
+    },
+    {
+      "case": "java-revert",
+      "language": "java",
+      "scenario": "revert",
+      "build_status": "partial",
+      "seconds": 5.125,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "java-ambiguous_relocation",
+      "language": "java",
+      "scenario": "ambiguous_relocation",
+      "build_status": "ready",
+      "seconds": 6.297000000020489,
+      "counts": {
+        "missed_continuity": 6,
+        "true_negative": 36,
+        "true_positive": 12
+      }
+    },
+    {
+      "case": "java-copy_then_delete_original",
+      "language": "java",
+      "scenario": "copy_then_delete_original",
+      "build_status": "ready",
+      "seconds": 6.0780000002123415,
+      "counts": {
+        "true_positive": 10,
+        "true_negative": 20
+      }
+    },
+    {
+      "case": "php-edit",
+      "language": "php",
+      "scenario": "edit",
+      "build_status": "ready",
+      "seconds": 7.672000000020489,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "php-rename",
+      "language": "php",
+      "scenario": "rename",
+      "build_status": "ready",
+      "seconds": 8.093999999808148,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "php-move",
+      "language": "php",
+      "scenario": "move",
+      "build_status": "ready",
+      "seconds": 4.468000000109896,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "php-retained_copy",
+      "language": "php",
+      "scenario": "retained_copy",
+      "build_status": "ready",
+      "seconds": 5.358999999938533,
+      "counts": {
+        "true_positive": 13,
+        "true_negative": 30,
+        "missed_continuity": 2
+      }
+    },
+    {
+      "case": "php-delete_reintroduce",
+      "language": "php",
+      "scenario": "delete_reintroduce",
+      "build_status": "partial",
+      "seconds": 3.921000000089407,
+      "counts": {
+        "true_negative": 11,
+        "true_positive": 7
+      }
+    },
+    {
+      "case": "php-revert",
+      "language": "php",
+      "scenario": "revert",
+      "build_status": "partial",
+      "seconds": 4.016000000061467,
+      "counts": {
+        "true_positive": 12,
+        "true_negative": 12
+      }
+    },
+    {
+      "case": "php-ambiguous_relocation",
+      "language": "php",
+      "scenario": "ambiguous_relocation",
+      "build_status": "ready",
+      "seconds": 4.719000000040978,
+      "counts": {
+        "missed_continuity": 6,
+        "true_negative": 36,
+        "true_positive": 12
+      }
+    },
+    {
+      "case": "php-copy_then_delete_original",
+      "language": "php",
+      "scenario": "copy_then_delete_original",
+      "build_status": "ready",
+      "seconds": 4.125,
+      "counts": {
+        "true_positive": 10,
+        "true_negative": 20
+      }
+    }
+  ]
+}
