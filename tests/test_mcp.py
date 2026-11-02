@@ -168,6 +168,7 @@ class TestIndexedTools:
         assert id_tool(str(repo.root), "handle")["error"]["code"] == "not_built"
         assert history_tool(str(repo.root), base="HEAD^", head="HEAD", indexed=True)["error"]["code"] == "not_built"
         assert entities_tool(str(repo.root), "app.py")["error"]["code"] == "not_built"
+        assert source_tool(str(repo.root), entity="handle")["error"]["code"] == "not_built"
         assert not IndexStore.locate(repo).exists()
 
     def test_identity_state_and_source_are_exact_committed_evidence(self, repo, built):
@@ -235,6 +236,49 @@ class TestIndexedTools:
         result = source_tool(str(repo.root), occurrence, budget=200)
         assert result["error"]["code"] == "budget_too_small"
         assert result.get("results", []) == []
+
+    def test_named_source_is_exact_in_one_request(self, repo, built):
+        (repo.root / "app.py").write_text("uncommitted replacement", encoding="utf-8")
+        result = source_tool(str(repo.root), entity="app.py::handle")
+        assert result["error"] is None, result
+        assert result["results"][0]["content"] == (
+            "def handle(request, context):\n    total = 0\n    return total")
+        assert result["generation"] == built["generation"]
+
+    def test_named_source_respects_historical_revision(self, repo, built):
+        occurrence = id_tool(str(repo.root), "handle", at="HEAD^")["results"][0]["occurrence"]
+        expected = source_tool(str(repo.root), occurrence)["results"][0]
+        result = source_tool(str(repo.root), entity="handle", at="HEAD^")
+        assert result["error"] is None, result
+        assert result["results"][0] == expected
+
+    def test_named_source_rejects_ambiguity_without_source_reads(self, repo, built, monkeypatch):
+        from gita.index.query import IndexSession
+        monkeypatch.setattr(IndexSession, "resolve", lambda *a, **kw: {"status": "ambiguous"})
+
+        def forbidden(*args):
+            pytest.fail("An ambiguous name must never select source")
+
+        monkeypatch.setattr(IndexSession, "source", forbidden)
+        result = source_tool(str(repo.root), entity="handle")
+        assert result["error"]["code"] == "ambiguous"
+        assert not result["results"]
+
+    def test_named_source_rejects_mixed_selectors(self, repo, built):
+        occurrence = id_tool(str(repo.root), "handle")["results"][0]["occurrence"]
+        result = source_tool(str(repo.root), occurrence, entity="handle")
+        assert result["error"]["code"] == "invalid_query"
+
+    def test_named_source_is_discoverable_and_executes_through_server(self, repo, built):
+        import asyncio
+        from gita.mcp.server import build_server
+        server = build_server(str(repo.root))
+        registered = {t.name: t for t in asyncio.run(server.list_tools())}
+        schema = registered["gita_source"].input_schema
+        assert "entity" in schema["properties"] and "at" in schema["properties"]
+        assert "occurrence" not in schema.get("required", [])
+        result = asyncio.run(server.call_tool("gita_source", {"entity": "app.py::handle"}))
+        assert "def handle" in str(result) and "total = 0" in str(result)
 
     def test_entities_reject_malformed_cursor(self, repo, built):
         result = entities_tool(str(repo.root), "app.py", cursor="not-a-cursor")

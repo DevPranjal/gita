@@ -1,0 +1,22 @@
+{
+  "kind": "No-inference, byte-checked audit of actual reviewer-visible recovery evidence",
+  "rows": [
+    {
+      "arm": "B",
+      "missing_file_recovery_guard_delivered": true,
+      "expired_row_reselection_delivered": true,
+      "media_distinct_lines_delivered": 571,
+      "retention_distinct_lines_delivered": 136
+    },
+    {
+      "arm": "H",
+      "missing_file_recovery_guard_delivered": true,
+      "expired_row_reselection_delivered": true,
+      "media_distinct_lines_delivered": 571,
+      "retention_distinct_lines_delivered": 98
+    }
+  ],
+  "unused_private_related_source_included": false,
+  "interpretation": "Both arms already received the recovery guards implicated in the incorrect irrecoverability claim. Missing caller/recovery source is not supported as the cause in this case; do not build additional context expansion on that assumption.",
+  "limits": "Availability in the prompt is not proof that the model attended to or correctly reasoned about it."
+}

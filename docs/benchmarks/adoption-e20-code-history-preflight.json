@@ -1,0 +1,75 @@
+{
+  "kind": "No-model compact code-history replay; private old traces unchanged",
+  "rows": [
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "old_characters": 3339,
+      "new_characters": 7697,
+      "old_events": 1,
+      "new_events": 3,
+      "old_patches": 0,
+      "new_patches": 3,
+      "patch_statuses": [
+        "included",
+        "included",
+        "included"
+      ]
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "old_characters": 3339,
+      "new_characters": 7712,
+      "old_events": 1,
+      "new_events": 3,
+      "old_patches": 0,
+      "new_patches": 3,
+      "patch_statuses": [
+        "included",
+        "included",
+        "included"
+      ]
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "old_characters": 2005,
+      "new_characters": 1918,
+      "old_events": 1,
+      "new_events": 1,
+      "old_patches": 0,
+      "new_patches": 0,
+      "patch_statuses": [
+        "not_applicable"
+      ]
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "old_characters": 4424,
+      "new_characters": 5143,
+      "old_events": 2,
+      "new_events": 2,
+      "old_patches": 0,
+      "new_patches": 1,
+      "patch_statuses": [
+        "included",
+        "not_applicable"
+      ]
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "old_characters": 3405,
+      "new_characters": 3636,
+      "old_events": 1,
+      "new_events": 1,
+      "old_patches": 0,
+      "new_patches": 1,
+      "patch_statuses": [
+        "included"
+      ]
+    }
+  ],
+  "uses_production_event_patch_renderer": true,
+  "limitations": [
+    "Offline response sizes and code availability are not an agent-cost/quality result.",
+    "Small source patches can increase response size while improving evidence; all event identities and decisions preserved."
+  ]
+}

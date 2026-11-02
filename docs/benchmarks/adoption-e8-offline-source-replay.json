@@ -1,0 +1,168 @@
+{
+  "kind": "Counterfactual source transport replay, not a model efficacy score",
+  "requests": [
+    {
+      "sequence": 8,
+      "tool": "entity_context",
+      "old_chars": 2208,
+      "new_chars": 2361,
+      "reused_lines": 0,
+      "window": {
+        "start_line": 131,
+        "end_line": 163,
+        "whole_entity": true
+      }
+    },
+    {
+      "sequence": 9,
+      "tool": "entity_context",
+      "old_chars": 2937,
+      "new_chars": 3190,
+      "reused_lines": 0,
+      "window": {
+        "start_line": 247,
+        "end_line": 299,
+        "whole_entity": true
+      }
+    },
+    {
+      "sequence": 11,
+      "tool": "entity_context",
+      "old_chars": 2979,
+      "new_chars": 3270,
+      "reused_lines": 0,
+      "window": {
+        "start_line": 426,
+        "end_line": 486,
+        "whole_entity": true
+      }
+    },
+    {
+      "sequence": 13,
+      "tool": "entity_context",
+      "old_chars": 4082,
+      "new_chars": 2752,
+      "reused_lines": 0,
+      "window": {
+        "start_line": 320,
+        "end_line": 370,
+        "whole_entity": false
+      }
+    },
+    {
+      "sequence": 14,
+      "tool": "entity_context",
+      "old_chars": 1714,
+      "new_chars": 1805,
+      "reused_lines": 0,
+      "window": {
+        "start_line": 488,
+        "end_line": 508,
+        "whole_entity": true
+      }
+    },
+    {
+      "sequence": 15,
+      "tool": "read_file",
+      "old_chars": 4207,
+      "new_chars": 4019,
+      "reused_lines": 0,
+      "window": null
+    },
+    {
+      "sequence": 16,
+      "tool": "entity_context",
+      "old_chars": 1668,
+      "new_chars": 1715,
+      "reused_lines": 0,
+      "window": {
+        "start_line": 92,
+        "end_line": 105,
+        "whole_entity": true
+      }
+    },
+    {
+      "sequence": 17,
+      "tool": "entity_context",
+      "old_chars": 2000,
+      "new_chars": 2150,
+      "reused_lines": 0,
+      "window": {
+        "start_line": 168,
+        "end_line": 199,
+        "whole_entity": true
+      }
+    },
+    {
+      "sequence": 18,
+      "tool": "read_file",
+      "old_chars": 3745,
+      "new_chars": 3745,
+      "reused_lines": 0,
+      "window": null
+    },
+    {
+      "sequence": 19,
+      "tool": "read_file",
+      "old_chars": 1568,
+      "new_chars": 1381,
+      "reused_lines": 0,
+      "window": null
+    },
+    {
+      "sequence": 20,
+      "tool": "read_file",
+      "old_chars": 2815,
+      "new_chars": 2628,
+      "reused_lines": 0,
+      "window": null
+    },
+    {
+      "sequence": 22,
+      "tool": "read_file",
+      "old_chars": 2686,
+      "new_chars": 1592,
+      "reused_lines": 32,
+      "window": null
+    },
+    {
+      "sequence": 26,
+      "tool": "read_file",
+      "old_chars": 1281,
+      "new_chars": 1094,
+      "reused_lines": 0,
+      "window": null
+    },
+    {
+      "sequence": 27,
+      "tool": "read_file",
+      "old_chars": 2094,
+      "new_chars": 729,
+      "reused_lines": 29,
+      "window": null
+    },
+    {
+      "sequence": 28,
+      "tool": "read_file",
+      "old_chars": 1251,
+      "new_chars": 728,
+      "reused_lines": 14,
+      "window": null
+    },
+    {
+      "sequence": 29,
+      "tool": "read_file",
+      "old_chars": 1562,
+      "new_chars": 728,
+      "reused_lines": 26,
+      "window": null
+    }
+  ],
+  "old_serialized_source_chars": 38797,
+  "new_serialized_source_chars": 33887,
+  "reduction_percent": 12.655617702399669,
+  "reused_lines": 101,
+  "baseline_log_sha256": "62767b61c7e34b546bcb9bee538091e56a189220ce97910b60e5ee37607fa2e6",
+  "baseline_unchanged": true,
+  "no_paid_calls": true
+}

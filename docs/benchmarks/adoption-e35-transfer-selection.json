@@ -1,0 +1,47 @@
+{
+  "kind": "Prospective unchanged-candidate transfer selection",
+  "seed": 20261022,
+  "eligible_positions": [
+    1,
+    2,
+    5,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    18,
+    19,
+    23,
+    24
+  ],
+  "positions": [
+    19,
+    11,
+    18
+  ],
+  "population_task_digest": "8d4edcf2d974055b90b0fe0baf6d05eb5b83735c1c921a23fecc76f6055d9217",
+  "tasks": [
+    {
+      "position": 19,
+      "id": "82ec18705a16ae64998d181393c7f885543cc33b25921073d24ebecec40fbc15",
+      "repo": "https://github.com/superyyrrzz/ForgeMap",
+      "history_ready": false
+    },
+    {
+      "position": 11,
+      "id": "bc277c0372a2c410587b86f47527f69bc7e76ae468a962c7fe668b452af88905",
+      "repo": "https://github.com/ardevd/jadx-collaboration",
+      "history_ready": true
+    },
+    {
+      "position": 18,
+      "id": "ee7f15418560e783cdc668536f3c4d8692e231a7f231876ddc86a2fac069e9e2",
+      "repo": "https://github.com/allan-mobley-jr/gimmes",
+      "history_ready": true
+    }
+  ],
+  "review_outcomes_inspected_before_selection": false,
+  "reference_findings_used": false
+}

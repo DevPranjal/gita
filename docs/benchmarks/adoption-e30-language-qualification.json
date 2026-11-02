@@ -1,0 +1,90 @@
+{
+  "kind": "Fresh language contexts; old generations never relabeled",
+  "policy_digest": "754d33aeb1a590c6a579b04aae71860c7e138ae1cab025fcc7e160b28abffa39",
+  "parse_fingerprint": "14dfb8c0567b1c522ab1bf3ad2fefcc71c6efcbde525cf34e6bf0dec07195dec",
+  "rows": [
+    {
+      "task": "3f4e836db70e52f2130f7c82f67af4af39f1091bb6d31a96258cb5d4add67a10",
+      "repo": "https://github.com/scottlz0310/Mcp-Docker",
+      "history_ready": true,
+      "seconds": 546.375,
+      "coverage": [],
+      "query_replays": []
+    },
+    {
+      "task": "0362dfe9422a542cde29b9a429b4baa39d301262a128fccb0910d6801f939a86",
+      "repo": "https://github.com/superhighfives/pika",
+      "history_ready": true,
+      "seconds": 922.25,
+      "coverage": [
+        {
+          "path": "Pika/Views/ContentView.swift",
+          "definitions": 25,
+          "independent_definitions": 25,
+          "every_source_verified": true
+        },
+        {
+          "path": "Pika/Services/Eyedroppers.swift",
+          "definitions": 103,
+          "independent_definitions": 103,
+          "every_source_verified": true
+        }
+      ],
+      "query_replays": [
+        {
+          "token": "ContentView",
+          "path": "Pika/Views/ContentView.swift",
+          "status": "source",
+          "complete_entity": true,
+          "result_digest": "f935599b1608854e5774a9ab5c570941a8bb7bf85637b2ef9af00c229441e0aa"
+        },
+        {
+          "token": "swap",
+          "path": "Pika/Services/Eyedroppers.swift",
+          "status": "source",
+          "complete_entity": true,
+          "result_digest": "bd30e3c5e41af8f855b96d70a2cce1287254c3d2bfa880d025851bc438eaa4f4"
+        }
+      ]
+    },
+    {
+      "task": "d701ed5ae7001b5fe7c881acdda33cf7759293132014f6d71abcbc657eb36d27",
+      "repo": "https://github.com/wirechat/wirechat",
+      "history_ready": false,
+      "seconds": 47.40600000001723,
+      "coverage": [
+        {
+          "path": "src/Livewire/Chat/Chat.php",
+          "definitions": 83,
+          "independent_definitions": 83,
+          "every_source_verified": true
+        }
+      ],
+      "query_replays": [
+        {
+          "token": "mount",
+          "path": "src/Livewire/Chat/Chat.php",
+          "status": "source",
+          "complete_entity": true,
+          "result_digest": "8b342d21c8a50cb6c64b0ac855937727f1ca09aab3de6a2bd9b904bec40d8004"
+        },
+        {
+          "token": "initializeConversation",
+          "path": "src/Livewire/Chat/Chat.php",
+          "status": "source",
+          "complete_entity": true,
+          "result_digest": "84a2a2be11320203ddd1fcd39ab5abc7dc9870e3e74da7c50c391081c0fcb687"
+        },
+        {
+          "token": "pushMessage",
+          "path": "src/Livewire/Chat/Chat.php",
+          "status": "source",
+          "complete_entity": true,
+          "result_digest": "f4300ef7b6c52a5e6223ce87df6ccf10935f09f692b8174da1dd8596ac6ffb4d"
+        }
+      ]
+    }
+  ],
+  "paid_calls": 0,
+  "interpretation": "Fresh parser-policy contexts, not relabeled old generations. All five previously missing Swift/PHP source requests now complete. Target definitions independently counted and every byte checked against Git. Cold bounded-history rebuild times are substantial and are not a speed/SLA claim."
+}

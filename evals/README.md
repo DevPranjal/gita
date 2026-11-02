@@ -1,5 +1,17 @@
 # Evaluation harness
 
+## Indexed-product evaluation: proposed, not yet implemented
+
+See [S4: indexed review evaluation](../docs/projects/index-first/04-review-evaluation.md)
+for the current harness audit, AACR/ReviewBench scorer differences, indexed
+preparation/tool contracts, baseline/ablation design, leakage tests, native
+resource accounting and proposed success gates. It requires a new versioned
+protocol with legacy disabled. No indexed reviewer experiment has been run here;
+the historical commands below do not become an indexed evaluation by enabling
+the legacy flag.
+
+## Historical harness
+
 These retained studies depend on the legacy structural-review product. New
 legacy-dependent runs refuse before preparing directories, resetting repositories
 or invoking a model unless the process explicitly sets `GITA_ENABLE_LEGACY=1`.

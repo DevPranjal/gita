@@ -1,0 +1,133 @@
+{
+  "kind": "E23 context lookup canary, original point gate failed and remainder not run",
+  "protocol": "4ee4e99303c7e8e0bca0672db06afcce9e9024a1c2fbc3db16ffa375112e707f",
+  "source_commit": "97fdc9cfdc767092a4c2047cdfbfb7f7b775410e",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "rows": [
+    {
+      "arm": "B",
+      "credits": 14.64438,
+      "input_tokens": 70615,
+      "output_tokens": 1938,
+      "reasoning_tokens": 765,
+      "cache_write_tokens": 17255,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 23,
+        "executed_call_attempts": 23,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 1
+      },
+      "context_queries": 0,
+      "raw_context_fallbacks": 0
+    },
+    {
+      "arm": "H",
+      "credits": 12.33132,
+      "input_tokens": 45542,
+      "output_tokens": 1747,
+      "reasoning_tokens": 749,
+      "cache_write_tokens": 15242,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 12,
+        "executed_call_attempts": 12,
+        "denied_over_budget": 0,
+        "indexed_calls": 2,
+        "errors": 1
+      },
+      "context_queries": 1,
+      "raw_context_fallbacks": 1
+    }
+  ],
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.3333333333333333,
+        "augmented_precision": 1,
+        "augmented_recall": 0.3333333333333333,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 2,
+        "golden_tp_count": 9,
+        "matched_count": 2,
+        "matched_tp_count": 2,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 3
+      },
+      "micro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.3333333333333333,
+        "augmented_precision": 1,
+        "augmented_recall": 0.3333333333333333,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 2,
+        "golden_tp_count": 9,
+        "matched_count": 2,
+        "matched_tp_count": 2,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 3
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.2222222222222222,
+        "augmented_precision": 1,
+        "augmented_recall": 0.2222222222222222,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 2,
+        "golden_tp_count": 9,
+        "matched_count": 2,
+        "matched_tp_count": 2,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 2
+      },
+      "micro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.2222222222222222,
+        "augmented_precision": 1,
+        "augmented_recall": 0.2222222222222222,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 2,
+        "golden_tp_count": 9,
+        "matched_count": 2,
+        "matched_tp_count": 2,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 2
+      }
+    }
+  },
+  "judge_credits": 6.9112,
+  "gate": {
+    "checks": {
+      "lower_review_credits": true,
+      "grounded_recall": false,
+      "augmented_precision": true,
+      "augmented_recall": false,
+      "useful_baseline": true
+    },
+    "passed": false,
+    "interpretation": "Small development point gate; not confidence-backed efficacy or25 authorization"
+  },
+  "correspondence_audit": "Both arms report two TP findings; baseline second finding additionally covers a separate reference about mock side effects mutating global history. Official reference coverage is3B/2H; do not change the score to imply parity.",
+  "limitations": [
+    "One earlier-used development task, no efficacy claim.",
+    "Cost is15.80% lower and native input35.51% lower, but reference recall drops33.33% to22.22%; original continuation gate remains failed.",
+    "No reviewer or judge reruns; source/raw fallback use explicitly distinguished."
+  ]
+}

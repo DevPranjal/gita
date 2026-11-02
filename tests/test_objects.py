@@ -501,6 +501,54 @@ class TestCommittedRepo:
             assert repository.source(empty_commit, b"empty.py", empty, 0o100644, 0, 0) == b""
         assert (objects.root / "a.py").read_bytes() == b"dirty worktree must not be read"
 
+    @pytest.mark.parametrize("path", [
+        b"plain.py", b"literal*.py", b":(glob)*.py", b"tab\tfile.py", b"line\nfile.py",
+    ])
+    def test_source_uses_exact_literal_tree_lookup(self, committed_objects, committed_api, monkeypatch, path):
+        objects = committed_objects
+        blob = objects.blob(b"target")
+        other = objects.blob(b"unrelated")
+        tree = objects.tree(((path, blob, "blob", 0o100644),
+                             (b"unrelated.py", other, "blob", 0o100644)))
+        commit = objects.commit(tree)
+        original = committed_api.CommittedRepo._records
+        calls, records = [], []
+
+        def observed(repository, args):
+            calls.append(args)
+            for record in original(repository, args):
+                records.append(record)
+                yield record
+
+        monkeypatch.setattr(committed_api.CommittedRepo, "_records", observed)
+        with committed_api.CommittedRepo(objects.root) as repository:
+            read_object = repository.read_object
+            blob_reads = []
+
+            def fresh_read(oid):
+                if oid == blob:
+                    blob_reads.append(oid)
+                return read_object(oid)
+
+            monkeypatch.setattr(repository, "read_object", fresh_read)
+            for start, end in ((0, 6), (0, 3), (3, 6)):
+                assert repository.source(commit, path, blob, 0o100644, start, end) == b"target"[start:end]
+            assert len(blob_reads) == 3
+            _committed_error(committed_api,
+                             lambda: repository.source(commit, path, other, 0o100644, 0, 1),
+                             code="source_unavailable")
+            _committed_error(committed_api,
+                             lambda: repository.source(commit, path, blob, 0o100755, 0, 1),
+                             code="source_unavailable")
+            monkeypatch.setattr(repository, "read_object",
+                                lambda oid: None if oid == blob else read_object(oid))
+            _committed_error(committed_api,
+                             lambda: repository.source(commit, path, blob, 0o100644, 0, 1),
+                             code="source_unavailable")
+        assert len(records) == 1
+        assert calls[0][0] == "--literal-pathspecs"
+        assert calls[0][-1] == path.decode("utf-8")
+
     def test_source_requires_exact_commit_path_blob_and_mode(self, committed_objects, committed_api):
         objects = committed_objects
         blob = objects.blob(b"original")

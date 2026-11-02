@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source_revision": "a99434e1bde42ba97af97ff1942916e182db49cd",
+  "corpus": {"files": 3, "functions": 2, "commits": 10, "profile": "uniform"},
+  "scenarios": ["snapshot", "history", "incremental", "noop", "query"],
+  "repetitions": 1,
+  "workers": 1,
+  "max_seconds": 120,
+  "max_storage_bytes": 268435456,
+  "notes": {"hardware": "operator must describe actual hardware", "power": "unknown", "contention": "uncontrolled"}
+}

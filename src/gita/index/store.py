@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import base64
+from collections import OrderedDict
 from contextlib import contextmanager
 from functools import lru_cache
 import json
 import os
 from pathlib import Path
 import sqlite3
+from sys import getsizeof
 from typing import Any, Iterator, TYPE_CHECKING
 from uuid import uuid4
 
@@ -225,6 +227,53 @@ def _parent_first(result: ParseResult) -> list[tuple[int, EntityDefinition]]:
     return ordered
 
 
+class _DecodedRecords:
+    """Bounded immutable decodes, reused only after rereading every SQL column."""
+
+    def __init__(self, max_bytes: int = 32 * 1024 ** 2, max_entries: int = 4096) -> None:
+        self.max_bytes, self.max_entries = max_bytes, max_entries
+        self.entries: OrderedDict[tuple[str, str], tuple[tuple, Any, int]] = OrderedDict()
+        self.bytes = 0
+
+    def get(self, table: str, row: sqlite3.Row):
+        key = (table, row["id"])
+        cached = self.entries.get(key)
+        if cached is None:
+            return None
+        if cached[0] != tuple(row):
+            self.bytes -= self.entries.pop(key)[2]
+            return None
+        self.entries.move_to_end(key)
+        return cached[1]
+
+    def put(self, table: str, row: sqlite3.Row, value) -> None:
+        key, snapshot = (table, row["id"]), tuple(row)
+        seen: set[int] = set()
+        pending = [key, snapshot, value, value.fields()]
+        size = 0
+        while pending:
+            item = pending.pop()
+            if id(item) in seen:
+                continue
+            seen.add(id(item))
+            size += getsizeof(item)
+            if size > self.max_bytes:
+                return
+            if type(item) is tuple:
+                pending.extend(item)
+        size += getsizeof((snapshot, value, size)) + 128  # OrderedDict entry overhead
+        if size > self.max_bytes or not self.max_entries:
+            return
+        if key in self.entries:
+            self.bytes -= self.entries.pop(key)[2]
+        while self.entries and (self.bytes + size > self.max_bytes
+                                or len(self.entries) >= self.max_entries):
+            _, (_, _, previous_size) = self.entries.popitem(last=False)
+            self.bytes -= previous_size
+        self.entries[key] = (snapshot, value, size)
+        self.bytes += size
+
+
 class IndexStore:
     """Non-destructive SQLite lifecycle, evidence, and generation operations."""
 
@@ -235,6 +284,7 @@ class IndexStore:
         self._writer_owned = False
         self._scope_active = False
         self._gc_authorized = False
+        self._decoded = _DecodedRecords()
         self._parse_metadata_hint = (
             " INDEXED BY parse_result_metadata" if self.connection.execute(
                 "SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'parse_result_metadata'",
@@ -492,12 +542,16 @@ class IndexStore:
             row = self.connection.execute("SELECT * FROM version WHERE id = ?", (identifier,)).fetchone()
             if row is None:
                 return None
+            cached = self._decoded.get("version", row)
+            if cached is not None:
+                return cached
             version = EntityVersion(*_load(row["fields_json"]))
             _valid(version.id == identifier, "version identifier disagrees with payload")
             _valid(canonical_encode("ver1", version.fields()) == row["canonical_payload"],
                    "version canonical payload disagrees with JSON")
             _valid(version.parse_fingerprint == row["parse_fp"] and version.kind == row["kind"],
                    "version columns disagree with payload")
+            self._decoded.put("version", row, version)
             return version
 
     def put_parse(self, result: ParseResult, versions: tuple[EntityVersion, ...]) -> str:
@@ -660,12 +714,16 @@ class IndexStore:
     def _context(self, identifier: str) -> IdentityContext:
         row = self._required("context", identifier)
         with _record_errors():
+            cached = self._decoded.get("context", row)
+            if cached is not None:
+                return cached
             fields = _load(row["fields_json"])
             context = IdentityContext(GitOid(*fields[0]), fields[1],
                                       tuple(GitOid(*parent) for parent in fields[2]), *fields[3:])
             _valid(context.id == identifier, "context identifier disagrees with payload")
             _valid(canonical_encode("ctx1", context.fields()) == row["canonical_payload"],
                    "context canonical payload disagrees with JSON")
+            self._decoded.put("context", row, context)
             return context
 
     @staticmethod
@@ -1389,15 +1447,8 @@ class IndexStore:
                 "AND coverage.path = file_state.path AND category = 'extraction') LIMIT 1", (generation,),
             ).fetchone()
             _require(missing_coverage is None, "every file interval needs an extraction coverage outcome")
-            duplicate_eid = self.connection.execute(
-                "SELECT 1 FROM file_state earlier JOIN binding old_binding ON old_binding.binding_set_id = earlier.binding_set_id "
-                "JOIN binding new_binding ON new_binding.eid = old_binding.eid "
-                "JOIN file_state later ON later.binding_set_id = new_binding.binding_set_id "
-                "WHERE earlier.generation_id = ? AND later.generation_id = earlier.generation_id AND later.id > earlier.id "
-                "AND (earlier.to_seq IS NULL OR earlier.to_seq > later.from_seq) "
-                "AND (later.to_seq IS NULL OR later.to_seq > earlier.from_seq) LIMIT 1", (generation,),
-            ).fetchone()
-            _require(duplicate_eid is None, "one EID occupies multiple active locations")
+            _require(not self._overlapping_eid(generation, expected_sequence),
+                     "one EID occupies multiple active locations")
             invalid_seed = self.connection.execute(
                 "WITH presence AS (SELECT binding.eid, min(file_state.from_seq) AS first_seq "
                 "FROM file_state JOIN binding ON binding.binding_set_id = file_state.binding_set_id "
@@ -1465,6 +1516,22 @@ class IndexStore:
             self.connection.execute("UPDATE scope SET published_generation_id = ? WHERE id = ?",
                                     (generation, record["scope_id"]))
             self.check_storage_limit(max_storage_bytes, reserve_commit=True)
+
+    def _overlapping_eid(self, generation: str, end_sequence: int) -> bool:
+        # For nonempty half-open intervals ordered by start, an overlap exists
+        # iff a prior maximum end exceeds this start. MAX (not LAG) also detects
+        # nested intervals; the validated member count bounds every open end.
+        return self.connection.execute(
+            "/* active-EID overlap proof */ "
+            "WITH presence AS (SELECT file_state.from_seq, "
+            "max(coalesce(file_state.to_seq, ?)) OVER (PARTITION BY binding.eid "
+            "ORDER BY file_state.from_seq, file_state.id "
+            "ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS previous_end "
+            "FROM file_state JOIN binding ON binding.binding_set_id = file_state.binding_set_id "
+            "WHERE file_state.generation_id = ?) "
+            "SELECT 1 FROM presence WHERE previous_end > from_seq LIMIT 1",
+            (end_sequence, generation),
+        ).fetchone() is not None
 
     def collect_generation(self, generation: str) -> None:
         """Collect one unused checkpoint and unreachable evidence without unlinking storage."""

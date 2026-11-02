@@ -1,0 +1,44 @@
+{
+  "kind": "Named published small-repository native query diagnostic, not an SLA",
+  "repository": "https://github.com/renedierking/LANdalf",
+  "head": "bc1698f4dbc3a99dee0a6dcf7629813f2027682a",
+  "published_definition_bindings": 4354,
+  "sessions": 5,
+  "measurements": {
+    "fresh_open": {
+      "observations": 5,
+      "median_ms": 249.58169998717494,
+      "p95_ms": 249.61719999555498,
+      "max_ms": 749.6541999862529
+    },
+    "resolve": {
+      "observations": 100,
+      "median_ms": 105.63879999972414,
+      "p95_ms": 113.41859999811277,
+      "max_ms": 120.33000000519678
+    },
+    "state": {
+      "observations": 100,
+      "median_ms": 77.97909999499097,
+      "p95_ms": 82.63799999258481,
+      "max_ms": 99.00649997871369
+    },
+    "first_history_page": {
+      "observations": 100,
+      "median_ms": 96.09229999477975,
+      "p95_ms": 111.09969997778535,
+      "max_ms": 149.04639997985214
+    }
+  },
+  "hardware": {
+    "os": "Windows-10-10.0.26300-SP0",
+    "processor": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+    "python": "3.11.9"
+  },
+  "limits": [
+    "Read-only native API calls against an existing generation; no rebuild or corpus execution.",
+    "No source-output rendering/model/token cost measured.",
+    "Five fresh opens are descriptive, not a confidence-backed open-latency SLA.",
+    "This result does not establish large-repository indexing or review efficacy."
+  ]
+}

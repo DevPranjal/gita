@@ -1,0 +1,179 @@
+{
+  "kind": "Pinned ReviewBench declared primary-language coverage audit",
+  "pin": "c17b05be9c90b85a1fc012ce39e455e2d09a7255",
+  "full_tasks": 219,
+  "starter_tasks": 25,
+  "rows": [
+    {
+      "primary_language": "TypeScript",
+      "full_tasks": 68,
+      "starter_tasks": 5,
+      "registered_in_current_worktree": true,
+      "adapter": "typescript",
+      "note": ""
+    },
+    {
+      "primary_language": "Python",
+      "full_tasks": 41,
+      "starter_tasks": 4,
+      "registered_in_current_worktree": true,
+      "adapter": "python",
+      "note": ""
+    },
+    {
+      "primary_language": "C#",
+      "full_tasks": 25,
+      "starter_tasks": 3,
+      "registered_in_current_worktree": true,
+      "adapter": "csharp",
+      "note": ""
+    },
+    {
+      "primary_language": "Go",
+      "full_tasks": 19,
+      "starter_tasks": 3,
+      "registered_in_current_worktree": true,
+      "adapter": "go",
+      "note": ""
+    },
+    {
+      "primary_language": "JavaScript",
+      "full_tasks": 15,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": true,
+      "adapter": "javascript",
+      "note": ""
+    },
+    {
+      "primary_language": "Rust",
+      "full_tasks": 11,
+      "starter_tasks": 2,
+      "registered_in_current_worktree": true,
+      "adapter": "rust",
+      "note": ""
+    },
+    {
+      "primary_language": "Java",
+      "full_tasks": 7,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": false,
+      "adapter": "java",
+      "note": ""
+    },
+    {
+      "primary_language": "Shell",
+      "full_tasks": 7,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": false,
+      "adapter": "bash",
+      "note": ""
+    },
+    {
+      "primary_language": "PHP",
+      "full_tasks": 7,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": true,
+      "adapter": "php",
+      "note": ""
+    },
+    {
+      "primary_language": "Kotlin",
+      "full_tasks": 4,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": false,
+      "adapter": "kotlin",
+      "note": ""
+    },
+    {
+      "primary_language": "Jupyter Notebook",
+      "full_tasks": 3,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": false,
+      "adapter": null,
+      "note": "Container or mixed format; not equivalent to a plain-language function adapter"
+    },
+    {
+      "primary_language": "Swift",
+      "full_tasks": 2,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": true,
+      "adapter": "swift",
+      "note": ""
+    },
+    {
+      "primary_language": "C++",
+      "full_tasks": 2,
+      "starter_tasks": 0,
+      "registered_in_current_worktree": true,
+      "adapter": "cpp",
+      "note": ""
+    },
+    {
+      "primary_language": "HCL",
+      "full_tasks": 2,
+      "starter_tasks": 0,
+      "registered_in_current_worktree": false,
+      "adapter": "hcl",
+      "note": ""
+    },
+    {
+      "primary_language": "C",
+      "full_tasks": 1,
+      "starter_tasks": 0,
+      "registered_in_current_worktree": false,
+      "adapter": "c",
+      "note": ""
+    },
+    {
+      "primary_language": "Dart",
+      "full_tasks": 1,
+      "starter_tasks": 0,
+      "registered_in_current_worktree": false,
+      "adapter": "dart",
+      "note": ""
+    },
+    {
+      "primary_language": "PowerShell",
+      "full_tasks": 1,
+      "starter_tasks": 0,
+      "registered_in_current_worktree": false,
+      "adapter": "powershell",
+      "note": ""
+    },
+    {
+      "primary_language": "Ruby",
+      "full_tasks": 1,
+      "starter_tasks": 1,
+      "registered_in_current_worktree": false,
+      "adapter": "ruby",
+      "note": ""
+    },
+    {
+      "primary_language": "Go Template",
+      "full_tasks": 1,
+      "starter_tasks": 0,
+      "registered_in_current_worktree": false,
+      "adapter": null,
+      "note": "Container or mixed format; not equivalent to a plain-language function adapter"
+    },
+    {
+      "primary_language": "unknown",
+      "full_tasks": 1,
+      "starter_tasks": 0,
+      "registered_in_current_worktree": false,
+      "adapter": null,
+      "note": "Language unknown in pinned repository metadata"
+    }
+  ],
+  "missing_plain_language_or_config_families": [
+    "Java",
+    "Shell",
+    "Kotlin",
+    "HCL",
+    "C",
+    "Dart",
+    "PowerShell",
+    "Ruby"
+  ],
+  "qualification": "Repository primary-language metadata, not an assertion that all changed files in each task are covered. No findings, labels or reviewer results used. Swift/PHP are implemented locally, not yet a merged release."
+}

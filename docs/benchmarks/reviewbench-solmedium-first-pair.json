@@ -1,0 +1,95 @@
+{
+  "status": "one paired canary quality-scored; full25 awaiting spending approval",
+  "protocol": "30ad9e3dcaccbe96756844afada9c3aecde1b3614ee95c71b632ea276f9f3e02",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "judge_model": "gpt-5.6-sol",
+  "judge_reasoning": "medium",
+  "quality_method": "Prior custom Copilot matcher/classifier with pinned official arithmetic; NOT upstream/leaderboard judge",
+  "fixed_tasks": 25,
+  "reviewed_pairs": 1,
+  "scored_pairs": 1,
+  "remaining_tasks_unstarted": 24,
+  "metrics": {
+    "B": {
+      "credits": 24.12666,
+      "input_tokens": 147714,
+      "output_tokens": 2259,
+      "cache_read_tokens": 117924,
+      "cache_write_tokens": 29757,
+      "uncached_input_tokens": 33,
+      "model": [
+        "gpt-5.6-sol"
+      ],
+      "requested_reasoning": "medium",
+      "tools": {
+        "evidence_calls": 23,
+        "executed_call_attempts": 23,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 2
+      },
+      "findings": 2,
+      "quality_macro": {
+        "grounded_precision": 0,
+        "grounded_recall": 0.1111111111111111,
+        "augmented_precision": 0,
+        "augmented_recall": 0.1111111111111111,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 2,
+        "golden_tp_count": 9,
+        "matched_count": 2,
+        "matched_tp_count": 0,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      }
+    },
+    "H": {
+      "credits": 21.00864,
+      "input_tokens": 72215,
+      "output_tokens": 3127,
+      "cache_read_tokens": 46416,
+      "cache_write_tokens": 25784,
+      "uncached_input_tokens": 15,
+      "model": [
+        "gpt-5.6-sol"
+      ],
+      "requested_reasoning": "medium",
+      "tools": {
+        "evidence_calls": 24,
+        "executed_call_attempts": 24,
+        "denied_over_budget": 0,
+        "indexed_calls": 5,
+        "errors": 3
+      },
+      "findings": 3,
+      "quality_macro": {
+        "grounded_precision": 0,
+        "grounded_recall": 0.1111111111111111,
+        "augmented_precision": 0.3333333333333333,
+        "augmented_recall": 0.2,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.3333333333333333,
+        "candidate_count": 3,
+        "golden_tp_count": 9,
+        "matched_count": 2,
+        "matched_tp_count": 0,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      }
+    }
+  },
+  "reviewer_credits": 45.1353,
+  "judge_credits": 16.9979,
+  "total_current_run_credits": 62.1332,
+  "source_hashes": {
+    "protocol": "13e6b863b4dd9e36e928f16cd32d854d2e138d9a520a9160583be3948896c71e",
+    "quality": "a2f0adbcdf9a98e66c24230765b33c68b3aa8d1a8418c0d187dc0c3709c79de4"
+  },
+  "interpretation": "No one-PR efficacy claim; source/golden matching may yield nonzero recall with zero precision under official resolver multiple-edge conventions. Both judges and reviewers verified fixed Solmedium. Budget approval needed for full25."
+}

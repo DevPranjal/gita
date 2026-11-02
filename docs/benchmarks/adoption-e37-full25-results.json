@@ -1,0 +1,4071 @@
+{
+  "kind": "Fixed full25 development study with attested query correctness repair",
+  "study": "a2c4fa95727c68a7d5d1010d5a63e2a8e467bf35791c3cd1e6c02896f4e20d7d",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "primary_slots": [
+    {
+      "task": "3f4e836db70e52f2130f7c82f67af4af39f1091bb6d31a96258cb5d4add67a10",
+      "arm": "B",
+      "status": "valid",
+      "retained": true,
+      "protocol": "a96cc8dee3d415ce30e5afc8e296f089ff276c84ef94576e870aa541d502e68b",
+      "usage": {
+        "input_tokens": 163753,
+        "output_tokens": 5178,
+        "cache_read_tokens": 131577,
+        "cache_write_tokens": 32149,
+        "model_requests": 9,
+        "uncached_input_tokens": 27,
+        "credits": 31.70438,
+        "total_nano_aiu": 31704380000,
+        "api_seconds": 80.03,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 163753,
+            "output_tokens": 5178,
+            "cache_read_tokens": 131577,
+            "cache_write_tokens": 32149,
+            "model_requests": 9,
+            "reasoning_tokens": 3843,
+            "native_model_nano_aiu": 31704380000
+          }
+        },
+        "reasoning_tokens": 3843
+      },
+      "wall_seconds": 98.875,
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 15,
+        "executed_call_attempts": 15,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "3f4e836db70e52f2130f7c82f67af4af39f1091bb6d31a96258cb5d4add67a10",
+      "arm": "H",
+      "status": "valid",
+      "retained": true,
+      "protocol": "a96cc8dee3d415ce30e5afc8e296f089ff276c84ef94576e870aa541d502e68b",
+      "usage": {
+        "input_tokens": 98853,
+        "output_tokens": 4968,
+        "cache_read_tokens": 75478,
+        "cache_write_tokens": 23354,
+        "model_requests": 7,
+        "uncached_input_tokens": 21,
+        "credits": 24.64052,
+        "total_nano_aiu": 24640520000,
+        "api_seconds": 75.157,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 98853,
+            "output_tokens": 4968,
+            "cache_read_tokens": 75478,
+            "cache_write_tokens": 23354,
+            "model_requests": 7,
+            "reasoning_tokens": 4016,
+            "native_model_nano_aiu": 24640520000
+          }
+        },
+        "reasoning_tokens": 4016
+      },
+      "wall_seconds": 88.04700000002049,
+      "findings": 5,
+      "tool_audit": {
+        "evidence_calls": 11,
+        "executed_call_attempts": 11,
+        "denied_over_budget": 0,
+        "indexed_calls": 1,
+        "errors": 0
+      },
+      "operations": {
+        "changes ok": 1,
+        "raw_patch ok": 1
+      },
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 7
+    },
+    {
+      "task": "0362dfe9422a542cde29b9a429b4baa39d301262a128fccb0910d6801f939a86",
+      "arm": "H",
+      "status": "valid",
+      "retained": true,
+      "protocol": "a96cc8dee3d415ce30e5afc8e296f089ff276c84ef94576e870aa541d502e68b",
+      "usage": {
+        "input_tokens": 258804,
+        "output_tokens": 4209,
+        "cache_read_tokens": 219147,
+        "cache_write_tokens": 39627,
+        "model_requests": 10,
+        "uncached_input_tokens": 30,
+        "credits": 37.00938,
+        "total_nano_aiu": 37009380000,
+        "api_seconds": 74.167,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 258804,
+            "output_tokens": 4209,
+            "cache_read_tokens": 219147,
+            "cache_write_tokens": 39627,
+            "model_requests": 10,
+            "reasoning_tokens": 2442,
+            "native_model_nano_aiu": 37009380000
+          }
+        },
+        "reasoning_tokens": 2442
+      },
+      "wall_seconds": 93.25,
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 40,
+        "executed_call_attempts": 40,
+        "denied_over_budget": 0,
+        "indexed_calls": 6,
+        "errors": 0
+      },
+      "operations": {
+        "changes ok": 1,
+        "raw_patch ok": 13,
+        "source ok": 4,
+        "diff ok": 1
+      },
+      "complete_indexed_source_first_responses": 3,
+      "reused_source_lines": 52
+    },
+    {
+      "task": "0362dfe9422a542cde29b9a429b4baa39d301262a128fccb0910d6801f939a86",
+      "arm": "B",
+      "status": "valid",
+      "retained": true,
+      "protocol": "a96cc8dee3d415ce30e5afc8e296f089ff276c84ef94576e870aa541d502e68b",
+      "usage": {
+        "input_tokens": 281198,
+        "output_tokens": 4067,
+        "cache_read_tokens": 235331,
+        "cache_write_tokens": 45837,
+        "model_requests": 10,
+        "uncached_input_tokens": 30,
+        "credits": 40.47774,
+        "total_nano_aiu": 40477740000,
+        "api_seconds": 69.827,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 281198,
+            "output_tokens": 4067,
+            "cache_read_tokens": 235331,
+            "cache_write_tokens": 45837,
+            "model_requests": 10,
+            "reasoning_tokens": 2651,
+            "native_model_nano_aiu": 40477740000
+          }
+        },
+        "reasoning_tokens": 2651
+      },
+      "wall_seconds": 93.71900000001187,
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 26,
+        "executed_call_attempts": 26,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "d701ed5ae7001b5fe7c881acdda33cf7759293132014f6d71abcbc657eb36d27",
+      "arm": "B",
+      "status": "valid",
+      "retained": true,
+      "protocol": "a96cc8dee3d415ce30e5afc8e296f089ff276c84ef94576e870aa541d502e68b",
+      "usage": {
+        "input_tokens": 369957,
+        "output_tokens": 4117,
+        "cache_read_tokens": 305687,
+        "cache_write_tokens": 64237,
+        "model_requests": 11,
+        "uncached_input_tokens": 33,
+        "credits": 52.59318,
+        "total_nano_aiu": 52593180000,
+        "api_seconds": 92.532,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 369957,
+            "output_tokens": 4117,
+            "cache_read_tokens": 305687,
+            "cache_write_tokens": 64237,
+            "model_requests": 11,
+            "reasoning_tokens": 2501,
+            "native_model_nano_aiu": 52593180000
+          }
+        },
+        "reasoning_tokens": 2501
+      },
+      "wall_seconds": 112.45300000000861,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 36,
+        "executed_call_attempts": 36,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 1
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "d701ed5ae7001b5fe7c881acdda33cf7759293132014f6d71abcbc657eb36d27",
+      "arm": "H",
+      "status": "valid",
+      "retained": true,
+      "protocol": "a96cc8dee3d415ce30e5afc8e296f089ff276c84ef94576e870aa541d502e68b",
+      "usage": {
+        "input_tokens": 175670,
+        "output_tokens": 4952,
+        "cache_read_tokens": 132008,
+        "cache_write_tokens": 43638,
+        "model_requests": 8,
+        "uncached_input_tokens": 24,
+        "credits": 37.01292,
+        "total_nano_aiu": 37012920000,
+        "api_seconds": 68.992,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 175670,
+            "output_tokens": 4952,
+            "cache_read_tokens": 132008,
+            "cache_write_tokens": 43638,
+            "model_requests": 8,
+            "reasoning_tokens": 3084,
+            "native_model_nano_aiu": 37012920000
+          }
+        },
+        "reasoning_tokens": 3084
+      },
+      "wall_seconds": 88.10899999999674,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 42,
+        "executed_call_attempts": 40,
+        "denied_over_budget": 2,
+        "indexed_calls": 5,
+        "errors": 3
+      },
+      "operations": {
+        "changes error": 1,
+        "changes ok": 1,
+        "raw_patch ok": 12,
+        "source ok": 3
+      },
+      "complete_indexed_source_first_responses": 3,
+      "reused_source_lines": 15
+    },
+    {
+      "task": "82ec18705a16ae64998d181393c7f885543cc33b25921073d24ebecec40fbc15",
+      "arm": "B",
+      "status": "valid",
+      "retained": true,
+      "protocol": "375550d991400ca2d1816f212b5d2f15c7a888791a97fd8e2e4521d541159fec",
+      "usage": {
+        "input_tokens": 92728,
+        "output_tokens": 4064,
+        "cache_read_tokens": 60198,
+        "cache_write_tokens": 32515,
+        "model_requests": 5,
+        "uncached_input_tokens": 15,
+        "credits": 26.79942,
+        "total_nano_aiu": 26799420000,
+        "api_seconds": 56.959,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 92728,
+            "output_tokens": 4064,
+            "cache_read_tokens": 60198,
+            "cache_write_tokens": 32515,
+            "model_requests": 5,
+            "reasoning_tokens": 2959,
+            "native_model_nano_aiu": 26799420000
+          }
+        },
+        "reasoning_tokens": 2959
+      },
+      "wall_seconds": 88.25,
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 17,
+        "executed_call_attempts": 17,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "82ec18705a16ae64998d181393c7f885543cc33b25921073d24ebecec40fbc15",
+      "arm": "H",
+      "status": "valid",
+      "retained": true,
+      "protocol": "375550d991400ca2d1816f212b5d2f15c7a888791a97fd8e2e4521d541159fec",
+      "usage": {
+        "input_tokens": 160035,
+        "output_tokens": 5262,
+        "cache_read_tokens": 131134,
+        "cache_write_tokens": 28871,
+        "model_requests": 10,
+        "uncached_input_tokens": 30,
+        "credits": 30.21686,
+        "total_nano_aiu": 30216860000,
+        "api_seconds": 116.954,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 160035,
+            "output_tokens": 5262,
+            "cache_read_tokens": 131134,
+            "cache_write_tokens": 28871,
+            "model_requests": 10,
+            "reasoning_tokens": 3962,
+            "native_model_nano_aiu": 30216860000
+          }
+        },
+        "reasoning_tokens": 3962
+      },
+      "wall_seconds": 141.67199999999139,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 22,
+        "executed_call_attempts": 22,
+        "denied_over_budget": 0,
+        "indexed_calls": 2,
+        "errors": 1
+      },
+      "operations": {
+        "changes error": 1,
+        "changes ok": 1,
+        "raw_patch ok": 2
+      },
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "bc277c0372a2c410587b86f47527f69bc7e76ae468a962c7fe668b452af88905",
+      "arm": "B",
+      "status": "valid",
+      "retained": true,
+      "protocol": "375550d991400ca2d1816f212b5d2f15c7a888791a97fd8e2e4521d541159fec",
+      "usage": {
+        "input_tokens": 56438,
+        "output_tokens": 2215,
+        "cache_read_tokens": 29064,
+        "cache_write_tokens": 27362,
+        "model_requests": 4,
+        "uncached_input_tokens": 12,
+        "credits": 19.27836,
+        "total_nano_aiu": 19278360000,
+        "api_seconds": 41.661,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 56438,
+            "output_tokens": 2215,
+            "cache_read_tokens": 29064,
+            "cache_write_tokens": 27362,
+            "model_requests": 4,
+            "reasoning_tokens": 1386,
+            "native_model_nano_aiu": 19278360000
+          }
+        },
+        "reasoning_tokens": 1386
+      },
+      "wall_seconds": 56.328000000008615,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 13,
+        "executed_call_attempts": 13,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "bc277c0372a2c410587b86f47527f69bc7e76ae468a962c7fe668b452af88905",
+      "arm": "H",
+      "status": "valid",
+      "retained": true,
+      "protocol": "375550d991400ca2d1816f212b5d2f15c7a888791a97fd8e2e4521d541159fec",
+      "usage": {
+        "input_tokens": 86053,
+        "output_tokens": 3830,
+        "cache_read_tokens": 59112,
+        "cache_write_tokens": 26923,
+        "model_requests": 6,
+        "uncached_input_tokens": 18,
+        "credits": 23.49318,
+        "total_nano_aiu": 23493180000,
+        "api_seconds": 53.574,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 86053,
+            "output_tokens": 3830,
+            "cache_read_tokens": 59112,
+            "cache_write_tokens": 26923,
+            "model_requests": 6,
+            "reasoning_tokens": 2455,
+            "native_model_nano_aiu": 23493180000
+          }
+        },
+        "reasoning_tokens": 2455
+      },
+      "wall_seconds": 76.42200000002049,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 22,
+        "executed_call_attempts": 22,
+        "denied_over_budget": 0,
+        "indexed_calls": 15,
+        "errors": 0
+      },
+      "operations": {
+        "changes ok": 1,
+        "raw_patch ok": 2,
+        "source ok": 9,
+        "context ok": 5
+      },
+      "complete_indexed_source_first_responses": 14,
+      "reused_source_lines": 3
+    },
+    {
+      "task": "ee7f15418560e783cdc668536f3c4d8692e231a7f231876ddc86a2fac069e9e2",
+      "arm": "H",
+      "status": "valid",
+      "retained": true,
+      "protocol": "375550d991400ca2d1816f212b5d2f15c7a888791a97fd8e2e4521d541159fec",
+      "usage": {
+        "input_tokens": 86906,
+        "output_tokens": 2563,
+        "cache_read_tokens": 56683,
+        "cache_write_tokens": 30205,
+        "model_requests": 6,
+        "uncached_input_tokens": 18,
+        "credits": 22.50302,
+        "total_nano_aiu": 22503020000,
+        "api_seconds": 43.801,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 86906,
+            "output_tokens": 2563,
+            "cache_read_tokens": 56683,
+            "cache_write_tokens": 30205,
+            "model_requests": 6,
+            "reasoning_tokens": 1402,
+            "native_model_nano_aiu": 22503020000
+          }
+        },
+        "reasoning_tokens": 1402
+      },
+      "wall_seconds": 66.95300000000861,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 21,
+        "executed_call_attempts": 21,
+        "denied_over_budget": 0,
+        "indexed_calls": 5,
+        "errors": 0
+      },
+      "operations": {
+        "changes ok": 1,
+        "raw_patch ok": 3,
+        "source ok": 2,
+        "context ok": 2
+      },
+      "complete_indexed_source_first_responses": 2,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "ee7f15418560e783cdc668536f3c4d8692e231a7f231876ddc86a2fac069e9e2",
+      "arm": "B",
+      "status": "valid",
+      "retained": true,
+      "protocol": "375550d991400ca2d1816f212b5d2f15c7a888791a97fd8e2e4521d541159fec",
+      "usage": {
+        "input_tokens": 80844,
+        "output_tokens": 1740,
+        "cache_read_tokens": 56408,
+        "cache_write_tokens": 24421,
+        "model_requests": 5,
+        "uncached_input_tokens": 15,
+        "credits": 17.95282,
+        "total_nano_aiu": 17952820000,
+        "api_seconds": 32.693,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 80844,
+            "output_tokens": 1740,
+            "cache_read_tokens": 56408,
+            "cache_write_tokens": 24421,
+            "model_requests": 5,
+            "reasoning_tokens": 913,
+            "native_model_nano_aiu": 17952820000
+          }
+        },
+        "reasoning_tokens": 913
+      },
+      "wall_seconds": 51.187999999994645,
+      "findings": 1,
+      "tool_audit": {
+        "evidence_calls": 13,
+        "executed_call_attempts": 13,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "2b2cd55a03f520d087055157e37cb54bb20eb8e3bd901d67a25f6725b36761bb",
+      "usage": {
+        "input_tokens": 206220,
+        "output_tokens": 4566,
+        "cache_read_tokens": 161280,
+        "cache_write_tokens": 0,
+        "model_requests": 8,
+        "uncached_input_tokens": 44940,
+        "credits": 33.5592,
+        "total_nano_aiu": 33559200000,
+        "api_seconds": 89.417,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 206220,
+            "output_tokens": 4566,
+            "cache_read_tokens": 161280,
+            "cache_write_tokens": 0,
+            "model_requests": 8,
+            "reasoning_tokens": 3411,
+            "native_model_nano_aiu": 33559200000
+          }
+        },
+        "reasoning_tokens": 3411
+      },
+      "wall_seconds": 127.40700000000652,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 19,
+        "executed_call_attempts": 19,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "2b2cd55a03f520d087055157e37cb54bb20eb8e3bd901d67a25f6725b36761bb",
+      "usage": {
+        "input_tokens": 107543,
+        "output_tokens": 3301,
+        "cache_read_tokens": 79872,
+        "cache_write_tokens": 0,
+        "model_requests": 8,
+        "uncached_input_tokens": 27671,
+        "credits": 20.86528,
+        "total_nano_aiu": 20865280000,
+        "api_seconds": 63.523,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 107543,
+            "output_tokens": 3301,
+            "cache_read_tokens": 79872,
+            "cache_write_tokens": 0,
+            "model_requests": 8,
+            "reasoning_tokens": 2202,
+            "native_model_nano_aiu": 20865280000
+          }
+        },
+        "reasoning_tokens": 2202
+      },
+      "wall_seconds": 80.65599999998813,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 17,
+        "executed_call_attempts": 17,
+        "denied_over_budget": 0,
+        "indexed_calls": 9,
+        "errors": 1
+      },
+      "operations": {
+        "changes error": 1,
+        "changes ok": 1,
+        "raw_patch ok": 1,
+        "source ok": 5,
+        "context ok": 2
+      },
+      "complete_indexed_source_first_responses": 7,
+      "reused_source_lines": 7
+    },
+    {
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "21f8e1cfbb8786f338bea4b0070ff2a69f5889b4e66dfe8c8b616dcae6870399",
+      "usage": {
+        "input_tokens": 493991,
+        "output_tokens": 3396,
+        "cache_read_tokens": 429246,
+        "cache_write_tokens": 64709,
+        "model_requests": 12,
+        "uncached_input_tokens": 36,
+        "credits": 56.33074,
+        "total_nano_aiu": 56330740000,
+        "api_seconds": 85.013,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 493991,
+            "output_tokens": 3396,
+            "cache_read_tokens": 429246,
+            "cache_write_tokens": 64709,
+            "model_requests": 12,
+            "reasoning_tokens": 1818,
+            "native_model_nano_aiu": 56330740000
+          }
+        },
+        "reasoning_tokens": 1818
+      },
+      "wall_seconds": 115.04700000002049,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 37,
+        "executed_call_attempts": 37,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 1
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "21f8e1cfbb8786f338bea4b0070ff2a69f5889b4e66dfe8c8b616dcae6870399",
+      "usage": {
+        "input_tokens": 319116,
+        "output_tokens": 3511,
+        "cache_read_tokens": 255443,
+        "cache_write_tokens": 63646,
+        "model_requests": 9,
+        "uncached_input_tokens": 27,
+        "credits": 49.07352,
+        "total_nano_aiu": 49073520000,
+        "api_seconds": 93.034,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 319116,
+            "output_tokens": 3511,
+            "cache_read_tokens": 255443,
+            "cache_write_tokens": 63646,
+            "model_requests": 9,
+            "reasoning_tokens": 1725,
+            "native_model_nano_aiu": 49073520000
+          }
+        },
+        "reasoning_tokens": 1725
+      },
+      "wall_seconds": 122.5460000000021,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 42,
+        "executed_call_attempts": 40,
+        "denied_over_budget": 2,
+        "indexed_calls": 1,
+        "errors": 2
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "03450a784fc7b42c1fefd90054083dc0a41bb94c93db014efbc420ab2c01b6a4",
+      "usage": {
+        "input_tokens": 157379,
+        "output_tokens": 3850,
+        "cache_read_tokens": 121566,
+        "cache_write_tokens": 35789,
+        "model_requests": 8,
+        "uncached_input_tokens": 24,
+        "credits": 30.46674,
+        "total_nano_aiu": 30466740000,
+        "api_seconds": 62.558,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 157379,
+            "output_tokens": 3850,
+            "cache_read_tokens": 121566,
+            "cache_write_tokens": 35789,
+            "model_requests": 8,
+            "reasoning_tokens": 2252,
+            "native_model_nano_aiu": 30466740000
+          }
+        },
+        "reasoning_tokens": 2252
+      },
+      "wall_seconds": 77.23399999999674,
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 32,
+        "executed_call_attempts": 32,
+        "denied_over_budget": 0,
+        "indexed_calls": 2,
+        "errors": 0
+      },
+      "operations": {
+        "changes ok": 1,
+        "raw_patch ok": 1,
+        "context raw fallback": 2,
+        "source ok": 1
+      },
+      "complete_indexed_source_first_responses": 1,
+      "reused_source_lines": 83
+    },
+    {
+      "task": "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "03450a784fc7b42c1fefd90054083dc0a41bb94c93db014efbc420ab2c01b6a4",
+      "usage": {
+        "input_tokens": 225130,
+        "output_tokens": 4289,
+        "cache_read_tokens": 179126,
+        "cache_write_tokens": 45980,
+        "model_requests": 8,
+        "uncached_input_tokens": 24,
+        "credits": 38.74264,
+        "total_nano_aiu": 38742640000,
+        "api_seconds": 61.778,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 225130,
+            "output_tokens": 4289,
+            "cache_read_tokens": 179126,
+            "cache_write_tokens": 45980,
+            "model_requests": 8,
+            "reasoning_tokens": 2383,
+            "native_model_nano_aiu": 38742640000
+          }
+        },
+        "reasoning_tokens": 2383
+      },
+      "wall_seconds": 89.03099999998813,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 41,
+        "executed_call_attempts": 40,
+        "denied_over_budget": 1,
+        "indexed_calls": 0,
+        "errors": 1
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "41e82f8b1e484bfc87ebd1fe052c0958c14596473cfde2970478fcc25e3bd3dc",
+      "usage": {
+        "input_tokens": 249207,
+        "output_tokens": 3213,
+        "cache_read_tokens": 192322,
+        "cache_write_tokens": 56861,
+        "model_requests": 8,
+        "uncached_input_tokens": 24,
+        "credits": 42.55898,
+        "total_nano_aiu": 42558980000,
+        "api_seconds": 47.783,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 249207,
+            "output_tokens": 3213,
+            "cache_read_tokens": 192322,
+            "cache_write_tokens": 56861,
+            "model_requests": 8,
+            "reasoning_tokens": 1511,
+            "native_model_nano_aiu": 42558980000
+          }
+        },
+        "reasoning_tokens": 1511
+      },
+      "wall_seconds": 66.70300000000861,
+      "findings": 7,
+      "tool_audit": {
+        "evidence_calls": 36,
+        "executed_call_attempts": 36,
+        "denied_over_budget": 0,
+        "indexed_calls": 3,
+        "errors": 0
+      },
+      "operations": {
+        "changes ok": 1,
+        "source ok": 2,
+        "raw_patch ok": 1
+      },
+      "complete_indexed_source_first_responses": 1,
+      "reused_source_lines": 18
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "41e82f8b1e484bfc87ebd1fe052c0958c14596473cfde2970478fcc25e3bd3dc",
+      "usage": {
+        "input_tokens": 504107,
+        "output_tokens": 2958,
+        "cache_read_tokens": 441911,
+        "cache_write_tokens": 62154,
+        "model_requests": 14,
+        "uncached_input_tokens": 42,
+        "credits": 54.68624,
+        "total_nano_aiu": 54686240000,
+        "api_seconds": 77.553,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 504107,
+            "output_tokens": 2958,
+            "cache_read_tokens": 441911,
+            "cache_write_tokens": 62154,
+            "model_requests": 14,
+            "reasoning_tokens": 1545,
+            "native_model_nano_aiu": 54686240000
+          }
+        },
+        "reasoning_tokens": 1545
+      },
+      "wall_seconds": 92.56200000000536,
+      "findings": 6,
+      "tool_audit": {
+        "evidence_calls": 21,
+        "executed_call_attempts": 21,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "54332e98fd25116d0be095cb3b78e99cf7dfacaf6c21c2fe3e8c18ee63d43ee7",
+      "usage": {
+        "input_tokens": 177630,
+        "output_tokens": 3462,
+        "cache_read_tokens": 143501,
+        "cache_write_tokens": 34096,
+        "model_requests": 11,
+        "uncached_input_tokens": 33,
+        "credits": 29.72524,
+        "total_nano_aiu": 29725240000,
+        "api_seconds": 61.206,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 177630,
+            "output_tokens": 3462,
+            "cache_read_tokens": 143501,
+            "cache_write_tokens": 34096,
+            "model_requests": 11,
+            "reasoning_tokens": 1818,
+            "native_model_nano_aiu": 29725240000
+          }
+        },
+        "reasoning_tokens": 1818
+      },
+      "wall_seconds": 83.75,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 36,
+        "executed_call_attempts": 36,
+        "denied_over_budget": 0,
+        "indexed_calls": 4,
+        "errors": 2
+      },
+      "operations": {
+        "changes error": 1,
+        "changes ok": 1,
+        "raw_patch ok": 1,
+        "source ok": 1,
+        "source error": 1,
+        "context raw fallback": 1
+      },
+      "complete_indexed_source_first_responses": 1,
+      "reused_source_lines": 21
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "54332e98fd25116d0be095cb3b78e99cf7dfacaf6c21c2fe3e8c18ee63d43ee7",
+      "usage": {
+        "input_tokens": 87290,
+        "output_tokens": 1587,
+        "cache_read_tokens": 67986,
+        "cache_write_tokens": 19283,
+        "model_requests": 7,
+        "uncached_input_tokens": 21,
+        "credits": 15.54334,
+        "total_nano_aiu": 15543340000,
+        "api_seconds": 32.943,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 87290,
+            "output_tokens": 1587,
+            "cache_read_tokens": 67986,
+            "cache_write_tokens": 19283,
+            "model_requests": 7,
+            "reasoning_tokens": 830,
+            "native_model_nano_aiu": 15543340000
+          }
+        },
+        "reasoning_tokens": 830
+      },
+      "wall_seconds": 51.155999999988126,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 12,
+        "executed_call_attempts": 12,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "c4ff9ac1bd84f7849d66b91ad9170cde6c7f71aa0433baa6048623e48ab2f7e3",
+      "usage": {
+        "input_tokens": 161976,
+        "output_tokens": 4172,
+        "cache_read_tokens": 103951,
+        "cache_write_tokens": 58007,
+        "model_requests": 6,
+        "uncached_input_tokens": 18,
+        "credits": 41.51274,
+        "total_nano_aiu": 41512740000,
+        "api_seconds": 91.705,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 161976,
+            "output_tokens": 4172,
+            "cache_read_tokens": 103951,
+            "cache_write_tokens": 58007,
+            "model_requests": 6,
+            "reasoning_tokens": 2643,
+            "native_model_nano_aiu": 41512740000
+          }
+        },
+        "reasoning_tokens": 2643
+      },
+      "wall_seconds": 102.28099999998813,
+      "findings": 8,
+      "tool_audit": {
+        "evidence_calls": 21,
+        "executed_call_attempts": 21,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "c4ff9ac1bd84f7849d66b91ad9170cde6c7f71aa0433baa6048623e48ab2f7e3",
+      "usage": {
+        "input_tokens": 286014,
+        "output_tokens": 3367,
+        "cache_read_tokens": 219981,
+        "cache_write_tokens": 66012,
+        "model_requests": 7,
+        "uncached_input_tokens": 21,
+        "credits": 48.54764,
+        "total_nano_aiu": 48547640000,
+        "api_seconds": 58.358,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 286014,
+            "output_tokens": 3367,
+            "cache_read_tokens": 219981,
+            "cache_write_tokens": 66012,
+            "model_requests": 7,
+            "reasoning_tokens": 1579,
+            "native_model_nano_aiu": 48547640000
+          }
+        },
+        "reasoning_tokens": 1579
+      },
+      "wall_seconds": 76.5,
+      "findings": 7,
+      "tool_audit": {
+        "evidence_calls": 30,
+        "executed_call_attempts": 30,
+        "denied_over_budget": 0,
+        "indexed_calls": 9,
+        "errors": 2
+      },
+      "operations": {
+        "changes ok": 1,
+        "raw_patch ok": 12,
+        "source ok": 6,
+        "source error": 2
+      },
+      "complete_indexed_source_first_responses": 6,
+      "reused_source_lines": 47
+    },
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "41db5215a8e95a8942778050595aabdcb8b43702369fa9851e288a409801ba97",
+      "usage": {
+        "input_tokens": 114744,
+        "output_tokens": 6301,
+        "cache_read_tokens": 86511,
+        "cache_write_tokens": 28212,
+        "model_requests": 7,
+        "uncached_input_tokens": 21,
+        "credits": 30.17684,
+        "total_nano_aiu": 30176840000,
+        "api_seconds": 86.809,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 114744,
+            "output_tokens": 6301,
+            "cache_read_tokens": 86511,
+            "cache_write_tokens": 28212,
+            "model_requests": 7,
+            "reasoning_tokens": 4817,
+            "native_model_nano_aiu": 30176840000
+          }
+        },
+        "reasoning_tokens": 4817
+      },
+      "wall_seconds": 101.34400000001187,
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 26,
+        "executed_call_attempts": 26,
+        "denied_over_budget": 0,
+        "indexed_calls": 7,
+        "errors": 0
+      },
+      "operations": {
+        "changes ok": 1,
+        "raw_patch ok": 4,
+        "source ok": 6
+      },
+      "complete_indexed_source_first_responses": 6,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "41db5215a8e95a8942778050595aabdcb8b43702369fa9851e288a409801ba97",
+      "usage": {
+        "input_tokens": 253630,
+        "output_tokens": 5149,
+        "cache_read_tokens": 212341,
+        "cache_write_tokens": 41262,
+        "model_requests": 9,
+        "uncached_input_tokens": 27,
+        "credits": 39.43344,
+        "total_nano_aiu": 39433440000,
+        "api_seconds": 103.46,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 253630,
+            "output_tokens": 5149,
+            "cache_read_tokens": 212341,
+            "cache_write_tokens": 41262,
+            "model_requests": 9,
+            "reasoning_tokens": 4091,
+            "native_model_nano_aiu": 39433440000
+          }
+        },
+        "reasoning_tokens": 4091
+      },
+      "wall_seconds": 121.48399999999674,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 23,
+        "executed_call_attempts": 23,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "5c83736f659f6161f23d244ebb2688612e170c679080265097785771c91b0ac4",
+      "usage": {
+        "input_tokens": 220010,
+        "output_tokens": 3985,
+        "cache_read_tokens": 176123,
+        "cache_write_tokens": 43857,
+        "model_requests": 10,
+        "uncached_input_tokens": 30,
+        "credits": 36.95542,
+        "total_nano_aiu": 36955420000,
+        "api_seconds": 72.32,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 220010,
+            "output_tokens": 3985,
+            "cache_read_tokens": 176123,
+            "cache_write_tokens": 43857,
+            "model_requests": 10,
+            "reasoning_tokens": 2413,
+            "native_model_nano_aiu": 36955420000
+          }
+        },
+        "reasoning_tokens": 2413
+      },
+      "wall_seconds": 95.46900000001187,
+      "findings": 7,
+      "tool_audit": {
+        "evidence_calls": 26,
+        "executed_call_attempts": 26,
+        "denied_over_budget": 0,
+        "indexed_calls": 1,
+        "errors": 0
+      },
+      "operations": {
+        "changes ok": 1,
+        "raw_patch ok": 1
+      },
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 1
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "5c83736f659f6161f23d244ebb2688612e170c679080265097785771c91b0ac4",
+      "usage": {
+        "input_tokens": 263536,
+        "output_tokens": 4649,
+        "cache_read_tokens": 209063,
+        "cache_write_tokens": 54446,
+        "model_requests": 9,
+        "uncached_input_tokens": 27,
+        "credits": 44.89432,
+        "total_nano_aiu": 44894320000,
+        "api_seconds": 74.051,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 263536,
+            "output_tokens": 4649,
+            "cache_read_tokens": 209063,
+            "cache_write_tokens": 54446,
+            "model_requests": 9,
+            "reasoning_tokens": 2983,
+            "native_model_nano_aiu": 44894320000
+          }
+        },
+        "reasoning_tokens": 2983
+      },
+      "wall_seconds": 101.32800000000861,
+      "findings": 5,
+      "tool_audit": {
+        "evidence_calls": 23,
+        "executed_call_attempts": 23,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "988209f1409ca0027e4687681035e8313901ef6c81912ab4fe484d66971eb950",
+      "usage": {
+        "input_tokens": 309703,
+        "output_tokens": 4797,
+        "cache_read_tokens": 270843,
+        "cache_write_tokens": 38821,
+        "model_requests": 13,
+        "uncached_input_tokens": 39,
+        "credits": 39.85382,
+        "total_nano_aiu": 39853820000,
+        "api_seconds": 85.188,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 309703,
+            "output_tokens": 4797,
+            "cache_read_tokens": 270843,
+            "cache_write_tokens": 38821,
+            "model_requests": 13,
+            "reasoning_tokens": 3381,
+            "native_model_nano_aiu": 39853820000
+          }
+        },
+        "reasoning_tokens": 3381
+      },
+      "wall_seconds": 106.85899999999674,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 31,
+        "executed_call_attempts": 31,
+        "denied_over_budget": 0,
+        "indexed_calls": 18,
+        "errors": 3
+      },
+      "operations": {
+        "changes ok": 1,
+        "raw_patch ok": 1,
+        "source ok": 12,
+        "context ok": 2,
+        "source error": 3
+      },
+      "complete_indexed_source_first_responses": 13,
+      "reused_source_lines": 20
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "988209f1409ca0027e4687681035e8313901ef6c81912ab4fe484d66971eb950",
+      "usage": {
+        "input_tokens": 416647,
+        "output_tokens": 4287,
+        "cache_read_tokens": 367128,
+        "cache_write_tokens": 49480,
+        "model_requests": 13,
+        "uncached_input_tokens": 39,
+        "credits": 48.01472,
+        "total_nano_aiu": 48014720000,
+        "api_seconds": 80.119,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 416647,
+            "output_tokens": 4287,
+            "cache_read_tokens": 367128,
+            "cache_write_tokens": 49480,
+            "model_requests": 13,
+            "reasoning_tokens": 2490,
+            "native_model_nano_aiu": 48014720000
+          }
+        },
+        "reasoning_tokens": 2490
+      },
+      "wall_seconds": 91.61000000001513,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 39,
+        "executed_call_attempts": 39,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 1
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "eacc6429f2ffd0c64fc2209dd024e93dfb5752de4521f3f3182c8e9d4636dee9",
+      "usage": {
+        "input_tokens": 47281,
+        "output_tokens": 2417,
+        "cache_read_tokens": 24337,
+        "cache_write_tokens": 22932,
+        "model_requests": 4,
+        "uncached_input_tokens": 12,
+        "credits": 17.27828,
+        "total_nano_aiu": 17278280000,
+        "api_seconds": 34.274,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 47281,
+            "output_tokens": 2417,
+            "cache_read_tokens": 24337,
+            "cache_write_tokens": 22932,
+            "model_requests": 4,
+            "reasoning_tokens": 1599,
+            "native_model_nano_aiu": 17278280000
+          }
+        },
+        "reasoning_tokens": 1599
+      },
+      "wall_seconds": 46.280999999988126,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 10,
+        "executed_call_attempts": 10,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "eacc6429f2ffd0c64fc2209dd024e93dfb5752de4521f3f3182c8e9d4636dee9",
+      "usage": {
+        "input_tokens": 51353,
+        "output_tokens": 3330,
+        "cache_read_tokens": 34339,
+        "cache_write_tokens": 16999,
+        "model_requests": 5,
+        "uncached_input_tokens": 15,
+        "credits": 16.53906,
+        "total_nano_aiu": 16539060000,
+        "api_seconds": 57.543,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 51353,
+            "output_tokens": 3330,
+            "cache_read_tokens": 34339,
+            "cache_write_tokens": 16999,
+            "model_requests": 5,
+            "reasoning_tokens": 2546,
+            "native_model_nano_aiu": 16539060000
+          }
+        },
+        "reasoning_tokens": 2546
+      },
+      "wall_seconds": 68.40599999998813,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 11,
+        "executed_call_attempts": 11,
+        "denied_over_budget": 0,
+        "indexed_calls": 2,
+        "errors": 0
+      },
+      "operations": {
+        "changes ok": 1,
+        "raw_patch ok": 1,
+        "history ok": 1
+      },
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "6bd294229b882616d6d86ddb0058b48db0af5484d92ef13352e551d126420e10",
+      "usage": {
+        "input_tokens": 219810,
+        "output_tokens": 3662,
+        "cache_read_tokens": 175505,
+        "cache_write_tokens": 44278,
+        "model_requests": 9,
+        "uncached_input_tokens": 27,
+        "credits": 36.494,
+        "total_nano_aiu": 36494000000,
+        "api_seconds": 63.849,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 219810,
+            "output_tokens": 3662,
+            "cache_read_tokens": 175505,
+            "cache_write_tokens": 44278,
+            "model_requests": 9,
+            "reasoning_tokens": 2447,
+            "native_model_nano_aiu": 36494000000
+          }
+        },
+        "reasoning_tokens": 2447
+      },
+      "wall_seconds": 89.67200000002049,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 22,
+        "executed_call_attempts": 22,
+        "denied_over_budget": 0,
+        "indexed_calls": 1,
+        "errors": 0
+      },
+      "operations": {
+        "changes ok": 1,
+        "raw_patch ok": 1
+      },
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 7
+    },
+    {
+      "task": "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "6bd294229b882616d6d86ddb0058b48db0af5484d92ef13352e551d126420e10",
+      "usage": {
+        "input_tokens": 328824,
+        "output_tokens": 4570,
+        "cache_read_tokens": 284660,
+        "cache_write_tokens": 44128,
+        "model_requests": 12,
+        "uncached_input_tokens": 36,
+        "credits": 42.6048,
+        "total_nano_aiu": 42604800000,
+        "api_seconds": 85.951,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 328824,
+            "output_tokens": 4570,
+            "cache_read_tokens": 284660,
+            "cache_write_tokens": 44128,
+            "model_requests": 12,
+            "reasoning_tokens": 3112,
+            "native_model_nano_aiu": 42604800000
+          }
+        },
+        "reasoning_tokens": 3112
+      },
+      "wall_seconds": 98.96899999998277,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 31,
+        "executed_call_attempts": 31,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "bb689ccbc1d109b4ff47b1235f1ed4d10c9bbb0ebee4262730bf6a2f74f9ee28",
+      "usage": {
+        "input_tokens": 239255,
+        "output_tokens": 3296,
+        "cache_read_tokens": 197560,
+        "cache_write_tokens": 41665,
+        "model_requests": 10,
+        "uncached_input_tokens": 30,
+        "credits": 35.3389,
+        "total_nano_aiu": 35338900000,
+        "api_seconds": 67.117,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 239255,
+            "output_tokens": 3296,
+            "cache_read_tokens": 197560,
+            "cache_write_tokens": 41665,
+            "model_requests": 10,
+            "reasoning_tokens": 1694,
+            "native_model_nano_aiu": 35338900000
+          }
+        },
+        "reasoning_tokens": 1694
+      },
+      "wall_seconds": 92.98500000001513,
+      "findings": 1,
+      "tool_audit": {
+        "evidence_calls": 36,
+        "executed_call_attempts": 36,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "bb689ccbc1d109b4ff47b1235f1ed4d10c9bbb0ebee4262730bf6a2f74f9ee28",
+      "usage": {
+        "input_tokens": 151210,
+        "output_tokens": 3654,
+        "cache_read_tokens": 119822,
+        "cache_write_tokens": 31361,
+        "model_requests": 9,
+        "uncached_input_tokens": 27,
+        "credits": 27.79218,
+        "total_nano_aiu": 27792180000,
+        "api_seconds": 53.331,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 151210,
+            "output_tokens": 3654,
+            "cache_read_tokens": 119822,
+            "cache_write_tokens": 31361,
+            "model_requests": 9,
+            "reasoning_tokens": 1582,
+            "native_model_nano_aiu": 27792180000
+          }
+        },
+        "reasoning_tokens": 1582
+      },
+      "wall_seconds": 75.53100000001723,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 43,
+        "executed_call_attempts": 40,
+        "denied_over_budget": 3,
+        "indexed_calls": 16,
+        "errors": 5
+      },
+      "operations": {
+        "changes error": 1,
+        "changes ok": 1,
+        "raw_patch ok": 12,
+        "source ok": 10,
+        "context error": 1,
+        "source error": 3
+      },
+      "complete_indexed_source_first_responses": 8,
+      "reused_source_lines": 27
+    },
+    {
+      "task": "91db148075d74d9bde541c1702d065e340acf96f90bc4258edb975c71f0f0e92",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "54b3bc4fdb12330d1a6e9f570d34da3fac1d6acf7a760767d358707d0f7ece4f",
+      "usage": {
+        "input_tokens": 624595,
+        "output_tokens": 2187,
+        "cache_read_tokens": 566660,
+        "cache_write_tokens": 57881,
+        "model_requests": 18,
+        "uncached_input_tokens": 54,
+        "credits": 56.0025,
+        "total_nano_aiu": 56002500000,
+        "api_seconds": 77.241,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 624595,
+            "output_tokens": 2187,
+            "cache_read_tokens": 566660,
+            "cache_write_tokens": 57881,
+            "model_requests": 18,
+            "reasoning_tokens": 1013,
+            "native_model_nano_aiu": 56002500000
+          }
+        },
+        "reasoning_tokens": 1013
+      },
+      "wall_seconds": 114.81200000000536,
+      "findings": 1,
+      "tool_audit": {
+        "evidence_calls": 28,
+        "executed_call_attempts": 28,
+        "denied_over_budget": 0,
+        "indexed_calls": 3,
+        "errors": 2
+      },
+      "operations": {
+        "changes error": 1,
+        "raw_patch ok": 1,
+        "context raw fallback": 1,
+        "source error": 1,
+        "source ok": 1
+      },
+      "complete_indexed_source_first_responses": 1,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "91db148075d74d9bde541c1702d065e340acf96f90bc4258edb975c71f0f0e92",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "54b3bc4fdb12330d1a6e9f570d34da3fac1d6acf7a760767d358707d0f7ece4f",
+      "usage": {
+        "input_tokens": 572884,
+        "output_tokens": 2382,
+        "cache_read_tokens": 503498,
+        "cache_write_tokens": 69341,
+        "model_requests": 15,
+        "uncached_input_tokens": 45,
+        "credits": 59.59242,
+        "total_nano_aiu": 59592420000,
+        "api_seconds": 68.309,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 572884,
+            "output_tokens": 2382,
+            "cache_read_tokens": 503498,
+            "cache_write_tokens": 69341,
+            "model_requests": 15,
+            "reasoning_tokens": 1116,
+            "native_model_nano_aiu": 59592420000
+          }
+        },
+        "reasoning_tokens": 1116
+      },
+      "wall_seconds": 92.4210000000021,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 28,
+        "executed_call_attempts": 28,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "7d1bf7158fd26470fa90ae3afa30ab61088ae3c62444c7c15a5001d978ec23a5",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "f79c6f41eb8f22777840a8d3f18a3a7a12daffba3dda80d0e04a106266995bf7",
+      "usage": {
+        "input_tokens": 209344,
+        "output_tokens": 4126,
+        "cache_read_tokens": 169371,
+        "cache_write_tokens": 39946,
+        "model_requests": 9,
+        "uncached_input_tokens": 27,
+        "credits": 35.01064,
+        "total_nano_aiu": 35010640000,
+        "api_seconds": 83.677,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 209344,
+            "output_tokens": 4126,
+            "cache_read_tokens": 169371,
+            "cache_write_tokens": 39946,
+            "model_requests": 9,
+            "reasoning_tokens": 2811,
+            "native_model_nano_aiu": 35010640000
+          }
+        },
+        "reasoning_tokens": 2811
+      },
+      "wall_seconds": 100.34400000001187,
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 19,
+        "executed_call_attempts": 19,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "7d1bf7158fd26470fa90ae3afa30ab61088ae3c62444c7c15a5001d978ec23a5",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "f79c6f41eb8f22777840a8d3f18a3a7a12daffba3dda80d0e04a106266995bf7",
+      "usage": {
+        "input_tokens": 400367,
+        "output_tokens": 3260,
+        "cache_read_tokens": 352435,
+        "cache_write_tokens": 47884,
+        "model_requests": 16,
+        "uncached_input_tokens": 48,
+        "credits": 44.5786,
+        "total_nano_aiu": 44578600000,
+        "api_seconds": 88.288,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 400367,
+            "output_tokens": 3260,
+            "cache_read_tokens": 352435,
+            "cache_write_tokens": 47884,
+            "model_requests": 16,
+            "reasoning_tokens": 1697,
+            "native_model_nano_aiu": 44578600000
+          }
+        },
+        "reasoning_tokens": 1697
+      },
+      "wall_seconds": 107.34400000001187,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 27,
+        "executed_call_attempts": 27,
+        "denied_over_budget": 0,
+        "indexed_calls": 2,
+        "errors": 1
+      },
+      "operations": {
+        "changes error": 1,
+        "changes ok": 1,
+        "raw_patch ok": 2
+      },
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "be07780f798b850fe30355d81efd3b148981033562e2f1ead08731b5afcc539f",
+      "usage": {
+        "input_tokens": 335262,
+        "output_tokens": 3647,
+        "cache_read_tokens": 274583,
+        "cache_write_tokens": 60646,
+        "model_requests": 11,
+        "uncached_input_tokens": 33,
+        "credits": 48.61352,
+        "total_nano_aiu": 48613520000,
+        "api_seconds": 71.725,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 335262,
+            "output_tokens": 3647,
+            "cache_read_tokens": 274583,
+            "cache_write_tokens": 60646,
+            "model_requests": 11,
+            "reasoning_tokens": 2573,
+            "native_model_nano_aiu": 48613520000
+          }
+        },
+        "reasoning_tokens": 2573
+      },
+      "wall_seconds": 94.68799999999464,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 20,
+        "executed_call_attempts": 20,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "be07780f798b850fe30355d81efd3b148981033562e2f1ead08731b5afcc539f",
+      "usage": {
+        "input_tokens": 167403,
+        "output_tokens": 5383,
+        "cache_read_tokens": 118796,
+        "cache_write_tokens": 48589,
+        "model_requests": 6,
+        "uncached_input_tokens": 18,
+        "credits": 39.81954,
+        "total_nano_aiu": 39819540000,
+        "api_seconds": 77.535,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 167403,
+            "output_tokens": 5383,
+            "cache_read_tokens": 118796,
+            "cache_write_tokens": 48589,
+            "model_requests": 6,
+            "reasoning_tokens": 4285,
+            "native_model_nano_aiu": 39819540000
+          }
+        },
+        "reasoning_tokens": 4285
+      },
+      "wall_seconds": 100.57800000000861,
+      "findings": 1,
+      "tool_audit": {
+        "evidence_calls": 26,
+        "executed_call_attempts": 26,
+        "denied_over_budget": 0,
+        "indexed_calls": 12,
+        "errors": 0
+      },
+      "operations": {
+        "changes ok": 1,
+        "raw_patch ok": 9,
+        "source ok": 9,
+        "history ok": 2
+      },
+      "complete_indexed_source_first_responses": 9,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "818ca8cfc87055000cd0c0980dc29fcdeaa4f8737a5b8a9e39231fa1879f09a9",
+      "usage": {
+        "input_tokens": 296847,
+        "output_tokens": 3651,
+        "cache_read_tokens": 239335,
+        "cache_write_tokens": 57482,
+        "model_requests": 10,
+        "uncached_input_tokens": 30,
+        "credits": 45.6284,
+        "total_nano_aiu": 45628400000,
+        "api_seconds": 67.754,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 296847,
+            "output_tokens": 3651,
+            "cache_read_tokens": 239335,
+            "cache_write_tokens": 57482,
+            "model_requests": 10,
+            "reasoning_tokens": 2496,
+            "native_model_nano_aiu": 45628400000
+          }
+        },
+        "reasoning_tokens": 2496
+      },
+      "wall_seconds": 84.28200000000652,
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 17,
+        "executed_call_attempts": 17,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "818ca8cfc87055000cd0c0980dc29fcdeaa4f8737a5b8a9e39231fa1879f09a9",
+      "usage": {
+        "input_tokens": 253766,
+        "output_tokens": 3914,
+        "cache_read_tokens": 202879,
+        "cache_write_tokens": 50863,
+        "model_requests": 8,
+        "uncached_input_tokens": 24,
+        "credits": 41.38426,
+        "total_nano_aiu": 41384260000,
+        "api_seconds": 56.788,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 253766,
+            "output_tokens": 3914,
+            "cache_read_tokens": 202879,
+            "cache_write_tokens": 50863,
+            "model_requests": 8,
+            "reasoning_tokens": 2063,
+            "native_model_nano_aiu": 41384260000
+          }
+        },
+        "reasoning_tokens": 2063
+      },
+      "wall_seconds": 77.96799999999348,
+      "findings": 5,
+      "tool_audit": {
+        "evidence_calls": 37,
+        "executed_call_attempts": 37,
+        "denied_over_budget": 0,
+        "indexed_calls": 15,
+        "errors": 0
+      },
+      "operations": {
+        "changes ok": 1,
+        "raw_patch ok": 7,
+        "source ok": 14
+      },
+      "complete_indexed_source_first_responses": 14,
+      "reused_source_lines": 3
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "5095a5383c6f6ae592ea1f4f06d8f3a4a5df4968a0b3eb7f051943b4b9d2e453",
+      "usage": {
+        "input_tokens": 135200,
+        "output_tokens": 3760,
+        "cache_read_tokens": 102466,
+        "cache_write_tokens": 32713,
+        "model_requests": 7,
+        "uncached_input_tokens": 21,
+        "credits": 27.98354,
+        "total_nano_aiu": 27983540000,
+        "api_seconds": 62.056,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 135200,
+            "output_tokens": 3760,
+            "cache_read_tokens": 102466,
+            "cache_write_tokens": 32713,
+            "model_requests": 7,
+            "reasoning_tokens": 2622,
+            "native_model_nano_aiu": 27983540000
+          }
+        },
+        "reasoning_tokens": 2622
+      },
+      "wall_seconds": 81.26600000000326,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 25,
+        "executed_call_attempts": 25,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "5095a5383c6f6ae592ea1f4f06d8f3a4a5df4968a0b3eb7f051943b4b9d2e453",
+      "usage": {
+        "input_tokens": 178593,
+        "output_tokens": 3270,
+        "cache_read_tokens": 145577,
+        "cache_write_tokens": 32986,
+        "model_requests": 10,
+        "uncached_input_tokens": 30,
+        "credits": 28.86808,
+        "total_nano_aiu": 28868080000,
+        "api_seconds": 53.01,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 178593,
+            "output_tokens": 3270,
+            "cache_read_tokens": 145577,
+            "cache_write_tokens": 32986,
+            "model_requests": 10,
+            "reasoning_tokens": 1858,
+            "native_model_nano_aiu": 28868080000
+          }
+        },
+        "reasoning_tokens": 1858
+      },
+      "wall_seconds": 78.78100000001723,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 30,
+        "executed_call_attempts": 30,
+        "denied_over_budget": 0,
+        "indexed_calls": 6,
+        "errors": 1
+      },
+      "operations": {
+        "changes error": 1,
+        "changes ok": 1,
+        "source ok": 2,
+        "raw_patch ok": 1,
+        "context ok": 2
+      },
+      "complete_indexed_source_first_responses": 1,
+      "reused_source_lines": 8
+    },
+    {
+      "task": "435c173f24b18a1fd88ab29dc033bc2fc1e42502df2db9d7e9312711c7a1ea3c",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "f11b728fe6975d03ac05c4ad1aa3683c1e14f100ee8c531d93a9a68c0ea9ffb4",
+      "usage": {
+        "input_tokens": 228805,
+        "output_tokens": 5579,
+        "cache_read_tokens": 191394,
+        "cache_write_tokens": 37378,
+        "model_requests": 11,
+        "uncached_input_tokens": 33,
+        "credits": 37.51596,
+        "total_nano_aiu": 37515960000,
+        "api_seconds": 110.435,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 228805,
+            "output_tokens": 5579,
+            "cache_read_tokens": 191394,
+            "cache_write_tokens": 37378,
+            "model_requests": 11,
+            "reasoning_tokens": 4256,
+            "native_model_nano_aiu": 37515960000
+          }
+        },
+        "reasoning_tokens": 4256
+      },
+      "wall_seconds": 141.79699999999139,
+      "findings": 5,
+      "tool_audit": {
+        "evidence_calls": 21,
+        "executed_call_attempts": 21,
+        "denied_over_budget": 0,
+        "indexed_calls": 4,
+        "errors": 2
+      },
+      "operations": {
+        "changes ok": 1,
+        "raw_patch ok": 1,
+        "source error": 2,
+        "source ok": 1
+      },
+      "complete_indexed_source_first_responses": 1,
+      "reused_source_lines": 4
+    },
+    {
+      "task": "435c173f24b18a1fd88ab29dc033bc2fc1e42502df2db9d7e9312711c7a1ea3c",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "f11b728fe6975d03ac05c4ad1aa3683c1e14f100ee8c531d93a9a68c0ea9ffb4",
+      "usage": {
+        "input_tokens": 209422,
+        "output_tokens": 4560,
+        "cache_read_tokens": 169772,
+        "cache_write_tokens": 39626,
+        "model_requests": 8,
+        "uncached_input_tokens": 24,
+        "credits": 35.73348,
+        "total_nano_aiu": 35733480000,
+        "api_seconds": 74.916,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 209422,
+            "output_tokens": 4560,
+            "cache_read_tokens": 169772,
+            "cache_write_tokens": 39626,
+            "model_requests": 8,
+            "reasoning_tokens": 3089,
+            "native_model_nano_aiu": 35733480000
+          }
+        },
+        "reasoning_tokens": 3089
+      },
+      "wall_seconds": 92.625,
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 26,
+        "executed_call_attempts": 26,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 1
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "b673f3f386cf657bbc269b622ce6a14389e41cd0d0427b48254c43c2ccd38956",
+      "arm": "B",
+      "status": "valid",
+      "retained": false,
+      "protocol": "6f0d87bd12723dde1037318b55b8b15242b1795e212c1a876838a27380d4cbce",
+      "usage": {
+        "input_tokens": 265709,
+        "output_tokens": 3362,
+        "cache_read_tokens": 214747,
+        "cache_write_tokens": 50935,
+        "model_requests": 9,
+        "uncached_input_tokens": 27,
+        "credits": 40.79218,
+        "total_nano_aiu": 40792180000,
+        "api_seconds": 53.73,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 265709,
+            "output_tokens": 3362,
+            "cache_read_tokens": 214747,
+            "cache_write_tokens": 50935,
+            "model_requests": 9,
+            "reasoning_tokens": 1702,
+            "native_model_nano_aiu": 40792180000
+          }
+        },
+        "reasoning_tokens": 1702
+      },
+      "wall_seconds": 95.7960000000021,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 37,
+        "executed_call_attempts": 37,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "operations": {},
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0
+    },
+    {
+      "task": "b673f3f386cf657bbc269b622ce6a14389e41cd0d0427b48254c43c2ccd38956",
+      "arm": "H",
+      "status": "valid",
+      "retained": false,
+      "protocol": "6f0d87bd12723dde1037318b55b8b15242b1795e212c1a876838a27380d4cbce",
+      "usage": {
+        "input_tokens": 158159,
+        "output_tokens": 2408,
+        "cache_read_tokens": 124636,
+        "cache_write_tokens": 33496,
+        "model_requests": 9,
+        "uncached_input_tokens": 27,
+        "credits": 26.56024,
+        "total_nano_aiu": 26560240000,
+        "api_seconds": 46.226,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 158159,
+            "output_tokens": 2408,
+            "cache_read_tokens": 124636,
+            "cache_write_tokens": 33496,
+            "model_requests": 9,
+            "reasoning_tokens": 1329,
+            "native_model_nano_aiu": 26560240000
+          }
+        },
+        "reasoning_tokens": 1329
+      },
+      "wall_seconds": 77.125,
+      "findings": 0,
+      "tool_audit": {
+        "evidence_calls": 29,
+        "executed_call_attempts": 29,
+        "denied_over_budget": 0,
+        "indexed_calls": 8,
+        "errors": 1
+      },
+      "operations": {
+        "changes error": 1,
+        "changes ok": 1,
+        "raw_patch ok": 3,
+        "source ok": 5,
+        "context ok": 1
+      },
+      "complete_indexed_source_first_responses": 5,
+      "reused_source_lines": 59
+    }
+  ],
+  "review_totals": {
+    "B": {
+      "known_telemetry_slots": 25,
+      "wall_seconds": 2272.3760000000475,
+      "credits": 950.0994399999997,
+      "input_tokens": 6297473,
+      "output_tokens": 92205,
+      "reasoning_tokens": 59261,
+      "cache_read_tokens": 5170626,
+      "cache_write_tokens": 1081256,
+      "uncached_input_tokens": 45591,
+      "model_requests": 225
+    },
+    "H": {
+      "known_telemetry_slots": 25,
+      "wall_seconds": 2297.5280000001076,
+      "credits": 858.6537800000001,
+      "input_tokens": 5241728,
+      "output_tokens": 98218,
+      "reasoning_tokens": 62135,
+      "cache_read_tokens": 4251767,
+      "cache_write_tokens": 961627,
+      "uncached_input_tokens": 28334,
+      "model_requests": 229
+    }
+  },
+  "operational_status_counts": {
+    "B": {
+      "valid": 25
+    },
+    "H": {
+      "valid": 25
+    }
+  },
+  "quality_pairs_scored": 25,
+  "quality_missing_tasks": [],
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 0.8400000000000002,
+        "grounded_recall": 0.20930253962001685,
+        "augmented_precision": 0.885,
+        "augmented_recall": 0.2460374625374625,
+        "novel_tp_count": 14,
+        "novel_tp_yield": 0.18133333333333332,
+        "candidate_count": 79,
+        "golden_tp_count": 352,
+        "matched_count": 65,
+        "matched_tp_count": 58,
+        "unmatched_count": 14,
+        "unmatched_tp_count": 14,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 72,
+        "grounded_f1_from_aggregated_precision_recall": 0.33510665731254513,
+        "augmented_f1_from_aggregated_precision_recall": 0.38503261219509277
+      },
+      "micro": {
+        "grounded_precision": 0.8923076923076924,
+        "grounded_recall": 0.20454545454545456,
+        "augmented_precision": 0.9113924050632911,
+        "augmented_recall": 0.23497267759562843,
+        "novel_tp_count": 14,
+        "novel_tp_yield": 0.17721518987341772,
+        "candidate_count": 79,
+        "golden_tp_count": 352,
+        "matched_count": 65,
+        "matched_tp_count": 58,
+        "unmatched_count": 14,
+        "unmatched_tp_count": 14,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 72,
+        "grounded_f1_from_aggregated_precision_recall": 0.33280204016576354,
+        "augmented_f1_from_aggregated_precision_recall": 0.3736197429554094
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 0.8611111111111112,
+        "grounded_recall": 0.22383180165485167,
+        "augmented_precision": 0.8770833333333333,
+        "augmented_recall": 0.26443230296124354,
+        "novel_tp_count": 18,
+        "novel_tp_yield": 0.2213293650793651,
+        "candidate_count": 85,
+        "golden_tp_count": 352,
+        "matched_count": 65,
+        "matched_tp_count": 60,
+        "unmatched_count": 20,
+        "unmatched_tp_count": 18,
+        "unmatched_fp_count": 2,
+        "golden_covered_count": 76,
+        "grounded_f1_from_aggregated_precision_recall": 0.3553072685338398,
+        "augmented_f1_from_aggregated_precision_recall": 0.40635302460702566
+      },
+      "micro": {
+        "grounded_precision": 0.9230769230769231,
+        "grounded_recall": 0.2159090909090909,
+        "augmented_precision": 0.9176470588235294,
+        "augmented_recall": 0.25405405405405407,
+        "novel_tp_count": 18,
+        "novel_tp_yield": 0.21176470588235294,
+        "candidate_count": 85,
+        "golden_tp_count": 352,
+        "matched_count": 65,
+        "matched_tp_count": 60,
+        "unmatched_count": 20,
+        "unmatched_tp_count": 18,
+        "unmatched_fp_count": 2,
+        "golden_covered_count": 76,
+        "grounded_f1_from_aggregated_precision_recall": 0.3499616270145818,
+        "augmented_f1_from_aggregated_precision_recall": 0.39793758480325647
+      }
+    }
+  },
+  "complete_valid_and_scored": true,
+  "fixed_delivered_grounded_recall_bounds": {
+    "B": {
+      "tp_bearing_fixed_tasks": 25,
+      "lower": 0.20930253962001688,
+      "upper": 0.20930253962001688
+    },
+    "H": {
+      "tp_bearing_fixed_tasks": 25,
+      "lower": 0.22383180165485167,
+      "upper": 0.22383180165485167
+    }
+  },
+  "bounds_interpretation": "Worst/best missing-outcome bounds, not confidence intervals",
+  "accounting": {
+    "reviewer_known_credits": 1808.75322,
+    "primary_judge_known_credits": 946.6382,
+    "new_supplementary_judge_known_credits": 0,
+    "total_judge_known_credits": 946.6382,
+    "unsettled": [],
+    "prior_supplements_included_in_retained_judge_total": true
+  },
+  "tool_usage": {
+    "B": {
+      "explicit_facade_operations": {},
+      "raw_patch_is_not_indexed_evidence": true,
+      "complete_indexed_source_first_responses": 0,
+      "reused_source_lines": 0,
+      "explicit_indexed_history_requests": 0,
+      "interpretation": "Successful candidate-only/context or raw-patch calls are not automatically complete indexed source. Source-line reuse can include raw reads."
+    },
+    "H": {
+      "explicit_facade_operations": {
+        "changes ok": 23,
+        "raw_patch ok": 93,
+        "source ok": 93,
+        "diff ok": 1,
+        "changes error": 9,
+        "context ok": 14,
+        "context raw fallback": 4,
+        "source error": 12,
+        "history ok": 3,
+        "context error": 1
+      },
+      "raw_patch_is_not_indexed_evidence": true,
+      "complete_indexed_source_first_responses": 96,
+      "reused_source_lines": 382,
+      "explicit_indexed_history_requests": 3,
+      "interpretation": "Successful candidate-only/context or raw-patch calls are not automatically complete indexed source. Source-line reuse can include raw reads."
+    }
+  },
+  "cohorts": {
+    "retained6": {
+      "fixed_tasks": 6,
+      "review_totals": {
+        "B": {
+          "credits": 188.80589999999998,
+          "input_tokens": 1044918,
+          "output_tokens": 21381,
+          "model_requests": 44
+        },
+        "H": {
+          "credits": 174.87588,
+          "input_tokens": 866321,
+          "output_tokens": 25784,
+          "model_requests": 47
+        }
+      },
+      "scores": {
+        "B": {
+          "macro": {
+            "grounded_precision": 0.8333333333333334,
+            "grounded_recall": 0.1625110756689704,
+            "augmented_precision": 0.8333333333333334,
+            "augmented_recall": 0.18434343434343434,
+            "novel_tp_count": 2,
+            "novel_tp_yield": 0.125,
+            "candidate_count": 17,
+            "golden_tp_count": 83,
+            "matched_count": 15,
+            "matched_tp_count": 14,
+            "unmatched_count": 2,
+            "unmatched_tp_count": 2,
+            "unmatched_fp_count": 0,
+            "golden_covered_count": 16
+          },
+          "micro": {
+            "grounded_precision": 0.9333333333333333,
+            "grounded_recall": 0.1927710843373494,
+            "augmented_precision": 0.9411764705882353,
+            "augmented_recall": 0.21176470588235294,
+            "novel_tp_count": 2,
+            "novel_tp_yield": 0.11764705882352941,
+            "candidate_count": 17,
+            "golden_tp_count": 83,
+            "matched_count": 15,
+            "matched_tp_count": 14,
+            "unmatched_count": 2,
+            "unmatched_tp_count": 2,
+            "unmatched_fp_count": 0,
+            "golden_covered_count": 16
+          }
+        },
+        "H": {
+          "macro": {
+            "grounded_precision": 0.8333333333333334,
+            "grounded_recall": 0.20663654084706717,
+            "augmented_precision": 0.9166666666666666,
+            "augmented_recall": 0.264555986538252,
+            "novel_tp_count": 5,
+            "novel_tp_yield": 0.3111111111111111,
+            "candidate_count": 19,
+            "golden_tp_count": 83,
+            "matched_count": 14,
+            "matched_tp_count": 13,
+            "unmatched_count": 5,
+            "unmatched_tp_count": 5,
+            "unmatched_fp_count": 0,
+            "golden_covered_count": 19
+          },
+          "micro": {
+            "grounded_precision": 0.9285714285714286,
+            "grounded_recall": 0.2289156626506024,
+            "augmented_precision": 0.9473684210526315,
+            "augmented_recall": 0.2727272727272727,
+            "novel_tp_count": 5,
+            "novel_tp_yield": 0.2631578947368421,
+            "candidate_count": 19,
+            "golden_tp_count": 83,
+            "matched_count": 14,
+            "matched_tp_count": 13,
+            "unmatched_count": 5,
+            "unmatched_tp_count": 5,
+            "unmatched_fp_count": 0,
+            "golden_covered_count": 19
+          }
+        }
+      },
+      "interpretation": "Retained adaptive pilots and the fixed continuation are separately visible; neither is a leaderboard-confirmation cohort."
+    },
+    "new19": {
+      "fixed_tasks": 19,
+      "review_totals": {
+        "B": {
+          "credits": 761.2935399999999,
+          "input_tokens": 5252555,
+          "output_tokens": 70824,
+          "model_requests": 181
+        },
+        "H": {
+          "credits": 683.7778999999999,
+          "input_tokens": 4375407,
+          "output_tokens": 72434,
+          "model_requests": 182
+        }
+      },
+      "scores": {
+        "B": {
+          "macro": {
+            "grounded_precision": 0.8421052631578947,
+            "grounded_recall": 0.22407879139403156,
+            "augmented_precision": 0.9013157894736842,
+            "augmented_recall": 0.2655197872303135,
+            "novel_tp_count": 12,
+            "novel_tp_yield": 0.19912280701754384,
+            "candidate_count": 62,
+            "golden_tp_count": 269,
+            "matched_count": 50,
+            "matched_tp_count": 44,
+            "unmatched_count": 12,
+            "unmatched_tp_count": 12,
+            "unmatched_fp_count": 0,
+            "golden_covered_count": 56
+          },
+          "micro": {
+            "grounded_precision": 0.88,
+            "grounded_recall": 0.20817843866171004,
+            "augmented_precision": 0.9032258064516129,
+            "augmented_recall": 0.24199288256227758,
+            "novel_tp_count": 12,
+            "novel_tp_yield": 0.1935483870967742,
+            "candidate_count": 62,
+            "golden_tp_count": 269,
+            "matched_count": 50,
+            "matched_tp_count": 44,
+            "unmatched_count": 12,
+            "unmatched_tp_count": 12,
+            "unmatched_fp_count": 0,
+            "golden_covered_count": 56
+          }
+        },
+        "H": {
+          "macro": {
+            "grounded_precision": 0.8703703703703703,
+            "grounded_recall": 0.22926188401520467,
+            "augmented_precision": 0.8638888888888888,
+            "augmented_recall": 0.2643932449895567,
+            "novel_tp_count": 13,
+            "novel_tp_yield": 0.19140211640211638,
+            "candidate_count": 66,
+            "golden_tp_count": 269,
+            "matched_count": 51,
+            "matched_tp_count": 47,
+            "unmatched_count": 15,
+            "unmatched_tp_count": 13,
+            "unmatched_fp_count": 2,
+            "golden_covered_count": 57
+          },
+          "micro": {
+            "grounded_precision": 0.9215686274509803,
+            "grounded_recall": 0.21189591078066913,
+            "augmented_precision": 0.9090909090909091,
+            "augmented_recall": 0.24822695035460993,
+            "novel_tp_count": 13,
+            "novel_tp_yield": 0.19696969696969696,
+            "candidate_count": 66,
+            "golden_tp_count": 269,
+            "matched_count": 51,
+            "matched_tp_count": 47,
+            "unmatched_count": 15,
+            "unmatched_tp_count": 13,
+            "unmatched_fp_count": 2,
+            "golden_covered_count": 57
+          }
+        }
+      },
+      "interpretation": "Retained adaptive pilots and the fixed continuation are separately visible; neither is a leaderboard-confirmation cohort."
+    }
+  },
+  "preparation": {
+    "continuation_rows": [
+      {
+        "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+        "repo": "https://github.com/PierreJanineh/TechDebtMCP",
+        "seconds": 8.155999999988126,
+        "preflight": {
+          "independent_occurrences_verified": 774,
+          "extraction_gaps": 0,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 36.296999999991385,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "ea0385c7349bbaee04456c57bf0ec3f217d63532",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "retained_then_revalidated",
+        "original_preparation": {
+          "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+          "status": "retained_completed_preparation",
+          "index_preparation": {
+            "status": "built",
+            "seconds": 36.296999999991385,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "ea0385c7349bbaee04456c57bf0ec3f217d63532",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        }
+      },
+      {
+        "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+        "repo": "https://github.com/simnaut/emdash",
+        "seconds": 0.485000000015134,
+        "preflight": {
+          "independent_occurrences_verified": 0,
+          "extraction_gaps": 0,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "timeout_raw_fallback",
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "raw_history_unchanged": true,
+            "preparation_timeout_seconds": 300,
+            "attempts": [
+              {
+                "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+                "mode": "bounded",
+                "seconds": 300.0469999999914,
+                "timed_out": true,
+                "exit_code": 0
+              }
+            ],
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "retained_then_revalidated",
+        "original_preparation": {
+          "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+          "repo": "https://github.com/simnaut/emdash",
+          "status": "timeout_raw_fallback",
+          "history_ready": false,
+          "attempts": [
+            {
+              "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+              "mode": "bounded",
+              "seconds": 300.0469999999914,
+              "timed_out": true,
+              "exit_code": 0
+            }
+          ],
+          "index_preparation": {
+            "status": "timeout_raw_fallback",
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "raw_history_unchanged": true,
+            "preparation_timeout_seconds": 300,
+            "attempts": [
+              {
+                "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+                "mode": "bounded",
+                "seconds": 300.0469999999914,
+                "timed_out": true,
+                "exit_code": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "task": "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+        "repo": "https://github.com/konturio/disaster-ninja-fe",
+        "seconds": 1.9679999999934807,
+        "preflight": {
+          "independent_occurrences_verified": 86,
+          "extraction_gaps": 0,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 89.79699999999139,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "3c1900acccaae22cb69adb02dd8351f24fe4e8b5",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 2,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "retained_then_revalidated",
+        "original_preparation": {
+          "task": "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+          "repo": "https://github.com/konturio/disaster-ninja-fe",
+          "status": "built",
+          "history_ready": true,
+          "attempts": [
+            {
+              "task": "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+              "mode": "bounded",
+              "seconds": 93.10899999999674,
+              "timed_out": false,
+              "exit_code": 0
+            }
+          ],
+          "index_preparation": {
+            "status": "built",
+            "seconds": 89.79699999999139,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "3c1900acccaae22cb69adb02dd8351f24fe4e8b5",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 2,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        }
+      },
+      {
+        "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+        "repo": "https://github.com/cmik/apilix",
+        "seconds": 23.10899999999674,
+        "preflight": {
+          "independent_occurrences_verified": 3286,
+          "extraction_gaps": 2,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 112.03099999998813,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "4fe23e22e3937c38cb859a3b9c00b193bb309aa1",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 9,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "retained_then_revalidated",
+        "original_preparation": {
+          "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+          "repo": "https://github.com/cmik/apilix",
+          "status": "built",
+          "history_ready": true,
+          "attempts": [
+            {
+              "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+              "mode": "bounded",
+              "seconds": 136.61000000001513,
+              "timed_out": false,
+              "exit_code": 0
+            }
+          ],
+          "index_preparation": {
+            "status": "built",
+            "seconds": 112.03099999998813,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "4fe23e22e3937c38cb859a3b9c00b193bb309aa1",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 9,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        }
+      },
+      {
+        "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+        "repo": "https://github.com/AA-Factory/aafactory-prototype",
+        "seconds": 1.062999999994645,
+        "preflight": {
+          "independent_occurrences_verified": 3,
+          "extraction_gaps": 0,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 3.51500000001397,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "e7f558c7360abac335af2df22f4ed376992b30ab",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 3,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "retained_then_revalidated",
+        "original_preparation": {
+          "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+          "repo": "https://github.com/AA-Factory/aafactory-prototype",
+          "status": "built",
+          "history_ready": true,
+          "attempts": [
+            {
+              "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+              "mode": "bounded",
+              "seconds": 7.077999999979511,
+              "timed_out": false,
+              "exit_code": 0
+            }
+          ],
+          "index_preparation": {
+            "status": "built",
+            "seconds": 3.51500000001397,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "e7f558c7360abac335af2df22f4ed376992b30ab",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 3,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        }
+      },
+      {
+        "task": "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+        "repo": "https://github.com/DisciplinedSoftware/Codebase-Conversion",
+        "seconds": 6.030999999988126,
+        "preflight": {
+          "independent_occurrences_verified": 177,
+          "extraction_gaps": 5,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 6.937999999994645,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "ed10728c91f7858a0bd95a97c754f4bd6c0487ec",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 24,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "retained_then_revalidated",
+        "original_preparation": {
+          "task": "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+          "repo": "https://github.com/DisciplinedSoftware/Codebase-Conversion",
+          "status": "built",
+          "history_ready": false,
+          "attempts": [
+            {
+              "task": "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+              "mode": "bounded",
+              "seconds": 14.140999999974156,
+              "timed_out": false,
+              "exit_code": 0
+            }
+          ],
+          "index_preparation": {
+            "status": "built",
+            "seconds": 6.937999999994645,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "ed10728c91f7858a0bd95a97c754f4bd6c0487ec",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 24,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        }
+      },
+      {
+        "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+        "repo": "https://github.com/brianc/node-postgres",
+        "seconds": 3.984000000025844,
+        "preflight": {
+          "independent_occurrences_verified": 383,
+          "extraction_gaps": 0,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 35.01600000000326,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "c6028a875f953eff9e8e403622b0aac127d1b4a6",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 8,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "retained_then_revalidated",
+        "original_preparation": {
+          "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+          "repo": "https://github.com/brianc/node-postgres",
+          "status": "built",
+          "history_ready": true,
+          "attempts": [
+            {
+              "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+              "mode": "bounded",
+              "seconds": 40.140999999974156,
+              "timed_out": false,
+              "exit_code": 0
+            }
+          ],
+          "index_preparation": {
+            "status": "built",
+            "seconds": 35.01600000000326,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "c6028a875f953eff9e8e403622b0aac127d1b4a6",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 8,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        }
+      },
+      {
+        "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+        "repo": "https://github.com/PaulStSmith/figlet-comment-generator",
+        "seconds": 14.671999999991385,
+        "preflight": {
+          "independent_occurrences_verified": 1650,
+          "extraction_gaps": 0,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 49.921999999991385,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "3750acad624b6b38b768aa8b9aa3ba1573e2f63e",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 23,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "retained_then_revalidated",
+        "original_preparation": {
+          "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+          "repo": "https://github.com/PaulStSmith/figlet-comment-generator",
+          "status": "built",
+          "history_ready": false,
+          "attempts": [
+            {
+              "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+              "mode": "bounded",
+              "seconds": 65.875,
+              "timed_out": false,
+              "exit_code": 0
+            }
+          ],
+          "index_preparation": {
+            "status": "built",
+            "seconds": 49.921999999991385,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "3750acad624b6b38b768aa8b9aa3ba1573e2f63e",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 23,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        }
+      },
+      {
+        "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+        "repo": "https://github.com/brexhq/CrabTrap",
+        "seconds": 5.375,
+        "preflight": {
+          "independent_occurrences_verified": 454,
+          "extraction_gaps": 0,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 15.780999999988126,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "b29930e93765700608313c0f0d32c4818734e158",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 2,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "retained_then_revalidated",
+        "original_preparation": {
+          "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+          "repo": "https://github.com/brexhq/CrabTrap",
+          "status": "built",
+          "history_ready": true,
+          "attempts": [
+            {
+              "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+              "mode": "bounded",
+              "seconds": 22.0,
+              "timed_out": false,
+              "exit_code": 0
+            }
+          ],
+          "index_preparation": {
+            "status": "built",
+            "seconds": 15.780999999988126,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "b29930e93765700608313c0f0d32c4818734e158",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 2,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        }
+      },
+      {
+        "task": "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+        "repo": "https://github.com/k1LoW/gh-copilot-review",
+        "seconds": 1.764999999984866,
+        "preflight": {
+          "independent_occurrences_verified": 27,
+          "extraction_gaps": 0,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 2.4690000000118744,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "5f3765a9ef25d9c5a57699418bed105d9ac54691",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 2,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "retained_then_revalidated",
+        "original_preparation": {
+          "task": "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+          "repo": "https://github.com/k1LoW/gh-copilot-review",
+          "status": "built",
+          "history_ready": true,
+          "attempts": [
+            {
+              "task": "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+              "mode": "bounded",
+              "seconds": 5.14000000001397,
+              "timed_out": false,
+              "exit_code": 0
+            }
+          ],
+          "index_preparation": {
+            "status": "built",
+            "seconds": 2.4690000000118744,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "5f3765a9ef25d9c5a57699418bed105d9ac54691",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 2,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        }
+      },
+      {
+        "task": "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+        "repo": "https://github.com/scotthamilton77/agents-config",
+        "seconds": 10.844000000011874,
+        "preflight": {
+          "independent_occurrences_verified": 481,
+          "extraction_gaps": 10,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 9.48399999999674,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "3776d9195827d79efec978fb900573f3a5a53339",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 11,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "retained_then_revalidated",
+        "original_preparation": {
+          "task": "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+          "repo": "https://github.com/scotthamilton77/agents-config",
+          "status": "built",
+          "history_ready": true,
+          "attempts": [
+            {
+              "task": "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+              "mode": "bounded",
+              "seconds": 20.21799999999348,
+              "timed_out": false,
+              "exit_code": 0
+            }
+          ],
+          "index_preparation": {
+            "status": "built",
+            "seconds": 9.48399999999674,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "3776d9195827d79efec978fb900573f3a5a53339",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 11,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        }
+      },
+      {
+        "task": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+        "repo": "https://github.com/AY2526S2-CS2103T-W14-3/tp",
+        "seconds": 12.578000000008615,
+        "preflight": {
+          "independent_occurrences_verified": 843,
+          "extraction_gaps": 0,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 19.60999999998603,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "a27b3e40d94f92f229b9301a8a9d5207d9a5b0bb",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": null,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "retained_then_revalidated",
+        "original_preparation": {
+          "task": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+          "repo": "https://github.com/AY2526S2-CS2103T-W14-3/tp",
+          "status": "built",
+          "history_ready": false,
+          "attempts": [
+            {
+              "task": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+              "mode": "bounded",
+              "seconds": 32.530999999988126,
+              "timed_out": false,
+              "exit_code": 0
+            }
+          ],
+          "index_preparation": {
+            "status": "built",
+            "seconds": 19.60999999998603,
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "a27b3e40d94f92f229b9301a8a9d5207d9a5b0bb",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": null,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        }
+      },
+      {
+        "task": "91db148075d74d9bde541c1702d065e340acf96f90bc4258edb975c71f0f0e92",
+        "repo": "https://github.com/vanyastaff/nebula",
+        "seconds": 36.34399999998277,
+        "preflight": {
+          "independent_occurrences_verified": 2236,
+          "extraction_gaps": 0,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+            "seconds": 246.67199999999139,
+            "scope_policy": "reviewed_PR_window",
+            "raw_history_unchanged": true,
+            "old_generations_retained": true,
+            "original_qualification_failed": "Independent name/id query conformance failed",
+            "original_failure_sha256": "748835c17c9e0133483e837a19551cb7bbbe46352ee8285a695cd2182d6cf9a8",
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "original_published_generations_requalified",
+        "original_attempt": {
+          "task": "91db148075d74d9bde541c1702d065e340acf96f90bc4258edb975c71f0f0e92",
+          "mode": "bounded",
+          "seconds": 246.67199999999139,
+          "timed_out": false,
+          "exit_code": 1
+        }
+      },
+      {
+        "task": "7d1bf7158fd26470fa90ae3afa30ab61088ae3c62444c7c15a5001d978ec23a5",
+        "repo": "https://github.com/NCATSTranslator/translator-ingests",
+        "seconds": 93.48499999998603,
+        "preflight": {
+          "independent_occurrences_verified": 214,
+          "extraction_gaps": 0,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 85.53099999998813,
+            "policy_digest": "1bbb8b4600cbfd3ccd8e0750e367ef5ca8cbc1d56c3d41ea6c1b67bcd9e51c8e",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "58d880509f9cf6d37715153b7cf261205dfa0f96",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": null,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "built",
+        "attempts": [
+          {
+            "task": "7d1bf7158fd26470fa90ae3afa30ab61088ae3c62444c7c15a5001d978ec23a5",
+            "mode": "bounded",
+            "seconds": 90.76600000000326,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ]
+      },
+      {
+        "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+        "repo": "https://github.com/mheuss/chronicle",
+        "seconds": 34.25,
+        "preflight": {
+          "independent_occurrences_verified": 438,
+          "extraction_gaps": 2,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 17.078000000008615,
+            "policy_digest": "1bbb8b4600cbfd3ccd8e0750e367ef5ca8cbc1d56c3d41ea6c1b67bcd9e51c8e",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "17e33ca1ebf643d47201a8f94b8ab3e88848cf23",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 18,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "built",
+        "attempts": [
+          {
+            "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+            "mode": "bounded",
+            "seconds": 26.062000000005355,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ]
+      },
+      {
+        "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+        "repo": "https://github.com/gagneurlab/PROTRIDER",
+        "seconds": 30.078000000008615,
+        "preflight": {
+          "independent_occurrences_verified": 484,
+          "extraction_gaps": 4,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 7.171999999991385,
+            "policy_digest": "1bbb8b4600cbfd3ccd8e0750e367ef5ca8cbc1d56c3d41ea6c1b67bcd9e51c8e",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "22740c695315543a1064915930f806abf5b058ce",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 33,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "built",
+        "attempts": [
+          {
+            "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+            "mode": "bounded",
+            "seconds": 19.01500000001397,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ]
+      },
+      {
+        "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+        "repo": "https://github.com/renedierking/LANdalf",
+        "seconds": 27.328000000008615,
+        "preflight": {
+          "independent_occurrences_verified": 22,
+          "extraction_gaps": 2,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 22.953000000008615,
+            "policy_digest": "1bbb8b4600cbfd3ccd8e0750e367ef5ca8cbc1d56c3d41ea6c1b67bcd9e51c8e",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "cc81fa3dc87a8a50654c1279b3bdb2761e94f832",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 6,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "built",
+        "attempts": [
+          {
+            "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+            "mode": "bounded",
+            "seconds": 25.625,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ]
+      },
+      {
+        "task": "435c173f24b18a1fd88ab29dc033bc2fc1e42502df2db9d7e9312711c7a1ea3c",
+        "repo": "https://github.com/sdsykes/fastimage",
+        "seconds": 19.671000000002095,
+        "preflight": {
+          "independent_occurrences_verified": 311,
+          "extraction_gaps": 4,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 6.312000000005355,
+            "policy_digest": "1bbb8b4600cbfd3ccd8e0750e367ef5ca8cbc1d56c3d41ea6c1b67bcd9e51c8e",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "7a0dcf780e6d8cd7686520a3a1f57e7cd85b0b46",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 6,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "built",
+        "attempts": [
+          {
+            "task": "435c173f24b18a1fd88ab29dc033bc2fc1e42502df2db9d7e9312711c7a1ea3c",
+            "mode": "bounded",
+            "seconds": 13.452999999979511,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ]
+      },
+      {
+        "task": "b673f3f386cf657bbc269b622ce6a14389e41cd0d0427b48254c43c2ccd38956",
+        "repo": "https://github.com/Marvell-Consulting/statswales-frontend",
+        "seconds": 101.21899999998277,
+        "preflight": {
+          "independent_occurrences_verified": 478,
+          "extraction_gaps": 0,
+          "broker_budget_gap_files": 0,
+          "index_status": {
+            "status": "built",
+            "seconds": 90.84399999998277,
+            "policy_digest": "1bbb8b4600cbfd3ccd8e0750e367ef5ca8cbc1d56c3d41ea6c1b67bcd9e51c8e",
+            "scope_policy": "reviewed_PR_window",
+            "indexed_anchor": "c1707c79a5a947cf7c6912af3ad00848c42a28e0",
+            "raw_history_unchanged": true,
+            "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+            "old_generations_retained": true,
+            "workers": 2,
+            "requested_history_commits": 2,
+            "max_history_commits": 20,
+            "max_storage_bytes": 2147483648,
+            "broker_budget_gap_files": 0
+          }
+        },
+        "status": "built",
+        "attempts": [
+          {
+            "task": "b673f3f386cf657bbc269b622ce6a14389e41cd0d0427b48254c43c2ccd38956",
+            "mode": "bounded",
+            "seconds": 96.92199999999139,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ]
+      }
+    ],
+    "original_bounded_rows": [
+      {
+        "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+        "status": "retained_completed_preparation",
+        "index_preparation": {
+          "status": "built",
+          "seconds": 36.296999999991385,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "ea0385c7349bbaee04456c57bf0ec3f217d63532",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      {
+        "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+        "repo": "https://github.com/simnaut/emdash",
+        "status": "timeout_raw_fallback",
+        "history_ready": false,
+        "attempts": [
+          {
+            "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+            "mode": "bounded",
+            "seconds": 300.0469999999914,
+            "timed_out": true,
+            "exit_code": 0
+          }
+        ],
+        "index_preparation": {
+          "status": "timeout_raw_fallback",
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "raw_history_unchanged": true,
+          "preparation_timeout_seconds": 300,
+          "attempts": [
+            {
+              "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+              "mode": "bounded",
+              "seconds": 300.0469999999914,
+              "timed_out": true,
+              "exit_code": 0
+            }
+          ]
+        }
+      },
+      {
+        "task": "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+        "repo": "https://github.com/konturio/disaster-ninja-fe",
+        "status": "built",
+        "history_ready": true,
+        "attempts": [
+          {
+            "task": "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+            "mode": "bounded",
+            "seconds": 93.10899999999674,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ],
+        "index_preparation": {
+          "status": "built",
+          "seconds": 89.79699999999139,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "3c1900acccaae22cb69adb02dd8351f24fe4e8b5",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "requested_history_commits": 2,
+          "max_history_commits": 20,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      {
+        "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+        "repo": "https://github.com/cmik/apilix",
+        "status": "built",
+        "history_ready": true,
+        "attempts": [
+          {
+            "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+            "mode": "bounded",
+            "seconds": 136.61000000001513,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ],
+        "index_preparation": {
+          "status": "built",
+          "seconds": 112.03099999998813,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "4fe23e22e3937c38cb859a3b9c00b193bb309aa1",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "requested_history_commits": 9,
+          "max_history_commits": 20,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      {
+        "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+        "repo": "https://github.com/AA-Factory/aafactory-prototype",
+        "status": "built",
+        "history_ready": true,
+        "attempts": [
+          {
+            "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+            "mode": "bounded",
+            "seconds": 7.077999999979511,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ],
+        "index_preparation": {
+          "status": "built",
+          "seconds": 3.51500000001397,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "e7f558c7360abac335af2df22f4ed376992b30ab",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "requested_history_commits": 3,
+          "max_history_commits": 20,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      {
+        "task": "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+        "repo": "https://github.com/DisciplinedSoftware/Codebase-Conversion",
+        "status": "built",
+        "history_ready": false,
+        "attempts": [
+          {
+            "task": "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+            "mode": "bounded",
+            "seconds": 14.140999999974156,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ],
+        "index_preparation": {
+          "status": "built",
+          "seconds": 6.937999999994645,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "ed10728c91f7858a0bd95a97c754f4bd6c0487ec",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "requested_history_commits": 24,
+          "max_history_commits": 20,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      {
+        "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+        "repo": "https://github.com/brianc/node-postgres",
+        "status": "built",
+        "history_ready": true,
+        "attempts": [
+          {
+            "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+            "mode": "bounded",
+            "seconds": 40.140999999974156,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ],
+        "index_preparation": {
+          "status": "built",
+          "seconds": 35.01600000000326,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "c6028a875f953eff9e8e403622b0aac127d1b4a6",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "requested_history_commits": 8,
+          "max_history_commits": 20,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      {
+        "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+        "repo": "https://github.com/PaulStSmith/figlet-comment-generator",
+        "status": "built",
+        "history_ready": false,
+        "attempts": [
+          {
+            "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+            "mode": "bounded",
+            "seconds": 65.875,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ],
+        "index_preparation": {
+          "status": "built",
+          "seconds": 49.921999999991385,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "3750acad624b6b38b768aa8b9aa3ba1573e2f63e",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "requested_history_commits": 23,
+          "max_history_commits": 20,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      {
+        "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+        "repo": "https://github.com/brexhq/CrabTrap",
+        "status": "built",
+        "history_ready": true,
+        "attempts": [
+          {
+            "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+            "mode": "bounded",
+            "seconds": 22.0,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ],
+        "index_preparation": {
+          "status": "built",
+          "seconds": 15.780999999988126,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "b29930e93765700608313c0f0d32c4818734e158",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "requested_history_commits": 2,
+          "max_history_commits": 20,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      {
+        "task": "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+        "repo": "https://github.com/k1LoW/gh-copilot-review",
+        "status": "built",
+        "history_ready": true,
+        "attempts": [
+          {
+            "task": "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+            "mode": "bounded",
+            "seconds": 5.14000000001397,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ],
+        "index_preparation": {
+          "status": "built",
+          "seconds": 2.4690000000118744,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "5f3765a9ef25d9c5a57699418bed105d9ac54691",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "requested_history_commits": 2,
+          "max_history_commits": 20,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      {
+        "task": "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+        "repo": "https://github.com/scotthamilton77/agents-config",
+        "status": "built",
+        "history_ready": true,
+        "attempts": [
+          {
+            "task": "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+            "mode": "bounded",
+            "seconds": 20.21799999999348,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ],
+        "index_preparation": {
+          "status": "built",
+          "seconds": 9.48399999999674,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "3776d9195827d79efec978fb900573f3a5a53339",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "requested_history_commits": 11,
+          "max_history_commits": 20,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      },
+      {
+        "task": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+        "repo": "https://github.com/AY2526S2-CS2103T-W14-3/tp",
+        "status": "built",
+        "history_ready": false,
+        "attempts": [
+          {
+            "task": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+            "mode": "bounded",
+            "seconds": 32.530999999988126,
+            "timed_out": false,
+            "exit_code": 0
+          }
+        ],
+        "index_preparation": {
+          "status": "built",
+          "seconds": 19.60999999998603,
+          "policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+          "scope_policy": "reviewed_PR_window",
+          "indexed_anchor": "a27b3e40d94f92f229b9301a8a9d5207d9a5b0bb",
+          "raw_history_unchanged": true,
+          "prior_indexed_history": "outside_this_index_window; raw fallback remains available",
+          "old_generations_retained": true,
+          "workers": 2,
+          "requested_history_commits": null,
+          "max_history_commits": 20,
+          "max_storage_bytes": 2147483648,
+          "broker_budget_gap_files": 0
+        }
+      }
+    ],
+    "timeout_raw_fallback_tasks": [
+      "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3"
+    ],
+    "interpretation": "Preparation and validation timings are separate from warm review elapsed. Original interrupted unbounded work is retained but has no final wall receipt."
+  },
+  "uncertainty": {
+    "draws": 10000,
+    "seed": 20261023,
+    "repository_clusters": 25,
+    "paired_95_percent_intervals": {
+      "credit_reduction": [
+        0.01993861333722463,
+        0.1611201447018309
+      ],
+      "input_reduction": [
+        0.008388444049126186,
+        0.2975572518710185
+      ],
+      "macro_grounded_recall_delta": [
+        -0.04410730115172066,
+        0.06688804206199717
+      ],
+      "pooled_augmented_precision_delta": [
+        -0.04003712034532978,
+        0.04824327874774727
+      ]
+    }
+  },
+  "limitations": [
+    "Development population with six attested retained pilot pairs, not held-out confirmation.",
+    "Custom Copilot matching/classification with pinned official arithmetic, not leaderboard judging.",
+    "Missing/invalid slots are retained; scored-subset quality is not full25 quality.",
+    "Study-wide known telemetry totals do not pretend missing spend is zero.",
+    "Raw fallback, source ledger behavior and preparation restrictions are part of the workflow profile."
+  ],
+  "gate_assessment": {
+    "verdict": "not_established",
+    "gates": {
+      "operational_delivery": true,
+      "useful_baseline": true,
+      "recall_noninferiority": false,
+      "precision_noninferiority": false,
+      "fp_per_pr_guard": true,
+      "input_reduction_15_percent": true,
+      "warm_elapsed_no_regression": false,
+      "actual_review_credits_lower": true,
+      "quality_route": false
+    },
+    "input_reduction": 0.16764581602811157,
+    "warm_elapsed_ratio_H_over_B": 1.0110685907614143,
+    "macro_grounded_recall_delta": 0.014529262034834817,
+    "requested_lower_cost_claim_supported": false,
+    "interpretation": "Development-only gates; bootstrap uncertainty crossing a margin is not a pass."
+  }
+}

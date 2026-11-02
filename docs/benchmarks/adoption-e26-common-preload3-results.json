@@ -1,0 +1,365 @@
+{
+  "kind": "E26 identical raw preload, optional on-demand index tools",
+  "protocol": "77accdeac0d1a7f01e4bdbd44996c068736580dbda717644f7a16b16daa798f5",
+  "source_commit": "cd5626b095a5be427892442fcd968100c1a3ab1c",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "all_initial_packet_pairs_identical": true,
+  "rows": [
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "B",
+      "status": "valid",
+      "usage": {
+        "input_tokens": 328780,
+        "output_tokens": 3780,
+        "cache_read_tokens": 268636,
+        "cache_write_tokens": 60123,
+        "model_requests": 7,
+        "uncached_input_tokens": 21,
+        "credits": 48.37534,
+        "total_nano_aiu": 48375340000,
+        "api_seconds": 76.264,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 328780,
+            "output_tokens": 3780,
+            "cache_read_tokens": 268636,
+            "cache_write_tokens": 60123,
+            "model_requests": 7,
+            "reasoning_tokens": 1974,
+            "native_model_nano_aiu": 48375340000
+          }
+        },
+        "reasoning_tokens": 1974
+      },
+      "findings": 9,
+      "tool_audit": {
+        "evidence_calls": 29,
+        "executed_call_attempts": 29,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {}
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "H",
+      "status": "valid",
+      "usage": {
+        "input_tokens": 226944,
+        "output_tokens": 3012,
+        "cache_read_tokens": 168665,
+        "cache_write_tokens": 58264,
+        "model_requests": 5,
+        "uncached_input_tokens": 15,
+        "credits": 41.9086,
+        "total_nano_aiu": 41908600000,
+        "api_seconds": 43.029,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 226944,
+            "output_tokens": 3012,
+            "cache_read_tokens": 168665,
+            "cache_write_tokens": 58264,
+            "model_requests": 5,
+            "reasoning_tokens": 1430,
+            "native_model_nano_aiu": 41908600000
+          }
+        },
+        "reasoning_tokens": 1430
+      },
+      "findings": 6,
+      "tool_audit": {
+        "evidence_calls": 30,
+        "executed_call_attempts": 30,
+        "denied_over_budget": 0,
+        "indexed_calls": 5,
+        "errors": 1
+      },
+      "indexed_operations": {
+        "source ok": 4,
+        "source error": 1
+      }
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "B",
+      "status": "valid",
+      "usage": {
+        "input_tokens": 91291,
+        "output_tokens": 2606,
+        "cache_read_tokens": 73269,
+        "cache_write_tokens": 18001,
+        "model_requests": 7,
+        "uncached_input_tokens": 21,
+        "credits": 17.15166,
+        "total_nano_aiu": 17151660000,
+        "api_seconds": 36.087,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 91291,
+            "output_tokens": 2606,
+            "cache_read_tokens": 73269,
+            "cache_write_tokens": 18001,
+            "model_requests": 7,
+            "reasoning_tokens": 1009,
+            "native_model_nano_aiu": 17151660000
+          }
+        },
+        "reasoning_tokens": 1009
+      },
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 20,
+        "executed_call_attempts": 20,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {}
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "H",
+      "status": "valid",
+      "usage": {
+        "input_tokens": 51525,
+        "output_tokens": 1960,
+        "cache_read_tokens": 37367,
+        "cache_write_tokens": 14143,
+        "model_requests": 5,
+        "uncached_input_tokens": 15,
+        "credits": 12.49218,
+        "total_nano_aiu": 12492180000,
+        "api_seconds": 31.286,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 51525,
+            "output_tokens": 1960,
+            "cache_read_tokens": 37367,
+            "cache_write_tokens": 14143,
+            "model_requests": 5,
+            "reasoning_tokens": 765,
+            "native_model_nano_aiu": 12492180000
+          }
+        },
+        "reasoning_tokens": 765
+      },
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 16,
+        "executed_call_attempts": 16,
+        "denied_over_budget": 0,
+        "indexed_calls": 3,
+        "errors": 2
+      },
+      "indexed_operations": {
+        "source ok": 1,
+        "source error": 1,
+        "history ok": 1,
+        "context ok": 1
+      }
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arm": "H",
+      "status": "valid",
+      "usage": {
+        "input_tokens": 146821,
+        "output_tokens": 4257,
+        "cache_read_tokens": 102209,
+        "cache_write_tokens": 44600,
+        "model_requests": 4,
+        "uncached_input_tokens": 12,
+        "credits": 34.90716,
+        "total_nano_aiu": 34907160000,
+        "api_seconds": 50.964,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 146821,
+            "output_tokens": 4257,
+            "cache_read_tokens": 102209,
+            "cache_write_tokens": 44600,
+            "model_requests": 4,
+            "reasoning_tokens": 2772,
+            "native_model_nano_aiu": 34907160000
+          }
+        },
+        "reasoning_tokens": 2772
+      },
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 18,
+        "executed_call_attempts": 18,
+        "denied_over_budget": 0,
+        "indexed_calls": 3,
+        "errors": 0
+      },
+      "indexed_operations": {
+        "source ok": 3
+      }
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arm": "B",
+      "status": "valid",
+      "usage": {
+        "input_tokens": 295039,
+        "output_tokens": 3756,
+        "cache_read_tokens": 243190,
+        "cache_write_tokens": 51828,
+        "model_requests": 7,
+        "uncached_input_tokens": 21,
+        "credits": 43.162,
+        "total_nano_aiu": 43162000000,
+        "api_seconds": 48.971,
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "current_model": "gpt-5.6-sol",
+        "per_model": {
+          "gpt-5.6-sol": {
+            "input_tokens": 295039,
+            "output_tokens": 3756,
+            "cache_read_tokens": 243190,
+            "cache_write_tokens": 51828,
+            "model_requests": 7,
+            "reasoning_tokens": 1786,
+            "native_model_nano_aiu": 43162000000
+          }
+        },
+        "reasoning_tokens": 1786
+      },
+      "findings": 8,
+      "tool_audit": {
+        "evidence_calls": 33,
+        "executed_call_attempts": 33,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {}
+    }
+  ],
+  "review_totals": {
+    "B": {
+      "credits": 108.689,
+      "input_tokens": 715110,
+      "output_tokens": 10142,
+      "reasoning_tokens": 4769,
+      "cache_read_tokens": 585095,
+      "cache_write_tokens": 129952,
+      "model_requests": 21,
+      "api_seconds": 161.322
+    },
+    "H": {
+      "credits": 89.30794,
+      "input_tokens": 425290,
+      "output_tokens": 9229,
+      "reasoning_tokens": 4967,
+      "cache_read_tokens": 308241,
+      "cache_write_tokens": 117007,
+      "model_requests": 14,
+      "api_seconds": 125.279
+    }
+  },
+  "judge_credits": 127.26219999999999,
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.49074074074074076,
+        "augmented_precision": 1,
+        "augmented_recall": 0.5261261261261262,
+        "novel_tp_count": 3,
+        "novel_tp_yield": 0.16203703703703703,
+        "candidate_count": 21,
+        "golden_tp_count": 54,
+        "matched_count": 18,
+        "matched_tp_count": 18,
+        "unmatched_count": 3,
+        "unmatched_tp_count": 3,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 23
+      },
+      "micro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.42592592592592593,
+        "augmented_precision": 1,
+        "augmented_recall": 0.45614035087719296,
+        "novel_tp_count": 3,
+        "novel_tp_yield": 0.14285714285714285,
+        "candidate_count": 21,
+        "golden_tp_count": 54,
+        "matched_count": 18,
+        "matched_tp_count": 18,
+        "unmatched_count": 3,
+        "unmatched_tp_count": 3,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 23
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.36111111111111116,
+        "augmented_precision": 1,
+        "augmented_recall": 0.37592592592592594,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.08333333333333333,
+        "candidate_count": 12,
+        "golden_tp_count": 54,
+        "matched_count": 11,
+        "matched_tp_count": 11,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 18
+      },
+      "micro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.3333333333333333,
+        "augmented_precision": 1,
+        "augmented_recall": 0.34545454545454546,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.08333333333333333,
+        "candidate_count": 12,
+        "golden_tp_count": 54,
+        "matched_count": 11,
+        "matched_tp_count": 11,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 18
+      }
+    }
+  },
+  "interpretation": "Efficiency alone improves but recall fails; do not expand or claim a joint win. Identical preloads do not establish source selection as the cause of previous recall losses.",
+  "limitations": [
+    "Adaptive development cases, not held-out confirmation.",
+    "Custom Copilot judging with pinned official arithmetic, not official leaderboard judge.",
+    "No unchanged reviewer retry or result selection."
+  ]
+}

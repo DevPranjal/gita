@@ -2,6 +2,68 @@
 
 ## Unreleased
 
+- Publish quality for all21 completed indexed ReviewBench pairs, preserving all
+  failed/unstarted reviewer slots, prior judgments and unknown cost reservations.
+  Report mixed grounded/augmented agreement, low indexed-tool adoption,
+  exploratory paired uncertainty and complete native development spending.
+  No official score, causal indexing benefit or general credit-saving claim.
+
+- Add explicitly authorized, separately sealed partial-cohort quality analysis.
+  Bind original source bytes, receipts, labels and unresolved cost bounds;
+  preserve the stopped reviewer ledger and all fixed task denominators. Share
+  ordinary blinded judging/scoring and use nonstreaming native judge output
+  without relaxing strict JSON or usage validation.
+
+- Preserve a second stopped indexed ReviewBench cohort: 21 complete valid pairs,
+  one valid unpaired review, one malformed native JSON/unknown-usage failure,
+  and six unstarted slots. Publish conditional metrics, low tool adoption and
+  all cost bounds separately; judging remains blocked and no efficacy is claimed.
+
+- Add an indexed-only ReviewBench experiment with pinned source/labels, common
+  Git versus optional indexed evidence, `auto` routing, native spend reservations,
+  strict integrity stops and blinded research judging with official arithmetic.
+  Preserve the first live cohort's hard-limit failure and unknown usage; no
+  indexed-review efficacy or savings claim is established.
+- Qualify a separate execution revision with exact UTF-8 stdin prompts,
+  denied-only finalization after 40 evidence attempts, a 400-credit reviewer
+  ceiling, complete bounded judge diff pagination, and offline CI tests.
+- Resolve historical source through bounded immutable literal-path bindings,
+  while freshly validating commit and blob bytes on every request. Preserve
+  raw-byte fallback paths and rejection of wrong modes, IDs and missing blobs.
+
+- Record an actual pinned NumPy snapshot, including the one-GiB reservation
+  refusal, fresh two-GiB retry and explicit unsupported/parse-error coverage.
+
+- Advance committed inventories and complete identity populations using raw
+  first-parent tree deltas instead of rebuilding them at every commit. Preserve
+  global copy/ambiguity guards, unknown-file retries and atomic publication.
+- Replace quadratic active-identity overlap validation with a tested ordered
+  interval proof; retain the remaining publication and integrity checks.
+- Classify Rust named modules as namespaces in indexed byte evidence, reserving
+  module kind for synthetic file roots. Parser/matcher fingerprints change;
+  existing scopes require explicit rebuilds, not automatic migration.
+- Record pinned before/after indexing measurements and remaining reopen/storage
+  costs in the delta performance report; no arbitrary-repository scale guarantee.
+
+- Record pinned public Flask, Express and ripgrep indexing observations, retaining
+  failures and partial coverage. Add reproducible public-corpus tooling and
+  independently member-bound source rechecks; do not claim full-history scale.
+- Specify indexed AACR/ReviewBench evaluation, harness audit, leakage/scoring
+  safeguards, accounting and proposed success gates. Historical AACR results
+  remain separate from current indexed-product measurements.
+- Materialize and verify native grammars before CI measurements, and use an
+  absolute runner-temp path for qualification artifact upload.
+
+- Add manifest-driven offline index qualification with authored Git histories,
+  independent source/query correctness gates, isolated build/update/no-op/query
+  scenarios, failure receipts, resource sampling and baseline comparisons.
+- Bound repeated candidate-version decoding with a transaction-local token cache.
+  Identity rules and storage schema are unchanged, but the builder fingerprint
+  changes: existing indexed scopes require an explicit rebuild.
+- Add serial/parallel/incremental equivalence, publication recovery, reader/writer
+  and adversarial oracle tests, plus dedicated Windows/Linux qualification CI.
+  These gates do not implement product F4 verification or qualify arbitrary sizes.
+
 - Begin legacy retirement with strict `GITA_ENABLE_LEGACY=1` opt-in. Unset/`0`
   disables the structural-review product; other values refuse clearly.
 - Ordinary CLI/MCP history now reads the published index, including scope/order

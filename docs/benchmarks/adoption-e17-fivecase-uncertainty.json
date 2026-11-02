@@ -1,0 +1,45 @@
+{
+  "kind": "Descriptive repository-cluster paired bootstrap on preserved E17 five-case policy",
+  "pairs": 5,
+  "repositories": 5,
+  "samples": 10000,
+  "seed": 20261020,
+  "intervals_two_sided_95": {
+    "input_tokens": [
+      -0.27386964839885897,
+      0.1299020691162036
+    ],
+    "total_tokens": [
+      -0.2667891192609926,
+      0.12842939539220588
+    ],
+    "output_tokens": [
+      -0.2749500998003993,
+      0.2193617021276596
+    ],
+    "reported_credits": [
+      -0.08033312249742908,
+      0.0822643774984596
+    ],
+    "wall_seconds": [
+      0.0589587168659369,
+      0.16240825548601712
+    ],
+    "recall_delta": [
+      -0.05681818181818182,
+      0.07532467532467532
+    ],
+    "pooled_augmented_precision_delta": [
+      -0.0793650793650793,
+      0.05555555555555558
+    ]
+  },
+  "undefined_precision_replicates": 0,
+  "pooled_precision_crosschecked_against_official_scorer": true,
+  "interpretation": "Small adaptively used development population; intervals are descriptive, not a confirmation or post-selection-valid significance test.",
+  "limits": [
+    "All inputs are complete pairs; do not generalize these intervals to missing or failed slots.",
+    "The S4 confirmation baseline needs known TP delivery on at least20 PRs; five-case analysis cannot satisfy that gate.",
+    "No development margin is retroactively frozen and no25 inference is authorized by this report."
+  ]
+}

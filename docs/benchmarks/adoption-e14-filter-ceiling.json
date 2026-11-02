@@ -1,0 +1,76 @@
+{
+  "kind": "ORACLE COUNTERFACTUAL, NOT AN AGENT RESULT",
+  "purpose": "Determine whether deleting false positives alone could preserve benchmark quality before spending on more reviewer runs",
+  "source": "Existing guard-policy scoring labels, never supplied to reviewer/verifier inputs",
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.10124458874458875,
+        "augmented_precision": 1,
+        "augmented_recall": 0.14430863254392665,
+        "novel_tp_count": 3,
+        "novel_tp_yield": 0.3333333333333333,
+        "candidate_count": 9,
+        "golden_tp_count": 64,
+        "matched_count": 6,
+        "matched_tp_count": 6,
+        "unmatched_count": 3,
+        "unmatched_tp_count": 3,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 6
+      },
+      "micro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.09375,
+        "augmented_precision": 1,
+        "augmented_recall": 0.13432835820895522,
+        "novel_tp_count": 3,
+        "novel_tp_yield": 0.3333333333333333,
+        "candidate_count": 9,
+        "golden_tp_count": 64,
+        "matched_count": 6,
+        "matched_tp_count": 6,
+        "unmatched_count": 3,
+        "unmatched_tp_count": 3,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 6
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.09172077922077922,
+        "augmented_precision": 1,
+        "augmented_recall": 0.14237012987012987,
+        "novel_tp_count": 3,
+        "novel_tp_yield": 0.4,
+        "candidate_count": 8,
+        "golden_tp_count": 64,
+        "matched_count": 5,
+        "matched_tp_count": 5,
+        "unmatched_count": 3,
+        "unmatched_tp_count": 3,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 5
+      },
+      "micro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.078125,
+        "augmented_precision": 1,
+        "augmented_recall": 0.11940298507462686,
+        "novel_tp_count": 3,
+        "novel_tp_yield": 0.375,
+        "candidate_count": 8,
+        "golden_tp_count": 64,
+        "matched_count": 5,
+        "matched_tp_count": 5,
+        "unmatched_count": 3,
+        "unmatched_tp_count": 3,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 5
+      }
+    }
+  },
+  "warning": "Not a real policy, not used for candidate selection or output filtering. No oracle finding indices are exported."
+}

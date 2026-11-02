@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "source_revision": "b64d43fbe8f57d6ce920aca059ef3de061bf59d1",
+  "history_commits": 20,
+  "workers": 4,
+  "max_storage_bytes": 268435456,
+  "max_seconds": 150,
+  "total_seconds": 900,
+  "repositories": [
+    {"name": "flask", "tip": "d086db856be187255b8ec61ef409357393020f32"}
+  ]
+}

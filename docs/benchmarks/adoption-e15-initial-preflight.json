@@ -1,0 +1,128 @@
+{
+  "kind": "No-model initial evidence preflight",
+  "rows": [
+    {
+      "position": 6,
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "B",
+      "seconds": 7.39100000000326,
+      "serialized_chars": 57118,
+      "raw_chars": 20489,
+      "raw_truncated": false,
+      "head_blocks": 4,
+      "head_coverage": {
+        "candidate_blocks": 7,
+        "omitted_blocks": 3,
+        "gaps": {},
+        "absence_claim": false
+      },
+      "related_omission": "whole_section_exceeds_budget",
+      "related_sources": 0
+    },
+    {
+      "position": 6,
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "H",
+      "seconds": 5.546999999991385,
+      "serialized_chars": 55480,
+      "raw_chars": 20489,
+      "raw_truncated": false,
+      "head_blocks": 10,
+      "head_coverage": {
+        "candidate_blocks": 11,
+        "omitted_blocks": 1,
+        "gaps": {
+          "no_published_callable": 6,
+          "zero_count_hunk_adjacent_HEAD_only_no_deleted_entity_claim": 1
+        },
+        "absence_claim": false
+      },
+      "related_omission": "whole_section_exceeds_budget",
+      "related_sources": 0
+    },
+    {
+      "position": 8,
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "B",
+      "seconds": 4.9060000000172295,
+      "serialized_chars": 58233,
+      "raw_chars": 22206,
+      "raw_truncated": false,
+      "head_blocks": 5,
+      "head_coverage": {
+        "candidate_blocks": 13,
+        "omitted_blocks": 8,
+        "gaps": {},
+        "absence_claim": false
+      },
+      "related_omission": "whole_section_exceeds_budget",
+      "related_sources": 0
+    },
+    {
+      "position": 8,
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "H",
+      "seconds": 4.937999999994645,
+      "serialized_chars": 77712,
+      "raw_chars": 22206,
+      "raw_truncated": false,
+      "head_blocks": 6,
+      "head_coverage": {
+        "candidate_blocks": 13,
+        "omitted_blocks": 7,
+        "gaps": {
+          "no_published_callable": 9,
+          "zero_count_hunk_adjacent_HEAD_only_no_deleted_entity_claim": 4,
+          "changed_range_extends_beyond_callable": 3,
+          "outermost_callable_exceeds_20000_bytes": 15
+        },
+        "absence_claim": false
+      },
+      "related_omission": null,
+      "related_sources": 15
+    },
+    {
+      "position": 17,
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "B",
+      "seconds": 6.780999999988126,
+      "serialized_chars": 80306,
+      "raw_chars": 41196,
+      "raw_truncated": true,
+      "head_blocks": 7,
+      "head_coverage": {
+        "candidate_blocks": 26,
+        "omitted_blocks": 19,
+        "gaps": {},
+        "absence_claim": false
+      },
+      "related_omission": "whole_section_exceeds_budget",
+      "related_sources": 0
+    },
+    {
+      "position": 17,
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "H",
+      "seconds": 7.10899999999674,
+      "serialized_chars": 80140,
+      "raw_chars": 41196,
+      "raw_truncated": true,
+      "head_blocks": 10,
+      "head_coverage": {
+        "candidate_blocks": 46,
+        "omitted_blocks": 36,
+        "gaps": {
+          "no_published_callable": 81,
+          "zero_count_hunk_adjacent_HEAD_only_no_deleted_entity_claim": 27,
+          "changed_range_extends_beyond_callable": 1
+        },
+        "absence_claim": false
+      },
+      "related_omission": "whole_section_exceeds_budget",
+      "related_sources": 0
+    }
+  ],
+  "same_raw_patch_component": true,
+  "same_inventory": true,
+  "max_serialized_chars": 100000
+}

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections import deque
+from collections import OrderedDict, deque
 from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import ExitStack, closing, contextmanager
 from dataclasses import dataclass
@@ -31,6 +31,44 @@ class BuildError(RuntimeError):
 	def __init__(self, code: str, message: str) -> None:
 		self.code = code
 		super().__init__(message)
+
+
+class _CandidateTokens:
+	"""Transaction-local validated immutable own tokens, never candidate decisions.
+
+	Bound both serialized payload bytes and token/entry counts: a byte-only limit
+	would not account for Python object overhead on many tiny tokens.
+	"""
+
+	def __init__(self, store: IndexStore, *, max_bytes: int = 4 * 1024 ** 2,
+				 max_tokens: int = 65536, max_entries: int = 1024) -> None:
+		self.store = store
+		self.max_bytes, self.max_tokens, self.max_entries = max_bytes, max_tokens, max_entries
+		self.entries: OrderedDict[str, tuple[tuple[str, ...] | None, int, int]] = OrderedDict()
+		self.bytes = self.tokens = 0
+
+	def get(self, row: sqlite3.Row) -> tuple[str, ...] | None:
+		identifier = row["version_id"]
+		if identifier in self.entries:
+			self.entries.move_to_end(identifier)
+			return self.entries[identifier][0]
+		version = self.store.get_version(identifier)
+		if version is None:
+			raise BuildError("corrupt", "Candidate representation is unavailable")
+		tokens = version.own
+		size, count = len(row["own_payload"] or b""), len(tokens or ())
+		if size <= self.max_bytes and count <= self.max_tokens and self.max_entries:
+			while self.entries and (
+				self.bytes + size > self.max_bytes or self.tokens + count > self.max_tokens
+				or len(self.entries) >= self.max_entries
+			):
+				_, (_, old_size, old_count) = self.entries.popitem(last=False)
+				self.bytes -= old_size
+				self.tokens -= old_count
+			self.entries[identifier] = (tokens, size, count)
+			self.bytes += size
+			self.tokens += count
+		return tokens
 
 
 @dataclass(frozen=True, slots=True)
@@ -132,10 +170,15 @@ class _Spool:
 				("role", "language, kind, synthetic_root, container"),
 				("own", "language, kind, own_digest"), ("body", "language, kind, body_digest"),
 				("subtree", "language, kind, subtree_digest"), ("depth", "depth, defkey"),
+				("changed", "changed, path"), ("uncertain", "uncertain"), ("seed", "seed_reason"),
+				("matched", "matched"),
 			):
 				self.db.execute(f"CREATE INDEX f2_{side}_{suffix} ON f2_{side} ({columns})")
 			self.db.execute(f"CREATE INDEX f2_files_{side}_blob ON f2_files_{side} "
 							"(blob_format, blob_digest, mode, object_type)")
+			self.db.execute(f"CREATE INDEX f2_files_{side}_changed ON f2_files_{side}(changed, path)")
+			self.db.execute(f"CREATE INDEX f2_files_{side}_status ON f2_files_{side}(status, path)")
+		self.create("f2_delta", _FILES)
 		self.create("f2_graph", "source TEXT, destination TEXT, method TEXT, evidence TEXT, "
 					"PRIMARY KEY(source, destination)")
 		self.db.execute("CREATE INDEX f2_graph_destination ON f2_graph(destination)")
@@ -401,6 +444,8 @@ class _Builder:
 		self.considered = 0
 		self.limited = False
 		self.gaps: dict[str, bool] = {}
+		self._candidate_tokens = _CandidateTokens(self.store)
+		self._population_ready = bool(prefix_count)
 		if prefix_count:
 			self.sequence = prefix_count - 1
 			member = self.store._member(generation, self.sequence)
@@ -416,6 +461,11 @@ class _Builder:
 					raise BuildError("corrupt", "Stored frontier has no parse evidence")
 				self._metadata(result)
 				del result
+			self._frontier()
+			self.db.execute("INSERT INTO f2_files_after SELECT * FROM f2_files_before")
+			self._populate("after")
+			self.db.execute("UPDATE f2_after SET matched = defkey")
+			self.db.execute("INSERT INTO f2_before SELECT * FROM f2_after")
 
 	def _metadata(self, result: ParseResult, versions: tuple[EntityVersion, ...] = ()) -> None:
 		supplied = {version.id: version for version in versions}
@@ -469,6 +519,14 @@ class _Builder:
 								 info.size, (), ("source exceeds max_blob_bytes",))
 			self.store.put_parse(result, ())
 			self._metadata(result)
+		elif evidence._spec_for_path(entry.path) is None:
+			# Unsupported extensions have no byte adapter. Object metadata is
+			# sufficient for their explicit excluded evidence; never dispatch them.
+			result = ParseResult(self.context.parse_fingerprint, entry.oid, entry.path, None,
+								 ParseStatus.UNSUPPORTED_LANGUAGE, info.size, (),
+								 ("no registered byte adapter for extension",))
+			self.parsed += 1
+			self.store.put_parse(result, ())
 		else:
 			source = pending[1] if pending is not None else self.repository.read_object(entry.oid)
 			if source is None:
@@ -503,6 +561,7 @@ class _Builder:
 							 == (*entry.oid.fields(), entry.object_type, entry.mode))
 				parse_id = content_id("par1", (self.context.parse_fingerprint, entry.oid.fields(), entry.path))
 				if (not unchanged and entry.object_type == "blob" and entry.mode in (0o100644, 0o100755)
+						and evidence._spec_for_path(entry.path) is not None
 						and self.spool.one("SELECT 1 FROM parse_result WHERE id = ?", (parse_id,)) is None):
 					info = self.repository.object_info(entry.oid)
 					if info is not None and info.object_type == "blob" and info.size <= self.limits.parse_limits.max_blob_bytes:
@@ -522,7 +581,7 @@ class _Builder:
 				future.cancel()
 			self._pending.clear()
 
-	def _inventory(self) -> None:
+	def _frontier(self) -> None:
 		self.db.execute(
 			"INSERT INTO f2_files_before SELECT state.path, state.blob_format, state.blob_digest, "
 			"state.object_type, state.mode, state.parse_id, state.binding_set_id, state.id, state.status, "
@@ -531,34 +590,9 @@ class _Builder:
 			"FROM frontier JOIN file_state state ON state.id = frontier.file_state_id "
 			"WHERE frontier.generation_id = ?", (self.generation,),
 		)
-		with closing(self.repository.iter_tree(self.commit, page_size=self.limits.page_size)) as pages:
-			for page in pages:
-				for entry in self._prefetch(page):
-					before = self.spool.one("SELECT * FROM f2_files_before WHERE path = ?", (entry.path,))
-					same = (before is not None and before["status"] == "present"
-							and (before["blob_format"], before["blob_digest"], before["object_type"], before["mode"])
-							== (*entry.oid.fields(), entry.object_type, entry.mode))
-					if same:
-						self.db.execute("INSERT INTO f2_files_after SELECT * FROM f2_files_before WHERE path = ?",
-										(entry.path,))
-					else:
-						result, reason = self._parse(entry)
-						self.db.execute("INSERT INTO f2_files_after VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?, 1)",
-										(entry.path, *entry.oid.fields(), entry.object_type, entry.mode,
-										 None if result is None else result.id,
-										 "present" if result is not None and result.complete else "unknown", reason))
-						del result
-				self.spool.check()
+
+	def _populate(self, side: str, *, delta: bool = False) -> None:
 		self.db.execute(
-			"INSERT INTO f2_files_after SELECT path, NULL, NULL, NULL, NULL, NULL, NULL, "
-			"CASE WHEN status = 'removed' THEN state_id END, 'removed', 'removed', "
-			"CASE WHEN status = 'removed' THEN 0 ELSE 1 END FROM f2_files_before old "
-			"WHERE NOT EXISTS (SELECT 1 FROM f2_files_after new WHERE new.path = old.path)",
-		)
-		self.db.execute("UPDATE f2_files_before SET changed = "
-						"(SELECT changed FROM f2_files_after WHERE path = f2_files_before.path)")
-		for side in ("before", "after"):
-			self.db.execute(
 				f"INSERT INTO f2_{side} SELECT definition.id, files.path, definition.parse_id, definition.version_id, "
 				"definition.parent_id, definition.terminal_name, definition.kind, repr.language, definition.synthetic_root, "
 				"EXISTS(SELECT 1 FROM definition child WHERE child.parent_id = definition.id), info.depth, info.locator, "
@@ -569,11 +603,93 @@ class _Builder:
 				"JOIN version ON version.id = definition.version_id JOIN f2_repr repr ON repr.id = version.id "
 				"JOIN f2_definfo info ON info.id = definition.id LEFT JOIN binding "
 				"ON binding.binding_set_id = files.binding_set_id AND binding.definition_id = definition.id "
-				"WHERE files.status = 'present'",
+				"WHERE files.status = 'present'" + (" AND files.changed = 1" if delta else ""),
+		)
+
+	def _carry_population(self) -> None:
+		"""Advance complete lookup populations using only the previous file delta."""
+		paths = "(SELECT path FROM f2_files_after WHERE changed = 1)"
+		self.db.execute(f"DELETE FROM f2_before WHERE path IN {paths}")
+		self.db.execute("INSERT INTO f2_before SELECT * FROM f2_after WHERE changed = 1")
+		self.db.execute("UPDATE f2_before SET changed = 0, matched = defkey, uncertain = NULL, "
+						"seed_reason = NULL WHERE changed = 1")
+		self.db.execute("UPDATE f2_before SET uncertain = NULL WHERE uncertain IS NOT NULL")
+		self.db.execute("UPDATE f2_after SET changed = 0, matched = defkey, uncertain = NULL, "
+						"seed_reason = NULL WHERE changed = 1")
+		self.db.execute(f"DELETE FROM f2_files_before WHERE path IN {paths}")
+		self.db.execute("INSERT INTO f2_files_before SELECT * FROM f2_files_after WHERE changed = 1")
+		for side in ("before", "after"):
+			self.db.execute(f"UPDATE f2_files_{side} SET changed = 0 WHERE changed = 1")
+
+	def _inventory(self) -> None:
+		if not self._population_ready:
+			with closing(self.repository.iter_tree(self.commit, page_size=self.limits.page_size)) as pages:
+				for page in pages:
+					self._parse_entries(page)
+			self._population_ready = True
+		else:
+			self._carry_population()
+			parent_tree = self.store._row_oid(self.store._commit(self.parent), "tree")
+			current_tree = self.store._row_oid(self.store._commit(self.commit), "tree")
+			with closing(self.repository.tree_changes(parent_tree, current_tree,
+													 page_size=self.limits.page_size)) as pages:
+				for page in pages:
+					for change in page:
+						before = self.spool.one("SELECT * FROM f2_files_before WHERE path = ?", (change.path,))
+						actual = None if before is None or before["status"] == "removed" else (
+							before["blob_format"], before["blob_digest"], before["object_type"], before["mode"],
+						)
+						expected = None if change.before is None else (
+							*change.before.oid.fields(), change.before.object_type, change.before.mode,
+						)
+						if actual != expected:
+							raise BuildError("corrupt", "Persisted frontier disagrees with the committed tree delta")
+						if change.after is None:
+							self.db.execute(
+								"INSERT INTO f2_delta VALUES (?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, "
+								"'removed', 'removed', 1)", (change.path,),
+							)
+						else:
+							entry = change.after
+							self.db.execute(
+								"INSERT INTO f2_delta VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, 'unparsed', '', 1)",
+								(entry.path, *entry.oid.fields(), entry.object_type, entry.mode),
+							)
+					self.spool.check()
+			# Preserve retries and gap evidence for unknown files even on unchanged
+			# trees, without enumerating unrelated complete entries.
+			self.db.execute(
+				"INSERT INTO f2_delta SELECT * FROM f2_files_before WHERE status = 'unknown' "
+				"AND path NOT IN (SELECT path FROM f2_delta)",
 			)
-		self.db.execute("UPDATE f2_before SET matched = defkey WHERE defkey IN "
-						"(SELECT defkey FROM f2_after WHERE changed = 0)")
-		self.db.execute("UPDATE f2_after SET matched = defkey WHERE changed = 0")
+			self.db.execute("UPDATE f2_files_before SET changed = 1 WHERE path IN (SELECT path FROM f2_delta)")
+			self.db.execute("UPDATE f2_before SET changed = 1, matched = NULL "
+							"WHERE path IN (SELECT path FROM f2_delta)")
+			self.db.execute("DELETE FROM f2_after WHERE path IN (SELECT path FROM f2_delta)")
+			self.db.execute("DELETE FROM f2_files_after WHERE path IN (SELECT path FROM f2_delta)")
+			self.db.execute(
+				"INSERT INTO f2_files_after SELECT * FROM f2_delta WHERE status = 'removed'",
+			)
+			entries: list[GitTreeEntry] = []
+			with closing(self.spool.rows("SELECT * FROM f2_delta WHERE status != 'removed' ORDER BY path")) as rows:
+				for row in rows:
+					entries.append(GitTreeEntry(row["path"], GitOid(row["blob_format"], row["blob_digest"]),
+												row["object_type"], row["mode"]))
+					if len(entries) == self.limits.page_size:
+						self._parse_entries(tuple(entries))
+						entries.clear()
+				if entries:
+					self._parse_entries(tuple(entries))
+		self._populate("after", delta=True)
+
+	def _parse_entries(self, entries: tuple[GitTreeEntry, ...]) -> None:
+		for entry in self._prefetch(entries):
+			result, reason = self._parse(entry)
+			self.db.execute("INSERT INTO f2_files_after VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?, 1)",
+							(entry.path, *entry.oid.fields(), entry.object_type, entry.mode,
+							 None if result is None else result.id,
+							 "present" if result is not None and result.complete else "unknown", reason))
+		self.spool.check()
 
 	def _gap(self, language: str) -> bool:
 		if language in self.gaps:
@@ -928,11 +1044,9 @@ class _Builder:
 							  self._count("before", before, "subtree"), self._count("after", after, "subtree"),
 							  (1, 1), counted=True)
 			return
-		old_version = self.store.get_version(before["version_id"])
-		new_version = self.store.get_version(after["version_id"])
-		if old_version is None or new_version is None:
-			raise BuildError("corrupt", "Candidate representation is unavailable")
-		numerator, denominator = matching.similarity(old_version.own, new_version.own)
+		numerator, denominator = matching.similarity(
+			self._candidate_tokens.get(before), self._candidate_tokens.get(after),
+		)
 		if denominator and 5 * numerator >= 3 * denominator:
 			self._refusal(before, after, "similarity", "candidate", "normalized_token_similarity",
 						  self._count("before", before, "own"), self._count("after", after, "own"),
@@ -1021,6 +1135,8 @@ class _Builder:
 			state = self.store.put_file_state(self.generation, row["path"], self.sequence, None,
 											  row["status"], blob, row["object_type"], row["mode"], row["parse_id"], binding_set)
 			self.store.set_frontier(self.generation, row["path"], state)
+			self.db.execute("UPDATE f2_files_after SET state_id = ?, binding_set_id = ? WHERE path = ?",
+							(state, binding_set, row["path"]))
 			self.store.put_coverage(self.generation, self.sequence, row["path"], "extraction", row["reason"],
 									0 if row["status"] != "unknown" else None)
 
@@ -1100,7 +1216,7 @@ class _Builder:
 		self.parent = self.parents[0] if sequence else None
 		self.considered, self.limited = 0, False
 		self.gaps.clear()
-		for table in ("f2_before", "f2_after", "f2_files_before", "f2_files_after", "f2_graph", "f2_decisions"):
+		for table in ("f2_delta", "f2_graph", "f2_decisions"):
 			self.db.execute(f"DELETE FROM {table}")
 		self.store.add_member(self.generation, sequence, commit)
 		self._inventory()

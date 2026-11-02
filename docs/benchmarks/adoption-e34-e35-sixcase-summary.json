@@ -1,0 +1,93 @@
+{
+  "kind": "Descriptive six-case same-candidate development summary",
+  "protocols": [
+    "a96cc8dee3d415ce30e5afc8e296f089ff276c84ef94576e870aa541d502e68b",
+    "375550d991400ca2d1816f212b5d2f15c7a888791a97fd8e2e4521d541159fec"
+  ],
+  "candidate_code_hashes_equal": true,
+  "review_totals": {
+    "B": {
+      "credits": 188.8059,
+      "input_tokens": 1044918,
+      "output_tokens": 21381,
+      "model_requests": 44
+    },
+    "H": {
+      "credits": 174.87588,
+      "input_tokens": 866321,
+      "output_tokens": 25784,
+      "model_requests": 47
+    }
+  },
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 0.8333333333333334,
+        "grounded_recall": 0.1625110756689704,
+        "augmented_precision": 0.8333333333333334,
+        "augmented_recall": 0.18434343434343434,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.125,
+        "candidate_count": 17,
+        "golden_tp_count": 83,
+        "matched_count": 15,
+        "matched_tp_count": 14,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 16
+      },
+      "micro": {
+        "grounded_precision": 0.9333333333333333,
+        "grounded_recall": 0.1927710843373494,
+        "augmented_precision": 0.9411764705882353,
+        "augmented_recall": 0.21176470588235294,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.11764705882352941,
+        "candidate_count": 17,
+        "golden_tp_count": 83,
+        "matched_count": 15,
+        "matched_tp_count": 14,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 16
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 0.8333333333333334,
+        "grounded_recall": 0.20663654084706717,
+        "augmented_precision": 0.9166666666666666,
+        "augmented_recall": 0.264555986538252,
+        "novel_tp_count": 5,
+        "novel_tp_yield": 0.3111111111111111,
+        "candidate_count": 19,
+        "golden_tp_count": 83,
+        "matched_count": 14,
+        "matched_tp_count": 13,
+        "unmatched_count": 5,
+        "unmatched_tp_count": 5,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 19
+      },
+      "micro": {
+        "grounded_precision": 0.9285714285714286,
+        "grounded_recall": 0.2289156626506024,
+        "augmented_precision": 0.9473684210526315,
+        "augmented_recall": 0.2727272727272727,
+        "novel_tp_count": 5,
+        "novel_tp_yield": 0.2631578947368421,
+        "candidate_count": 19,
+        "golden_tp_count": 83,
+        "matched_count": 14,
+        "matched_tp_count": 13,
+        "unmatched_count": 5,
+        "unmatched_tp_count": 5,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 19
+      }
+    }
+  },
+  "interpretation": "Development aggregate is lower-cost and higher-recall, but prospective transfer alone has higher cost. Preserve both stages separately; this is not held-out confirmation or a successful lower-cost transfer."
+}

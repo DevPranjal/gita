@@ -1,0 +1,56 @@
+{
+  "kind": "Authored real Copilot transport canary",
+  "protocol": "f57a794205386faa6ed0bbd295b2df590b802c87ae55581b6b515d332796d426",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "markers_recovered_exactly": true,
+  "source_executed": false,
+  "review_or_judge_benchmark": false,
+  "tool_audit": {
+    "evidence_calls": 4,
+    "executed_call_attempts": 4,
+    "denied_over_budget": 0,
+    "indexed_calls": 2,
+    "errors": 0
+  },
+  "usage": {
+    "input_tokens": 54238,
+    "output_tokens": 238,
+    "cache_read_tokens": 37119,
+    "cache_write_tokens": 17104,
+    "model_requests": 5,
+    "uncached_input_tokens": 15,
+    "credits": 10.51876,
+    "total_nano_aiu": 10518760000,
+    "api_seconds": 11.9,
+    "models": [
+      "gpt-5.6-sol"
+    ],
+    "current_model": "gpt-5.6-sol",
+    "per_model": {
+      "gpt-5.6-sol": {
+        "input_tokens": 54238,
+        "output_tokens": 238,
+        "cache_read_tokens": 37119,
+        "cache_write_tokens": 17104,
+        "model_requests": 5,
+        "reasoning_tokens": 54,
+        "native_model_nano_aiu": 10518760000
+      }
+    },
+    "reasoning_tokens": 54
+  },
+  "response_characters": [
+    14055,
+    10325,
+    10318,
+    1906
+  ],
+  "embedded_json_characters": [
+    14286,
+    19051,
+    19052,
+    2692
+  ],
+  "interpretation": "Real native MCP transport recovered unpredictable source tails from bounded larger ASCII and heavily escaped source pages without builtin view access."
+}

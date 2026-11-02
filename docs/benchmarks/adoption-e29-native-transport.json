@@ -1,0 +1,60 @@
+{
+  "kind": "Authored real Copilot transport canary",
+  "protocol": "ab869d9c51ab1659ee5c0aa1a8c7ea98f873e68d8a9679fa0d70f0b8d2a978b3",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "markers_recovered_exactly": true,
+  "source_executed": false,
+  "review_or_judge_benchmark": false,
+  "tool_audit": {
+    "evidence_calls": 6,
+    "executed_call_attempts": 6,
+    "denied_over_budget": 0,
+    "indexed_calls": 6,
+    "errors": 3
+  },
+  "usage": {
+    "input_tokens": 45812,
+    "output_tokens": 633,
+    "cache_read_tokens": 33295,
+    "cache_write_tokens": 12499,
+    "model_requests": 6,
+    "uncached_input_tokens": 18,
+    "credits": 8.8545,
+    "total_nano_aiu": 8854500000,
+    "api_seconds": 22.709,
+    "models": [
+      "gpt-5.6-sol"
+    ],
+    "current_model": "gpt-5.6-sol",
+    "per_model": {
+      "gpt-5.6-sol": {
+        "input_tokens": 45812,
+        "output_tokens": 633,
+        "cache_read_tokens": 33295,
+        "cache_write_tokens": 12499,
+        "model_requests": 6,
+        "reasoning_tokens": 377,
+        "native_model_nano_aiu": 8854500000
+      }
+    },
+    "reasoning_tokens": 377
+  },
+  "response_characters": [
+    14055,
+    248,
+    178,
+    205,
+    6744,
+    4872
+  ],
+  "embedded_json_characters": [
+    14286,
+    272,
+    202,
+    229,
+    12268,
+    8590
+  ],
+  "interpretation": "Source-tail recovery passed, but this is not a clean named-source qualification: the escaped named request hit the inner token budget, followed by two invalid model retries and indexed-window recovery. Three errors and all 8.85450 credits are retained. A separate corrected retrieval-budget canary is required."
+}

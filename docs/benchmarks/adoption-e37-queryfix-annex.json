@@ -1,0 +1,18 @@
+{
+  "kind": "Pre-model correctness-repair annex with exact retained-evidence equivalence",
+  "study_digest": "a2c4fa95727c68a7d5d1010d5a63e2a8e467bf35791c3cd1e6c02896f4e20d7d",
+  "original_product_policy_digest": "8a78d98bdb148c2ad8b66e1e78f437bc3a1d1d3d2245fe89df8bf8e4228f7b03",
+  "new_product_policy_digest": "1bbb8b4600cbfd3ccd8e0750e367ef5ca8cbc1d56c3d41ea6c1b67bcd9e51c8e",
+  "historical_validation_digest": "f006077412dd7a2f37faa32da4f30189c340bd6f56c6320c856ab35327d63240",
+  "queryfix_attestation_digest": "29fff4c2bb24917a64136748e86630067c2aa49254c8fe31ed42b207db5e8138",
+  "qualified_scopes_digest": "4ed4a4e162ca5847f04ca6b8693369c109428e9804ff8b8bb4960800576400ef",
+  "parser_manifest_digest": "bc8aa4123afdec57abd887f47d77fe6d97134fee9ba7b7b0718af1bd61b1f285",
+  "native_review_pairs_started_before_annex": 0,
+  "retained_primary_reviews": 12,
+  "retained_native_evidence_calls_replayed_identically": 278,
+  "change": "Qualified-name query repair for compound captured scopes; no parser, matching, reviewer prompt, tool schema, delivery profile or model change.",
+  "retained_receipts": "Original protocols/identities unchanged. Native log prefixes hash-match original receipt artifacts; replay tails remain preserved separately.",
+  "preparation": "Original builds retained and revalidated under repaired query. One timeout raw fallback remains in the fixed population. No task removed.",
+  "interpretation": "Same observed six-pair evidence plus a transparent query correctness repair. Not byte-identical product versions, not held-out confirmation.",
+  "digest": "915dcca0afdf81b864392826b405e28dcb2321648fc147e64bb255403ab8afda"
+}

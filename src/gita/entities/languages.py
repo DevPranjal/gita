@@ -61,6 +61,73 @@ _JS_COMMENTS = frozenset({"comment", "html_comment"})
 
 SPECS: tuple[LanguageSpec, ...] = (
     LanguageSpec(
+        name="java", extensions=(".java",),
+        kinds={
+            "class_declaration": EntityKind.CLASS, "interface_declaration": EntityKind.INTERFACE,
+            "enum_declaration": EntityKind.ENUM, "record_declaration": EntityKind.CLASS,
+            "annotation_type_declaration": EntityKind.INTERFACE,
+            "method_declaration": EntityKind.METHOD, "constructor_declaration": EntityKind.METHOD,
+            "compact_constructor_declaration": EntityKind.METHOD,
+            "variable_declarator": EntityKind.PROPERTY,
+        },
+        comment_nodes=frozenset({"line_comment", "block_comment"}),
+        body_fields=("body", "value"),
+    ),
+    LanguageSpec(
+        name="kotlin", extensions=(".kt", ".kts"),
+        kinds={
+            "class_declaration": EntityKind.CLASS, "object_declaration": EntityKind.CLASS,
+            "function_declaration": EntityKind.FUNCTION, "property_declaration": EntityKind.PROPERTY,
+            "secondary_constructor": EntityKind.METHOD, "type_alias": EntityKind.TYPE,
+        },
+        comment_nodes=frozenset({"line_comment", "multiline_comment"}),
+        name_children=("simple_identifier", "type_identifier", "variable_declaration"),
+    ),
+    LanguageSpec(
+        name="c", extensions=(".c",),
+        kinds={
+            "struct_specifier": EntityKind.STRUCT, "union_specifier": EntityKind.STRUCT,
+            "enum_specifier": EntityKind.ENUM, "function_definition": EntityKind.FUNCTION,
+            "type_definition": EntityKind.TYPE, "preproc_function_def": EntityKind.FUNCTION,
+        },
+        comment_nodes=frozenset({"comment"}), body_fields=("body", "value"),
+    ),
+    LanguageSpec(
+        name="ruby", extensions=(".rb", ".rake"),
+        kinds={
+            "class": EntityKind.CLASS, "module": EntityKind.NAMESPACE,
+            "method": EntityKind.METHOD, "singleton_method": EntityKind.METHOD,
+        },
+        comment_nodes=frozenset({"comment"}),
+    ),
+    LanguageSpec(
+        name="bash", extensions=(".sh", ".bash"),
+        kinds={"function_definition": EntityKind.FUNCTION},
+        comment_nodes=frozenset({"comment"}),
+    ),
+    LanguageSpec(
+        name="powershell", extensions=(".ps1", ".psm1", ".psd1"),
+        kinds={
+            "function_statement": EntityKind.FUNCTION, "class_statement": EntityKind.CLASS,
+            "enum_statement": EntityKind.ENUM, "class_method_definition": EntityKind.METHOD,
+            "class_property_definition": EntityKind.PROPERTY,
+        },
+        comment_nodes=frozenset({"comment"}),
+        name_children=("function_name", "simple_name", "variable"),
+    ),
+    LanguageSpec(
+        name="hcl", extensions=(".hcl", ".tf", ".tfvars"),
+        kinds={"block": EntityKind.SECTION, "attribute": EntityKind.SECTION},
+        comment_nodes=frozenset({"comment"}), name_children=("identifier",),
+    ),
+    LanguageSpec(
+        name="dart", extensions=(".dart",),
+        kinds={"class_definition": EntityKind.CLASS, "gita_callable": EntityKind.FUNCTION,
+               "enum_declaration": EntityKind.ENUM},
+        comment_nodes=frozenset({"comment", "documentation_comment"}),
+        name_children=("identifier",),
+    ),
+    LanguageSpec(
         name="python",
         extensions=(".py", ".pyi"),
         kinds={
@@ -89,6 +156,44 @@ SPECS: tuple[LanguageSpec, ...] = (
         kinds=_TS_KINDS,
         comment_nodes=_JS_COMMENTS,
         anonymous_nodes=_JS_ANON,
+    ),
+    LanguageSpec(
+        name="swift",
+        extensions=(".swift",),
+        kinds={
+            "class_declaration": EntityKind.CLASS,
+            "protocol_declaration": EntityKind.INTERFACE,
+            "function_declaration": EntityKind.FUNCTION,
+            "protocol_function_declaration": EntityKind.METHOD,
+            "init_declaration": EntityKind.METHOD,
+            "deinit_declaration": EntityKind.METHOD,
+            "subscript_declaration": EntityKind.METHOD,
+            "property_declaration": EntityKind.PROPERTY,
+            "typealias_declaration": EntityKind.TYPE,
+        },
+        comment_nodes=frozenset({"comment", "multiline_comment"}),
+        body_fields=("body", "value", "computed_value"),
+    ),
+    LanguageSpec(
+        name="php",
+        extensions=(".php", ".phtml"),
+        kinds={
+            "namespace_definition": EntityKind.NAMESPACE,
+            "class_declaration": EntityKind.CLASS,
+            "interface_declaration": EntityKind.INTERFACE,
+            "trait_declaration": EntityKind.TRAIT,
+            "enum_declaration": EntityKind.ENUM,
+            "function_definition": EntityKind.FUNCTION,
+            "method_declaration": EntityKind.METHOD,
+            "property_element": EntityKind.PROPERTY,
+            "const_element": EntityKind.PROPERTY,
+            "anonymous_function": EntityKind.FUNCTION,
+            "arrow_function": EntityKind.FUNCTION,
+        },
+        comment_nodes=frozenset({"comment"}),
+        anonymous_nodes=frozenset({"anonymous_function", "arrow_function"}),
+        body_fields=("body", "value", "default_value"),
+        name_children=("name", "variable_name"),
     ),
     LanguageSpec(
         name="csharp",

@@ -1,0 +1,595 @@
+{
+  "schema_version": 1,
+  "kind": "reviewbench-observable-pr-adoption-analysis",
+  "analysis_date": "2026-10-15",
+  "scope": {
+    "trace_root": "artifacts/gita-rb-live4-20261015",
+    "paired_prs": 21,
+    "included_valid_attempts": 42,
+    "arms": {"B": "baseline", "H": "indexed-tool-enabled"},
+    "selection": "The 21 tasks having valid B-r0-a0 and H-r0-a0 results, in scopes.json order.",
+    "excluded": [
+      {"repository": "scottlz0310/Mcp-Docker", "pr": 29, "reason": "Orphan valid H and measurement_invalid B; excluded from every paired aggregate."},
+      {"reason": "The three later scheduled tasks without completed pairs are not analyzed."}
+    ],
+    "not_performed": [
+      "No product source or index preparation investigation.",
+      "No hidden model reasoning read, extracted or summarized.",
+      "No golden/reference label text read; only existing aggregate/per-PR numeric scores used.",
+      "No network requests, models, corpus execution, engine edits or commits."
+    ],
+    "interpretation_limits": [
+      "Final findings are reviewer assertions, not independently verified defects.",
+      "Observed change summaries describe returned patch/source evidence, not necessarily the entire PR.",
+      "Titles are metadata, not proof of changed code; some retrieved patches begin with unrelated documentation or release metadata.",
+      "Potential usefulness of entity/source/endpoint-diff/history tools is an inference, not measured counterfactual benefit.",
+      "Different source coverage and findings across arms prevent attributing lower call counts or quality changes to indexing."
+    ]
+  },
+  "provenance": {
+    "hash_algorithm": "SHA-256",
+    "artifact_sha256": {
+      "protocol.json": "9c8f32edcef58dce3674a8fbb245807ec77aa4d384f241c3ae2acc4520ba4da1",
+      "scopes.json": "7813ed399fc1644381b0798e491b29762eea016dbb44139d4edc74294fc35212",
+      "docs\\benchmarks\\reviewbench-auto-indexed-quality.json": "45bcc3dab596bc0771979a4a729a3fdd4b7f21d0fe932bbed2616bfd95c62c7d"
+    },
+    "per_pr_bundle_definition": "Resolve task_id_prefix uniquely against scopes.json task.id. In arm order B,H and file order tools.jsonl,result.json,findings.json,events.jsonl, compute the SHA-256 of each file's original bytes. For each append UTF-8: attempts\\<full-task-id>-<arm>-r0-a0\\<filename>, one literal TAB, its lowercase hex digest, one LF. source_bundle_sha256 is SHA-256 of the eight concatenated manifest entries. This binds every pair to all eight source artifacts without copying their sensitive contents.",
+    "events_handling": "Event files are provenance inputs; only event metadata/schema was inspected. Analysis uses tools.jsonl call arguments/results and result.json/findings.json final outputs, not assistant reasoning fields.",
+    "evidence_reference": "B#n or H#n denotes the sequence field in that PR's tools.jsonl."
+  },
+  "metric_definitions": {
+    "arm_metrics_columns": [
+      "all_tool_calls",
+      "raw_diff_calls",
+      "read_file_calls_including_failures",
+      "search_calls",
+      "list_files_calls",
+      "calls_with_cursor_argument_including_failures",
+      "results_with_truncated_true",
+      "final_finding_count",
+      "existing_grounded_precision",
+      "existing_grounded_recall"
+    ],
+    "quality_source": "Existing quality.per_pr[arm].metrics.overall; precision/recall rounded to four decimals; null remains null. These are custom blinded scores, not official leaderboard scores or new judgments.",
+    "source_retrieval": "read_file supplies exact-revision file lines; search supplies matching source snippets; raw_diff supplies changed source and hunk context. None is an entity-source tool call.",
+    "repeated_returned_lines": "Repeated numbered read_file lines within the same PR and arm, keyed by exact requested path string and line number; failed calls excluded. This measures duplicate delivery, not overlapping requested ranges.",
+    "truncated_result": "A result explicitly marked truncated=true; does not by itself prove the reviewer failed to obtain needed context."
+  },
+  "aggregate": {
+    "B": {
+      "tool_calls": 167,
+      "tools": {"raw_diff": 64, "read_file": 72, "search": 16, "list_files": 8, "commit_log": 6, "file_history": 1},
+      "truncated_results": 84,
+      "truncated_read_file_results": 29,
+      "cursor_argument_calls": 36,
+      "tasks_with_any_truncated_diff_result": 17,
+      "tasks_without_read_file": 3,
+      "numbered_source_lines_returned": 4914,
+      "repeated_numbered_source_lines": 96,
+      "failed_calls": 2
+    },
+    "H": {
+      "tool_calls": 115,
+      "tools": {"raw_diff": 41, "read_file": 45, "search": 15, "list_files": 8, "commit_log": 2, "index_status": 2, "entities": 1, "events": 1},
+      "truncated_results": 52,
+      "truncated_read_file_results": 17,
+      "cursor_argument_calls": 17,
+      "tasks_with_any_truncated_diff_result": 17,
+      "tasks_without_read_file": 8,
+      "numbered_source_lines_returned": 2904,
+      "repeated_numbered_source_lines": 37,
+      "failed_calls": 3,
+      "tasks_with_any_indexed_tool_call": 2,
+      "entity_source_calls": 0,
+      "entity_history_calls": 0,
+      "endpoint_diff_calls": 0
+    },
+    "findings": {"B": 42, "H": 39},
+    "raw_diff_exactly_3000_character_results": {"B": 49, "H": 32},
+    "empty_text_search_or_listing_results": {
+      "B": ["cmik/apilix#12 B#3 search execFile", "cmik/apilix#12 B#4 search git under server/**/*.js", "gagneurlab/PROTRIDER#10 B#2 list protrider/**"],
+      "H": ["gagneurlab/PROTRIDER#10 H#2 list protrider/**"]
+    },
+    "history_usage": {
+      "raw_commit_log_calls": 8,
+      "raw_file_history_calls": 1,
+      "indexed_events_calls": 1,
+      "indexed_events_successes": 0,
+      "caution": "Raw commit_log is available in both arms and is not indexed-tool adoption. An endpoint returning GitHub commit timestamps is not repository-history tool usage."
+    }
+  },
+  "cross_task_findings": [
+    {
+      "id": "F1",
+      "observation": "H used entities once, as the last tool call on avatar tests; it never followed the returned entity IDs with entity-source retrieval. Its only events call failed. All retrieved source came through raw_diff, read_file or search.",
+      "evidence": ["AA-Factory/aafactory-prototype#17 H#11", "allan-mobley-jr/gimmes#468 H#2", "All 42 paired tool inventories"],
+      "inference": "There is no observed completed indexed discovery-to-source workflow from which to infer an index benefit. Returned entity metadata alone did not replace source retrieval.",
+      "fast_improvement": "Make a changed-entity result directly actionable as exact endpoint source, with path, span, source action and paging status together. Test the action-to-source round trip separately before the rerun.",
+      "acceptance_measure": "Successful changed-entity-to-source chains and relevant source retrieved, not raw indexed-call count."
+    },
+    {
+      "id": "F2",
+      "observation": "The dominant navigational cost is small pages and manual line continuation, not massive duplicate source delivery: 46 of 117 read_file calls returned truncated=true, but only 133 of 7818 numbered source lines were repeated.",
+      "evidence": ["agents-config#1 B:8/H:7 installer reads", "Codebase-Conversion#1 H:4 reads of llm_client.py", "tp#152 B:16/H:8 raw_diff calls", "PROTRIDER#10 H#4 and H#5 both clipped"],
+      "inference": "Complete entity-sized source and obvious continuation affordances may reduce round trips while preserving coverage. Simply reducing calls risks shorter, less-complete reviews.",
+      "fast_improvement": "Offer complete small-function source within a bounded budget, explicit returned line bounds and an executable continuation. Use installer, storage and checkpoint workflows as untuned usability checks.",
+      "acceptance_measure": "Same-or-better relevant endpoint source coverage with fewer pagination/re-range calls; report omitted source explicitly."
+    },
+    {
+      "id": "F3",
+      "observation": "Large first patch pages can be dominated by documentation/configuration. Reviewers sometimes jumped to different source areas while leaving patch pagination incomplete; nebula B reviewed process state while H reviewed metrics routes.",
+      "evidence": ["emdash#2 B#1/H#1 and SEO searches", "nebula#224 B#2/H#1 and divergent source reads", "Codebase-Conversion#1 first diff and fetcher versus llm_client reads", "PROTRIDER#10 first diff and pipeline/model reads"],
+      "inference": "A compact endpoint changed-file/entity inventory is a more direct review starting point than chronological history for these tasks. It can expose scope and omissions without forcing all raw patch pages.",
+      "fast_improvement": "Start with a bounded endpoint change map that links touched definitions to before/after source; label non-code changes and uncovered paths. Do not infer review scope from the PR title.",
+      "acceptance_measure": "Changed-code areas inspected and explicitly omitted, plus existing quality outcomes; no claim that index navigation itself improves correctness."
+    },
+    {
+      "id": "F4",
+      "observation": "Several tasks needed only a diff and produced findings without file reads; H omitted read_file on 8/21 tasks. Exact-path errors also interrupted source exploration in avatar tests and chronicle, and PROTRIDER began with an empty package-directory listing.",
+      "evidence": ["disaster-ninja-fe#1230 and gh-copilot-review#9: one raw_diff per arm", "LANdalf#88 H#1", "avatar#17 B#3/H#4", "chronicle#14 H#4", "PROTRIDER#10 B#2/H#2"],
+      "inference": "Not every review needs entities or history. For source-heavy reviews, path discovery and source actions should remove guesswork; diff-only tasks should retain a cheap path.",
+      "fast_improvement": "Keep a small-diff fast path and supply exact copyable repository-relative paths from change/entity results. Check glob semantics and path-validation recovery, without weakening traversal checks.",
+      "acceptance_measure": "Fewer refused or empty discovery calls and successful recovery; optional indexed usage rather than mandatory tool quotas."
+    },
+    {
+      "id": "F5",
+      "observation": "History was mostly unused or shallow: eight raw commit-log calls, one raw file-history call, one failed indexed events call. The observed file-history lookup specifically concerned whether DeleteNoteCommand was an old stub.",
+      "evidence": ["tp#152 B#33", "gimmes#468 H#2: No common first-parent generation; use raw_diff", "avatar#17 H#3 and gimmes#468 H#4: history_ready=false"],
+      "inference": "History is a conditional aid for provenance or introduced-versus-pre-existing behavior, not a generic PR-review requirement. Most concrete opportunities here concern endpoint source and relations instead.",
+      "fast_improvement": "Show history availability before suggesting chronological operations; offer endpoint comparison when history is unavailable. Reserve history for an explicit provenance question.",
+      "acceptance_measure": "History requests answer a concrete temporal question or cleanly route to endpoint evidence; no repeated unavailable-history exploration."
+    }
+  ],
+  "per_pr": [
+    {
+      "row": 0,
+      "repository": "PierreJanineh/TechDebtMCP",
+      "pr": 135,
+      "task_id_prefix": "d0a584f4",
+      "source_bundle_sha256": "8e6cc53014dca5510f91cd31dbc80dfca8c760fdb66af87158100dc399f6d6fc",
+      "observed_change": "Custom regex pattern-length validation, flag normalization, tests and documentation; B additionally inspected server input handling. Returned patch names include ARCHITECTURE.md, CHANGELOG.md, README.md, customRulesEngine tests and implementation.",
+      "arm_metrics": {"B": [8,3,3,2,0,1,2,2,0.5,0.2222], "H": [4,3,0,1,0,1,2,2,0.5,0.4444]},
+      "source_evidence": {
+        "B": ["#3 path-filtered raw_diff src/core/customRulesEngine.ts", "#4 read_file customRulesEngine.ts:130-165", "#5 read_file customRulesEngine.ts:248-280", "#6 search MAX_FILE_SIZE_BYTES", "#7 read_file src/server/handlers.ts:405-480", "#8 search MAX_CODE_LENGTH"],
+        "H": ["#3 search MAX_ in src/**/*.ts", "#4 path-filtered raw_diff src/core/customRulesEngine.ts"]
+      },
+      "navigation": "Both read two initial diff pages and then a path-filtered implementation diff. H used raw snippets/diff only; no indexed tools.",
+      "final_finding_topics": {"B": ["Incomplete catastrophic-backtracking mitigation", "Duplicated flag normalization"], "H": ["Incomplete catastrophic-backtracking mitigation", "Duplicated flag normalization"]},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Retrieve validatePattern and executePattern together, then the handler that caps inline input, instead of stitching searches and line ranges.",
+        "endpoint_diff": "Compare the two normalization definitions and caller input guards before/after.",
+        "history": "Low need: the synchronous-regex safety claim can be evaluated from endpoint code.",
+        "priority": "medium"
+      }
+    },
+    {
+      "row": 1,
+      "repository": "simnaut/emdash",
+      "pr": 2,
+      "task_id_prefix": "6faf6a10",
+      "source_bundle_sha256": "831c4e03f606ec902b08d49040c336a0795e7a50b0fc10b84acab4499524f2ef",
+      "observed_change": "The first returned patch page contains changesets/configuration and a changeset describing SEO query batching. Both reviewers explored SeoRepository.getMany and SQL_BATCH_SIZE, not the pluggable-auth subject in the task title. No full changed-code inventory was retrieved.",
+      "arm_metrics": {"B": [5,2,1,2,0,0,1,0,null,0], "H": [5,1,2,2,0,0,1,0,null,0]},
+      "source_evidence": {
+        "B": ["#2 search getMany in **/seo*.ts", "#3 read_file packages/core/src/database/repositories/seo.ts:70-140", "#4 search SQL_BATCH_SIZE =", "#5 path-filtered raw_diff .changeset/config.json"],
+        "H": ["#2 search content_id in **/seo.ts", "#3 read_file packages/core/src/database/repositories/seo.ts:70-125", "#4 search SQL_BATCH_SIZE in packages/core/src/**", "#5 read_file packages/core/src/utils/chunks.ts"]
+      },
+      "navigation": "Both stopped global diff paging after the first truncated page and focused on one source area. This is observed scope narrowing, not proof that other changes contain defects.",
+      "final_finding_topics": {"B": [], "H": []},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Resolve getMany and chunks/SQL_BATCH_SIZE source as a connected bounded source request.",
+        "endpoint_diff": "High-value starting point: list actual changed code beyond changeset headers and expose uninspected areas.",
+        "history": "Low need for generic batching correctness; optional only if a specific auth migration/provenance question arises.",
+        "priority": "high"
+      }
+    },
+    {
+      "row": 2,
+      "repository": "konturio/disaster-ninja-fe",
+      "pr": 1230,
+      "task_id_prefix": "f68612ef",
+      "source_bundle_sha256": "f5e16271bd16275b1d5fee25ba2b3a3a006273300473d630743e38ac02883b02",
+      "observed_change": "GenericRenderer basemap setStyle/remount lifecycle and its asynchronous-event mock test.",
+      "arm_metrics": {"B": [1,1,0,0,0,0,0,3,0.6667,0.2308], "H": [1,1,0,0,0,0,0,3,0.6667,0.2308]},
+      "source_evidence": {"B": ["#1 raw_diff GenericRenderer.ts and GenericRenderer.test.ts"], "H": ["#1 raw_diff GenericRenderer.ts and GenericRenderer.test.ts"]},
+      "navigation": "One non-truncated raw_diff per arm; no discovery, file reads or indexed calls.",
+      "final_finding_topics": {"B": ["One-shot styledata ordering", "Disable/enable lifecycle after setStyle", "Synchronous mock masks asynchronous behavior"], "H": ["One-shot styledata ordering", "Disable/enable lifecycle after setStyle", "Synchronous mock masks asynchronous behavior"]},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Optional corroboration: inspect other renderers' disable/enable implementations before asserting how remounting behaves.",
+        "endpoint_diff": "Low incremental value over this complete small diff.",
+        "history": "No demonstrated need.",
+        "priority": "low"
+      }
+    },
+    {
+      "row": 3,
+      "repository": "cmik/apilix",
+      "pr": 12,
+      "task_id_prefix": "2f8f2c3f",
+      "source_bundle_sha256": "ffc6373dd2fad8cbca9a220d59d546efe53cd72afdac21922760daed5a38b62c",
+      "observed_change": "Workspace Git synchronization documentation and server routes/guards in server/index.js; B inspected the client Git adapter.",
+      "arm_metrics": {"B": [9,1,4,3,1,0,3,5,0.5,0.0278], "H": [5,3,0,1,1,1,2,2,1,0.0278]},
+      "source_evidence": {
+        "B": ["#2 list **/*ync*", "#3 search execFile: empty", "#4 search git in server/**/*.js: empty", "#5 read_file client/src/utils/sync/gitAdapter.ts", "#6 search /api/sync/git/push", "#7-9 read_file server/index.js:930-1180,1010-1146,1073-1146"],
+        "H": ["#2 list server/**", "#3 and #5 path-filtered raw_diff server/index.js with continuation", "#4 search /api/sync/git/push in server/index.js"]
+      },
+      "navigation": "Two empty B searches preceded the correct adapter/route lookup. B continued a clipped large server read twice; H stayed with path-filtered diff.",
+      "final_finding_topics": {"B": ["Prefix path guard", "Credentials in Git error URLs", "Git argument validation", "Unrelated-history pull", "Timestamp route mutates repository"], "H": ["Prefix path guard", "Credentials in Git error URLs"]},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Retrieve ensureRepo and push/pull/timestamp route bodies with their client adapter; compare shared path/auth handling.",
+        "endpoint_diff": "Expose repeated route changes and common helper once rather than paging the whole server file.",
+        "history": "Low need: Git synchronization semantics are not a reason to require source-history browsing.",
+        "priority": "high"
+      }
+    },
+    {
+      "row": 4,
+      "repository": "AA-Factory/aafactory-prototype",
+      "pr": 17,
+      "task_id_prefix": "4823fe56",
+      "source_bundle_sha256": "731348eb6122c21eb5bcb3f278332f79fb7cdc181a5c242dcad8c79e23da3595",
+      "observed_change": "A new mock-chat test calls a mocked low-level LLM helper. The implementation path queried by raw_diff returns no change, so implementation source was context rather than demonstrated modified code.",
+      "arm_metrics": {"B": [10,3,4,0,2,0,1,1,1,0.1111], "H": [11,2,4,0,2,0,1,1,1,0.1111]},
+      "source_evidence": {
+        "B": ["#3 read_file aafactory/src/chat/interface.py: refused, absent at exact revision", "#4 list test subtree", "#5 raw_diff test_mock_chat.py", "#6 read_file test_mock_chat.py", "#7 list root", "#8 read_file aafactory/src/aafactory/chat/interface.py", "#9 read_file test_chat_interface.py", "#10 path-filtered implementation diff: empty"],
+        "H": ["#4 same missing-path read failure", "#5 list test subtree", "#6 read_file test_mock_chat.py", "#7 list **/chat/interface.py", "#8 read_file test_chat_interface.py", "#9 read_file aafactory/src/aafactory/chat/interface.py", "#10 implementation diff: empty", "#11 entities on implementation path returns module/function IDs and spans"]
+      },
+      "navigation": "Both guessed a path lacking the nested package directory. H entities is the final tool call, after source was already read; it does not demonstrate entity-source adoption.",
+      "final_finding_topics": {"B": ["Test exercises the mock rather than send_request_to_llm"], "H": ["Test exercises the mock rather than send_request_to_llm"]},
+      "history_observed": ["B#1 and H#1 commit_log; neither paginated it", "H#3 index_status reports history_ready=false"],
+      "opportunity_inference": {
+        "entity_source": "Resolve send_request_to_llm directly to its exact nested-package path, then inspect the test's mock target; this removes demonstrated path guessing.",
+        "endpoint_diff": "Separate changed tests from unchanged implementation context.",
+        "history": "Not necessary to decide whether the test invokes its subject under test.",
+        "priority": "high"
+      }
+    },
+    {
+      "row": 5,
+      "repository": "DisciplinedSoftware/Codebase-Conversion",
+      "pr": 1,
+      "task_id_prefix": "fb3644da",
+      "source_bundle_sha256": "192c854740e5a23c74b7241b3aac41f6982880804de4376bde81ae57b379d4a7",
+      "observed_change": "The first returned patch page shows new devcontainer build setup. Reviewers then inspected conversion tooling: B fetcher/test harness, H LLM client/test harness. The trace does not expose a complete patch inventory.",
+      "arm_metrics": {"B": [5,1,3,0,1,0,3,3,0.3333,0.0323], "H": [7,1,5,0,1,0,5,2,1,0.0323]},
+      "source_evidence": {
+        "B": ["#2 list root", "#3 read_file fortran_to_rust/test_harness.py", "#4 read_file fortran_to_rust/fetcher.py", "#5 read_file fetcher.py:70-140"],
+        "H": ["#2 list root", "#3 read_file fortran_to_rust/llm_client.py", "#4 read_file test_harness.py", "#5-7 read_file llm_client.py:60-230,134-363,200-300"]
+      },
+      "navigation": "H used four reads to traverse llm_client.py; three were truncated. Requested range overlap mostly represents continuation after returned text ended, not redundant delivery.",
+      "final_finding_topics": {"B": ["Failed downloads leave cache files", "Archive links bypass name-only path guard", "HTTP downloads lack integrity"], "H": ["Ambient credential fallback with overridden endpoint", "429 retry reporting and final sleep"]},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Retrieve download/extract definitions or credential-resolution/request-retry definitions completely, with their callers.",
+        "endpoint_diff": "Reveal the actual changed tooling beyond the devcontainer prefix to keep both reviews on comparable scope.",
+        "history": "Low need unless asking whether an insecure behavior predates this change.",
+        "priority": "high"
+      }
+    },
+    {
+      "row": 6,
+      "repository": "brianc/node-postgres",
+      "pr": 3650,
+      "task_id_prefix": "0b0800ed",
+      "source_bundle_sha256": "e938a8ba8e56492ac0690a30dd49a51498911305f93e1e03bd357f0fea175d12",
+      "observed_change": "pg-pool diagnostic channels, connection tracing callback wrapper and diagnostic tests.",
+      "arm_metrics": {"B": [3,2,1,0,0,1,2,1,null,0], "H": [3,2,1,0,0,1,2,1,null,0]},
+      "source_evidence": {"B": ["#1-2 raw_diff pages", "#3 read_file packages/pg-pool/index.js:170-290"], "H": ["#1-2 raw_diff pages", "#3 read_file packages/pg-pool/index.js:195-275"]},
+      "navigation": "Both followed one diff cursor and used a clipped source range around the connection callback. No indexed calls.",
+      "final_finding_topics": {"B": ["context.client assignment occurs after asyncStart"], "H": ["context.client assignment occurs after asyncStart"]},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Fetch complete connect/enrichedCb and related diagnostic publisher/test code instead of line coordinates.",
+        "endpoint_diff": "Show tracing-wrapper changes with their callback context.",
+        "history": "No demonstrated need; claims about Node tracing semantics require API evidence, not repository chronology.",
+        "priority": "medium"
+      }
+    },
+    {
+      "row": 7,
+      "repository": "PaulStSmith/figlet-comment-generator",
+      "pr": 32,
+      "task_id_prefix": "33c1ba8b",
+      "source_bundle_sha256": "89fdbe503c57a681491a85b19ef4e8fdb25dc28ecb8922983abae9fe54c61706",
+      "observed_change": "CI version-sync removal and publish-workflow path-filter narrowing across multiple packaging ecosystems; patch evidence is broader than the VSCode issue-link title.",
+      "arm_metrics": {"B": [8,5,3,0,0,4,5,6,1,0.6667], "H": [2,2,0,0,0,1,2,4,1,0.4444]},
+      "source_evidence": {
+        "B": ["#1,#2,#6-8 raw_diff pages", "#3-5 read_file first 12 lines of publish-figlet-nuget.yml, publish-figlet-ts.yml and publish-figlet-py.yml"],
+        "H": ["#1-2 raw_diff pages only"]
+      },
+      "navigation": "H stopped after two truncated diff pages; B retrieved five pages and reported two more workflow variants. This is a coverage difference, not evidence that indexing saved work.",
+      "final_finding_topics": {"B": ["Version/manifest-only publishing exclusions in six workflows"], "H": ["Version/manifest-only publishing exclusions in four workflows"]},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Low: YAML workflow trigger blocks and package manifests are better units than code entities.",
+        "endpoint_diff": "High: enumerate every changed workflow and compare trigger filters against package/version inputs.",
+        "history": "Not needed for static trigger/filter review.",
+        "priority": "high"
+      }
+    },
+    {
+      "row": 8,
+      "repository": "brexhq/CrabTrap",
+      "pr": 15,
+      "task_id_prefix": "0033d688",
+      "source_bundle_sha256": "dbc8d649962cfdf4576fbd3a531a8c1d32b4b27e58ed8e6d4e1c8724e311c050",
+      "observed_change": "Audit list pagination/defaults and summary queries, related tests, and web API/list-consumer code.",
+      "arm_metrics": {"B": [6,6,0,0,0,5,6,0,null,0], "H": [7,2,3,2,0,1,3,2,1,0.125]},
+      "source_evidence": {
+        "B": ["#1-6 raw_diff pages; no read_file or search"],
+        "H": ["#3 search QuerySummaries", "#4 search ) Count(", "#5-7 read_file internal/admin/pg_audit_reader.go:280-450,360-470,245-280"]
+      },
+      "navigation": "H moved from two diff pages into actual query/scan source. B stayed entirely on diff pages. Both still encountered clipping.",
+      "final_finding_topics": {"B": [], "H": ["Summary placeholders look like empty real payload fields", "Separate count/list queries and swallowed errors affect pagination"]},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Fetch QuerySummaries, Count and scanAuditEntry, then their HTTP/UI consumers to verify omissions and pagination contracts.",
+        "endpoint_diff": "Trace the full list contract from storage through handler to web consumer.",
+        "history": "Low need for endpoint contract correctness; optional to distinguish existing query error behavior.",
+        "priority": "high"
+      }
+    },
+    {
+      "row": 9,
+      "repository": "k1LoW/gh-copilot-review",
+      "pr": 9,
+      "task_id_prefix": "eedd7018",
+      "source_bundle_sha256": "8ae952b69fda60d81c22d3b9fcbd69adf70087290201d027c6cf4801b3141df1",
+      "observed_change": "Command freshness shortcut and new GitHub review-versus-commit freshness method.",
+      "arm_metrics": {"B": [1,1,0,0,0,0,0,2,1,0.2857], "H": [1,1,0,0,0,0,0,3,1,0.4286]},
+      "source_evidence": {"B": ["#1 raw_diff cmd/root.go and internal/github/github.go"], "H": ["#1 raw_diff cmd/root.go and internal/github/github.go"]},
+      "navigation": "One complete diff per arm. GitHub commits/reviews mentioned in findings are application APIs, not source-history tool usage.",
+      "final_finding_topics": {"B": ["Commit API pagination", "Review API pagination"], "H": ["Commit API pagination", "Review API pagination", "Committer timestamp is not push recency"]},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Optional: inspect existing REST-client pagination helpers/tests to corroborate single-page behavior.",
+        "endpoint_diff": "Low incremental value for this already complete diff.",
+        "history": "No demonstrated source-history need.",
+        "priority": "low"
+      }
+    },
+    {
+      "row": 10,
+      "repository": "scotthamilton77/agents-config",
+      "pr": 1,
+      "task_id_prefix": "eec6673d",
+      "source_bundle_sha256": "0d285aae95c444f2b2685b1251b663f30169c8a7d2bbf625108f611bd301b3ac",
+      "observed_change": "Multi-tool installer and corresponding usage documentation, including detection, layered install/merge and hashing behavior.",
+      "arm_metrics": {"B": [9,1,8,0,0,0,8,2,1,0.04], "H": [8,1,7,0,0,0,6,2,1,0.04]},
+      "source_evidence": {
+        "B": ["#2-9 read_file scripts/install.sh, then starts 68,156,232,305,371,427,495"],
+        "H": ["#2-8 read_file scripts/install.sh, then starts 70,158,270,342,403,464"]
+      },
+      "navigation": "The 569-line installer required eight B/seven H file calls. Neither used read_file cursors; each advanced manually through line ranges after clipping. This is not eight full-file rereads.",
+      "final_finding_topics": {"B": ["Layer-local keep warnings", "TOML template overwrite behavior"], "H": ["Merged settings file permission change", "Empty-directory hash subprocess behavior"]},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Fetch compute_hash, merge-settings and layer-install definitions as complete units where shell parsing supports them; otherwise use named-block/file source with explicit bounds.",
+        "endpoint_diff": "Separate detection/merge/hash changed blocks from documentation.",
+        "history": "Optional only to establish whether overwrite/permission behavior was introduced.",
+        "priority": "high"
+      }
+    },
+    {
+      "row": 11,
+      "repository": "ardevd/jadx-collaboration",
+      "pr": 3,
+      "task_id_prefix": "bc277c03",
+      "source_bundle_sha256": "ed409f2310c457c7c6294ecd88fa736d7d6563e73b6b853024266d86686be0fd",
+      "observed_change": "Pull/push threading and UI conflict-resolution dispatch/exception handling plus tests. Returned implementation changes use unmanaged threads; the title's shared-executor description is not substituted for patch evidence.",
+      "arm_metrics": {"B": [6,3,1,2,0,2,2,3,1,0.2222], "H": [6,3,3,0,0,2,2,3,1,0.3333]},
+      "source_evidence": {
+        "B": ["#4 search kotlin.concurrent.thread", "#5 search localRepositoryToProject(localRepository)", "#6 read_file Plugin.kt:36-70"],
+        "H": ["#4 read_file Plugin.kt:540-576", "#5 read_file Plugin.kt:42-56", "#6 read_file ConflictResolvers.kt:164-186"]
+      },
+      "navigation": "Both used three diff pages; B text searches and H source ranges connected worker/UI code.",
+      "final_finding_topics": {"B": ["Concurrent pull/push race", "UI-owned state read on worker", "Modal exception becomes null conflict result"], "H": ["Concurrent pull/push race", "UI-owned state read on worker", "Asynchronous UI updates invalidate synchronous test assumptions"]},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Inspect pull, push, UI dispatch helper and conflict resolver together, plus direct test callers.",
+        "endpoint_diff": "Show before/after thread-boundary changes rather than chronological commits.",
+        "history": "Low need; endpoint code can answer most thread-affinity questions.",
+        "priority": "medium"
+      }
+    },
+    {
+      "row": 12,
+      "repository": "AY2526S2-CS2103T-W14-3/tp",
+      "pr": 152,
+      "task_id_prefix": "e45f1894",
+      "source_bundle_sha256": "a30c0dbf931963ffea49b22188e3f90eab90b7bbcea8804e655366b80da3a008",
+      "observed_change": "Global date-note command/model/storage/observable planner UI integration and tests/docs. Reviewers followed different concerns: B old deletion command, H note persistence iteration order.",
+      "arm_metrics": {"B": [34,16,14,1,0,14,16,1,1,0.0714], "H": [13,8,3,2,0,7,8,1,1,0.0714]},
+      "source_evidence": {
+        "B": ["#4 raw_diff Logic.java; #5 raw_diff UserGuide.md", "#15 read_file PlannerListPanel.java:1-150", "#16 read_file DeleteNoteCommand.java", "#17 read_file VisitDate.java", "#22 read_file ModelManager.java", "#23 read_file JsonSerializableAddressBook.java", "#24 read_file NoteCommand.java", "#25 read_file Command.java", "#26 read_file DeleteNoteCommand.java:10-42", "#27-28 read_file ModelManager.java:100-180,210-329", "#29 read_file AddressBook.java:1-210", "#30 search DeleteNoteCommand", "#31 read_file UserGuide.md:325-365", "#32 read_file ModelManager.java:175-210", "#34 read_file LogicManager.java:70-145"],
+        "H": ["#3 read_file NoteCommand.java", "#10 read_file PlannerListPanel.java:45-80", "#11 read_file JsonSerializableAddressBook.java:26-88", "#12 search public declarations in **/dates/VisitDate.java", "#13 search hashCode in **/dates/*.java"]
+      },
+      "navigation": "B's diff cursor at #3 was refused as Tampered cursor; it later resumed valid paging. Sixteen B versus eight H diff calls are the largest patch-pagination burden. Source spans crossed commands, model, serialization and UI.",
+      "final_finding_topics": {"B": ["DeleteNoteCommand remains a no-op stub"], "H": ["HashMap serialization loses insertion-dependent note ordering"]},
+      "history_observed": ["B#1 and #6 commit_log pages", "B#33 file_history DeleteNoteCommand.java returned its introduction diff with a deferred-backend comment"],
+      "opportunity_inference": {
+        "entity_source": "Retrieve note command/model mutation/serialization/planner-update definitions and their actual call sites as one bounded contract trace.",
+        "endpoint_diff": "Distinguish newly implemented note storage from unchanged DeleteNoteCommand behavior, reducing introduced-versus-existing ambiguity.",
+        "history": "Concrete conditional value: B's stub concern benefits from introduction/provenance evidence. Do not require history for the independent serialization-order question.",
+        "priority": "high"
+      }
+    },
+    {
+      "row": 13,
+      "repository": "vanyastaff/nebula",
+      "pr": 224,
+      "task_id_prefix": "91db1480",
+      "source_bundle_sha256": "713e47c5aa3812c6a43d36bddde97bb159a4627b3e9fd907d7bd4ee78a79f49b",
+      "observed_change": "The retrieved global diff page starts with .claude/active-work.md metadata. Source exploration then diverged: B system process refresh, H metrics endpoint/route registration. Neither retrieved a complete change inventory; the credential-focused title alone cannot establish these areas' changed status.",
+      "arm_metrics": {"B": [8,1,5,0,1,0,4,1,null,0], "H": [6,1,2,2,1,0,2,2,null,0]},
+      "source_evidence": {
+        "B": ["#3 list crates/system/src/**", "#4 read_file crates/system/src/load.rs", "#5-8 read_file crates/system/src/process.rs with starts 1,93,175,300"],
+        "H": ["#2 list crates/**/src/**/*.rs", "#3 read_file crates/api/src/routes/metrics.rs", "#4 read_file crates/api/src/routes/mod.rs", "#5 search metrics_registry in crates/api/**", "#6 search with_metrics_registry"]
+      },
+      "navigation": "One clipped patch page per arm; different code families chosen after directory discovery. Four process.rs reads versus metrics registration searches illustrate scope divergence, not a measured navigation win.",
+      "final_finding_topics": {"B": ["Dead processes remain in cached process state"], "H": ["Metrics registry has no observed wiring caller", "Metrics endpoint mounted outside JWT middleware"]},
+      "history_observed": ["B#1 commit_log; no continuation"],
+      "opportunity_inference": {
+        "entity_source": "For H's hypothesis, retrieve AppState registry builder and router wiring/callers; for B, retrieve get_process and refresh implementation context.",
+        "endpoint_diff": "Highest value: make changed definitions and endpoint status visible before choosing a subsystem, rather than relying on title or first documentation page.",
+        "history": "Conditional only to determine whether a selected concern is new; endpoint comparison should come first.",
+        "priority": "high"
+      }
+    },
+    {
+      "row": 14,
+      "repository": "NCATSTranslator/translator-ingests",
+      "pr": 336,
+      "task_id_prefix": "7d1bf715",
+      "source_bundle_sha256": "4fd705941fda3e55afe13fe799d72e1f8a1e6cd0dc4d00a67df489007e24df8f",
+      "observed_change": "GtoPdb ingestion deduplication/grouping, selected columns, protein mapping and action-to-predicate handling.",
+      "arm_metrics": {"B": [3,1,2,0,0,0,3,2,1,0.1176], "H": [3,1,2,0,0,0,3,2,1,0.1176]},
+      "source_evidence": {
+        "B": ["#2 read_file src/translator_ingest/ingests/gtopdb/gtopdb.py:60-330", "#3 read_file same file:127-290"],
+        "H": ["#2 read_file same file:60-330", "#3 read_file same file:127-300"]
+      },
+      "navigation": "Both arms used identical first source range and nearly identical continuation. All three results in each arm were clipped.",
+      "final_finding_topics": {"B": ["Agnoist misspelling excludes Agonist branch", "Default groupby drops rows with missing keys"], "H": ["Default groupby drops rows with missing keys", "Agnoist misspelling excludes Agonist branch"]},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Retrieve the full ingest transformation and action-mapping definition instead of two clipped line ranges.",
+        "endpoint_diff": "Show grouping-key and mapping changes together.",
+        "history": "No demonstrated need; data/library semantics, not code chronology, are the unresolved context.",
+        "priority": "medium"
+      }
+    },
+    {
+      "row": 15,
+      "repository": "mheuss/chronicle",
+      "pr": 14,
+      "task_id_prefix": "26e77afc",
+      "source_bundle_sha256": "e6cdbc9a5e389acbfcf5614c686ccb7027745b0498900a2aa102ab8018965192",
+      "observed_change": "Storage/media path validation and allocation hardening, filesystem permissions, helper relocation/test copies and storage dependencies.",
+      "arm_metrics": {"B": [13,3,7,2,0,0,9,3,1,0.2], "H": [7,1,5,1,0,0,2,3,0.5,0.2]},
+      "source_evidence": {
+        "B": ["#3 read_file files.rs:1-120", "#4 search allocate_path", "#5 search sanitize_id", "#6,#7,#9,#10 read_file media.rs with starts 1,77,139,210", "#8 raw_diff media.rs", "#11 raw_diff lib.rs", "#12-13 read_file lib.rs:40-260,150-330"],
+        "H": ["#2 read_file files.rs:1-80", "#3 search sanitize_id", "#4 media.rs path with backslashes refused", "#5-7 read_file repository-relative slash-form media.rs:1-130,130-300,198-290"]
+      },
+      "navigation": "H recovered immediately after explicit POSIX repository-path validation error. Both traversed relocated helpers and continued clipped media source; B additionally inspected permission setup.",
+      "final_finding_topics": {"B": ["Symlink validation fallback", "Tests target copied dead helpers", "Unconditional base-directory chmod"], "H": ["Symlink validation fallback", "Unsanitized extension in allocated path", "Tests target copied dead helpers"]},
+      "history_observed": ["B#2 commit_log; no continuation"],
+      "opportunity_inference": {
+        "entity_source": "Resolve production sanitize_id, validate_path, allocate_path and Storage::open, distinguishing test-only copies by exact path.",
+        "endpoint_diff": "Track helper relocation and before/after validation; compare actual production definitions instead of same-name text matches.",
+        "history": "Optional for relocation provenance; endpoint comparison is sufficient for most path-safety questions.",
+        "priority": "high"
+      }
+    },
+    {
+      "row": 16,
+      "repository": "superhighfives/pika",
+      "pr": 200,
+      "task_id_prefix": "0362dfe9",
+      "source_bundle_sha256": "59645a3cf5a5ab4482a9070a8ae16e15f6643ad3cc42973b08a7b3c8ff9266cf",
+      "observed_change": "Persistent named palettes, history migration, UI/string/defaults changes and related export/eyedropper code in returned patch pages.",
+      "arm_metrics": {"B": [7,4,1,2,0,3,5,1,1,0.0526], "H": [3,1,0,2,0,0,1,1,1,0.0526]},
+      "source_evidence": {
+        "B": ["#2 search migrateHistoryToPalettes", "#3 search colorHistory", "#4-6 further diff pages", "#7 read_file Pika/Services/Eyedroppers.swift"],
+        "H": ["#2 search migrateHistoryToPalettes", "#3 search .colorHistory"]
+      },
+      "navigation": "H used search snippets after a single clipped diff page and did not inspect full source; B retrieved more palette-related diff/source but produced the same finding topic.",
+      "final_finding_topics": {"B": ["Migration replaces existing palettes"], "H": ["Migration replaces existing palettes"]},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Retrieve migration plus persisted Palette/defaults representation and launch caller to verify overwrite preconditions.",
+        "endpoint_diff": "Expose UI/export changes beyond the early migration block without raw-page traversal.",
+        "history": "Only useful if establishing which older persisted schema the migration must support; not necessary for the generic assignment concern.",
+        "priority": "medium"
+      }
+    },
+    {
+      "row": 17,
+      "repository": "gagneurlab/PROTRIDER",
+      "pr": 10,
+      "task_id_prefix": "0083e3b9",
+      "source_bundle_sha256": "8621ed2e63e7a46cc11df7371987b0ed3ed442e8c15b59c478cc822925947af9",
+      "observed_change": "First patch page shows ignore/documentation updates including checkpointing documentation. Reviewers inspected pipeline/model checkpoint load behavior; the entire implementation diff was not retrieved.",
+      "arm_metrics": {"B": [9,1,6,0,2,0,6,2,0.5,0.0476], "H": [5,1,2,0,2,0,3,1,0,0]},
+      "source_evidence": {
+        "B": ["#2 list protrider/**: empty", "#3 list root", "#4 read_file src/protrider/pipeline.py", "#5 read_file src/protrider/model/model.py", "#6-9 read_file pipeline.py:78-260,300-520,400-634,454-560"],
+        "H": ["#2 list protrider/**: empty", "#3 list **/*.py", "#4 read_file src/protrider/model/model.py", "#5 read_file src/protrider/pipeline.py"]
+      },
+      "navigation": "Both initially missed the src layout. H's two source results ended after roughly 78-79 lines with truncation; it never followed up into later pipeline checkpoint logic. B traversed later pipeline sections.",
+      "final_finding_topics": {"B": ["Loaded-state flag can disagree with actual checkpoint load", "Untrusted checkpoint unpickling"], "H": ["Untrusted checkpoint unpickling"]},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Resolve load_model and the pipeline run/checkpoint gating definition at their exact src paths; retrieve complete relevant bodies instead of file prefixes.",
+        "endpoint_diff": "Surface actual checkpoint/parquet implementation changes beyond README content and distinguish newly introduced behavior.",
+        "history": "Low need unless a provenance question remains after endpoint comparison.",
+        "priority": "high"
+      }
+    },
+    {
+      "row": 18,
+      "repository": "allan-mobley-jr/gimmes",
+      "pr": 468,
+      "task_id_prefix": "ee7f1541",
+      "source_bundle_sha256": "19578973cbff7701e4e08ab85013868bae4a9adbe71b1fc7d23bcf87893d19a1",
+      "observed_change": "Staleness changes from price-only to volume/OI/price activity, with configuration/help text and tests.",
+      "arm_metrics": {"B": [13,4,5,2,1,3,5,1,0,0], "H": [16,4,6,2,1,3,6,1,0,0.1667]},
+      "source_evidence": {
+        "B": ["#4 list **/*staleness*", "#5 read_file src/gimmes/strategy/staleness.py", "#7 search volume_24h in src/**/*.py", "#8 read_file tests/unit/test_staleness.py", "#9 search check_staleness in **/*.py", "#11-13 read_file market model:1-100, CLI:285-330, Kalshi adapter:1-75"],
+        "H": ["#6 list *staleness*", "#7 read_file staleness.py", "#9-10 search volume_24h and check_staleness in *.py", "#11 read_file test_staleness.py", "#13-15 read_file market model:1-75, adapter:1-60, CLI:295-325", "#16 read_file test_staleness.py:80-225"]
+      },
+      "navigation": "H's events request failed before raw-diff/source work and was followed by status discovery; it made three more calls overall. Model/adapter/caller reads supplied endpoint semantics without history.",
+      "final_finding_topics": {"B": ["Rolling volume threshold is not new trading activity"], "H": ["Rolling volume threshold is not new trading activity"]},
+      "history_observed": ["B#2 and H#1 commit_log", "H#2 events refused: No common first-parent generation; use raw_diff", "H#4 index_status history_ready=false"],
+      "opportunity_inference": {
+        "entity_source": "Retrieve check_staleness, snapshot state/model, market adapter and CLI caller to verify cumulative/rolling-volume semantics.",
+        "endpoint_diff": "Preferred available alternative to chronological events for before/after staleness state.",
+        "history": "Optional to investigate the intent of the earlier price-only rule; not required to understand the present volume counter.",
+        "priority": "high"
+      }
+    },
+    {
+      "row": 19,
+      "repository": "superyyrrzz/ForgeMap",
+      "pr": 106,
+      "task_id_prefix": "82ec1870",
+      "source_bundle_sha256": "ddc46d40c10147442682046c858f0a30b7bfda3bc820b2653b83fad2ded75723",
+      "observed_change": "Documentation theme CSS and Pages workflow concurrency group/cancellation changes.",
+      "arm_metrics": {"B": [7,4,3,0,0,3,3,2,0.5,0.0667], "H": [1,1,0,0,0,0,1,2,0.5,0.0667]},
+      "source_evidence": {
+        "B": ["#1-2,#6-7 raw_diff pages", "#3 read_file .github/workflows/docs.yml:20-30", "#4 read_file docfx/templates/forgemap/public/main.css:1-12", "#5 read_file complete docs workflow"],
+        "H": ["#1 raw_diff only, truncated"]
+      },
+      "navigation": "H's two finding topics were visible near the beginning of one clipped patch; B inspected more workflow/CSS context. Entity parsing is not the natural primary abstraction.",
+      "final_finding_topics": {"B": ["Pages deployment cancellation/concurrency", "External font CSS import"], "H": ["External font CSS import", "Pages deployment cancellation/concurrency"]},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Low: whole workflow trigger/deploy blocks and CSS import context are the meaningful units.",
+        "endpoint_diff": "Show workflow versus large theme changes separately and retain cheap path-filtered source.",
+        "history": "No demonstrated need.",
+        "priority": "low"
+      }
+    },
+    {
+      "row": 20,
+      "repository": "renedierking/LANdalf",
+      "pr": 88,
+      "task_id_prefix": "a3c2d2b9",
+      "source_bundle_sha256": "22877392ccb75694f5a5879d7d047965963ff30e89392a8c69a670db643b53be",
+      "observed_change": "Container ping utility installation and DeviceMonitoringService ping overload/platform-support/cancellation handling.",
+      "arm_metrics": {"B": [2,1,1,0,0,0,0,1,1,0.1667], "H": [1,1,0,0,0,0,0,1,1,0.1667]},
+      "source_evidence": {"B": ["#1 raw_diff src/API/Dockerfile and DeviceMonitoringService.cs", "#2 read_file DeviceMonitoringService.cs:165-192"], "H": ["#1 same complete small diff"]},
+      "navigation": "H reviewed only the complete diff; B made one small surrounding-source read. No paging, errors or indexed tools.",
+      "final_finding_topics": {"B": ["Cancellation exception handling around SendPingAsync"], "H": ["Cancellation exception handling around SendPingAsync"]},
+      "history_observed": [],
+      "opportunity_inference": {
+        "entity_source": "Optional: retrieve complete ping method and outer service-loop caller to check whether cancellation propagates intentionally.",
+        "endpoint_diff": "Low incremental value over the complete diff.",
+        "history": "No demonstrated need.",
+        "priority": "low"
+      }
+    }
+  ]
+}

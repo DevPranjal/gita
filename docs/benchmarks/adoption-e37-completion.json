@@ -1,0 +1,15 @@
+{
+  "kind": "Completed E37 full25 development study",
+  "study": "a2c4fa95727c68a7d5d1010d5a63e2a8e467bf35791c3cd1e6c02896f4e20d7d",
+  "completed_at": "2026-10-20T12:36:48.967208+00:00",
+  "results_digest": "51026a0ffc8746bd2d4ca99ba4c39e29ca01a787be9d1766dd6ce0e283f14bcb",
+  "case_bindings_digest": "00a3a1fd26a4c03b7b23fb35369e21610f8028dedbed8dcea9c029c2278613a0",
+  "queryfix_annex_digest": "12f8f1f68cd3fb32e8ea493b71a2fb283d9b5ca8f9e2890a4965cc92be062d58",
+  "frozen_product_manifest_digest": "f3d8d871e6d2ffcfe21e9e6dd2c09be236cf09372330873cd131af2af3fb1d6d",
+  "review_slots_valid": 50,
+  "pairs_scored": 25,
+  "known_review_credits": 1808.75322,
+  "known_judge_credits": 946.6382,
+  "gate_verdict": "not_established",
+  "digest": "9072de53c5fa405157d27eae327db4291ccd5fa771d62070b76f373aba5309d6"
+}

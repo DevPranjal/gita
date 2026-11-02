@@ -1,0 +1,152 @@
+{
+  "kind": "offline exact-query replay; no model calls",
+  "queries": [
+    {
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "sequence": 10,
+      "old_error": "Unexpected tool argument",
+      "new_status": "success",
+      "source_query": {
+        "text": "getMany",
+        "path": "packages/**/*.ts*"
+      },
+      "result_characters": 2516,
+      "result_sha256": "ed357efc0c6d160503a2b659360c00c1b43474b8c317b66c037e424b16483779",
+      "original_call_log_sha256": "fd3af5b5c9387c9ff9770c0e97ad08fffa4b241033c8fdfeb471f707217f8e79"
+    },
+    {
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "sequence": 11,
+      "old_error": "Unexpected tool argument",
+      "new_status": "success",
+      "source_query": {
+        "text": "content_id IN",
+        "path": "packages/**/*.ts"
+      },
+      "result_characters": 126,
+      "result_sha256": "8fb594f13be08a503f9ba252819988fbee1f72763763195948eccc341d5c9a97",
+      "original_call_log_sha256": "3372f7dde53703679c970c30562825a4d6263b8ed3e6163f044d4577444f39aa"
+    },
+    {
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "sequence": 12,
+      "old_error": "Unexpected tool argument",
+      "new_status": "success",
+      "source_query": {
+        "text": "siteUrl",
+        "path": "packages/**/*.ts*"
+      },
+      "result_characters": 3000,
+      "result_sha256": "98d11bc4f7fd8e962244ba01fd8b9ef4956fcaf499137ae5079cc3a43726ef4d",
+      "original_call_log_sha256": "f0231ba17d1bdbcd760e4ece00dffe485b50f89a4b455f5346097b96a23aa18e"
+    },
+    {
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "sequence": 13,
+      "old_error": "Unexpected tool argument",
+      "new_status": "success",
+      "source_query": {
+        "text": "searchParams",
+        "path": "packages/core/**/*.ts"
+      },
+      "result_characters": 3000,
+      "result_sha256": "45e046730924d5866fe6c8c10477b70194f79106a1fd36cf7ea461a43f1250c9",
+      "original_call_log_sha256": "cfe6e2eabdd9fd2db3bc9b7c50ae0e07abe16298bcb0fc0810f92e0fe2424de0"
+    },
+    {
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "sequence": 14,
+      "old_error": "Unexpected tool argument",
+      "new_status": "success",
+      "source_query": {
+        "text": "media/:",
+        "path": "packages/**/*.ts"
+      },
+      "result_characters": 306,
+      "result_sha256": "fc06aeaaf111c8fd01607aab5b7c6e47a095b9e66098c72285aaa8ae4429bed1",
+      "original_call_log_sha256": "6d62fdcc3e19e8bdf91df6774731e4017ef7cfb92bcc0ee24a25b5c9f75abacf"
+    },
+    {
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "sequence": 15,
+      "old_error": "Unexpected tool argument",
+      "new_status": "success",
+      "source_query": {
+        "text": "pageSize",
+        "path": "packages/admin/src/components/ContentList.tsx"
+      },
+      "result_characters": 0,
+      "result_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_call_log_sha256": "7582d1aaa3284e29eb435a21fffe305844b4c4587b0d5d48488c7ae668dd30d5"
+    },
+    {
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "sequence": 16,
+      "old_error": "Unexpected tool argument",
+      "new_status": "success",
+      "source_query": {
+        "text": "Content-Security-Policy",
+        "path": "packages/**/*.ts*"
+      },
+      "result_characters": 535,
+      "result_sha256": "7eecc9a7a56f1f2ea65ef35233a4da8bb174fde6a31287259d1d675cd8419077",
+      "original_call_log_sha256": "5b4696b009260c4e50f995b72849b4bf8020eafc5e2ed54ca3040ca8d86757c3"
+    },
+    {
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "sequence": 17,
+      "old_error": "Unexpected tool argument",
+      "new_status": "success",
+      "source_query": {
+        "text": "User-Agent",
+        "path": "packages/**/*.ts"
+      },
+      "result_characters": 772,
+      "result_sha256": "083194f083415064e826466017bb40a10e255e02db400b4aec7dcdd4f8e4baaf",
+      "original_call_log_sha256": "aff07349920b9ba922a8787c2a749821ac3421e23a946ac5670f957b65727350"
+    },
+    {
+      "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+      "sequence": 15,
+      "old_error": "Unexpected tool argument",
+      "new_status": "success",
+      "source_query": {
+        "text": "addRule(",
+        "path": "src/**/*.ts"
+      },
+      "result_characters": 1671,
+      "result_sha256": "015ce39162de52fec80505af8f13b121f53c30a6b3d6b19c334ca33e7f814a29",
+      "original_call_log_sha256": "582226d3250e6baf44b23feabdc4dd8f1af5655843dd59c74d4f97ad70805700"
+    },
+    {
+      "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+      "sequence": 16,
+      "old_error": "Unexpected tool argument",
+      "new_status": "success",
+      "source_query": {
+        "text": "getFileStats",
+        "path": "src/**/*.ts"
+      },
+      "result_characters": 581,
+      "result_sha256": "9aa880ea3d254dc3e62a0932c1e22eae1f83b9181637eb5518f256ca835219bd",
+      "original_call_log_sha256": "15a9a5d69b207311100c8dc38a609520d3343cfafbe041014d9c071c5e0a9403"
+    },
+    {
+      "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+      "sequence": 17,
+      "old_error": "Unexpected tool argument",
+      "new_status": "success",
+      "source_query": {
+        "text": "parseExecuteCustomRulesInput",
+        "path": "src/**/*.ts"
+      },
+      "result_characters": 1335,
+      "result_sha256": "236bc1db74583d4be5f6db49cd71dd8b3c59632ff39e1ef4b292ebcd70b4328f",
+      "original_call_log_sha256": "953e11bcfc4d9878f9315ef8e0ab42ee0caba0c75cf91e34702d9e4a0532ace3"
+    }
+  ],
+  "old_refusals": 11,
+  "new_successes": 11,
+  "canonical_filter_equivalence": true,
+  "interpretation": "Eliminates observed schema refusals, not evidence of improved precision/recall or paid-agent cost. RawB/H schemas changed identically."
+}

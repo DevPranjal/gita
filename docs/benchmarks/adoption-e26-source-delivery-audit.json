@@ -1,0 +1,117 @@
+{
+  "kind": "Actual source pagination consumption, no model calls",
+  "protocol": "77accdeac0d1a7f01e4bdbd44996c068736580dbda717644f7a16b16daa798f5",
+  "rows": [
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arguments": {
+        "operation": "source",
+        "token": "AppProvider",
+        "path": "client/src/store.tsx"
+      },
+      "first_response_complete": false,
+      "continuations_consumed": 1,
+      "delivered_characters": 6256,
+      "total_characters": 6256,
+      "full_body_delivered": true
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arguments": {
+        "operation": "source",
+        "token": "WorkspaceManagerModal",
+        "path": "client/src/components/WorkspaceManagerModal.tsx"
+      },
+      "first_response_complete": true,
+      "continuations_consumed": 0,
+      "delivered_characters": 1916,
+      "total_characters": 1916,
+      "full_body_delivered": true
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arguments": {
+        "operation": "source",
+        "token": "SyncTab",
+        "path": "client/src/components/WorkspaceManagerModal.tsx"
+      },
+      "first_response_complete": false,
+      "continuations_consumed": 0,
+      "delivered_characters": 5632,
+      "total_characters": 8869,
+      "full_body_delivered": false
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arguments": {
+        "operation": "source",
+        "token": "HistoryTab",
+        "path": "client/src/components/WorkspaceManagerModal.tsx"
+      },
+      "first_response_complete": true,
+      "continuations_consumed": 0,
+      "delivered_characters": 3785,
+      "total_characters": 3785,
+      "full_body_delivered": true
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arguments": {
+        "operation": "source",
+        "token": "_load_avatar_infos_for_chat",
+        "path": "aafactory/src/aafactory/chat/interface.py"
+      },
+      "first_response_complete": true,
+      "continuations_consumed": 0,
+      "delivered_characters": 1180,
+      "total_characters": 1180,
+      "full_body_delivered": true
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arguments": {
+        "operation": "source",
+        "token": "FigletPanel",
+        "path": "FIGLet.VSCodeExtension/src/FigletPanel.ts"
+      },
+      "first_response_complete": false,
+      "continuations_consumed": 1,
+      "delivered_characters": 11336,
+      "total_characters": 11696,
+      "full_body_delivered": false
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arguments": {
+        "operation": "source",
+        "token": "SettingsApp",
+        "path": "FIGLet.VSCodeExtension/src/webview/SettingsApp.tsx"
+      },
+      "first_response_complete": false,
+      "continuations_consumed": 0,
+      "delivered_characters": 5674,
+      "total_characters": 9646,
+      "full_body_delivered": false
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arguments": {
+        "operation": "source",
+        "token": "FigletSettingsPanel",
+        "path": "FIGLet.VSCodeExtension/src/FigletSettingsPanel.ts"
+      },
+      "first_response_complete": false,
+      "continuations_consumed": 0,
+      "delivered_characters": 5675,
+      "total_characters": 10211,
+      "full_body_delivered": false
+    }
+  ],
+  "summary": {
+    "successful_source_requests": 8,
+    "complete_first_response": 3,
+    "complete_after_continuations": 4,
+    "partial_after_all_calls": 4
+  },
+  "interpretation": "Follow actual issued cursors in later successful calls. A successful request is not necessarily a complete indexed body. This audit does not establish cause of missed findings."
+}

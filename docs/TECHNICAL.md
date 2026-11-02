@@ -426,11 +426,23 @@ Sources: [tests/test_cli.py](../tests/test_cli.py), [tests/test_mcp.py](../tests
 
 ## 9. Scope and Further Reading
 
-Indexed adapters: Python, JavaScript, TypeScript/TSX, C#, C++, Go, Rust, Markdown,
-JSON, YAML and TOML. SQL, `.c` and CUDA are not indexed. C# and C++ are structural
-parsers, without compiler invocation, macro expansion or semantic linking of
+Indexed adapters: Python, JavaScript, TypeScript/TSX, C#, C/C++, Go, Rust, Swift,
+PHP, Java, Kotlin, Ruby, Bash, PowerShell, Dart, HCL/Terraform, Markdown,
+JSON, YAML and TOML. SQL and CUDA are not indexed. Notebooks and Go templates
+are not implicitly covered by their embedded Python/Go languages.
+These are structural parsers, without compiler invocation, macro expansion or semantic linking of
 declarations and definitions. Consult [languages.py](../src/gita/entities/languages.py),
 [evidence.py](../src/gita/index/evidence.py) and [FOUNDATION.md](FOUNDATION.md).
+
+Dart signature/body siblings are projected into one byte-preserving callable;
+the header alone is never represented as the complete implementation.
+Unrecognized Dart members remain in enclosing source. Swift multi-binding
+properties remain enclosed, and multiple unbraced PHP namespaces are explicit
+unsupported layouts. HCL moves retain the same conservative minimum-body/copy
+guards as other indexed identities. `GITA_PARSER_CACHE` selects an explicit
+absolute native-cache location consistently across CLI, MCP and workers;
+cache paths do not become entity identity. Grammar artifacts and extraction
+rules remain part of the parse fingerprint.
 
 There is no shipped caller graph, impact/test selection, automatic conflict
 resolution, entity-linked memory, complete handoff orchestration or on-device

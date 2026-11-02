@@ -1,0 +1,21 @@
+{
+  "tool": "entity_context",
+  "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+  "path": "src/core/customRulesEngine.ts",
+  "line": 262,
+  "error": null,
+  "names": [
+    "CustomRulesEngine",
+    "validatePattern"
+  ],
+  "source_characters": 1872,
+  "response_characters": 2938,
+  "truncated": false,
+  "coverage": {
+    "source": "indexed",
+    "total_characters": 1872,
+    "shown_characters": 1872,
+    "exact_entity_source": true,
+    "complete_entity": true
+  }
+}

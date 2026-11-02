@@ -1,0 +1,201 @@
+{
+  "kind": "E22 complete changed-range discovery, same prospective positions3/4/7",
+  "protocol": "89f12a202a97173d164700df2eabcf9ae7cb8745d7b890a2c3e1b83a67a2d318",
+  "source_commit": "e8a4173b7facbf3e28cabc13f5123996747eae89",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "review_totals": {
+    "B": {
+      "credits": 105.37536,
+      "input_tokens": 681961,
+      "output_tokens": 9496
+    },
+    "H": {
+      "credits": 106.6639,
+      "input_tokens": 584625,
+      "output_tokens": 10841
+    }
+  },
+  "judge_credits": 95.8168,
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.4537037037037037,
+        "augmented_precision": 1,
+        "augmented_recall": 0.4648148148148148,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.047619047619047616,
+        "candidate_count": 17,
+        "golden_tp_count": 54,
+        "matched_count": 16,
+        "matched_tp_count": 16,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 22
+      },
+      "micro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.4074074074074074,
+        "augmented_precision": 1,
+        "augmented_recall": 0.41818181818181815,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.058823529411764705,
+        "candidate_count": 17,
+        "golden_tp_count": 54,
+        "matched_count": 16,
+        "matched_tp_count": 16,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 22
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.46296296296296297,
+        "augmented_precision": 1,
+        "augmented_recall": 0.47407407407407404,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.047619047619047616,
+        "candidate_count": 17,
+        "golden_tp_count": 54,
+        "matched_count": 16,
+        "matched_tp_count": 16,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 23
+      },
+      "micro": {
+        "grounded_precision": 1,
+        "grounded_recall": 0.42592592592592593,
+        "augmented_precision": 1,
+        "augmented_recall": 0.43636363636363634,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.058823529411764705,
+        "candidate_count": 17,
+        "golden_tp_count": 54,
+        "matched_count": 16,
+        "matched_tp_count": 16,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 23
+      }
+    }
+  },
+  "rows": [
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "B",
+      "status": "valid",
+      "credits": 47.39654,
+      "input_tokens": 329812,
+      "output_tokens": 3212,
+      "findings": 7,
+      "tool_audit": {
+        "evidence_calls": 28,
+        "executed_call_attempts": 28,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {}
+    },
+    {
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "H",
+      "status": "valid",
+      "credits": 47.32156,
+      "input_tokens": 276194,
+      "output_tokens": 3519,
+      "findings": 8,
+      "tool_audit": {
+        "evidence_calls": 32,
+        "executed_call_attempts": 32,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {}
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "B",
+      "status": "valid",
+      "credits": 14.93532,
+      "input_tokens": 66074,
+      "output_tokens": 2537,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 15,
+        "executed_call_attempts": 15,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {}
+    },
+    {
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "H",
+      "status": "valid",
+      "credits": 22.8928,
+      "input_tokens": 163959,
+      "output_tokens": 3024,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 21,
+        "executed_call_attempts": 21,
+        "denied_over_budget": 0,
+        "indexed_calls": 3,
+        "errors": 2
+      },
+      "indexed_operations": {
+        "source": 1
+      }
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arm": "H",
+      "status": "valid",
+      "credits": 36.44954,
+      "input_tokens": 144472,
+      "output_tokens": 4298,
+      "findings": 7,
+      "tool_audit": {
+        "evidence_calls": 30,
+        "executed_call_attempts": 30,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {}
+    },
+    {
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arm": "B",
+      "status": "valid",
+      "credits": 43.0435,
+      "input_tokens": 286075,
+      "output_tokens": 3747,
+      "findings": 7,
+      "tool_audit": {
+        "evidence_calls": 25,
+        "executed_call_attempts": 25,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {}
+    }
+  ],
+  "limitations": [
+    "Three earlier-used development starter tasks, not held-out/inferential confirmation.",
+    "Custom Copilot source-grounded matching/classification with official pinned resolver/scorer arithmetic.",
+    "No reviewer retries, late filtering or task exclusions; source allocations changed explicitly to reserve the complete manifest."
+  ]
+}

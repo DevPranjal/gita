@@ -9,7 +9,7 @@ cd gita
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 .\.venv\Scripts\python.exe -m pip install -c constraints.txt -e .
-.\.venv\Scripts\python.exe -c "from tree_sitter_language_pack import download; download(['python','javascript','typescript','tsx','csharp','cpp','go','rust','json','yaml','toml','markdown'])"
+.\.venv\Scripts\python.exe -c "from gita.entities.parsers import get_parser; from tree_sitter_language_pack import downloaded_languages; names = ['python','javascript','typescript','tsx','csharp','cpp','go','rust','swift','php','java','kotlin','c','ruby','bash','powershell','hcl','dart','json','yaml','toml','markdown']; [get_parser(name) for name in names]; assert set(names) <= set(downloaded_languages())"
 ```
 
 Grammar provisioning uses the network once. Indexed operations then use local
@@ -20,8 +20,14 @@ Git objects. On Linux/macOS, activate with `source .venv/bin/activate` and use
 For an existing installation, provision the new grammars explicitly:
 
 ```powershell
-.\.venv\Scripts\python.exe -c "from tree_sitter_language_pack import download; download(['csharp','cpp'])"
+.\.venv\Scripts\python.exe -c "from gita.entities.parsers import get_parser; from gita.entities.languages import SPECS; from tree_sitter_language_pack import downloaded_languages; names = {spec.name for spec in SPECS}; [get_parser(name) for name in sorted(names)]; assert names <= set(downloaded_languages())"
 ```
+
+For an isolated installation, set `GITA_PARSER_CACHE` to an absolute grammar-cache
+directory before provisioning and keep it set for CLI/MCP and parsing workers.
+New language rules change the parse policy; explicitly rebuild rather than
+relabeling existing generations. Missing grammars are errors, not implicit
+downloads during indexed operations. See [language boundaries](../README.md#how-it-works).
 
 C# extensions are `.cs` and `.csx`. C++ extensions are `.cpp`, `.cc`, `.cxx`,
 `.c++`, `.h`, `.hpp`, `.hh`, `.hxx`, `.h++`, `.ipp`, `.tpp` and `.inl`.

@@ -1,0 +1,232 @@
+{
+  "kind": "E17 unchanged reviewer transfer; all five quality-scored with explicit source supplements",
+  "review_protocol": "24d334bd5be357db04a38c76cb8036b8d77bb11a4ed7981744f35e3ff3cdd7e1",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "transfer_rows": [
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "B",
+      "status": "valid",
+      "credits": 34.11508,
+      "input_tokens": 191906,
+      "output_tokens": 3082,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 13,
+        "executed_call_attempts": 13,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "H",
+      "status": "valid",
+      "credits": 37.1202,
+      "input_tokens": 195594,
+      "output_tokens": 3485,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 21,
+        "executed_call_attempts": 21,
+        "denied_over_budget": 0,
+        "indexed_calls": 8,
+        "errors": 0
+      }
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "arm": "H",
+      "status": "valid",
+      "credits": 25.55394,
+      "input_tokens": 191355,
+      "output_tokens": 2760,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 19,
+        "executed_call_attempts": 19,
+        "denied_over_budget": 0,
+        "indexed_calls": 1,
+        "errors": 0
+      }
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "arm": "B",
+      "status": "valid",
+      "credits": 24.295,
+      "input_tokens": 109871,
+      "output_tokens": 3344,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 19,
+        "executed_call_attempts": 19,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      }
+    }
+  ],
+  "combined_five_costs": {
+    "B": {
+      "credits": 179.35154,
+      "input_tokens": 1019613,
+      "output_tokens": 17334
+    },
+    "H": {
+      "credits": 176.8543,
+      "input_tokens": 1022683,
+      "output_tokens": 17005
+    }
+  },
+  "transfer_judge_credits": 27.6868,
+  "additional_transfer_judge_credits": 7.3937,
+  "combined_five_scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 0.7,
+        "grounded_recall": 0.11672077922077921,
+        "augmented_precision": 0.7933333333333333,
+        "augmented_recall": 0.18252164502164503,
+        "novel_tp_count": 5,
+        "novel_tp_yield": 0.32,
+        "candidate_count": 15,
+        "golden_tp_count": 64,
+        "matched_count": 9,
+        "matched_tp_count": 7,
+        "unmatched_count": 6,
+        "unmatched_tp_count": 5,
+        "unmatched_fp_count": 1,
+        "golden_covered_count": 7
+      },
+      "micro": {
+        "grounded_precision": 0.7777777777777778,
+        "grounded_recall": 0.109375,
+        "augmented_precision": 0.8,
+        "augmented_recall": 0.17391304347826086,
+        "novel_tp_count": 5,
+        "novel_tp_yield": 0.3333333333333333,
+        "candidate_count": 15,
+        "golden_tp_count": 64,
+        "matched_count": 9,
+        "matched_tp_count": 7,
+        "unmatched_count": 6,
+        "unmatched_tp_count": 5,
+        "unmatched_fp_count": 1,
+        "golden_covered_count": 7
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 0.75,
+        "grounded_recall": 0.12895021645021645,
+        "augmented_precision": 0.8166666666666668,
+        "augmented_recall": 0.18584839073969509,
+        "novel_tp_count": 4,
+        "novel_tp_yield": 0.26666666666666666,
+        "candidate_count": 15,
+        "golden_tp_count": 64,
+        "matched_count": 10,
+        "matched_tp_count": 8,
+        "unmatched_count": 5,
+        "unmatched_tp_count": 4,
+        "unmatched_fp_count": 1,
+        "golden_covered_count": 8
+      },
+      "micro": {
+        "grounded_precision": 0.8,
+        "grounded_recall": 0.125,
+        "augmented_precision": 0.8,
+        "augmented_recall": 0.17647058823529413,
+        "novel_tp_count": 4,
+        "novel_tp_yield": 0.26666666666666666,
+        "candidate_count": 15,
+        "golden_tp_count": 64,
+        "matched_count": 10,
+        "matched_tp_count": 8,
+        "unmatched_count": 5,
+        "unmatched_tp_count": 4,
+        "unmatched_fp_count": 1,
+        "golden_covered_count": 8
+      }
+    }
+  },
+  "transfer_two_scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 0.5,
+        "grounded_recall": 0.08333333333333333,
+        "augmented_precision": 0.75,
+        "augmented_recall": 0.18831168831168832,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.5,
+        "candidate_count": 4,
+        "golden_tp_count": 16,
+        "matched_count": 2,
+        "matched_tp_count": 1,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      },
+      "micro": {
+        "grounded_precision": 0.5,
+        "grounded_recall": 0.0625,
+        "augmented_precision": 0.75,
+        "augmented_recall": 0.16666666666666666,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.5,
+        "candidate_count": 4,
+        "golden_tp_count": 16,
+        "matched_count": 2,
+        "matched_tp_count": 1,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 0.5,
+        "grounded_recall": 0.08333333333333333,
+        "augmented_precision": 0.75,
+        "augmented_recall": 0.18831168831168832,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.5,
+        "candidate_count": 4,
+        "golden_tp_count": 16,
+        "matched_count": 2,
+        "matched_tp_count": 1,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      },
+      "micro": {
+        "grounded_precision": 0.5,
+        "grounded_recall": 0.0625,
+        "augmented_precision": 0.75,
+        "augmented_recall": 0.16666666666666666,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.5,
+        "candidate_count": 4,
+        "golden_tp_count": 16,
+        "matched_count": 2,
+        "matched_tp_count": 1,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      }
+    }
+  },
+  "interpretation": "Combined credit reduction only1.39%, input tokens0.30% higher; transfer alone costs more. Quality point estimates preserved/improved, but weak cost evidence does not authorize25.",
+  "limitations": [
+    "Repeatedly used development tasks, not held-out confirmation.",
+    "Custom Copilot judge and official pinned arithmetic, not official upstream judge.",
+    "One explicit judge missing-source request supplied verified full dependencies to both arms; no reviewer or matcher reruns."
+  ]
+}

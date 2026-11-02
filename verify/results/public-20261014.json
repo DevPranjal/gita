@@ -1,0 +1,3507 @@
+{
+  "campaigns": [
+    {
+      "attempts": [
+        {
+          "build_status": "partial",
+          "completed_seconds": null,
+          "correctness": null,
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 236
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 104
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 132
+            }
+          ],
+          "deadline_seconds": 150,
+          "error": {
+            "code": null,
+            "message": "Python AST span missing",
+            "type": "AssertionError"
+          },
+          "git_unchanged": true,
+          "operation_seconds": 7.955333800055087,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 104,
+            "unsupported_language": 132
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "publication": "published",
+          "repository": "flask",
+          "requested_commit_count": 1,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 26062848,
+            "observed_tree_cpu_seconds": 12.84375,
+            "owned_identities": 27,
+            "rss_tree_sampled_peak_bytes": 290058240,
+            "sample_interval_seconds": 0.05,
+            "samples": 152,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 26442192
+          },
+          "returncode": 1,
+          "row_counts": {
+            "definition": 2202,
+            "event": 2202,
+            "lineage": 2202,
+            "lineage_link": 0,
+            "occurrence": 2202,
+            "version": 1963
+          },
+          "scenario": "snapshot",
+          "status": "correctness_failed",
+          "supervised_seconds": 11.531551400199533,
+          "workers": 4
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": null,
+          "correctness": null,
+          "counters": {
+            "cached_files": 2492,
+            "commits": 20,
+            "parsed_files": 298
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 150
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 2640
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 7
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 2492
+            }
+          ],
+          "deadline_seconds": 150,
+          "error": {
+            "code": null,
+            "message": "Python AST span missing",
+            "type": "AssertionError"
+          },
+          "git_unchanged": true,
+          "operation_seconds": 68.42375209974125,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 150,
+            "unsupported_language": 148
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "publication": "published",
+          "repository": "flask",
+          "requested_commit_count": 20,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 62083072,
+            "observed_tree_cpu_seconds": 79.625,
+            "owned_identities": 61,
+            "rss_tree_sampled_peak_bytes": 385761280,
+            "sample_interval_seconds": 0.05,
+            "samples": 1029,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 62710552
+          },
+          "returncode": 1,
+          "row_counts": {
+            "definition": 4888,
+            "event": 3166,
+            "lineage": 2616,
+            "lineage_link": 2881,
+            "occurrence": 7531,
+            "version": 2127
+          },
+          "scenario": "history",
+          "status": "correctness_failed",
+          "supervised_seconds": 80.62101380014792,
+          "workers": 4
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": null,
+          "correctness": null,
+          "counters": {
+            "cached_files": 132,
+            "commits": 21,
+            "parsed_files": 1
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 151
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 2772
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 7
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 2624
+            }
+          ],
+          "deadline_seconds": 150,
+          "error": {
+            "code": null,
+            "message": "Python AST span missing",
+            "type": "AssertionError"
+          },
+          "git_unchanged": true,
+          "operation_seconds": 12.761953100096434,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 151,
+            "unsupported_language": 148
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "prerequisite_status": "correctness_failed",
+          "publication": "published",
+          "repository": "flask",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 67338240,
+            "observed_tree_cpu_seconds": 22.625,
+            "owned_identities": 27,
+            "rss_tree_sampled_peak_bytes": 217391104,
+            "sample_interval_seconds": 0.05,
+            "samples": 313,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 7935152
+          },
+          "returncode": 1,
+          "row_counts": {
+            "definition": 4929,
+            "event": 3170,
+            "lineage": 2617,
+            "lineage_link": 2923,
+            "occurrence": 7613,
+            "version": 2129
+          },
+          "scenario": "append",
+          "scenario_valid": false,
+          "status": "correctness_failed",
+          "supervised_seconds": 24.21818419964984,
+          "workers": 4
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": null,
+          "correctness": null,
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 151
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 2772
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 7
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 2624
+            }
+          ],
+          "deadline_seconds": 150,
+          "error": {
+            "code": null,
+            "message": "Python AST span missing",
+            "type": "AssertionError"
+          },
+          "git_unchanged": true,
+          "operation_seconds": 0.33701330004259944,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 151,
+            "unsupported_language": 148
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "prerequisite_status": "correctness_failed",
+          "publication": "unchanged",
+          "repository": "flask",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 67338240,
+            "observed_tree_cpu_seconds": 10.765625,
+            "owned_identities": 22,
+            "rss_tree_sampled_peak_bytes": 141160448,
+            "sample_interval_seconds": 0.05,
+            "samples": 155,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 0
+          },
+          "returncode": 1,
+          "row_counts": {
+            "definition": 4929,
+            "event": 3170,
+            "lineage": 2617,
+            "lineage_link": 2923,
+            "occurrence": 7613,
+            "version": 2129
+          },
+          "scenario": "noop",
+          "scenario_valid": false,
+          "status": "correctness_failed",
+          "supervised_seconds": 11.645909099839628,
+          "workers": 4
+        },
+        {
+          "completed_seconds": null,
+          "correctness": null,
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 151
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 2772
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 7
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 2624
+            }
+          ],
+          "deadline_seconds": 150,
+          "error": {
+            "code": null,
+            "message": "Python AST span missing",
+            "type": "AssertionError"
+          },
+          "git_unchanged": true,
+          "operation_seconds": null,
+          "parse_statuses": {
+            "complete": 151,
+            "unsupported_language": 148
+          },
+          "prerequisite_status": "correctness_failed",
+          "publication": "unchanged",
+          "query_lineage_check": "stable only; no independent event/identity truth",
+          "query_path": ".devcontainer/devcontainer.json",
+          "query_source_checks": 8,
+          "repository": "flask",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 67338240,
+            "observed_tree_cpu_seconds": 11.9375,
+            "owned_identities": 40,
+            "rss_tree_sampled_peak_bytes": 158474240,
+            "sample_interval_seconds": 0.05,
+            "samples": 175,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 0
+          },
+          "returncode": 1,
+          "row_counts": {
+            "definition": 4929,
+            "event": 3170,
+            "lineage": 2617,
+            "lineage_link": 2923,
+            "occurrence": 7613,
+            "version": 2129
+          },
+          "scenario": "query",
+          "scenario_valid": false,
+          "session_open_seconds": 0.16346490010619164,
+          "source_read_seconds": [
+            0.16633810009807348,
+            0.09570170007646084,
+            0.08238920010626316,
+            0.08496230002492666,
+            0.08544239960610867,
+            0.0954156001098454,
+            0.08519489970058203,
+            0.10130880028009415
+          ],
+          "status": "correctness_failed",
+          "supervised_seconds": 13.424049300141633,
+          "warm_query_seconds": {
+            "entities": [
+              0.009595999959856272,
+              0.0029972000047564507,
+              0.0028777997940778732,
+              0.003954899962991476,
+              0.004008200019598007
+            ],
+            "history": [
+              0.01833650004118681,
+              0.006522100418806076,
+              0.0072511001490056515,
+              0.006035800091922283,
+              0.0060167997144162655
+            ],
+            "state": [
+              0.005166400223970413,
+              0.00191430002450943,
+              0.001949199941009283,
+              0.0015076999552547932,
+              0.0013343999162316322
+            ]
+          },
+          "workers": 4
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": null,
+          "correctness": null,
+          "counters": {
+            "cached_files": 2492,
+            "commits": 20,
+            "parsed_files": 298
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 150
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 2640
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 7
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 2492
+            }
+          ],
+          "deadline_seconds": 150,
+          "error": {
+            "code": null,
+            "message": "Python AST span missing",
+            "type": "AssertionError"
+          },
+          "git_unchanged": true,
+          "operation_seconds": 61.07620459981263,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 1
+          },
+          "parse_statuses": {
+            "complete": 150,
+            "unsupported_language": 148
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "publication": "published",
+          "repository": "flask",
+          "requested_commit_count": 20,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 62083072,
+            "observed_tree_cpu_seconds": 69.703125,
+            "owned_identities": 53,
+            "rss_tree_sampled_peak_bytes": 266731520,
+            "sample_interval_seconds": 0.05,
+            "samples": 962,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 62710552
+          },
+          "returncode": 1,
+          "row_counts": {
+            "definition": 4888,
+            "event": 3166,
+            "lineage": 2616,
+            "lineage_link": 2881,
+            "occurrence": 7531,
+            "version": 2127
+          },
+          "scenario": "serial_history",
+          "status": "correctness_failed",
+          "supervised_seconds": 72.19060509977862,
+          "workers": 1
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": null,
+          "correctness": null,
+          "counters": {
+            "cached_files": 2624,
+            "commits": 21,
+            "parsed_files": 299
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 151
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 2772
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 7
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 2624
+            }
+          ],
+          "deadline_seconds": 150,
+          "error": {
+            "code": null,
+            "message": "Python AST span missing",
+            "type": "AssertionError"
+          },
+          "git_unchanged": true,
+          "operation_seconds": 60.68252109969035,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 151,
+            "unsupported_language": 148
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "publication": "published",
+          "repository": "flask",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 62865408,
+            "observed_tree_cpu_seconds": 71.546875,
+            "owned_identities": 51,
+            "rss_tree_sampled_peak_bytes": 383885312,
+            "sample_interval_seconds": 0.05,
+            "samples": 955,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 63497472
+          },
+          "returncode": 1,
+          "row_counts": {
+            "definition": 4929,
+            "event": 3170,
+            "lineage": 2617,
+            "lineage_link": 2923,
+            "occurrence": 7613,
+            "version": 2129
+          },
+          "scenario": "cold_final",
+          "status": "correctness_failed",
+          "supervised_seconds": 71.74893140001222,
+          "workers": 4
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": 12.676768799778074,
+          "correctness": {
+            "canonical_digest": "385586a58bc0cd17886c0af980ffbece3f20fa1ed846b7687efa53c4f24ca274",
+            "exact_member_scope": "passed",
+            "git_blob_and_source_digest_checks": 8,
+            "independent_python_ast_span_checks": 0,
+            "inventory_completeness": "not independently established",
+            "lineage_truth": "not independently established for these real repositories",
+            "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+            "python_span_examples": [],
+            "sql_foreign_keys": "passed",
+            "sql_integrity": "passed",
+            "stored_contracts": "passed"
+          },
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 214
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 153
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 61
+            }
+          ],
+          "database_bytes": 46309376,
+          "deadline_seconds": 150,
+          "git_unchanged": true,
+          "operation_seconds": 12.676768799778074,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 153,
+            "unsupported_language": 61
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "publication": "published",
+          "repository": "express",
+          "requested_commit_count": 1,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 46309376,
+            "observed_tree_cpu_seconds": 20.75,
+            "owned_identities": 20,
+            "rss_tree_sampled_peak_bytes": 344559616,
+            "sample_interval_seconds": 0.05,
+            "samples": 241,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 46807352
+          },
+          "returncode": 0,
+          "row_counts": {
+            "definition": 3651,
+            "event": 3651,
+            "lineage": 3651,
+            "lineage_link": 0,
+            "occurrence": 3651,
+            "version": 3172
+          },
+          "scenario": "snapshot",
+          "status": "passed",
+          "supervised_seconds": 18.152229399885982,
+          "verification_seconds": 4.6838799002580345,
+          "workers": 4
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": 50.85597730008885,
+          "correctness": {
+            "canonical_digest": "6b55362f74397332fa7cbb25d4340a324b51aa2df664a2cef5de873dcf9173e0",
+            "exact_member_scope": "passed",
+            "git_blob_and_source_digest_checks": 160,
+            "independent_python_ast_span_checks": 0,
+            "inventory_completeness": "not independently established",
+            "lineage_truth": "not independently established for these real repositories",
+            "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+            "python_span_examples": [],
+            "sql_foreign_keys": "passed",
+            "sql_integrity": "passed",
+            "stored_contracts": "passed"
+          },
+          "counters": {
+            "cached_files": 1159,
+            "commits": 20,
+            "parsed_files": 245
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 184
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 1220
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 5
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 1159
+            }
+          ],
+          "database_bytes": 74543104,
+          "deadline_seconds": 150,
+          "git_unchanged": true,
+          "operation_seconds": 50.85597730008885,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 184,
+            "unsupported_language": 61
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "publication": "published",
+          "repository": "express",
+          "requested_commit_count": 20,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 74543104,
+            "observed_tree_cpu_seconds": 62.890625,
+            "owned_identities": 45,
+            "rss_tree_sampled_peak_bytes": 415539200,
+            "sample_interval_seconds": 0.05,
+            "samples": 819,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 75243592
+          },
+          "returncode": 0,
+          "row_counts": {
+            "definition": 5431,
+            "event": 4528,
+            "lineage": 4039,
+            "lineage_link": 2356,
+            "occurrence": 6979,
+            "version": 3286
+          },
+          "scenario": "history",
+          "status": "passed",
+          "supervised_seconds": 61.739802999887615,
+          "verification_seconds": 10.038093000184745,
+          "workers": 4
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": 14.330858400091529,
+          "correctness": {
+            "canonical_digest": "28fe5eb08b6f121b2731fa067b77ef35c707e5c9a7ee9310297103cc931e72af",
+            "exact_member_scope": "passed",
+            "git_blob_and_source_digest_checks": 168,
+            "independent_python_ast_span_checks": 0,
+            "inventory_completeness": "not independently established",
+            "lineage_truth": "not independently established for these real repositories",
+            "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+            "python_span_examples": [],
+            "sql_foreign_keys": "passed",
+            "sql_integrity": "passed",
+            "stored_contracts": "passed"
+          },
+          "counters": {
+            "cached_files": 65,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 188
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 1281
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 6
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 1224
+            }
+          ],
+          "database_bytes": 79904768,
+          "deadline_seconds": 150,
+          "git_unchanged": true,
+          "operation_seconds": 14.330858400091529,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 184,
+            "unsupported_language": 61
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "prerequisite_status": "passed",
+          "publication": "published",
+          "repository": "express",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 79904768,
+            "observed_tree_cpu_seconds": 24.9375,
+            "owned_identities": 20,
+            "rss_tree_sampled_peak_bytes": 257171456,
+            "sample_interval_seconds": 0.05,
+            "samples": 344,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 8652032
+          },
+          "returncode": 0,
+          "row_counts": {
+            "definition": 5431,
+            "event": 4590,
+            "lineage": 4059,
+            "lineage_link": 2630,
+            "occurrence": 7234,
+            "version": 3286
+          },
+          "scenario": "append",
+          "scenario_valid": true,
+          "status": "passed",
+          "supervised_seconds": 25.776044900063425,
+          "verification_seconds": 10.615882399957627,
+          "workers": 4
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": 0.32295940024778247,
+          "correctness": {
+            "canonical_digest": "28fe5eb08b6f121b2731fa067b77ef35c707e5c9a7ee9310297103cc931e72af",
+            "exact_member_scope": "passed",
+            "git_blob_and_source_digest_checks": 168,
+            "independent_python_ast_span_checks": 0,
+            "inventory_completeness": "not independently established",
+            "lineage_truth": "not independently established for these real repositories",
+            "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+            "python_span_examples": [],
+            "sql_foreign_keys": "passed",
+            "sql_integrity": "passed",
+            "stored_contracts": "passed"
+          },
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 188
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 1281
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 6
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 1224
+            }
+          ],
+          "database_bytes": 79904768,
+          "deadline_seconds": 150,
+          "git_unchanged": true,
+          "operation_seconds": 0.32295940024778247,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 184,
+            "unsupported_language": 61
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "prerequisite_status": "passed",
+          "publication": "unchanged",
+          "repository": "express",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 79904768,
+            "observed_tree_cpu_seconds": 11.140625,
+            "owned_identities": 11,
+            "rss_tree_sampled_peak_bytes": 132034560,
+            "sample_interval_seconds": 0.05,
+            "samples": 161,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 0
+          },
+          "returncode": 0,
+          "row_counts": {
+            "definition": 5431,
+            "event": 4590,
+            "lineage": 4059,
+            "lineage_link": 2630,
+            "occurrence": 7234,
+            "version": 3286
+          },
+          "scenario": "noop",
+          "scenario_valid": true,
+          "status": "passed",
+          "supervised_seconds": 12.037915299646556,
+          "verification_seconds": 10.840110099874437,
+          "workers": 4
+        },
+        {
+          "completed_seconds": null,
+          "correctness": {
+            "canonical_digest": "28fe5eb08b6f121b2731fa067b77ef35c707e5c9a7ee9310297103cc931e72af",
+            "exact_member_scope": "passed",
+            "git_blob_and_source_digest_checks": 168,
+            "independent_python_ast_span_checks": 0,
+            "inventory_completeness": "not independently established",
+            "lineage_truth": "not independently established for these real repositories",
+            "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+            "python_span_examples": [],
+            "sql_foreign_keys": "passed",
+            "sql_integrity": "passed",
+            "stored_contracts": "passed"
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 188
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 1281
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 6
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 1224
+            }
+          ],
+          "database_bytes": 79904768,
+          "deadline_seconds": 150,
+          "git_unchanged": true,
+          "operation_seconds": null,
+          "parse_statuses": {
+            "complete": 184,
+            "unsupported_language": 61
+          },
+          "prerequisite_status": "passed",
+          "publication": "unchanged",
+          "query_lineage_check": "stable only; no independent event/identity truth",
+          "query_path": ".eslintrc.yml",
+          "query_source_checks": 8,
+          "repository": "express",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 79904768,
+            "observed_tree_cpu_seconds": 11.875,
+            "owned_identities": 40,
+            "rss_tree_sampled_peak_bytes": 148852736,
+            "sample_interval_seconds": 0.05,
+            "samples": 173,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 0
+          },
+          "returncode": 0,
+          "row_counts": {
+            "definition": 5431,
+            "event": 4590,
+            "lineage": 4059,
+            "lineage_link": 2630,
+            "occurrence": 7234,
+            "version": 3286
+          },
+          "scenario": "query",
+          "scenario_valid": true,
+          "session_open_seconds": 0.16723630018532276,
+          "source_read_seconds": [
+            0.16651689959689975,
+            0.08213389990851283,
+            0.08410869957879186,
+            0.08271940005943179,
+            0.08136019995436072,
+            0.08168369997292757,
+            0.08182469988241792,
+            0.08472950011491776
+          ],
+          "status": "passed",
+          "supervised_seconds": 12.988625299651176,
+          "verification_seconds": 10.51655609998852,
+          "warm_query_seconds": {
+            "entities": [
+              0.010389199946075678,
+              0.005501800216734409,
+              0.004846000112593174,
+              0.005103700328618288,
+              0.004414199851453304
+            ],
+            "history": [
+              0.033110400196164846,
+              0.012076800223439932,
+              0.011263599619269371,
+              0.009846599772572517,
+              0.009379200171679258
+            ],
+            "state": [
+              0.0032834000885486603,
+              0.0011367001570761204,
+              0.0011077001690864563,
+              0.0014725998044013977,
+              0.0013782000169157982
+            ]
+          },
+          "workers": 4
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": 54.72431610012427,
+          "correctness": {
+            "canonical_digest": "6b55362f74397332fa7cbb25d4340a324b51aa2df664a2cef5de873dcf9173e0",
+            "exact_member_scope": "passed",
+            "git_blob_and_source_digest_checks": 160,
+            "independent_python_ast_span_checks": 0,
+            "inventory_completeness": "not independently established",
+            "lineage_truth": "not independently established for these real repositories",
+            "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+            "python_span_examples": [],
+            "sql_foreign_keys": "passed",
+            "sql_integrity": "passed",
+            "stored_contracts": "passed"
+          },
+          "counters": {
+            "cached_files": 1159,
+            "commits": 20,
+            "parsed_files": 245
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 184
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 1220
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 5
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 1159
+            }
+          ],
+          "database_bytes": 74543104,
+          "deadline_seconds": 150,
+          "git_unchanged": true,
+          "operation_seconds": 54.72431610012427,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 1
+          },
+          "parse_statuses": {
+            "complete": 184,
+            "unsupported_language": 61
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "publication": "published",
+          "repository": "express",
+          "requested_commit_count": 20,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 74543104,
+            "observed_tree_cpu_seconds": 63.421875,
+            "owned_identities": 50,
+            "rss_tree_sampled_peak_bytes": 310517760,
+            "sample_interval_seconds": 0.05,
+            "samples": 870,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 75243592
+          },
+          "returncode": 0,
+          "row_counts": {
+            "definition": 5431,
+            "event": 4528,
+            "lineage": 4039,
+            "lineage_link": 2356,
+            "occurrence": 6979,
+            "version": 3286
+          },
+          "scenario": "serial_history",
+          "status": "passed",
+          "supervised_seconds": 65.7150524999015,
+          "verification_seconds": 10.104400699958205,
+          "workers": 1
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": 56.152370600029826,
+          "correctness": {
+            "canonical_digest": "28fe5eb08b6f121b2731fa067b77ef35c707e5c9a7ee9310297103cc931e72af",
+            "exact_member_scope": "passed",
+            "git_blob_and_source_digest_checks": 168,
+            "independent_python_ast_span_checks": 0,
+            "inventory_completeness": "not independently established",
+            "lineage_truth": "not independently established for these real repositories",
+            "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+            "python_span_examples": [],
+            "sql_foreign_keys": "passed",
+            "sql_integrity": "passed",
+            "stored_contracts": "passed"
+          },
+          "counters": {
+            "cached_files": 1224,
+            "commits": 21,
+            "parsed_files": 245
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 188
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 1281
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 6
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 1224
+            }
+          ],
+          "database_bytes": 76476416,
+          "deadline_seconds": 150,
+          "git_unchanged": true,
+          "operation_seconds": 56.152370600029826,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 184,
+            "unsupported_language": 61
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "publication": "published",
+          "repository": "express",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 76476416,
+            "observed_tree_cpu_seconds": 68.28125,
+            "owned_identities": 50,
+            "rss_tree_sampled_peak_bytes": 416182272,
+            "sample_interval_seconds": 0.05,
+            "samples": 898,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 77188232
+          },
+          "returncode": 0,
+          "row_counts": {
+            "definition": 5431,
+            "event": 4590,
+            "lineage": 4059,
+            "lineage_link": 2630,
+            "occurrence": 7234,
+            "version": 3286
+          },
+          "scenario": "cold_final",
+          "status": "passed",
+          "supervised_seconds": 67.6548524000682,
+          "verification_seconds": 10.566512700170279,
+          "workers": 4
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": 20.14438970014453,
+          "correctness": {
+            "canonical_digest": "eeadcbd0a148c3ea3df6e40466be626d111291ab6ef0e74be2fe7958f3f9f490",
+            "exact_member_scope": "passed",
+            "git_blob_and_source_digest_checks": 8,
+            "independent_python_ast_span_checks": 0,
+            "inventory_completeness": "not independently established",
+            "lineage_truth": "not independently established for these real repositories",
+            "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+            "python_span_examples": [],
+            "sql_foreign_keys": "passed",
+            "sql_integrity": "passed",
+            "stored_contracts": "passed"
+          },
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 236
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 152
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "non_source_object",
+              "records": 1
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 84
+            }
+          ],
+          "database_bytes": 71110656,
+          "deadline_seconds": 150,
+          "git_unchanged": true,
+          "operation_seconds": 20.14438970014453,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 152,
+            "unsupported_language": 84
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "publication": "published",
+          "repository": "ripgrep",
+          "requested_commit_count": 1,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 71110656,
+            "observed_tree_cpu_seconds": 33.140625,
+            "owned_identities": 26,
+            "rss_tree_sampled_peak_bytes": 425201664,
+            "sample_interval_seconds": 0.05,
+            "samples": 391,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 71753952
+          },
+          "returncode": 0,
+          "row_counts": {
+            "definition": 5161,
+            "event": 5161,
+            "lineage": 5161,
+            "lineage_link": 0,
+            "occurrence": 5161,
+            "version": 4544
+          },
+          "scenario": "snapshot",
+          "status": "passed",
+          "supervised_seconds": 30.337335499934852,
+          "verification_seconds": 9.30752529995516,
+          "workers": 4
+        },
+        {
+          "completed_seconds": null,
+          "correctness": null,
+          "deadline_seconds": 150,
+          "error": {
+            "code": "invalid_record",
+            "message": "only synthetic roots have module kind",
+            "type": "IndexContractError"
+          },
+          "git_unchanged": true,
+          "operation_seconds": null,
+          "publication": "not_attempted",
+          "repository": "ripgrep",
+          "requested_commit_count": 20,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 319488,
+            "observed_tree_cpu_seconds": 37.125,
+            "owned_identities": 24,
+            "rss_tree_sampled_peak_bytes": 436695040,
+            "sample_interval_seconds": 0.05,
+            "samples": 446,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 12619592
+          },
+          "returncode": 1,
+          "scenario": "history",
+          "status": "error",
+          "supervised_seconds": 33.9971649996005,
+          "workers": 4
+        },
+        {
+          "completed_seconds": null,
+          "correctness": null,
+          "deadline_seconds": 150,
+          "error": {
+            "code": "invalid_record",
+            "message": "only synthetic roots have module kind",
+            "type": "IndexContractError"
+          },
+          "git_unchanged": true,
+          "operation_seconds": null,
+          "prerequisite_status": "error",
+          "publication": "not_attempted",
+          "repository": "ripgrep",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 319488,
+            "observed_tree_cpu_seconds": 37.5,
+            "owned_identities": 25,
+            "rss_tree_sampled_peak_bytes": 437334016,
+            "sample_interval_seconds": 0.05,
+            "samples": 454,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 12298232
+          },
+          "returncode": 1,
+          "scenario": "append",
+          "scenario_valid": false,
+          "status": "error",
+          "supervised_seconds": 34.57616480020806,
+          "workers": 4
+        },
+        {
+          "completed_seconds": null,
+          "correctness": null,
+          "deadline_seconds": 150,
+          "error": {
+            "code": "invalid_record",
+            "message": "only synthetic roots have module kind",
+            "type": "IndexContractError"
+          },
+          "git_unchanged": true,
+          "operation_seconds": null,
+          "prerequisite_status": "error",
+          "publication": "not_attempted",
+          "repository": "ripgrep",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 319488,
+            "observed_tree_cpu_seconds": 36.796875,
+            "owned_identities": 26,
+            "rss_tree_sampled_peak_bytes": 437813248,
+            "sample_interval_seconds": 0.05,
+            "samples": 448,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 12298232
+          },
+          "returncode": 1,
+          "scenario": "noop",
+          "scenario_valid": false,
+          "status": "error",
+          "supervised_seconds": 34.00359500013292,
+          "workers": 4
+        },
+        {
+          "completed_seconds": null,
+          "correctness": null,
+          "deadline_seconds": 150,
+          "error": {
+            "code": null,
+            "message": "",
+            "type": "AssertionError"
+          },
+          "git_unchanged": true,
+          "operation_seconds": null,
+          "prerequisite_status": "error",
+          "publication": "not_attempted",
+          "repository": "ripgrep",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 319488,
+            "observed_tree_cpu_seconds": 0.453125,
+            "owned_identities": 5,
+            "rss_tree_sampled_peak_bytes": 41484288,
+            "sample_interval_seconds": 0.05,
+            "samples": 10,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 0
+          },
+          "returncode": 1,
+          "scenario": "query",
+          "scenario_valid": false,
+          "status": "correctness_failed",
+          "supervised_seconds": 0.8353796000592411,
+          "workers": 4
+        },
+        {
+          "completed_seconds": null,
+          "correctness": null,
+          "deadline_seconds": 150,
+          "error": {
+            "code": "invalid_record",
+            "message": "only synthetic roots have module kind",
+            "type": "IndexContractError"
+          },
+          "git_unchanged": true,
+          "operation_seconds": null,
+          "publication": "not_attempted",
+          "repository": "ripgrep",
+          "requested_commit_count": 20,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 319488,
+            "observed_tree_cpu_seconds": 36.078125,
+            "owned_identities": 21,
+            "rss_tree_sampled_peak_bytes": 307425280,
+            "sample_interval_seconds": 0.05,
+            "samples": 494,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 12619592
+          },
+          "returncode": 1,
+          "scenario": "serial_history",
+          "status": "error",
+          "supervised_seconds": 37.32582399994135,
+          "workers": 1
+        },
+        {
+          "completed_seconds": null,
+          "correctness": null,
+          "deadline_seconds": 150,
+          "error": {
+            "code": "invalid_record",
+            "message": "only synthetic roots have module kind",
+            "type": "IndexContractError"
+          },
+          "git_unchanged": true,
+          "operation_seconds": null,
+          "publication": "not_attempted",
+          "repository": "ripgrep",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 319488,
+            "observed_tree_cpu_seconds": 38.640625,
+            "owned_identities": 25,
+            "rss_tree_sampled_peak_bytes": 441765888,
+            "sample_interval_seconds": 0.05,
+            "samples": 462,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 12619592
+          },
+          "returncode": 1,
+          "scenario": "cold_final",
+          "status": "error",
+          "supervised_seconds": 35.61819129996002,
+          "workers": 4
+        }
+      ],
+      "campaign": 1,
+      "created_utc": "2026-10-14T12:42:41.248515+00:00",
+      "environment": {
+        "builder_sha256": "1fc4adf349ef66f778ef7de5993cc8404ad7665d26c9279c497760bb1bd01928",
+        "cache": "fresh SQLite per cold scenario; OS/Git caches uncontrolled and warm",
+        "contention": "shared host; parent agent active",
+        "git": "git version 2.55.0.windows.5",
+        "grammars_preflight": {
+          "javascript": true,
+          "python": true,
+          "rust": true
+        },
+        "logical_cpus": 16,
+        "machine": "AMD64",
+        "packages": {
+          "psutil": "7.2.2",
+          "tree-sitter": "0.26.0",
+          "tree-sitter-language-pack": "1.14.3"
+        },
+        "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233",
+        "physical_cpus": 8,
+        "platform": "Windows-10-10.0.26100-SP0",
+        "power": "uncontrolled",
+        "processor": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+        "python": "3.11.9",
+        "ram_bytes": 68665831424,
+        "resources": {
+          "cleanup_complete": true,
+          "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+          "main_sampled_peak_bytes": null,
+          "observed_tree_cpu_seconds": 0.625,
+          "owned_identities": 8,
+          "rss_tree_sampled_peak_bytes": 47726592,
+          "sample_interval_seconds": 0.05,
+          "samples": 14,
+          "temp_spool_bytes": null,
+          "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+          "unavailable": [],
+          "wal_sampled_peak_bytes": null
+        },
+        "returncode": 0,
+        "runtime_source_sha256": "266264a80e15f792087a875315bbbf6f84e0b2e9c487d8c4f04631a5dcb0639e",
+        "source_dirty": false,
+        "source_revision": "b64d43fbe8f57d6ce920aca059ef3de061bf59d1",
+        "sqlite": "3.45.1",
+        "supervised_seconds": 1.1139956000261009
+      },
+      "equivalence": [
+        {
+          "lineage_truth": "equivalence does not prove accepted links true",
+          "repository": "flask",
+          "scenarios": [
+            "history",
+            "serial_history"
+          ],
+          "scope": "same policy/anchor; immutable records intact; only operational generation/allocation fields excluded",
+          "status": "unavailable"
+        },
+        {
+          "lineage_truth": "equivalence does not prove accepted links true",
+          "repository": "flask",
+          "scenarios": [
+            "append",
+            "cold_final"
+          ],
+          "scope": "same policy/anchor; immutable records intact; only operational generation/allocation fields excluded",
+          "status": "unavailable"
+        },
+        {
+          "lineage_truth": "equivalence does not prove accepted links true",
+          "repository": "express",
+          "scenarios": [
+            "history",
+            "serial_history"
+          ],
+          "scope": "same policy/anchor; immutable records intact; only operational generation/allocation fields excluded",
+          "status": "equal"
+        },
+        {
+          "lineage_truth": "equivalence does not prove accepted links true",
+          "repository": "express",
+          "scenarios": [
+            "append",
+            "cold_final"
+          ],
+          "scope": "same policy/anchor; immutable records intact; only operational generation/allocation fields excluded",
+          "status": "equal"
+        },
+        {
+          "lineage_truth": "equivalence does not prove accepted links true",
+          "repository": "ripgrep",
+          "scenarios": [
+            "history",
+            "serial_history"
+          ],
+          "scope": "same policy/anchor; immutable records intact; only operational generation/allocation fields excluded",
+          "status": "unavailable"
+        },
+        {
+          "lineage_truth": "equivalence does not prove accepted links true",
+          "repository": "ripgrep",
+          "scenarios": [
+            "append",
+            "cold_final"
+          ],
+          "scope": "same policy/anchor; immutable records intact; only operational generation/allocation fields excluded",
+          "status": "unavailable"
+        }
+      ],
+      "manifest": {
+        "history_commits": 20,
+        "max_seconds": 150,
+        "max_storage_bytes": 268435456,
+        "repositories": [
+          {
+            "name": "flask",
+            "tip": "d086db856be187255b8ec61ef409357393020f32"
+          },
+          {
+            "name": "express",
+            "tip": "a419aa7350389a275ab45fde2e849ed1f02449ef"
+          },
+          {
+            "name": "ripgrep",
+            "tip": "3fce3b5bb0236da2df6d99672afb8a719642eca7"
+          }
+        ],
+        "schema_version": 1,
+        "source_revision": "b64d43fbe8f57d6ce920aca059ef3de061bf59d1",
+        "total_seconds": 900,
+        "workers": 4
+      },
+      "measured_campaign_seconds": 776.1888510002755,
+      "repositories": [
+        {
+          "anchor": "258d68b6ff5e2244386540f48b48bab90d6ab827",
+          "append_commits": 1,
+          "available_commit_count": 223,
+          "commits": [
+            "258d68b6ff5e2244386540f48b48bab90d6ab827",
+            "2ac89889f4cc330eabd50f295dcef02828522c69",
+            "06ea505ce2b2042af26e96d35ebf159af7c0869d",
+            "dcbede0cb00df32e7f1895e19e37d5f40a75d1f6",
+            "7374c85ddefc3f4b177a698ab9f0cbb6a5c0b392",
+            "9fcd34c9f3065640bd1cd86234216ca068633fb9",
+            "954f5684e4841aad84a8eec7ace7b81a0d3f6831",
+            "36e4a824f340fdee7ed50937ba8e7f6bc7d17f81",
+            "6a2f545bfd8ed31e19066a299296917e034aca58",
+            "8b4fd5d18611e63080b826ecfefe8659dba7d2e4",
+            "514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b",
+            "05e9c6bd630ecf4ec0ec884b1fc7901663737bc7",
+            "3596b1ab61cea85edb8970e83ff61daa073facf8",
+            "d8eaaba824655046958d1a97f11780de460c3271",
+            "2a8a38b051fc248865730bf3511bf2e2ea325e81",
+            "d318b683471101618febed18996405ad26462110",
+            "d73fa1cdcbd8b1465c151db8924ba58b1dd14e35",
+            "728c5e440af704a786384159184f695cf04ecbe7",
+            "41cb747cd5a9b43da43bf809ad974722542603db",
+            "329c32b916938d33fec41f40eb7ed854bf0b3e2b",
+            "d086db856be187255b8ec61ef409357393020f32"
+          ],
+          "download_git_unchanged": true,
+          "history_commits": 20,
+          "history_tip": "329c32b916938d33fec41f40eb7ed854bf0b3e2b",
+          "license": "BSD-3-Clause",
+          "license_path": "LICENSE.txt",
+          "license_sha256": "489a8e1108509ed98a37bb983e11e0f7e1d31f0bd8f99a79c8448e7ff37d07ea",
+          "name": "flask",
+          "shallow": true,
+          "tip": "d086db856be187255b8ec61ef409357393020f32",
+          "tip_tree_entries": 236,
+          "url": "http<local-path-redacted>"
+        },
+        {
+          "anchor": "91d333b4cfea158c9798d32e6665d36bd8e37c3d",
+          "append_commits": 1,
+          "available_commit_count": 80,
+          "commits": [
+            "91d333b4cfea158c9798d32e6665d36bd8e37c3d",
+            "2574a53bbc52cbb3c2a68c080a931d8624fdb5c7",
+            "023767fe9872e029271df1418f73401bff20ff40",
+            "c35284ee7afddb267da747b8c1d66de71982c026",
+            "4fe723dad4c93de3a2c37f923563a06798d98db6",
+            "4e65ec983d332edc0dfc0e8b5efb7fa4fbb432d8",
+            "bed501c695a61886399ee622875f3be933c716d8",
+            "53d4a0d606c0388f764f192b306ce0e90200e7e8",
+            "3ce6d0eb86e9d93529ff3191c6bb5db8ce6e72c8",
+            "9a34acf03cb818ff3f8bc40e44176e277a25cbb9",
+            "98bd4cd96b250d25e1672c36f49cfc743bc801e7",
+            "3b7e39fe74371ddabc77fed736dd22aa71c14f5c",
+            "7ef98448f8b38099ab1ded55e458538ad47a51e7",
+            "9169cbe1127ed1f9bc4f80a70b82c412467dd156",
+            "de777714df3fb1e81ac2d95f509c421478ab1e56",
+            "2717ae3cbf2bdc3f946d22ea6a4e0b5bd438b87b",
+            "9efc29e280018dafc1f0617f3a3d28f4e463b7be",
+            "8c2fcfcb7d37c9c2e89363b7b86a092768c3a8a3",
+            "cf6722bf89a86905281d9160b6482e08166b5ef0",
+            "6d2df035a95f3d1002be3e29997b7a4bfe976b5f",
+            "a419aa7350389a275ab45fde2e849ed1f02449ef"
+          ],
+          "download_git_unchanged": true,
+          "history_commits": 20,
+          "history_tip": "6d2df035a95f3d1002be3e29997b7a4bfe976b5f",
+          "license": "MIT",
+          "license_path": "LICENSE",
+          "license_sha256": "95a5762890e5c1c9808921cef095661fc482c5e1f0bba31446ac85595df6237c",
+          "name": "express",
+          "shallow": true,
+          "tip": "a419aa7350389a275ab45fde2e849ed1f02449ef",
+          "tip_tree_entries": 214,
+          "url": "http<local-path-redacted>"
+        },
+        {
+          "anchor": "626b8951acbced7ff710f4e01624a05f219eec38",
+          "append_commits": 1,
+          "available_commit_count": 80,
+          "commits": [
+            "626b8951acbced7ff710f4e01624a05f219eec38",
+            "6e527e9202f85a39ab2c4698636710204eb096e0",
+            "c55818fd32d68cf742aea67bce86529f198bc985",
+            "b621e65b4fc8a50b55576b07526f21c5d051ad71",
+            "227381db0ee83dfa4341f1e27ff9617c0f5ad992",
+            "d958105d412b6a1ad014cb0e5832a9b029fa4977",
+            "be739c7910288905d966f87607b28435d1576295",
+            "a9dc2228fbddd1d25146f38d0926830812c97419",
+            "59e318f5ace48db54f37bb67c152535bc17fa153",
+            "2ed0c006fee4c441add774a711d9122a88477619",
+            "d57de83a944c1b349be376b6762334009372d454",
+            "d99ac34406f82c03c3938c222f1786495c845034",
+            "8372866810a1f2a647d11d7780984d4402a5c1e9",
+            "f9c05a949d1a0dc8e16dee28ca9605d38611faeb",
+            "dffd776a737dc19a48b758dd6a621de113794121",
+            "435f59fc4b43af3ab32f34d53fa34978f393fe52",
+            "5ed408e17eccfc59bcec48f584feece902873e54",
+            "7525479a9576f1ca4c2d04339d78e47ff5ae9b05",
+            "020687a77d13146923333f0beb274eeabd54a270",
+            "5055264ae021b5d0e01e55f723622d638ea877f0",
+            "3fce3b5bb0236da2df6d99672afb8a719642eca7"
+          ],
+          "download_git_unchanged": true,
+          "history_commits": 20,
+          "history_tip": "5055264ae021b5d0e01e55f723622d638ea877f0",
+          "license": "MIT OR Unlicense",
+          "license_path": "COPYING",
+          "license_sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
+          "name": "ripgrep",
+          "shallow": true,
+          "tip": "3fce3b5bb0236da2df6d99672afb8a719642eca7",
+          "tip_tree_entries": 237,
+          "url": "http<local-path-redacted>"
+        }
+      ],
+      "schema_version": 1,
+      "tooling_hash_provenance": "observed during initial campaign; initial supervisor did not emit hashes",
+      "tooling_sha256": {
+        "bench_public_index.py": "23353669181907f1be79d8e9dcba27a8baeee3c2a06b8c468c6ab391db2d69f2",
+        "public_index_worker.py": "b11a585d13720d79fe7848ef22b63d188cf84806c4a11448c399230d806b2ced"
+      }
+    },
+    {
+      "attempts": [
+        {
+          "build_status": "partial",
+          "completed_seconds": 9.594969300087541,
+          "correctness": {
+            "canonical_digest": "71215b64c8e5326c0853371766089f7a2df4bb18f8c22e8e3f86e050171a783a",
+            "exact_member_scope": "passed",
+            "git_blob_and_source_digest_checks": 8,
+            "independent_python_ast_span_checks": 15,
+            "inventory_completeness": "not independently established",
+            "lineage_truth": "not independently established for these real repositories",
+            "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+            "python_span_examples": [
+              {
+                "end_byte": 3385,
+                "name": "setup",
+                "path": "docs/conf.py",
+                "start_byte": 3334
+              },
+              {
+                "end_byte": 3331,
+                "name": "github_link",
+                "path": "docs/conf.py",
+                "start_byte": 2555
+              },
+              {
+                "end_byte": 591,
+                "name": "create_app",
+                "path": "examples/celery/src/task_app/__init__.py",
+                "start_byte": 110
+              },
+              {
+                "end_byte": 1023,
+                "name": "celery_init_app",
+                "path": "examples/celery/src/task_app/__init__.py",
+                "start_byte": 594
+              },
+              {
+                "end_byte": 208,
+                "name": "block",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 170
+              },
+              {
+                "end_byte": 152,
+                "name": "add",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 104
+              },
+              {
+                "end_byte": 483,
+                "name": "process",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 256
+              },
+              {
+                "end_byte": 658,
+                "name": "add",
+                "path": "examples/celery/src/task_app/views.py",
+                "start_byte": 476
+              }
+            ],
+            "sql_foreign_keys": "passed",
+            "sql_integrity": "passed",
+            "stored_contracts": "passed"
+          },
+          "counters": {
+            "cached_files": 0,
+            "commits": 1,
+            "parsed_files": 236
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 104
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 132
+            }
+          ],
+          "database_bytes": 26062848,
+          "deadline_seconds": 150,
+          "git_unchanged": true,
+          "operation_seconds": 9.594969300087541,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 104,
+            "unsupported_language": 132
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "publication": "published",
+          "repository": "flask",
+          "requested_commit_count": 1,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 26062848,
+            "observed_tree_cpu_seconds": 15.90625,
+            "owned_identities": 33,
+            "rss_tree_sampled_peak_bytes": 288817152,
+            "sample_interval_seconds": 0.05,
+            "samples": 182,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 26442192
+          },
+          "returncode": 0,
+          "row_counts": {
+            "definition": 2202,
+            "event": 2202,
+            "lineage": 2202,
+            "lineage_link": 0,
+            "occurrence": 2202,
+            "version": 1963
+          },
+          "scenario": "snapshot",
+          "status": "passed",
+          "supervised_seconds": 14.204436799976975,
+          "verification_seconds": 3.49631159985438,
+          "workers": 4
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": 64.0280263996683,
+          "correctness": {
+            "canonical_digest": "1cc0cacb0f153ac210c7f7088ac360d452735a12a288a715617089d1165aaf64",
+            "exact_member_scope": "passed",
+            "git_blob_and_source_digest_checks": 160,
+            "independent_python_ast_span_checks": 15,
+            "inventory_completeness": "not independently established",
+            "lineage_truth": "not independently established for these real repositories",
+            "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+            "python_span_examples": [
+              {
+                "end_byte": 3385,
+                "name": "setup",
+                "path": "docs/conf.py",
+                "start_byte": 3334
+              },
+              {
+                "end_byte": 3331,
+                "name": "github_link",
+                "path": "docs/conf.py",
+                "start_byte": 2555
+              },
+              {
+                "end_byte": 1023,
+                "name": "celery_init_app",
+                "path": "examples/celery/src/task_app/__init__.py",
+                "start_byte": 594
+              },
+              {
+                "end_byte": 591,
+                "name": "create_app",
+                "path": "examples/celery/src/task_app/__init__.py",
+                "start_byte": 110
+              },
+              {
+                "end_byte": 208,
+                "name": "block",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 170
+              },
+              {
+                "end_byte": 483,
+                "name": "process",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 256
+              },
+              {
+                "end_byte": 152,
+                "name": "add",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 104
+              },
+              {
+                "end_byte": 782,
+                "name": "block",
+                "path": "examples/celery/src/task_app/views.py",
+                "start_byte": 680
+              }
+            ],
+            "sql_foreign_keys": "passed",
+            "sql_integrity": "passed",
+            "stored_contracts": "passed"
+          },
+          "counters": {
+            "cached_files": 2492,
+            "commits": 20,
+            "parsed_files": 298
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 150
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 2640
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 7
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 2492
+            }
+          ],
+          "database_bytes": 62083072,
+          "deadline_seconds": 150,
+          "git_unchanged": true,
+          "operation_seconds": 64.0280263996683,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 150,
+            "unsupported_language": 148
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "publication": "published",
+          "repository": "flask",
+          "requested_commit_count": 20,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 62083072,
+            "observed_tree_cpu_seconds": 76.296875,
+            "owned_identities": 66,
+            "rss_tree_sampled_peak_bytes": 386744320,
+            "sample_interval_seconds": 0.05,
+            "samples": 1023,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 62710552
+          },
+          "returncode": 0,
+          "row_counts": {
+            "definition": 4888,
+            "event": 3166,
+            "lineage": 2616,
+            "lineage_link": 2881,
+            "occurrence": 7531,
+            "version": 2127
+          },
+          "scenario": "history",
+          "status": "passed",
+          "supervised_seconds": 76.82301829988137,
+          "verification_seconds": 11.880462599918246,
+          "workers": 4
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": 12.426211600191891,
+          "correctness": {
+            "canonical_digest": "bb18f2963347465246c69438108cfb25e4cf8a6e5c5cdc0beac964d5ebb565bc",
+            "exact_member_scope": "passed",
+            "git_blob_and_source_digest_checks": 168,
+            "independent_python_ast_span_checks": 15,
+            "inventory_completeness": "not independently established",
+            "lineage_truth": "not independently established for these real repositories",
+            "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+            "python_span_examples": [
+              {
+                "end_byte": 3385,
+                "name": "setup",
+                "path": "docs/conf.py",
+                "start_byte": 3334
+              },
+              {
+                "end_byte": 3331,
+                "name": "github_link",
+                "path": "docs/conf.py",
+                "start_byte": 2555
+              },
+              {
+                "end_byte": 1023,
+                "name": "celery_init_app",
+                "path": "examples/celery/src/task_app/__init__.py",
+                "start_byte": 594
+              },
+              {
+                "end_byte": 591,
+                "name": "create_app",
+                "path": "examples/celery/src/task_app/__init__.py",
+                "start_byte": 110
+              },
+              {
+                "end_byte": 208,
+                "name": "block",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 170
+              },
+              {
+                "end_byte": 483,
+                "name": "process",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 256
+              },
+              {
+                "end_byte": 152,
+                "name": "add",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 104
+              },
+              {
+                "end_byte": 782,
+                "name": "block",
+                "path": "examples/celery/src/task_app/views.py",
+                "start_byte": 680
+              }
+            ],
+            "sql_foreign_keys": "passed",
+            "sql_integrity": "passed",
+            "stored_contracts": "passed"
+          },
+          "counters": {
+            "cached_files": 132,
+            "commits": 21,
+            "parsed_files": 1
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 151
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 2772
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 7
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 2624
+            }
+          ],
+          "database_bytes": 67338240,
+          "deadline_seconds": 150,
+          "git_unchanged": true,
+          "operation_seconds": 12.426211600191891,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 151,
+            "unsupported_language": 148
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "prerequisite_status": "passed",
+          "publication": "published",
+          "repository": "flask",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 67338240,
+            "observed_tree_cpu_seconds": 24.328125,
+            "owned_identities": 32,
+            "rss_tree_sampled_peak_bytes": 220389376,
+            "sample_interval_seconds": 0.05,
+            "samples": 343,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 7935152
+          },
+          "returncode": 0,
+          "row_counts": {
+            "definition": 4929,
+            "event": 3170,
+            "lineage": 2617,
+            "lineage_link": 2923,
+            "occurrence": 7613,
+            "version": 2129
+          },
+          "scenario": "append",
+          "scenario_valid": true,
+          "status": "passed",
+          "supervised_seconds": 25.994783999864012,
+          "verification_seconds": 12.594031899701804,
+          "workers": 4
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": 0.37618190003558993,
+          "correctness": {
+            "canonical_digest": "bb18f2963347465246c69438108cfb25e4cf8a6e5c5cdc0beac964d5ebb565bc",
+            "exact_member_scope": "passed",
+            "git_blob_and_source_digest_checks": 168,
+            "independent_python_ast_span_checks": 15,
+            "inventory_completeness": "not independently established",
+            "lineage_truth": "not independently established for these real repositories",
+            "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+            "python_span_examples": [
+              {
+                "end_byte": 3385,
+                "name": "setup",
+                "path": "docs/conf.py",
+                "start_byte": 3334
+              },
+              {
+                "end_byte": 3331,
+                "name": "github_link",
+                "path": "docs/conf.py",
+                "start_byte": 2555
+              },
+              {
+                "end_byte": 1023,
+                "name": "celery_init_app",
+                "path": "examples/celery/src/task_app/__init__.py",
+                "start_byte": 594
+              },
+              {
+                "end_byte": 591,
+                "name": "create_app",
+                "path": "examples/celery/src/task_app/__init__.py",
+                "start_byte": 110
+              },
+              {
+                "end_byte": 208,
+                "name": "block",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 170
+              },
+              {
+                "end_byte": 483,
+                "name": "process",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 256
+              },
+              {
+                "end_byte": 152,
+                "name": "add",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 104
+              },
+              {
+                "end_byte": 782,
+                "name": "block",
+                "path": "examples/celery/src/task_app/views.py",
+                "start_byte": 680
+              }
+            ],
+            "sql_foreign_keys": "passed",
+            "sql_integrity": "passed",
+            "stored_contracts": "passed"
+          },
+          "counters": {
+            "cached_files": 0,
+            "commits": 21,
+            "parsed_files": 0
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 151
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 2772
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 7
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 2624
+            }
+          ],
+          "database_bytes": 67338240,
+          "deadline_seconds": 150,
+          "git_unchanged": true,
+          "operation_seconds": 0.37618190003558993,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 151,
+            "unsupported_language": 148
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "prerequisite_status": "passed",
+          "publication": "unchanged",
+          "repository": "flask",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 67338240,
+            "observed_tree_cpu_seconds": 11.875,
+            "owned_identities": 24,
+            "rss_tree_sampled_peak_bytes": 142520320,
+            "sample_interval_seconds": 0.05,
+            "samples": 177,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 0
+          },
+          "returncode": 0,
+          "row_counts": {
+            "definition": 4929,
+            "event": 3170,
+            "lineage": 2617,
+            "lineage_link": 2923,
+            "occurrence": 7613,
+            "version": 2129
+          },
+          "scenario": "noop",
+          "scenario_valid": true,
+          "status": "passed",
+          "supervised_seconds": 13.183869500178844,
+          "verification_seconds": 11.936093299649656,
+          "workers": 4
+        },
+        {
+          "completed_seconds": null,
+          "correctness": {
+            "canonical_digest": "bb18f2963347465246c69438108cfb25e4cf8a6e5c5cdc0beac964d5ebb565bc",
+            "exact_member_scope": "passed",
+            "git_blob_and_source_digest_checks": 168,
+            "independent_python_ast_span_checks": 15,
+            "inventory_completeness": "not independently established",
+            "lineage_truth": "not independently established for these real repositories",
+            "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+            "python_span_examples": [
+              {
+                "end_byte": 3385,
+                "name": "setup",
+                "path": "docs/conf.py",
+                "start_byte": 3334
+              },
+              {
+                "end_byte": 3331,
+                "name": "github_link",
+                "path": "docs/conf.py",
+                "start_byte": 2555
+              },
+              {
+                "end_byte": 1023,
+                "name": "celery_init_app",
+                "path": "examples/celery/src/task_app/__init__.py",
+                "start_byte": 594
+              },
+              {
+                "end_byte": 591,
+                "name": "create_app",
+                "path": "examples/celery/src/task_app/__init__.py",
+                "start_byte": 110
+              },
+              {
+                "end_byte": 208,
+                "name": "block",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 170
+              },
+              {
+                "end_byte": 483,
+                "name": "process",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 256
+              },
+              {
+                "end_byte": 152,
+                "name": "add",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 104
+              },
+              {
+                "end_byte": 782,
+                "name": "block",
+                "path": "examples/celery/src/task_app/views.py",
+                "start_byte": 680
+              }
+            ],
+            "sql_foreign_keys": "passed",
+            "sql_integrity": "passed",
+            "stored_contracts": "passed"
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 151
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 2772
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 7
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 2624
+            }
+          ],
+          "database_bytes": 67338240,
+          "deadline_seconds": 150,
+          "git_unchanged": true,
+          "operation_seconds": null,
+          "parse_statuses": {
+            "complete": 151,
+            "unsupported_language": 148
+          },
+          "prerequisite_status": "passed",
+          "publication": "unchanged",
+          "query_lineage_check": "stable only; no independent event/identity truth",
+          "query_path": ".devcontainer/devcontainer.json",
+          "query_source_checks": 8,
+          "repository": "flask",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 67338240,
+            "observed_tree_cpu_seconds": 13.84375,
+            "owned_identities": 49,
+            "rss_tree_sampled_peak_bytes": 157278208,
+            "sample_interval_seconds": 0.05,
+            "samples": 210,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 0
+          },
+          "returncode": 0,
+          "row_counts": {
+            "definition": 4929,
+            "event": 3170,
+            "lineage": 2617,
+            "lineage_link": 2923,
+            "occurrence": 7613,
+            "version": 2129
+          },
+          "scenario": "query",
+          "scenario_valid": true,
+          "session_open_seconds": 0.1809388999827206,
+          "source_read_seconds": [
+            0.191489199642092,
+            0.09644979983568192,
+            0.09991940017789602,
+            0.08975209994241595,
+            0.0999694000929594,
+            0.10340450005605817,
+            0.11438939999789,
+            0.08431740012019873
+          ],
+          "status": "passed",
+          "supervised_seconds": 16.11196509981528,
+          "verification_seconds": 13.228987599723041,
+          "warm_query_seconds": {
+            "entities": [
+              0.012288100086152554,
+              0.003197300247848034,
+              0.0029592998325824738,
+              0.00290600024163723,
+              0.0029506999999284744
+            ],
+            "history": [
+              0.019532099831849337,
+              0.007909100037068129,
+              0.007178000174462795,
+              0.007697999943047762,
+              0.0064582000486552715
+            ],
+            "state": [
+              0.0039623999036848545,
+              0.001554899848997593,
+              0.0014353999868035316,
+              0.001422099769115448,
+              0.0013385000638663769
+            ]
+          },
+          "workers": 4
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": 66.47303410014138,
+          "correctness": {
+            "canonical_digest": "1cc0cacb0f153ac210c7f7088ac360d452735a12a288a715617089d1165aaf64",
+            "exact_member_scope": "passed",
+            "git_blob_and_source_digest_checks": 160,
+            "independent_python_ast_span_checks": 15,
+            "inventory_completeness": "not independently established",
+            "lineage_truth": "not independently established for these real repositories",
+            "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+            "python_span_examples": [
+              {
+                "end_byte": 3385,
+                "name": "setup",
+                "path": "docs/conf.py",
+                "start_byte": 3334
+              },
+              {
+                "end_byte": 3331,
+                "name": "github_link",
+                "path": "docs/conf.py",
+                "start_byte": 2555
+              },
+              {
+                "end_byte": 1023,
+                "name": "celery_init_app",
+                "path": "examples/celery/src/task_app/__init__.py",
+                "start_byte": 594
+              },
+              {
+                "end_byte": 591,
+                "name": "create_app",
+                "path": "examples/celery/src/task_app/__init__.py",
+                "start_byte": 110
+              },
+              {
+                "end_byte": 208,
+                "name": "block",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 170
+              },
+              {
+                "end_byte": 483,
+                "name": "process",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 256
+              },
+              {
+                "end_byte": 152,
+                "name": "add",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 104
+              },
+              {
+                "end_byte": 782,
+                "name": "block",
+                "path": "examples/celery/src/task_app/views.py",
+                "start_byte": 680
+              }
+            ],
+            "sql_foreign_keys": "passed",
+            "sql_integrity": "passed",
+            "stored_contracts": "passed"
+          },
+          "counters": {
+            "cached_files": 2492,
+            "commits": 20,
+            "parsed_files": 298
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 150
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 2640
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 7
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 2492
+            }
+          ],
+          "database_bytes": 62083072,
+          "deadline_seconds": 150,
+          "git_unchanged": true,
+          "operation_seconds": 66.47303410014138,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 1
+          },
+          "parse_statuses": {
+            "complete": 150,
+            "unsupported_language": 148
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "publication": "published",
+          "repository": "flask",
+          "requested_commit_count": 20,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 62083072,
+            "observed_tree_cpu_seconds": 75.90625,
+            "owned_identities": 63,
+            "rss_tree_sampled_peak_bytes": 260091904,
+            "sample_interval_seconds": 0.05,
+            "samples": 1055,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 62710552
+          },
+          "returncode": 0,
+          "row_counts": {
+            "definition": 4888,
+            "event": 3166,
+            "lineage": 2616,
+            "lineage_link": 2881,
+            "occurrence": 7531,
+            "version": 2127
+          },
+          "scenario": "serial_history",
+          "status": "passed",
+          "supervised_seconds": 79.1909476001747,
+          "verification_seconds": 11.77527410024777,
+          "workers": 1
+        },
+        {
+          "build_status": "partial",
+          "completed_seconds": 65.19620499992743,
+          "correctness": {
+            "canonical_digest": "bb18f2963347465246c69438108cfb25e4cf8a6e5c5cdc0beac964d5ebb565bc",
+            "exact_member_scope": "passed",
+            "git_blob_and_source_digest_checks": 168,
+            "independent_python_ast_span_checks": 15,
+            "inventory_completeness": "not independently established",
+            "lineage_truth": "not independently established for these real repositories",
+            "non_python_spans": "byte/digest checked; no independent JS/Rust grammar oracle",
+            "python_span_examples": [
+              {
+                "end_byte": 3385,
+                "name": "setup",
+                "path": "docs/conf.py",
+                "start_byte": 3334
+              },
+              {
+                "end_byte": 3331,
+                "name": "github_link",
+                "path": "docs/conf.py",
+                "start_byte": 2555
+              },
+              {
+                "end_byte": 1023,
+                "name": "celery_init_app",
+                "path": "examples/celery/src/task_app/__init__.py",
+                "start_byte": 594
+              },
+              {
+                "end_byte": 591,
+                "name": "create_app",
+                "path": "examples/celery/src/task_app/__init__.py",
+                "start_byte": 110
+              },
+              {
+                "end_byte": 208,
+                "name": "block",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 170
+              },
+              {
+                "end_byte": 483,
+                "name": "process",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 256
+              },
+              {
+                "end_byte": 152,
+                "name": "add",
+                "path": "examples/celery/src/task_app/tasks.py",
+                "start_byte": 104
+              },
+              {
+                "end_byte": 782,
+                "name": "block",
+                "path": "examples/celery/src/task_app/views.py",
+                "start_byte": 680
+              }
+            ],
+            "sql_foreign_keys": "passed",
+            "sql_integrity": "passed",
+            "stored_contracts": "passed"
+          },
+          "counters": {
+            "cached_files": 2624,
+            "commits": 21,
+            "parsed_files": 299
+          },
+          "coverage": [
+            {
+              "category": "extraction",
+              "omitted": 0,
+              "reason": "complete",
+              "records": 151
+            },
+            {
+              "category": "extraction",
+              "omitted": null,
+              "reason": "unsupported_language",
+              "records": 2772
+            },
+            {
+              "category": "matching",
+              "omitted": null,
+              "reason": "candidate_limit",
+              "records": 7
+            },
+            {
+              "category": "source_availability",
+              "omitted": null,
+              "reason": "unchecked_cached_source",
+              "records": 2624
+            }
+          ],
+          "database_bytes": 62865408,
+          "deadline_seconds": 150,
+          "git_unchanged": true,
+          "operation_seconds": 65.19620499992743,
+          "operational_settings": {
+            "max_candidates": 64,
+            "max_pairs": 10000,
+            "max_storage_bytes": 268435456,
+            "page_size": 1000,
+            "parse_limits": {
+              "max_blob_bytes": 5242880,
+              "max_definitions": 50000,
+              "max_representation_bytes": 33554432
+            },
+            "parse_timeout_seconds": 5.0,
+            "workers": 4
+          },
+          "parse_statuses": {
+            "complete": 151,
+            "unsupported_language": 148
+          },
+          "policy": {
+            "limits": {
+              "max_blob_bytes": 5242880,
+              "max_candidates": 64,
+              "max_definitions": 50000,
+              "max_pairs": 10000,
+              "max_representation_bytes": 33554432
+            },
+            "match_fingerprint": "e4f4aa50fa1e2a7adddd54968bf831dcca0c68f52c23be2c26b655698fd91165",
+            "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233"
+          },
+          "publication": "published",
+          "repository": "flask",
+          "requested_commit_count": 21,
+          "resources": {
+            "cleanup_complete": true,
+            "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+            "main_sampled_peak_bytes": 62865408,
+            "observed_tree_cpu_seconds": 76.546875,
+            "owned_identities": 55,
+            "rss_tree_sampled_peak_bytes": 375533568,
+            "sample_interval_seconds": 0.05,
+            "samples": 774,
+            "temp_spool_bytes": null,
+            "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+            "unavailable": [],
+            "wal_sampled_peak_bytes": 63497472
+          },
+          "returncode": 0,
+          "row_counts": {
+            "definition": 4929,
+            "event": 3170,
+            "lineage": 2617,
+            "lineage_link": 2923,
+            "occurrence": 7613,
+            "version": 2129
+          },
+          "scenario": "cold_final",
+          "status": "passed",
+          "supervised_seconds": 78.19291679980233,
+          "verification_seconds": 11.96548330038786,
+          "workers": 4
+        }
+      ],
+      "campaign": 2,
+      "created_utc": "2026-10-14T12:58:26.259905+00:00",
+      "environment": {
+        "builder_sha256": "1fc4adf349ef66f778ef7de5993cc8404ad7665d26c9279c497760bb1bd01928",
+        "cache": "fresh SQLite per cold scenario; OS/Git caches uncontrolled and warm",
+        "contention": "shared host; parent agent active",
+        "git": "git version 2.55.0.windows.5",
+        "grammars_preflight": {
+          "javascript": true,
+          "python": true,
+          "rust": true
+        },
+        "logical_cpus": 16,
+        "machine": "AMD64",
+        "packages": {
+          "psutil": "7.2.2",
+          "tree-sitter": "0.26.0",
+          "tree-sitter-language-pack": "1.14.3"
+        },
+        "parse_fingerprint": "cbccca2cd50d8e839d538fc7feae5206ac1e81065a0139bbc01a8e928eef8233",
+        "physical_cpus": 8,
+        "platform": "Windows-10-10.0.26100-SP0",
+        "power": "uncontrolled",
+        "processor": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+        "python": "3.11.9",
+        "ram_bytes": 68665831424,
+        "resources": {
+          "cleanup_complete": true,
+          "limitations": "RSS counts shared pages per process; CPU is a sampled lower bound; short-lived children/transients can be missed",
+          "main_sampled_peak_bytes": null,
+          "observed_tree_cpu_seconds": 0.703125,
+          "owned_identities": 8,
+          "rss_tree_sampled_peak_bytes": 51212288,
+          "sample_interval_seconds": 0.05,
+          "samples": 16,
+          "temp_spool_bytes": null,
+          "temp_spool_reason": "anonymous SQLite TEMP files not portably observable",
+          "unavailable": [],
+          "wal_sampled_peak_bytes": null
+        },
+        "returncode": 0,
+        "runtime_source_sha256": "266264a80e15f792087a875315bbbf6f84e0b2e9c487d8c4f04631a5dcb0639e",
+        "source_dirty": false,
+        "source_revision": "b64d43fbe8f57d6ce920aca059ef3de061bf59d1",
+        "sqlite": "3.45.1",
+        "supervised_seconds": 1.4199936999939382
+      },
+      "equivalence": [
+        {
+          "lineage_truth": "equivalence does not prove accepted links true",
+          "repository": "flask",
+          "scenarios": [
+            "history",
+            "serial_history"
+          ],
+          "scope": "same policy/anchor; immutable records intact; only operational generation/allocation fields excluded",
+          "status": "equal"
+        },
+        {
+          "lineage_truth": "equivalence does not prove accepted links true",
+          "repository": "flask",
+          "scenarios": [
+            "append",
+            "cold_final"
+          ],
+          "scope": "same policy/anchor; immutable records intact; only operational generation/allocation fields excluded",
+          "status": "equal"
+        }
+      ],
+      "manifest": {
+        "history_commits": 20,
+        "max_seconds": 150,
+        "max_storage_bytes": 268435456,
+        "repositories": [
+          {
+            "name": "flask",
+            "tip": "d086db856be187255b8ec61ef409357393020f32"
+          }
+        ],
+        "schema_version": 1,
+        "source_revision": "b64d43fbe8f57d6ce920aca059ef3de061bf59d1",
+        "total_seconds": 900,
+        "workers": 4
+      },
+      "measured_campaign_seconds": 310.98958360031247,
+      "repositories": [
+        {
+          "anchor": "258d68b6ff5e2244386540f48b48bab90d6ab827",
+          "append_commits": 1,
+          "available_commit_count": 223,
+          "commits": [
+            "258d68b6ff5e2244386540f48b48bab90d6ab827",
+            "2ac89889f4cc330eabd50f295dcef02828522c69",
+            "06ea505ce2b2042af26e96d35ebf159af7c0869d",
+            "dcbede0cb00df32e7f1895e19e37d5f40a75d1f6",
+            "7374c85ddefc3f4b177a698ab9f0cbb6a5c0b392",
+            "9fcd34c9f3065640bd1cd86234216ca068633fb9",
+            "954f5684e4841aad84a8eec7ace7b81a0d3f6831",
+            "36e4a824f340fdee7ed50937ba8e7f6bc7d17f81",
+            "6a2f545bfd8ed31e19066a299296917e034aca58",
+            "8b4fd5d18611e63080b826ecfefe8659dba7d2e4",
+            "514fc6b3e8402e4c646d5284e97a4f0ab50a7c4b",
+            "05e9c6bd630ecf4ec0ec884b1fc7901663737bc7",
+            "3596b1ab61cea85edb8970e83ff61daa073facf8",
+            "d8eaaba824655046958d1a97f11780de460c3271",
+            "2a8a38b051fc248865730bf3511bf2e2ea325e81",
+            "d318b683471101618febed18996405ad26462110",
+            "d73fa1cdcbd8b1465c151db8924ba58b1dd14e35",
+            "728c5e440af704a786384159184f695cf04ecbe7",
+            "41cb747cd5a9b43da43bf809ad974722542603db",
+            "329c32b916938d33fec41f40eb7ed854bf0b3e2b",
+            "d086db856be187255b8ec61ef409357393020f32"
+          ],
+          "download_git_unchanged": true,
+          "history_commits": 20,
+          "history_tip": "329c32b916938d33fec41f40eb7ed854bf0b3e2b",
+          "license": "BSD-3-Clause",
+          "license_path": "LICENSE.txt",
+          "license_sha256": "489a8e1108509ed98a37bb983e11e0f7e1d31f0bd8f99a79c8448e7ff37d07ea",
+          "name": "flask",
+          "shallow": true,
+          "tip": "d086db856be187255b8ec61ef409357393020f32",
+          "tip_tree_entries": 236,
+          "url": "http<local-path-redacted>"
+        }
+      ],
+      "schema_version": 1,
+      "tooling_sha256": {
+        "bench_public_index.py": "24311af4a2fac99c5e5557afc0fc0e5bfe597642e044e4fb96d45e9bdb60472b",
+        "index_oracle.py": "5b9c52067c75a0db9a5d6420e85c947a3aa1cd994802fe7f2703fa262bc56077",
+        "public_index_worker.py": "a0bece6ab8c3b223095d5638b21ea2ed938b2d0755a8e14866c63615580a5561"
+      }
+    }
+  ],
+  "final_tooling_sha256": {
+    "bench_public_index.py": "24311af4a2fac99c5e5557afc0fc0e5bfe597642e044e4fb96d45e9bdb60472b",
+    "export_public_index.py": "c83194a7eb1d143aef40d0953fcfefc37a9836da83b01e8a7a5ab6f406745c1c",
+    "index_oracle.py": "5b9c52067c75a0db9a5d6420e85c947a3aa1cd994802fe7f2703fa262bc56077",
+    "public_index_worker.py": "a0bece6ab8c3b223095d5638b21ea2ed938b2d0755a8e14866c63615580a5561",
+    "verify_public_spans.py": "777d50eca5f4a6e77f23b841a126c03088b9d7e30d411fb16f8d40a432c2e727"
+  },
+  "interpretation": {
+    "baseline_comparison": "not performed",
+    "completed_seconds": "build-only time gated on successful publication and all stated checks",
+    "correctness_recheck_receipt": "public-20261014.correctness-recheck.json; all 15 retained PASS publications passed the strengthened sampled member/path tree binding",
+    "coverage": "partial publications retained, not equated with complete extraction/matching",
+    "initial_flask_failure": "verification oracle included decorators; indexed def/class spans intentionally exclude wrappers",
+    "initial_golden_failure": "verification query used nonexistent scope.generation_id; corrected to published_generation_id",
+    "lineage_truth": "not independently established for real repositories",
+    "measurement_tooling_note": "final_tooling_sha256 records pre-review tooling; new hashes are pinned separately in the correctness recheck receipt",
+    "non_python_oracle": "two hand-reviewed pinned snapshot spans only",
+    "original_timing_source_gate": "all timings and attempts predate the independent member commit/path blob+mode tree-entry check and are preserved unchanged",
+    "resources": "sampled over the entire child including verification, not builder alone"
+  },
+  "schema_version": 1,
+  "untimed_diagnostics": [
+    {
+      "commit": "626b8951acbced7ff710f4e01624a05f219eec38",
+      "failures": [],
+      "rust_files_attempted": 100,
+      "timing": "untimed parser diagnostic; corpus code not executed"
+    },
+    {
+      "commit": "626b8951acbced7ff710f4e01624a05f219eec38",
+      "examples": [
+        {
+          "end_byte": 4263,
+          "kind": "module",
+          "names": [
+            "tests"
+          ],
+          "path": "crates/cli/src/escape.rs",
+          "start_byte": 2449,
+          "synthetic_root": false
+        },
+        {
+          "end_byte": 2986,
+          "kind": "module",
+          "names": [
+            "tests"
+          ],
+          "path": "crates/cli/src/hostname.rs",
+          "start_byte": 2863,
+          "synthetic_root": false
+        },
+        {
+          "end_byte": 4225,
+          "kind": "module",
+          "names": [
+            "tests"
+          ],
+          "path": "crates/cli/src/human.rs",
+          "start_byte": 3214,
+          "synthetic_root": false
+        },
+        {
+          "end_byte": 5092,
+          "kind": "module",
+          "names": [
+            "decompress"
+          ],
+          "path": "crates/cli/src/lib.rs",
+          "start_byte": 5077,
+          "synthetic_root": false
+        },
+        {
+          "end_byte": 5104,
+          "kind": "module",
+          "names": [
+            "escape"
+          ],
+          "path": "crates/cli/src/lib.rs",
+          "start_byte": 5093,
+          "synthetic_root": false
+        },
+        {
+          "end_byte": 5118,
+          "kind": "module",
+          "names": [
+            "hostname"
+          ],
+          "path": "crates/cli/src/lib.rs",
+          "start_byte": 5105,
+          "synthetic_root": false
+        },
+        {
+          "end_byte": 5129,
+          "kind": "module",
+          "names": [
+            "human"
+          ],
+          "path": "crates/cli/src/lib.rs",
+          "start_byte": 5119,
+          "synthetic_root": false
+        },
+        {
+          "end_byte": 5142,
+          "kind": "module",
+          "names": [
+            "pattern"
+          ],
+          "path": "crates/cli/src/lib.rs",
+          "start_byte": 5130,
+          "synthetic_root": false
+        }
+      ],
+      "matching_validation": "matching.py validates synthetic_root == (kind == module); this diagnostic observes parser output only, not all historic matching decisions",
+      "non_synthetic_module_definitions": 118,
+      "rust_files_attempted": 100,
+      "timing": "untimed parser diagnostic; corpus code not executed"
+    }
+  ],
+  "untimed_golden_attempts": [
+    {
+      "results": [
+        {
+          "commit": "a419aa7350389a275ab45fde2e849ed1f02449ef",
+          "end_byte": 1227,
+          "error": "no such column: scope.generation_id",
+          "error_type": "OperationalError",
+          "name": "createApplication",
+          "path": "lib/express.js",
+          "repository": "express",
+          "source_span_sha256": "1700da5f6e24bf4f2e1aebc8e286c182d18de0477e41c835d99db5705517f354",
+          "start_byte": 660,
+          "status": "failed"
+        },
+        {
+          "commit": "3fce3b5bb0236da2df6d99672afb8a719642eca7",
+          "end_byte": 2575,
+          "error": "no such column: scope.generation_id",
+          "error_type": "OperationalError",
+          "name": "main",
+          "path": "crates/core/main.rs",
+          "repository": "ripgrep",
+          "source_span_sha256": "efac214d642ab7afa042a871705bcfb4f22994eb7badecb948e89670a3df1837",
+          "start_byte": 1530,
+          "status": "failed"
+        }
+      ],
+      "schema_version": 1,
+      "timing": "untimed follow-up"
+    },
+    {
+      "results": [
+        {
+          "commit": "a419aa7350389a275ab45fde2e849ed1f02449ef",
+          "end_byte": 1227,
+          "name": "createApplication",
+          "path": "lib/express.js",
+          "repository": "express",
+          "source_span_sha256": "1700da5f6e24bf4f2e1aebc8e286c182d18de0477e41c835d99db5705517f354",
+          "start_byte": 660,
+          "status": "passed"
+        },
+        {
+          "commit": "3fce3b5bb0236da2df6d99672afb8a719642eca7",
+          "end_byte": 2575,
+          "name": "main",
+          "path": "crates/core/main.rs",
+          "repository": "ripgrep",
+          "source_span_sha256": "efac214d642ab7afa042a871705bcfb4f22994eb7badecb948e89670a3df1837",
+          "start_byte": 1530,
+          "status": "passed"
+        }
+      ],
+      "schema_version": 1,
+      "timing": "untimed follow-up"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "kind": "No-model contextual source replay of two real refusals",
+  "rows": [
+    {
+      "token": "send_request_to_open_ai",
+      "old_error": "not_found",
+      "new_provenance": "public_named_source_verified_against_git",
+      "actual_path": "aafactory/src/aafactory/fetcher/fetching.py",
+      "resolution": {
+        "requested_path_hint": "aafactory/src/aafactory/chat/interface.py",
+        "scope": "global_published_name_match",
+        "binding": "Lexical match outside the hint; verify imports/callers before assuming a binding."
+      },
+      "serialized_characters": 1841
+    },
+    {
+      "token": "DB_PATH",
+      "old_error": "not_found",
+      "new_provenance": "raw_literal_context_after_index_miss",
+      "actual_path": "aafactory/src/aafactory/configuration.py",
+      "resolution": {
+        "index_status": "not_found_not_absence",
+        "kind": "literal_references_not_definitions",
+        "matching_lines": [
+          8
+        ],
+        "matching_lines_omitted": 0
+      },
+      "serialized_characters": 2687
+    }
+  ],
+  "original_log_unchanged": true,
+  "limits": [
+    "Global name match is lexical, not imported/caller binding.",
+    "Unindexed constant returns explicitly raw literal references, not a fabricated entity or indexed-source claim.",
+    "No efficacy conclusion from offline query success."
+  ]
+}

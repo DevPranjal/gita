@@ -34,6 +34,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "mcp>=1.2", "pyyaml>=6.0"]
+bench = ["psutil>=5.9,<8"]
 # The evaluation harness reads its task manifest from YAML; gita.eval imports it
 # at package import, so the dashboard and the eval tests need this too.
 eval = ["pyyaml>=6.0"]

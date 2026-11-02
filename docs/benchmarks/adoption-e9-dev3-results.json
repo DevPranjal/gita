@@ -1,0 +1,186 @@
+{
+  "protocol": "fe50bcbf019953e3ff72c9b2b1c507e686506e6b697b215b6a0ca59f88139c41",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "pairs": 3,
+  "metrics": {
+    "B": {
+      "credits": 78.92426,
+      "input_tokens": 430093,
+      "macro": {
+        "grounded_precision": 0.8888888888888888,
+        "grounded_recall": 0.11318542568542568,
+        "augmented_precision": 0.8888888888888888,
+        "augmented_recall": 0.1542950513538749,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.27777777777777773,
+        "candidate_count": 8,
+        "golden_tp_count": 48,
+        "matched_count": 6,
+        "matched_tp_count": 5,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 5
+      }
+    },
+    "H": {
+      "credits": 80.42822000000001,
+      "input_tokens": 459457,
+      "macro": {
+        "grounded_precision": 0.9166666666666666,
+        "grounded_recall": 0.14989177489177488,
+        "augmented_precision": 0.9166666666666666,
+        "augmented_recall": 0.14989177489177488,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 8,
+        "golden_tp_count": 48,
+        "matched_count": 8,
+        "matched_tp_count": 7,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 7
+      }
+    }
+  },
+  "rows": [
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "B",
+      "credits": 26.0078,
+      "input_tokens": 146404,
+      "output_tokens": 2607,
+      "tool_counts": {
+        "raw_diff": 1,
+        "commit_log": 1,
+        "continue_evidence": 3,
+        "read_file": 14,
+        "search": 8
+      },
+      "errors": [],
+      "findings": 2
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "H",
+      "credits": 27.57626,
+      "input_tokens": 177902,
+      "output_tokens": 2566,
+      "tool_counts": {
+        "change_context": 1,
+        "raw_diff": 1,
+        "index_status": 1,
+        "entity_diff": 3,
+        "continue_evidence": 4,
+        "entity_context": 5,
+        "search": 11,
+        "read_file": 8
+      },
+      "errors": [
+        {
+          "tool": "entity_diff",
+          "error": {
+            "code": "refused",
+            "message": "Entity lacks qualified present state at both endpoints; use raw_diff"
+          }
+        }
+      ],
+      "findings": 2
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "B",
+      "credits": 30.04818,
+      "input_tokens": 188171,
+      "output_tokens": 2045,
+      "tool_counts": {
+        "raw_diff": 7,
+        "commit_log": 1,
+        "continue_evidence": 10,
+        "list_files": 1,
+        "read_file": 4
+      },
+      "errors": [
+        {
+          "tool": "raw_diff",
+          "error": {
+            "code": "refused",
+            "message": "Nonmember diff path"
+          }
+        },
+        {
+          "tool": "raw_diff",
+          "error": {
+            "code": "refused",
+            "message": "Nonmember diff path"
+          }
+        }
+      ],
+      "findings": 3
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "H",
+      "credits": 30.68944,
+      "input_tokens": 171510,
+      "output_tokens": 2472,
+      "tool_counts": {
+        "change_context": 1,
+        "commit_log": 1,
+        "index_status": 1,
+        "continue_evidence": 7,
+        "raw_diff": 8,
+        "entity_context": 6,
+        "read_file": 2
+      },
+      "errors": [],
+      "findings": 4
+    },
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "B",
+      "credits": 22.86828,
+      "input_tokens": 95518,
+      "output_tokens": 3655,
+      "tool_counts": {
+        "raw_diff": 1,
+        "commit_log": 1,
+        "continue_evidence": 3,
+        "read_file": 8,
+        "search": 3
+      },
+      "errors": [],
+      "findings": 3
+    },
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "H",
+      "credits": 22.16252,
+      "input_tokens": 110045,
+      "output_tokens": 2679,
+      "tool_counts": {
+        "change_context": 1,
+        "index_status": 1,
+        "commit_log": 1,
+        "raw_diff": 1,
+        "entity_diff": 3,
+        "continue_evidence": 2,
+        "entity_context": 2,
+        "read_file": 4,
+        "list_files": 1,
+        "search": 3
+      },
+      "errors": [],
+      "findings": 2
+    }
+  ],
+  "review_credits": 159.35247999999999,
+  "judge_credits": 50.9525,
+  "gate": "failed: quality mixed and Hcostslightlyhigher, do not scale25",
+  "provenance": {
+    "protocol_sha256": "a3c2b21942efaf869e140a041fefc840d06a40389e8cab3bb815ecae9f3d73cb",
+    "quality_sha256": "986d5c90366bb69fa30a7670fc4967904c3efe781a39c0372f5d357b895db7e6"
+  }
+}

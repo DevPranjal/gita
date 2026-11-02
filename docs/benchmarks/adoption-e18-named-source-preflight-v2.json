@@ -1,0 +1,117 @@
+{
+  "kind": "No-model exact-component locator replay; ambiguity offers actionable EIDs",
+  "rows": [
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "source_delivered": true,
+      "status": "unique",
+      "candidate_count": 0,
+      "truncated": false,
+      "same_occurrence": true,
+      "error": null
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "source_delivered": true,
+      "status": "unique",
+      "candidate_count": 0,
+      "truncated": false,
+      "same_occurrence": true,
+      "error": null
+    },
+    {
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "source_delivered": true,
+      "status": "unique",
+      "candidate_count": 0,
+      "truncated": false,
+      "same_occurrence": true,
+      "error": null
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "source_delivered": true,
+      "status": "unique",
+      "candidate_count": 0,
+      "truncated": false,
+      "same_occurrence": true,
+      "error": null
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "source_delivered": true,
+      "status": "unique",
+      "candidate_count": 0,
+      "truncated": false,
+      "same_occurrence": true,
+      "error": null
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "source_delivered": false,
+      "status": "ambiguous",
+      "candidate_count": 2,
+      "truncated": null,
+      "same_occurrence": false,
+      "error": null
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "source_delivered": true,
+      "status": "unique",
+      "candidate_count": 0,
+      "truncated": false,
+      "same_occurrence": true,
+      "error": null
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "source_delivered": true,
+      "status": "unique",
+      "candidate_count": 0,
+      "truncated": false,
+      "same_occurrence": true,
+      "error": null
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "source_delivered": true,
+      "status": "unique",
+      "candidate_count": 0,
+      "truncated": false,
+      "same_occurrence": true,
+      "error": null
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "source_delivered": true,
+      "status": "unique",
+      "candidate_count": 0,
+      "truncated": true,
+      "same_occurrence": true,
+      "error": null
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "source_delivered": true,
+      "status": "unique",
+      "candidate_count": 0,
+      "truncated": false,
+      "same_occurrence": true,
+      "error": null
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "source_delivered": true,
+      "status": "unique",
+      "candidate_count": 0,
+      "truncated": false,
+      "same_occurrence": true,
+      "error": null
+    }
+  ],
+  "original_logs_unchanged": true,
+  "source_bodies": 11,
+  "explicit_ambiguity": 1,
+  "note": "First replay incorrectly joined captured components with dots, losing literal dots inside TSX expressions/C# namespace components; preserved v1; corrected to native :: component syntax."
+}

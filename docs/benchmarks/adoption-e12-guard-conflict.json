@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "label": "E12 GUARD-CONFLICT CORRIGENDUM",
+  "official_reclassification": false,
+  "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+  "arm": "H",
+  "local_candidate_index": 0,
+  "original_global_candidate_index": 5,
+  "source": {
+    "id": "sources/p17/PROTRIDER",
+    "head": "b462b109b630dd1e1a9a78088b18429d2baaae9b",
+    "path": "src/protrider/pipeline.py",
+    "windows_reread": [[54, 91], [430, 493], [500, 549]]
+  },
+  "conclusion": {
+    "audit_verdict": "disagree",
+    "confidence": "high for the verifier's missing-q-assignment/control-flow error; conditional for whole-program reachability",
+    "settled_fact": "Failure returns (None, None), but the caller subsequently assigns q again at line 458. It is incorrect to conclude that q remains None merely because loading failed.",
+    "normal_successful_fallback": "With a still-existing checkpoint and non-None fallback q, training and the nested save are unreachable, regardless of whether loading failed.",
+    "important_qualification": "Existing file plus failed load alone does not determine reachability. If fallback actually returns None for q and initialization/inference proceed normally, the guard permits training and the nested save. Those helper behaviors were not inspected or executed in this bounded adjudication.",
+    "conflict_resolution": "The verifier's supplied TP rationale is not established: it omits the reassignment at line 458 and assumes persistent None. Retain the audit disagreement with the credited normal failed-load overwrite consequence; do not elevate it into a universal theorem that saving is impossible under every failed-load execution."
+  },
+  "ancestor_conditions": [
+    {
+      "statement": "train(dataset, model, criterion, ...)",
+      "line": 531,
+      "lexical_function": "_run_protrider_standard",
+      "enclosing_if_conditions": [{"line": 512, "condition": "should_train", "branch": "body"}],
+      "expanded_condition": "config.autoencoder_training and not (checkpoint_path and checkpoint_path.exists() and q is not None)",
+      "not_ancestors": [
+        "if model is None at line 456: this block ends before training",
+        "if config.use_wandb at line 514: its block ends before train"
+      ]
+    },
+    {
+      "statement": "save_model(model, str(checkpoint_path), q)",
+      "line": 540,
+      "lexical_function": "_run_protrider_standard",
+      "enclosing_if_conditions": [
+        {"line": 512, "condition": "should_train", "branch": "body"},
+        {"line": 539, "condition": "checkpoint_path", "branch": "body"}
+      ],
+      "expanded_condition": "config.autoencoder_training and not (checkpoint_path and checkpoint_path.exists() and q is not None), followed by truthy checkpoint_path",
+      "execution_prerequisites": "Earlier dataset setup, fallback if entered, initial inference, optional logging setup, training, and post-training inference must complete without an exception.",
+      "not_ancestors": [
+        "if model is None at line 456",
+        "if config.use_wandb at line 514 or line 541"
+      ]
+    }
+  ],
+  "state_flow": [
+    {"lines": [442, 443], "effect": "Initialize model and q to None."},
+    {"lines": [450, 452], "effect": "If the path exists, assign model and q from load_model."},
+    {"lines": [89, 91], "effect": "A caught loading failure logs a warning and returns (None, None)."},
+    {"lines": [456, 479], "effect": "model is None enters fallback, which explicitly reassigns q from find_latent_dim at line 458."},
+    {"lines": [485, 491], "effect": "Initialize a replacement model using the current q."},
+    {"lines": [500, 502], "effect": "Initial inference precedes the training guard and may prevent later execution if it raises."},
+    {"lines": [509, 510], "effect": "Recompute loaded flag from path existence and current q, not the actual load outcome."},
+    {"lines": [512, 540], "effect": "Training and checkpoint save share the should_train enclosing branch."}
+  ],
+  "truth_table_conventions": {
+    "path_truthy": "Assumed true: both configured and default branches assign a Path at lines 445-448.",
+    "E": "checkpoint_path.exists() at the line-509 guard, not necessarily its value at load time.",
+    "Q": "q is not None at line 509, after fallback.",
+    "A": "bool(config.autoencoder_training).",
+    "reachability": "Guard-level reachability; actual execution additionally requires all earlier operations to complete normally."
+  },
+  "truth_table": [
+    {"E": true, "load_failed": true, "Q": true, "A": true, "model_was_loaded": true, "should_train": false, "train_guard_reachable": false, "save_guard_reachable": false, "interpretation": "Still-existing failed checkpoint plus successful non-None fallback."},
+    {"E": true, "load_failed": true, "Q": true, "A": false, "model_was_loaded": true, "should_train": false, "train_guard_reachable": false, "save_guard_reachable": false, "interpretation": "Training disabled independently."},
+    {"E": true, "load_failed": true, "Q": false, "A": true, "model_was_loaded": false, "should_train": true, "train_guard_reachable": true, "save_guard_reachable": true, "interpretation": "Conditional syntactic path only: fallback must actually leave q None and all earlier/later calls must accept it. Not demonstrated by the verifier's failure-return argument."},
+    {"E": true, "load_failed": true, "Q": false, "A": false, "model_was_loaded": false, "should_train": false, "train_guard_reachable": false, "save_guard_reachable": false, "interpretation": "Training disabled independently."},
+    {"E": false, "load_failed": true, "Q": true, "A": true, "model_was_loaded": false, "should_train": true, "train_guard_reachable": true, "save_guard_reachable": true, "interpretation": "Would require the previously existing file to stop existing before this guard; not the stated unchanged-existing-file scenario."}
+  ],
+  "rating_history_preserved": [
+    {"artifact": "adoption-e10-novel-audit.json#/decisions/5", "rating": "disagree", "confidence": "high", "status": "Unchanged; conditional-scope clarification recorded here."},
+    {"artifact": "adoption-e10-audited-sensitivity.json", "rating": "Counterfactual N06 TP-to-FP arithmetic, not a persistent label change", "status": "Unchanged; no new sensitivity computation."},
+    {"artifact": "source-only verifier handoff supplied by parent", "rating": "kept TP", "rationale": "q remains None after failed loading, so fallback trains and overwrites", "status": "Rationale contradicted by explicit caller reassignment; original verifier decision not edited."},
+    {"artifact": "adoption-e12-guard-conflict.json", "rating": "retain disagree; qualify universal reachability language", "status": "Current narrow adjudication."}
+  ],
+  "limits": [
+    "Only the exact loading, fallback, guard, training, and save source windows were reread at the allowed HEAD.",
+    "No helper implementation inspection beyond these windows, AST execution, corpus execution, tests, models, network, or other PR analysis.",
+    "No conclusion that every possible fallback returns a non-None q is claimed from these windows alone.",
+    "No final FP/TP replacement, score change, prior-report deletion, or gate approval.",
+    "The distinct fresh-untrained-model issue is not substituted for the disputed overwrite claim.",
+    "Only this sanitized JSON and its Markdown companion were written."
+  ]
+}

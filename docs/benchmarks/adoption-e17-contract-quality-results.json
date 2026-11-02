@@ -1,0 +1,152 @@
+{
+  "kind": "E17 separately named verified-runtime-contract scoring policy",
+  "review_protocol": "65ffaa2fb12203f2ff969310afa72ad31852dfdec9ff98866cfeef53cd730226",
+  "judge_variant_protocol": "f55c3ed41d65557e57380deb79feec2ab2652742e8e1be13a5f31ad9d3b6a3d7",
+  "reviewer_model": "gpt-5.6-sol",
+  "judge_model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "complete_pairs": 3,
+  "review_costs": {
+    "B": {
+      "credits": 120.94146,
+      "input_tokens": 717836,
+      "output_tokens": 10908,
+      "reasoning_tokens": 7294
+    },
+    "H": {
+      "credits": 114.18016,
+      "input_tokens": 635734,
+      "output_tokens": 10760,
+      "reasoning_tokens": 7038
+    }
+  },
+  "original_judge_credits": 56.6445,
+  "additional_judge_credits": 7.4842,
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 0.8333333333333334,
+        "grounded_recall": 0.13897907647907648,
+        "augmented_precision": 0.8222222222222223,
+        "augmented_recall": 0.17866161616161616,
+        "novel_tp_count": 3,
+        "novel_tp_yield": 0.19999999999999998,
+        "candidate_count": 11,
+        "golden_tp_count": 48,
+        "matched_count": 7,
+        "matched_tp_count": 6,
+        "unmatched_count": 4,
+        "unmatched_tp_count": 3,
+        "unmatched_fp_count": 1,
+        "golden_covered_count": 6
+      },
+      "micro": {
+        "grounded_precision": 0.8571428571428571,
+        "grounded_recall": 0.125,
+        "augmented_precision": 0.8181818181818182,
+        "augmented_recall": 0.17647058823529413,
+        "novel_tp_count": 3,
+        "novel_tp_yield": 0.2727272727272727,
+        "candidate_count": 11,
+        "golden_tp_count": 48,
+        "matched_count": 7,
+        "matched_tp_count": 6,
+        "unmatched_count": 4,
+        "unmatched_tp_count": 3,
+        "unmatched_fp_count": 1,
+        "golden_covered_count": 6
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 0.9166666666666666,
+        "grounded_recall": 0.15936147186147184,
+        "augmented_precision": 0.8611111111111112,
+        "augmented_recall": 0.18420619235836624,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.1111111111111111,
+        "candidate_count": 11,
+        "golden_tp_count": 48,
+        "matched_count": 8,
+        "matched_tp_count": 7,
+        "unmatched_count": 3,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 1,
+        "golden_covered_count": 7
+      },
+      "micro": {
+        "grounded_precision": 0.875,
+        "grounded_recall": 0.14583333333333334,
+        "augmented_precision": 0.8181818181818182,
+        "augmented_recall": 0.18,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.18181818181818182,
+        "candidate_count": 11,
+        "golden_tp_count": 48,
+        "matched_count": 8,
+        "matched_tp_count": 7,
+        "unmatched_count": 3,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 1,
+        "golden_covered_count": 7
+      }
+    }
+  },
+  "novel_decisions": [
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "B",
+      "local_index": 2,
+      "tp_fp": "fp",
+      "reused_identical_input": false
+    },
+    {
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "H",
+      "local_index": 1,
+      "tp_fp": "fp",
+      "reused_identical_input": false
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "B",
+      "local_index": 2,
+      "tp_fp": "tp",
+      "reused_identical_input": true
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "B",
+      "local_index": 1,
+      "tp_fp": "tp",
+      "reused_identical_input": true
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "B",
+      "local_index": 4,
+      "tp_fp": "tp",
+      "reused_identical_input": true
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "H",
+      "local_index": 3,
+      "tp_fp": "tp",
+      "reused_identical_input": true
+    },
+    {
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "H",
+      "local_index": 1,
+      "tp_fp": "tp",
+      "reused_identical_input": true
+    }
+  ],
+  "policy": "Apply verified external runtime evidence wherever source uses traceCallback; reuse only byte-identical complete classifier inputs. Reviewers and all matching edges unchanged.",
+  "limitations": [
+    "Three repeatedly used development PRs; not a confidence-bound noninferiority pass or held-out result.",
+    "Custom Copilot semantic classification with pinned official resolver/scorer arithmetic; not official upstream judging.",
+    "Original quality output remains preserved; two Node false-positive classifications corrected for both arms."
+  ]
+}

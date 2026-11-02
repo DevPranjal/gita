@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Gita offline indexing qualification manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_revision", "corpus", "scenarios", "repetitions", "workers", "max_seconds", "notes"],
+  "properties": {
+    "schema_version": {"const": 1, "type": "integer"},
+    "source_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "corpus": {
+      "type": "object", "additionalProperties": false,
+      "required": ["files", "functions", "commits", "profile"],
+      "properties": {
+        "files": {"type": "integer", "minimum": 1, "maximum": 10000},
+        "functions": {"type": "integer", "minimum": 1, "maximum": 20},
+        "commits": {"type": "integer", "minimum": 2, "maximum": 1000},
+        "profile": {"enum": ["uniform", "hotspot"]}
+      }
+    },
+    "scenarios": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {"enum": ["snapshot", "history", "incremental", "noop", "query"]}
+    },
+    "repetitions": {"type": "integer", "minimum": 1, "maximum": 20},
+    "workers": {"type": "integer", "minimum": 1, "maximum": 32},
+    "max_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 3600},
+    "max_storage_bytes": {"type": "integer", "minimum": 1048576, "maximum": 1073741824},
+    "notes": {
+      "type": "object", "additionalProperties": false,
+      "required": ["hardware", "power", "contention"],
+      "properties": {
+        "hardware": {"type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S"},
+        "power": {"type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S"},
+        "contention": {"type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S"}
+      }
+    }
+  }
+}

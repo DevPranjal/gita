@@ -1192,6 +1192,7 @@ def check_f3() -> list[Result]:
         environment = {key: value for key, value in os.environ.items() if key.upper() in {
             "PATH", "SYSTEMROOT", "WINDIR", "COMSPEC", "PATHEXT", "SYSTEMDRIVE",
             "TEMP", "TMP", "TMPDIR", "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA",
+            "GITA_PARSER_CACHE",
         }}
         environment.update({
             "PYTHONPATH": str(ROOT / "src"), "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8",

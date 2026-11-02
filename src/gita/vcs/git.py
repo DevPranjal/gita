@@ -446,6 +446,7 @@ class CommittedRepo:
         self._info_batch: subprocess.Popen[bytes] | None = None
         self._info_batch_discarded = False
         self._streams: dict[subprocess.Popen[bytes], BinaryIO] = {}
+        self._source_entries: dict[tuple[GitOid, bytes], GitTreeEntry] = {}
         for name, value in (("max_object_bytes", max_object_bytes), ("max_streams", max_streams)):
             if type(value) is not int or value <= 0:
                 raise GitObjectError("invalid_limit", f"{name} must be a positive integer")
@@ -593,6 +594,7 @@ class CommittedRepo:
 
     def close(self) -> None:
         self._closed = True
+        self._source_entries.clear()
         failures: list[GitObjectError] = []
         for info in (False, True):
             try:
@@ -865,10 +867,20 @@ class CommittedRepo:
             raise GitObjectError("invalid_output", "Git mode and object type disagree")
         return GitTreeEntry(path, self._oid(raw_oid, code="invalid_output"), expected_type, mode)
 
-    def iter_tree(self, oid: GitOid, *, page_size: int = 1000) -> Iterator[tuple[GitTreeEntry, ...]]:
+    def iter_tree(self, oid: GitOid, *, page_size: int = 1000,
+                  _literal_path: bytes | None = None) -> Iterator[tuple[GitTreeEntry, ...]]:
         self._page_size(page_size)
         committed = self.commit(oid)
-        records = self._records(("ls-tree", "-rz", "--full-tree", committed.tree.digest.hex(), "--"))
+        arguments = ("ls-tree", "-rz", "--full-tree", committed.tree.digest.hex(), "--")
+        # Windows normalizes backslashes even in a literal pathspec.
+        if _literal_path is not None and not (os.name == "nt" and b"\\" in _literal_path):
+            try:
+                selector = _literal_path.decode("utf-8", errors="strict")
+            except UnicodeDecodeError:
+                pass
+            else:
+                arguments = ("--literal-pathspecs", *arguments, selector)
+        records = self._records(arguments)
         page: list[GitTreeEntry] = []
         try:
             for record in records:
@@ -897,6 +909,21 @@ class CommittedRepo:
         else:
             self.commit(parent)
             revisions = (parent.digest.hex(), oid.digest.hex())
+        yield from self._tree_changes(revisions, page_size)
+
+    def tree_changes(self, parent: GitOid, tree: GitOid, *,
+                     page_size: int = 1000) -> Iterator[tuple[GitTreeChange, ...]]:
+        """Diff trees whose provenance the caller already validated from commits.
+
+        Git traverses changed tree branches; do not reread cached commit objects
+        through the batch reader merely to rediscover their tree IDs.
+        """
+        self._page_size(page_size)
+        self._validate_oid(parent)
+        self._validate_oid(tree)
+        yield from self._tree_changes((parent.digest.hex(), tree.digest.hex()), page_size)
+
+    def _tree_changes(self, revisions: tuple[str, ...], page_size: int) -> Iterator[tuple[GitTreeChange, ...]]:
         records = self._records((
             "diff-tree", "--raw", "-z", "--no-renames", "--no-commit-id", "-r",
             "--no-abbrev", "--no-ext-diff", "--no-textconv", "--ignore-submodules=none",
@@ -939,26 +966,33 @@ class CommittedRepo:
                start: int, end: int) -> bytes:
         self._validate_oid(oid)
         self._validate_oid(blob)
-        if (type(path) is not bytes or type(mode) is not int or mode not in (0o100644, 0o100755)
+        if (type(path) is not bytes or not path or b"\0" in path
+                or any(part in (b"", b".", b"..") for part in path.split(b"/"))
+                or type(mode) is not int or mode not in (0o100644, 0o100755)
                 or type(start) is not int or type(end) is not int or not 0 <= start <= end):
             raise GitObjectError("source_unavailable", "Invalid committed source request")
-        pages = self.iter_tree(oid)
-        found = False
-        try:
-            for page in pages:
-                for entry in page:
-                    if entry.path == path:
-                        if entry.oid != blob or entry.mode != mode or entry.object_type != "blob":
-                            raise GitObjectError("source_unavailable", "Committed source identity does not match")
-                        found = True
+        self.commit(oid)
+        key = (oid, path)
+        entry = self._source_entries.get(key)
+        if entry is None:
+            pages = self.iter_tree(oid, _literal_path=path)
+            try:
+                for page in pages:
+                    entry = next((candidate for candidate in page if candidate.path == path), None)
+                    if entry is not None:
                         break
-                if found:
-                    break
-        finally:
-            with self._cleanup_guard(sys.exc_info()[1]):
-                pages.close()
-        if not found:
+            finally:
+                with self._cleanup_guard(sys.exc_info()[1]):
+                    pages.close()
+        if entry is None:
             raise GitObjectError("source_unavailable", "Committed source path is absent")
+        if entry.oid != blob or entry.mode != mode or entry.object_type != "blob":
+            raise GitObjectError("source_unavailable", "Committed source identity does not match")
+        # Only immutable commit/path bindings are cached; blob bytes are still read and validated.
+        if key not in self._source_entries and len(path) <= 4096:
+            if len(self._source_entries) >= 1024:
+                self._source_entries.pop(next(iter(self._source_entries)))
+            self._source_entries[key] = entry
         result = self.read_object(blob)
         if result is None or result.object_type != "blob" or end > len(result.data):
             raise GitObjectError("source_unavailable", "Committed source bytes or bounds are unavailable")

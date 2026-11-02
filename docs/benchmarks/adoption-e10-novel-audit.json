@@ -1,0 +1,242 @@
+{
+  "schema_version": 1,
+  "audit": "adoption-e10-novel-classification",
+  "scope": "Eight existing unmatched candidate TP decisions across five tasks: B=3, H=5. Static audit only; existing and pre-existing issues are eligible without requiring introduction by the PR.",
+  "protocols": {
+    "original_three": "83fec8fd0ff5c0b021cae7b197faeb79f1ed18bd26345c6464d73fd8815e30dd",
+    "transfer_two": "b74eb2180e6736b2eace0b81d7634d4ca1aca3dce0aaca09cbf1fdbe24837e08"
+  },
+  "inputs": [
+    {
+      "id": "adjudications/e10-new2/score-inputs.json",
+      "sha256": "196fadab667d8e96fd6248ced3a546d76dad170bf3cfe67f417fbcb2ce44627a"
+    },
+    {
+      "id": "adjudications/e10-new2/input.json",
+      "sha256": "73c26750866fdec1e3fbd37562b2213f63e0aaca6c44af09d9a57b89a496d7e1"
+    },
+    {
+      "id": "adjudications/e10-new2/classifications.json",
+      "sha256": "bd81e6fa0494856ffd58670392a4a61653e8c58447b5d9ba307f18249d4ae577"
+    }
+  ],
+  "identity_note": "Input hashes are SHA256 of file bytes. Source IDs are stable repository-relative identifiers pinned by Git HEAD. No absolute artifact locations or private reference content are published.",
+  "method": "Read original classification-input candidate claims, empty-match correspondence entries, final arm-local classifications, and narrowly relevant source from allowed HEAD Git objects. Judge evidence was visible, so inspection was not blinded. Did not execute applications, tests, models, or runtime corpus code.",
+  "first_clear_bad_classification": {
+    "decision": "N06",
+    "arm": "H",
+    "task_prefix": "0083e3b9d289",
+    "arm_candidate_index": 0,
+    "global_candidate_index": 5,
+    "finding": "The credited retrain-and-overwrite consequence is blocked by the existing-file training guard. Loading failure is logged and falls back to initialization, but a still-existing checkpoint makes model_was_loaded true once q is populated; training and its nested save are skipped.",
+    "confidence": "high",
+    "source": [
+      "src/protrider/pipeline.py:89-91",
+      "src/protrider/pipeline.py:450-491",
+      "src/protrider/pipeline.py:508-512",
+      "src/protrider/pipeline.py:538-549"
+    ],
+    "decision_effect": "Audit disagreement only. The existing TP label and scores remain unchanged; this report does not substitute another finding or relabel the candidate."
+  },
+  "sources": [
+    {"id": "sources/p06/node-postgres", "head": "b922f0ddfa3914cc7b05387cd12fc606bc658dc4"},
+    {"id": "sources/p08/CrabTrap", "head": "5ef0884c59b3ee1d5a986dd02686a8232570c80f"},
+    {"id": "sources/p17/PROTRIDER", "head": "b462b109b630dd1e1a9a78088b18429d2baaae9b"},
+    {"id": "sources/p15/chronicle", "head": "04ac4c02d48083676c14dd3fa70d26ca102bd50e"},
+    {"id": "sources/p20/LANdalf", "head": "bc1698f4dbc3a99dee0a6dcf7629813f2027682a"}
+  ],
+  "index_contract": "global_candidate_index refers to original per-task classification-input.json/correspondences.json. arm_candidate_index refers to score-inputs.json. Score pointers locate existing classifications, not altered decisions.",
+  "decisions": [
+    {
+      "id": "N01",
+      "task_prefix": "0033d688d295",
+      "source_id": "sources/p08/CrabTrap",
+      "arm": "B",
+      "global_candidate_index": 1,
+      "arm_candidate_index": 1,
+      "score_pointer": "/B/1/classifications/0",
+      "existing_label": "tp",
+      "accepted_reference_matches": [],
+      "verdict": "agree",
+      "confidence": "high",
+      "proof": "The async page fetch closes over a render-time entries array. SSE independently adds a row to the current store, but the fetch continuation replaces the entire collection with the old snapshot plus fetched rows. A live row outside that page is dropped from the view. Store append reconciliation is actionable.",
+      "source": [
+        {"path": "web/src/hooks/useAuditLog.ts", "lines": [52, 61]},
+        {"path": "web/src/hooks/useAuditLog.ts", "lines": [68, 84]},
+        {"path": "web/src/stores/auditStore.ts", "lines": [33, 60]}
+      ],
+      "limits": "Conditional interleaving; static proof of lost display state, not permanent database loss."
+    },
+    {
+      "id": "N02",
+      "task_prefix": "0083e3b9d289",
+      "source_id": "sources/p17/PROTRIDER",
+      "arm": "B",
+      "global_candidate_index": 4,
+      "arm_candidate_index": 3,
+      "score_pointer": "/B/2/classifications/0",
+      "existing_label": "tp",
+      "accepted_reference_matches": [],
+      "verdict": "agree",
+      "confidence": "high",
+      "proof": "Checkpoint metadata omits feature identity/order. Loading builds the model using current dataset dimensions and loads tensors without an identity check; automatic same-output-directory reuse can therefore accept a reordered same-shaped dataset. Inference labels outputs with the new dataset's columns, making feature-semantic validation actionable.",
+      "source": [
+        {"path": "src/protrider/pipeline.py", "lines": [32, 37]},
+        {"path": "src/protrider/pipeline.py", "lines": [69, 87]},
+        {"path": "src/protrider/pipeline.py", "lines": [441, 452]},
+        {"path": "src/protrider/pipeline.py", "lines": [576, 592]}
+      ],
+      "limits": "Requires semantically changed features with compatible dimensions and architecture. Numerical impact was not measured."
+    },
+    {
+      "id": "N03",
+      "task_prefix": "a3c2d2b9d85f",
+      "source_id": "sources/p20/LANdalf",
+      "arm": "B",
+      "global_candidate_index": 2,
+      "arm_candidate_index": 1,
+      "score_pointer": "/B/4/classifications/0",
+      "existing_label": "tp",
+      "accepted_reference_matches": [],
+      "verdict": "agree",
+      "confidence": "medium",
+      "proof": "One scope resolves one database service, then every asynchronous device check receives it through Task.WhenAll. Changed statuses call Update on the same stored context and SaveChangesAsync, without serialization or per-task scope. Concurrent continuations can overlap context access; isolating persistence is actionable.",
+      "source": [
+        {"path": "src/API/Services/DeviceMonitoringService.cs", "lines": [79, 95]},
+        {"path": "src/API/Services/DeviceMonitoringService.cs", "lines": [110, 143]},
+        {"path": "src/API/Services/AppDbService.cs", "lines": [7, 14]},
+        {"path": "src/API/Services/AppDbService.cs", "lines": [30, 35]},
+        {"path": "src/API/Services/AppDbService.cs", "lines": [50, 51]},
+        {"path": "src/API/Program.cs", "lines": [40, 46]}
+      ],
+      "limits": "Pre-existing is allowed. Timing-dependent risk, not a guarantee of failure in every cycle; the SQLite provider may complete individual operations synchronously. No concurrency was executed."
+    },
+    {
+      "id": "N04",
+      "task_prefix": "0b0800ed5659",
+      "source_id": "sources/p06/node-postgres",
+      "arm": "H",
+      "global_candidate_index": 2,
+      "arm_candidate_index": 0,
+      "score_pointer": "/H/0/classifications/0",
+      "existing_label": "tp",
+      "accepted_reference_matches": [],
+      "verdict": "uncertain",
+      "confidence": "medium",
+      "proof": "Repository source forwards ordinary query failures as callback arguments, forwards those arguments again in the enrichment callback, and delegates tracing to the Node built-in. It contains no explicit publication for that error argument. This supports the suspected omission, but the decisive built-in error-event semantics are outside the inspected Git source.",
+      "source": [
+        {"path": "packages/pg/lib/query.js", "lines": [122, 133]},
+        {"path": "packages/pg/lib/client.js", "lines": [721, 734]},
+        {"path": "packages/pg/lib/diagnostics.js", "lines": [8, 18]}
+      ],
+      "limits": "No runtime source, runtime corpus code, tests, network documentation, or execution was consulted. The claimed test timeout and exact built-in event behavior are not independently verified here; do not treat this as a confirmed FP or TP."
+    },
+    {
+      "id": "N05",
+      "task_prefix": "0083e3b9d289",
+      "source_id": "sources/p17/PROTRIDER",
+      "arm": "H",
+      "global_candidate_index": 3,
+      "arm_candidate_index": 1,
+      "score_pointer": "/H/2/classifications/0",
+      "existing_label": "tp",
+      "accepted_reference_matches": [],
+      "verdict": "agree",
+      "confidence": "high",
+      "proof": "Loading sets model presence behavior from saved metadata, while criterion construction uses the current configuration. The model adds a leading intensity/presence dimension when enabled; criterion indexing is separately conditional. Inference passes model output directly to that criterion. Incompatible settings can therefore misinterpret dimensions or fail; validating consistency is actionable.",
+      "source": [
+        {"path": "src/protrider/pipeline.py", "lines": [65, 80]},
+        {"path": "src/protrider/pipeline.py", "lines": [495, 502]},
+        {"path": "src/protrider/pipeline.py", "lines": [576, 584]},
+        {"path": "src/protrider/model/model.py", "lines": [151, 159]},
+        {"path": "src/protrider/model/model.py", "lines": [208, 226]}
+      ],
+      "limits": "The implementation uses a stacked tensor rather than necessarily a Python tuple. The candidate's container wording is imprecise, but its incompatible-shape mechanism remains supported."
+    },
+    {
+      "id": "N06",
+      "task_prefix": "0083e3b9d289",
+      "source_id": "sources/p17/PROTRIDER",
+      "arm": "H",
+      "global_candidate_index": 5,
+      "arm_candidate_index": 0,
+      "score_pointer": "/H/2/classifications/1",
+      "existing_label": "tp",
+      "accepted_reference_matches": [],
+      "verdict": "disagree",
+      "confidence": "high",
+      "proof": "The claimed normal failed-load retraining and overwrite path is contradicted by the downstream guard. Failure returns no model and logs a warning; fallback repopulates q. With the original file still present, model_was_loaded becomes true, should_train false, and both training and its nested checkpoint save are bypassed. The classifier cites a real save but misses its reachability condition.",
+      "source": [
+        {"path": "src/protrider/pipeline.py", "lines": [89, 91]},
+        {"path": "src/protrider/pipeline.py", "lines": [450, 491]},
+        {"path": "src/protrider/pipeline.py", "lines": [508, 512]},
+        {"path": "src/protrider/pipeline.py", "lines": [530, 549]}
+      ],
+      "limits": "This rejects the credited overwrite consequence, not the existence of other load-failure bugs. Concurrent external file deletion or other unstated file mutations are outside the reported scenario. No replacement issue was substituted to rescue the TP classification."
+    },
+    {
+      "id": "N07",
+      "task_prefix": "26e77afc1678",
+      "source_id": "sources/p15/chronicle",
+      "arm": "H",
+      "global_candidate_index": 2,
+      "arm_candidate_index": 0,
+      "score_pointer": "/H/3/classifications/0",
+      "existing_label": "tp",
+      "accepted_reference_matches": [],
+      "verdict": "agree",
+      "confidence": "high",
+      "proof": "An existing destination resolving outside the storage root fails the first acceptance check but still reaches an independent in-root-parent fallback. Write and permission operations then follow that destination. This contradicts the validator's containment contract; rejecting resolved-outside destinations is actionable.",
+      "source": [
+        {"path": "chronicle-daemon/crates/storage/src/media.rs", "lines": [51, 74]},
+        {"path": "chronicle-daemon/crates/storage/src/media.rs", "lines": [79, 89]},
+        {"path": "chronicle-daemon/crates/storage/src/media.rs", "lines": [150, 152]}
+      ],
+      "limits": "Requires a pre-existing symlink, sufficient filesystem permissions, and a caller using that destination. A remote attacker path and the existing high severity were not independently established."
+    },
+    {
+      "id": "N08",
+      "task_prefix": "a3c2d2b9d85f",
+      "source_id": "sources/p20/LANdalf",
+      "arm": "H",
+      "global_candidate_index": 0,
+      "arm_candidate_index": 1,
+      "score_pointer": "/H/4/classifications/0",
+      "existing_label": "tp",
+      "accepted_reference_matches": [],
+      "verdict": "agree",
+      "confidence": "medium",
+      "proof": "Same verified shared-context fan-out and persistence path as N03; one scoped service/context is reused across concurrent checks. The defect can affect status persistence and merits per-task scope or serialized database access.",
+      "source": [
+        {"path": "src/API/Services/DeviceMonitoringService.cs", "lines": [79, 95]},
+        {"path": "src/API/Services/DeviceMonitoringService.cs", "lines": [110, 143]},
+        {"path": "src/API/Services/AppDbService.cs", "lines": [7, 14]},
+        {"path": "src/API/Services/AppDbService.cs", "lines": [30, 35]},
+        {"path": "src/API/Services/AppDbService.cs", "lines": [50, 51]},
+        {"path": "src/API/Program.cs", "lines": [40, 46]}
+      ],
+      "limits": "Same mechanism as B's N03, not an independent second defect or replication experiment. Pre-existing is allowed. Timing/provider caveats apply equally."
+    }
+  ],
+  "summary": {
+    "decisions_inspected": 8,
+    "arms": {"B": 3, "H": 5},
+    "existing_labels": {"tp": 8, "fp": 0},
+    "verdicts": {"agree": 6, "disagree": 1, "uncertain": 1},
+    "distinct_mechanisms": 7,
+    "gate": "not_certified",
+    "conclusion": "At least one credited novel TP is supported by unreachable-path reasoning rather than the actual control flow. These novel classifications are not sufficiently reliable to certify the proposed quality/cost gate or justify scaling to 25 tasks on the present evidence.",
+    "metrics_effect": "Not computed. Existing score inputs, labels, and scores were not modified. Reported cost and precision/recall changes were supplied as context, not independently validated or reinterpreted as a new score."
+  },
+  "limits": [
+    "Bounded targeted audit of the eight supplied unmatched TP decisions, not an exhaustive review of five PRs or the implementation.",
+    "No requirement that an eligible defect be newly introduced; pre-existing behavior was not rejected on age.",
+    "Truth/actionability was audited, not reference completeness, matching novelty, severity calibration, or aggregate deduplication.",
+    "The final LANdalf supplement supplied supporting service/registration context; both arm decisions were checked against actual HEAD source.",
+    "No hidden reasoning or private reference text/source metadata was read for this audit.",
+    "No applications, tests, runtime corpus code, network, paid model calls, or review reruns were executed.",
+    "Existing classifier evidence was visible before source inspection; this was not blinded, and no stochastic repeatability claim follows.",
+    "No score recalculation, replacement labels, gate approval, implementation changes, prompt changes, or pilot tuning.",
+    "Only this JSON and its Markdown companion are audit deliverables; publication identifiers are relative and input content hashes are explicit."
+  ]
+}

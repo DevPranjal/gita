@@ -7,11 +7,12 @@ facts this module produced.
 
 from __future__ import annotations
 
-from tree_sitter_language_pack import get_parser
+from .parsers import get_parser
 
 from .languages import LanguageSpec, for_path
 from .sql import SQL_EXTENSIONS, extract_sql
 from .model import Entity, EntityKind, EntityTree, SyntaxRegion, digest
+from .syntax import DartCallable, children as syntax_children
 
 #: Wrappers to climb through when hunting for the binding site of a function value.
 _TRANSPARENT = frozenset({
@@ -32,12 +33,20 @@ _IDENTIFIER_NODES = frozenset({
 MODULE_ENTITY = "<module>"
 _NATIVE_LITERAL_NODES = frozenset({
     "string_literal", "char_literal", "raw_string_literal", "verbatim_string_literal", "string_content",
+    "string", "line_string_literal", "multi_line_string_literal", "encapsed_string", "heredoc", "nowdoc",
+    "string_lit", "regex", "regex_literal", "heredoc_body",
+    "heredoc_template",
+})
+_BYTE_LITERAL_LANGUAGES = frozenset({
+    "csharp", "cpp", "swift", "php", "java", "kotlin", "c", "ruby",
+    "bash", "powershell", "hcl", "dart",
 })
 
-_LAYOUT_LANGUAGES = frozenset({"python", "javascript", "typescript", "tsx", "go", "rust"})
+_LAYOUT_LANGUAGES = frozenset({"python", "javascript", "typescript", "tsx", "go", "rust", "swift", "php"})
 _LITERAL_NODES = frozenset({
     "string", "string_literal", "raw_string_literal", "interpreted_string_literal",
     "template_string", "jsx_element", "jsx_fragment", "token_tree",
+    "line_string_literal", "multi_line_string_literal", "encapsed_string", "heredoc", "nowdoc",
 })
 
 
@@ -89,9 +98,24 @@ def _binding_name(node) -> str:
 
 
 def _file_namespace(node, spec: LanguageSpec):
+    if spec.name in ("java", "kotlin") and node.type in ("program", "source_file"):
+        declaration = "package_declaration" if spec.name == "java" else "package_header"
+        return next((child for child in node.named_children if child.type == declaration), None)
     if spec.name == "csharp" and node.type == "compilation_unit":
         return next((child for child in node.named_children
                      if child.type == "file_scoped_namespace_declaration"), None)
+    if spec.name == "php" and node.type == "program":
+        namespaces = [child for child in node.named_children if child.type == "namespace_definition"]
+        if len(namespaces) == 1 and namespaces[0].child_by_field_name("body") is None:
+            return namespaces[0]
+    return None
+
+
+def _unsupported_layout(node, spec: LanguageSpec) -> str | None:
+    if spec.name == "php":
+        namespaces = [child for child in node.named_children if child.type == "namespace_definition"]
+        if len(namespaces) > 1 and any(n.child_by_field_name("body") is None for n in namespaces):
+            return "multiple unbraced PHP namespaces require separate scope regions"
     return None
 
 
@@ -129,14 +153,45 @@ def _cpp_callable(node) -> bool:
 
 
 def _entity_kind(node, spec: LanguageSpec):
+    if spec.name == "ruby" and not node.is_named:
+        return None
+    if _file_namespace(node, spec) is not None:
+        return EntityKind.NAMESPACE
+    if spec.name == "java" and node.type == "variable_declarator":
+        if node.parent is None or node.parent.type not in ("field_declaration", "constant_declaration"):
+            return None
+    if spec.name == "kotlin":
+        if node.type == "class_declaration":
+            if any(child.type == "interface" for child in node.children):
+                return EntityKind.INTERFACE
+            if any(child.type == "enum_class_body" for child in node.named_children):
+                return EntityKind.ENUM
+        if node.type == "property_declaration":
+            if sum(child.type == "variable_declaration" for child in node.named_children) != 1:
+                return None
+        if node.type == "function_declaration" and node.parent is not None and node.parent.type == "class_body":
+            return EntityKind.METHOD
+    if spec.name == "dart" and isinstance(node, DartCallable):
+        return EntityKind.METHOD if node.parent is not None and node.parent.type == "class_body" else EntityKind.FUNCTION
+    if spec.name == "swift":
+        if node.type == "class_declaration":
+            declaration = node.child_by_field_name("declaration_kind")
+            return {"struct": EntityKind.STRUCT, "enum": EntityKind.ENUM,
+                    "extension": EntityKind.IMPL}.get(_text(declaration), EntityKind.CLASS)
+        if node.type == "function_declaration" and node.parent is not None:
+            if node.parent.type in ("class_body", "enum_class_body", "protocol_body"):
+                return EntityKind.METHOD
+        if node.type == "property_declaration" and len(node.children_by_field_name("name")) != 1:
+            return None
+    if spec.name == "php":
+        if node.type == "namespace_definition" and node.child_by_field_name("body") is None:
+            return None
     if spec.name == "csharp":
         if node.type == "record_declaration" and any(child.type == "struct" for child in node.children):
             return EntityKind.STRUCT
         if node.type == "file_scoped_namespace_declaration":
             return None
-        if _file_namespace(node, spec) is not None:
-            return EntityKind.NAMESPACE
-    if spec.name == "cpp":
+    if spec.name in ("cpp", "c"):
         parent = node.parent
         if parent is not None and parent.type == "template_declaration" and _declaration(parent, spec) != parent:
             return None
@@ -158,7 +213,32 @@ def _entity_kind(node, spec: LanguageSpec):
 def _native_name(node, spec: LanguageSpec, read):
     namespace = _file_namespace(node, spec)
     if namespace is not None:
-        return read(namespace.child_by_field_name("name"))
+        name = namespace.child_by_field_name("name")
+        if name is None:
+            name = next((c for c in namespace.named_children
+                         if c.type in ("identifier", "scoped_identifier")), None)
+        return read(name)
+    if spec.name == "dart" and isinstance(node, DartCallable):
+        return "".join(read(c) for c in node.children_by_field_name("name")) or None
+    if spec.name == "kotlin":
+        if node.type == "secondary_constructor":
+            return "constructor"
+        if node.type == "property_declaration":
+            declaration = next(c for c in node.named_children if c.type == "variable_declaration")
+            return read(next(c for c in declaration.named_children if c.type == "simple_identifier"))
+    if spec.name == "powershell" and node.type == "class_property_definition":
+        return read(next(c for c in node.named_children if c.type == "variable")).lstrip("$")
+    if spec.name == "hcl" and node.type == "block":
+        return ".".join(read(c).strip('"') for c in node.named_children
+                        if c.type in ("identifier", "string_lit"))
+    if spec.name == "swift" and node.type in ("deinit_declaration", "subscript_declaration"):
+        return "deinit" if node.type == "deinit_declaration" else "subscript"
+    if spec.name == "php":
+        if node.type == "property_element":
+            return read(node.child_by_field_name("name")).lstrip("$")
+        if node.type in spec.anonymous_nodes and node.parent is not None:
+            if node.parent.type == "assignment_expression":
+                return read(node.parent.child_by_field_name("left")).lstrip("$")
     if spec.name == "csharp":
         if node.type == "destructor_declaration":
             return "~" + read(node.child_by_field_name("name"))
@@ -175,7 +255,7 @@ def _native_name(node, spec: LanguageSpec, read):
         explicit = next((child for child in node.children if child.type == "explicit_interface_specifier"), None)
         if explicit is not None:
             return read(explicit).rstrip(".") + "." + read(node.child_by_field_name("name"))
-    if spec.name == "cpp":
+    if spec.name in ("cpp", "c"):
         node = _declaration(node, spec)
         named = node.child_by_field_name("name")
         if named is not None:
@@ -245,7 +325,7 @@ def _tokens(node, spec: LanguageSpec, skip: frozenset[int] = frozenset()) -> lis
         current = stack.pop()
         if current.id in skip or current.type in spec.comment_nodes:
             continue
-        if spec.name in ("csharp", "cpp") and current.type in _NATIVE_LITERAL_NODES:
+        if spec.name in _BYTE_LITERAL_LANGUAGES and current.type in _NATIVE_LITERAL_NODES:
             out.append(current.text.decode("utf8", "replace"))
             continue
         if current.child_count == 0:
@@ -253,7 +333,7 @@ def _tokens(node, spec: LanguageSpec, skip: frozenset[int] = frozenset()) -> lis
             if text:
                 out.append(text)
             continue
-        stack.extend(reversed(current.children))
+        stack.extend(reversed(syntax_children(current, spec.name)))
     return out
 
 
@@ -287,7 +367,7 @@ def _own_and_body(node, spec: LanguageSpec,
             if in_body:
                 body.append(current)
             continue
-        if spec.name in ("csharp", "cpp") and current.type in _NATIVE_LITERAL_NODES:
+        if spec.name in _BYTE_LITERAL_LANGUAGES and current.type in _NATIVE_LITERAL_NODES:
             text = current.text.decode("utf8", "replace")
             own.append(text)
             if in_body:
@@ -305,7 +385,7 @@ def _own_and_body(node, spec: LanguageSpec,
         base = current.start_byte
         items: list = []
         cursor = 0
-        for child in current.children:
+        for child in syntax_children(current, spec.name):
             start = child.start_byte - base
             if start > cursor:
                 gap = raw[cursor:start].decode("utf8", "replace").strip()
@@ -325,15 +405,26 @@ def _own_and_body(node, spec: LanguageSpec,
 
 
 def _body_nodes(node, spec: LanguageSpec) -> frozenset[int]:
-    if _file_namespace(node, spec) is not None:
+    namespace = _file_namespace(node, spec)
+    if namespace is not None:
         return frozenset(child.id for child in node.children
-                         if child.type != "file_scoped_namespace_declaration")
+                         if child.id != namespace.id)
     node = _declaration(node, spec)
     ids = set()
     for field_name in spec.body_fields:
         body = node.child_by_field_name(field_name)
         if body is not None:
             ids.add(body.id)
+    child_bodies = {
+        "kotlin": ("function_body", "class_body", "enum_class_body"),
+        "powershell": ("script_block",),
+        "hcl": ("body", "expression"),
+    }.get(spec.name, ())
+    ids.update(child.id for child in node.named_children if child.type in child_bodies)
+    if spec.name == "kotlin" and node.type == "property_declaration":
+        separator = next((child for child in node.children if child.type == "="), None)
+        if separator is not None:
+            ids.update(child.id for child in node.named_children if child.start_byte > separator.end_byte)
     if spec.name == "csharp":
         accessors = node.child_by_field_name("accessors")
         if accessors is not None:
@@ -410,6 +501,9 @@ def extract(source: bytes, path: str, spec: LanguageSpec | None = None) -> Entit
         parse_error=root_node.has_error,
     )
     entity_tree.add(root)
+    if _unsupported_layout(root_node, spec) is not None:
+        entity_tree.parse_error = True
+        return entity_tree
 
     # Sibling names collide (overloads, repeated `it(...)` labels). Disambiguate
     # by document order so ids stay stable across revisions.
@@ -447,13 +541,13 @@ def extract(source: bytes, path: str, spec: LanguageSpec | None = None) -> Entit
             child_parent = entity_id
 
         prefix = () if kind is not None else location
-        for index, child in enumerate(node.children):
+        for index, child in enumerate(syntax_children(node, spec.name)):
             visit(child, child_parent, prefix + ((child.type, index),))
 
     if namespace is not None:
         visit(root_node, root.id, ())
     else:
-        for index, child in enumerate(root_node.children):
+        for index, child in enumerate(syntax_children(root_node, spec.name)):
             visit(child, root.id, ((child.type, index),))
 
     # Blank separation can affect directives and documentation attachment.

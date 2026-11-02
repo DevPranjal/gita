@@ -1,0 +1,89 @@
+{
+  "stage": "E7 schema/readiness experiment",
+  "scope": "one previously seen development PR; not heldout or confirmation",
+  "protocol": "10933145e8012a544d18661040cd13a5ceea3f25a41f615d85c5b12f83390c50",
+  "valid_pairs": 1,
+  "metrics": {
+    "B": {
+      "credits": 19.6945,
+      "input_tokens": 137411,
+      "output_tokens": 1853,
+      "model_requests": 11,
+      "models": [
+        "gpt-5.6-sol"
+      ],
+      "reasoning": "medium",
+      "tool_counts": {
+        "raw_diff": 7,
+        "commit_log": 1,
+        "read_file": 5,
+        "search": 2
+      },
+      "tool_errors": [],
+      "findings": 2,
+      "quality_macro": {
+        "grounded_precision": 0,
+        "grounded_recall": 0.1111111111111111,
+        "augmented_precision": 0.5,
+        "augmented_recall": 0.2,
+        "novel_tp_count": 1,
+        "novel_tp_yield": 0.5,
+        "candidate_count": 2,
+        "golden_tp_count": 9,
+        "matched_count": 1,
+        "matched_tp_count": 0,
+        "unmatched_count": 1,
+        "unmatched_tp_count": 1,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      }
+    },
+    "H": {
+      "credits": 26.89786,
+      "input_tokens": 144702,
+      "output_tokens": 3521,
+      "model_requests": 9,
+      "models": [
+        "gpt-5.6-sol"
+      ],
+      "reasoning": "medium",
+      "tool_counts": {
+        "change_context": 1,
+        "index_status": 1,
+        "raw_diff": 8,
+        "entity_context": 7,
+        "search": 3,
+        "read_file": 9
+      },
+      "tool_errors": [],
+      "findings": 2,
+      "quality_macro": {
+        "grounded_precision": 0,
+        "grounded_recall": 0.1111111111111111,
+        "augmented_precision": 0,
+        "augmented_recall": 0.1111111111111111,
+        "novel_tp_count": 0,
+        "novel_tp_yield": 0,
+        "candidate_count": 2,
+        "golden_tp_count": 9,
+        "matched_count": 2,
+        "matched_tp_count": 0,
+        "unmatched_count": 0,
+        "unmatched_tp_count": 0,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      }
+    }
+  },
+  "credit_reduction_percent": -36.575490619208395,
+  "input_reduction_percent": -5.305979870607147,
+  "reviewer_credits": 46.59236,
+  "judge_credits": 16.901899999999998,
+  "total_credits": 63.49426,
+  "cumulative_native_upper": 909.6454604999999,
+  "conclusion": "Observed interface refusals eliminated, but no joint quality/cost win; do not claim successful25task qualification. No more paid experiments underremainingoriginalceiling.",
+  "provenance": {
+    "protocol_sha256": "e2ee31f4e66d8faf9dba0c37b860a02d9f33f482b98786a34589c416e011608f",
+    "quality_sha256": "9aec4910ab4aee49539ce3bf74d86160d94dd431f93fde518bbb099059481b86"
+  }
+}

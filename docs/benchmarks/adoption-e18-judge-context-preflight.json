@@ -1,0 +1,41 @@
+{
+  "kind": "No-model shared judge-context qualification from both reviewer source requests",
+  "requested_paths": [
+    "src/API/API.csproj",
+    "src/API/Dockerfile",
+    "src/API/Program.cs",
+    "src/API/Services/AppDbService.cs",
+    "src/API/Services/DeviceMonitoringService.cs",
+    "src/API/Services/IDeviceMonitoringService.cs",
+    "src/API/docker-entrypoint.sh",
+    "test/API/DeviceMonitoringServiceTests.cs"
+  ],
+  "included_complete_HEAD_files": [
+    "src/API/API.csproj",
+    "src/API/Dockerfile",
+    "src/API/Program.cs",
+    "src/API/Services/AppDbService.cs",
+    "src/API/Services/DeviceMonitoringService.cs",
+    "src/API/Services/IDeviceMonitoringService.cs",
+    "src/API/docker-entrypoint.sh",
+    "test/API/DeviceMonitoringServiceTests.cs"
+  ],
+  "coverage": {
+    "requested_paths": [
+      "src/API/API.csproj",
+      "src/API/Dockerfile",
+      "src/API/Program.cs",
+      "src/API/Services/AppDbService.cs",
+      "src/API/Services/DeviceMonitoringService.cs",
+      "src/API/Services/IDeviceMonitoringService.cs",
+      "src/API/docker-entrypoint.sh",
+      "test/API/DeviceMonitoringServiceTests.cs"
+    ],
+    "already_complete_in_snippets": [],
+    "omitted": [],
+    "absence_claim": false,
+    "selection": "Symmetric union of both reviewers' source requests and visible preloads"
+  },
+  "serialized_characters": 42478,
+  "corpus_code_executed": false
+}

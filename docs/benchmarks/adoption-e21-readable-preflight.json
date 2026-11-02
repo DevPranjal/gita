@@ -1,0 +1,409 @@
+{
+  "kind": "No-model readable evidence presentation qualification on all50 frozen packets",
+  "rows": [
+    {
+      "position": 0,
+      "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+      "arm": "B",
+      "canonical_characters": 60054,
+      "readable_characters": 59344,
+      "current_source_blocks": 5
+    },
+    {
+      "position": 0,
+      "task": "d0a584f406cc11984b123d71f32df9e15c14ea17aff0b840688cb3aaf4d55942",
+      "arm": "H",
+      "canonical_characters": 58243,
+      "readable_characters": 58076,
+      "current_source_blocks": 8
+    },
+    {
+      "position": 1,
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "arm": "B",
+      "canonical_characters": 96020,
+      "readable_characters": 96036,
+      "current_source_blocks": 4
+    },
+    {
+      "position": 1,
+      "task": "6faf6a10851d5b9021558d7f765ff2fe4cbc17fc50a7f8a24c7ba37bec0c89a3",
+      "arm": "H",
+      "canonical_characters": 96133,
+      "readable_characters": 96149,
+      "current_source_blocks": 4
+    },
+    {
+      "position": 2,
+      "task": "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+      "arm": "B",
+      "canonical_characters": 21248,
+      "readable_characters": 21361,
+      "current_source_blocks": 3
+    },
+    {
+      "position": 2,
+      "task": "f68612efc881856aeccaa23ebab2e3ce5f6977dd2f9204256f4764b4401d9336",
+      "arm": "H",
+      "canonical_characters": 16978,
+      "readable_characters": 17220,
+      "current_source_blocks": 3
+    },
+    {
+      "position": 3,
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "B",
+      "canonical_characters": 80031,
+      "readable_characters": 75910,
+      "current_source_blocks": 8
+    },
+    {
+      "position": 3,
+      "task": "2f8f2c3fd8075d9526564d6e559ab32259ebd1b12b49105e2bc7c436c0ecf37e",
+      "arm": "H",
+      "canonical_characters": 80195,
+      "readable_characters": 76074,
+      "current_source_blocks": 8
+    },
+    {
+      "position": 4,
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "B",
+      "canonical_characters": 5400,
+      "readable_characters": 5559,
+      "current_source_blocks": 1
+    },
+    {
+      "position": 4,
+      "task": "4823fe568ed61ab2579bda8f76be1a178e71f0f40e038857cfc76277177bdfb0",
+      "arm": "H",
+      "canonical_characters": 5429,
+      "readable_characters": 5588,
+      "current_source_blocks": 1
+    },
+    {
+      "position": 5,
+      "task": "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+      "arm": "B",
+      "canonical_characters": 80110,
+      "readable_characters": 77462,
+      "current_source_blocks": 6
+    },
+    {
+      "position": 5,
+      "task": "fb3644da389c0d50941a68f376636d5a8cd4a8847c346d647b67a2201a211c47",
+      "arm": "H",
+      "canonical_characters": 80160,
+      "readable_characters": 77512,
+      "current_source_blocks": 6
+    },
+    {
+      "position": 6,
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "B",
+      "canonical_characters": 50629,
+      "readable_characters": 49921,
+      "current_source_blocks": 4
+    },
+    {
+      "position": 6,
+      "task": "0b0800ed5659ae4f24efd65819c3ecd550f8a1f61f054b894ed5fee8fec83871",
+      "arm": "H",
+      "canonical_characters": 55804,
+      "readable_characters": 55772,
+      "current_source_blocks": 10
+    },
+    {
+      "position": 7,
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arm": "B",
+      "canonical_characters": 79662,
+      "readable_characters": 77069,
+      "current_source_blocks": 5
+    },
+    {
+      "position": 7,
+      "task": "33c1ba8b899d143428d91057373ad42b7b12b353270432024b78af78b8d26b0e",
+      "arm": "H",
+      "canonical_characters": 80096,
+      "readable_characters": 78525,
+      "current_source_blocks": 11
+    },
+    {
+      "position": 8,
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "B",
+      "canonical_characters": 59008,
+      "readable_characters": 56971,
+      "current_source_blocks": 4
+    },
+    {
+      "position": 8,
+      "task": "0033d688d2959a5cd3aca33939508be3df248884066c66e6b6fce56bb6ba32f3",
+      "arm": "H",
+      "canonical_characters": 58947,
+      "readable_characters": 56672,
+      "current_source_blocks": 4
+    },
+    {
+      "position": 9,
+      "task": "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+      "arm": "B",
+      "canonical_characters": 15006,
+      "readable_characters": 14309,
+      "current_source_blocks": 2
+    },
+    {
+      "position": 9,
+      "task": "eedd7018c87d291c7a899ed24c69dfd5882c81d03c7d2e22fe1abced6e651dce",
+      "arm": "H",
+      "canonical_characters": 13557,
+      "readable_characters": 13177,
+      "current_source_blocks": 3
+    },
+    {
+      "position": 10,
+      "task": "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+      "arm": "B",
+      "canonical_characters": 80811,
+      "readable_characters": 75989,
+      "current_source_blocks": 6
+    },
+    {
+      "position": 10,
+      "task": "eec6673da19dc8999728abddb3c9d7e9e3acf53eab418512ca0d40ce04577441",
+      "arm": "H",
+      "canonical_characters": 80924,
+      "readable_characters": 76102,
+      "current_source_blocks": 6
+    },
+    {
+      "position": 11,
+      "task": "bc277c0372a2c410587b86f47527f69bc7e76ae468a962c7fe668b452af88905",
+      "arm": "B",
+      "canonical_characters": 39756,
+      "readable_characters": 39202,
+      "current_source_blocks": 3
+    },
+    {
+      "position": 11,
+      "task": "bc277c0372a2c410587b86f47527f69bc7e76ae468a962c7fe668b452af88905",
+      "arm": "H",
+      "canonical_characters": 39794,
+      "readable_characters": 39240,
+      "current_source_blocks": 3
+    },
+    {
+      "position": 12,
+      "task": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+      "arm": "B",
+      "canonical_characters": 78630,
+      "readable_characters": 77677,
+      "current_source_blocks": 7
+    },
+    {
+      "position": 12,
+      "task": "e45f1894c4e03609df086733535644efb13db727ad2ce5f8183e1c547faa9191",
+      "arm": "H",
+      "canonical_characters": 78680,
+      "readable_characters": 77727,
+      "current_source_blocks": 7
+    },
+    {
+      "position": 13,
+      "task": "91db148075d74d9bde541c1702d065e340acf96f90bc4258edb975c71f0f0e92",
+      "arm": "B",
+      "canonical_characters": 82047,
+      "readable_characters": 81148,
+      "current_source_blocks": 9
+    },
+    {
+      "position": 13,
+      "task": "91db148075d74d9bde541c1702d065e340acf96f90bc4258edb975c71f0f0e92",
+      "arm": "H",
+      "canonical_characters": 82184,
+      "readable_characters": 81285,
+      "current_source_blocks": 9
+    },
+    {
+      "position": 14,
+      "task": "7d1bf7158fd26470fa90ae3afa30ab61088ae3c62444c7c15a5001d978ec23a5",
+      "arm": "B",
+      "canonical_characters": 58813,
+      "readable_characters": 57707,
+      "current_source_blocks": 1
+    },
+    {
+      "position": 14,
+      "task": "7d1bf7158fd26470fa90ae3afa30ab61088ae3c62444c7c15a5001d978ec23a5",
+      "arm": "H",
+      "canonical_characters": 58951,
+      "readable_characters": 57845,
+      "current_source_blocks": 1
+    },
+    {
+      "position": 15,
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "B",
+      "canonical_characters": 79665,
+      "readable_characters": 77834,
+      "current_source_blocks": 4
+    },
+    {
+      "position": 15,
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "H",
+      "canonical_characters": 79669,
+      "readable_characters": 78255,
+      "current_source_blocks": 6
+    },
+    {
+      "position": 16,
+      "task": "0362dfe9422a542cde29b9a429b4baa39d301262a128fccb0910d6801f939a86",
+      "arm": "B",
+      "canonical_characters": 80085,
+      "readable_characters": 78553,
+      "current_source_blocks": 3
+    },
+    {
+      "position": 16,
+      "task": "0362dfe9422a542cde29b9a429b4baa39d301262a128fccb0910d6801f939a86",
+      "arm": "H",
+      "canonical_characters": 80186,
+      "readable_characters": 78654,
+      "current_source_blocks": 3
+    },
+    {
+      "position": 17,
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "B",
+      "canonical_characters": 80409,
+      "readable_characters": 79348,
+      "current_source_blocks": 6
+    },
+    {
+      "position": 17,
+      "task": "0083e3b9d289cf65d718cf844d29bac7df57f1cd603e32f48f2be5136caba41f",
+      "arm": "H",
+      "canonical_characters": 80408,
+      "readable_characters": 79713,
+      "current_source_blocks": 8
+    },
+    {
+      "position": 18,
+      "task": "ee7f15418560e783cdc668536f3c4d8692e231a7f231876ddc86a2fac069e9e2",
+      "arm": "B",
+      "canonical_characters": 41732,
+      "readable_characters": 40739,
+      "current_source_blocks": 5
+    },
+    {
+      "position": 18,
+      "task": "ee7f15418560e783cdc668536f3c4d8692e231a7f231876ddc86a2fac069e9e2",
+      "arm": "H",
+      "canonical_characters": 37766,
+      "readable_characters": 36947,
+      "current_source_blocks": 5
+    },
+    {
+      "position": 19,
+      "task": "82ec18705a16ae64998d181393c7f885543cc33b25921073d24ebecec40fbc15",
+      "arm": "B",
+      "canonical_characters": 30179,
+      "readable_characters": 29545,
+      "current_source_blocks": 2
+    },
+    {
+      "position": 19,
+      "task": "82ec18705a16ae64998d181393c7f885543cc33b25921073d24ebecec40fbc15",
+      "arm": "H",
+      "canonical_characters": 30212,
+      "readable_characters": 29578,
+      "current_source_blocks": 2
+    },
+    {
+      "position": 20,
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "arm": "B",
+      "canonical_characters": 17062,
+      "readable_characters": 17082,
+      "current_source_blocks": 2
+    },
+    {
+      "position": 20,
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "arm": "H",
+      "canonical_characters": 14899,
+      "readable_characters": 15115,
+      "current_source_blocks": 3
+    },
+    {
+      "position": 21,
+      "task": "3f4e836db70e52f2130f7c82f67af4af39f1091bb6d31a96258cb5d4add67a10",
+      "arm": "B",
+      "canonical_characters": 64085,
+      "readable_characters": 60767,
+      "current_source_blocks": 7
+    },
+    {
+      "position": 21,
+      "task": "3f4e836db70e52f2130f7c82f67af4af39f1091bb6d31a96258cb5d4add67a10",
+      "arm": "H",
+      "canonical_characters": 64138,
+      "readable_characters": 60820,
+      "current_source_blocks": 7
+    },
+    {
+      "position": 22,
+      "task": "d701ed5ae7001b5fe7c881acdda33cf7759293132014f6d71abcbc657eb36d27",
+      "arm": "B",
+      "canonical_characters": 79794,
+      "readable_characters": 78433,
+      "current_source_blocks": 6
+    },
+    {
+      "position": 22,
+      "task": "d701ed5ae7001b5fe7c881acdda33cf7759293132014f6d71abcbc657eb36d27",
+      "arm": "H",
+      "canonical_characters": 79904,
+      "readable_characters": 78543,
+      "current_source_blocks": 6
+    },
+    {
+      "position": 23,
+      "task": "435c173f24b18a1fd88ab29dc033bc2fc1e42502df2db9d7e9312711c7a1ea3c",
+      "arm": "B",
+      "canonical_characters": 57630,
+      "readable_characters": 57220,
+      "current_source_blocks": 10
+    },
+    {
+      "position": 23,
+      "task": "435c173f24b18a1fd88ab29dc033bc2fc1e42502df2db9d7e9312711c7a1ea3c",
+      "arm": "H",
+      "canonical_characters": 57756,
+      "readable_characters": 57346,
+      "current_source_blocks": 10
+    },
+    {
+      "position": 24,
+      "task": "b673f3f386cf657bbc269b622ce6a14389e41cd0d0427b48254c43c2ccd38956",
+      "arm": "B",
+      "canonical_characters": 29872,
+      "readable_characters": 30056,
+      "current_source_blocks": 5
+    },
+    {
+      "position": 24,
+      "task": "b673f3f386cf657bbc269b622ce6a14389e41cd0d0427b48254c43c2ccd38956",
+      "arm": "H",
+      "canonical_characters": 21437,
+      "readable_characters": 21957,
+      "current_source_blocks": 6
+    }
+  ],
+  "all50_within_frozen_budget": true,
+  "source_selection_changed": false,
+  "raw_Git_or_index_queries_executed": false,
+  "interpretation": "Only presentation changes; no context fields or source bodies omitted. Character counts are not native token/credit efficacy."
+}

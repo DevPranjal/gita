@@ -1,0 +1,147 @@
+{
+  "kind": "E20 code-bearing history canary; precision gate failed and second case not run",
+  "history_treatment_exercised": false,
+  "quality_status": "Original precision gate failed. Audit found a potential cross-platform-reference versus extension-traversal semantic mismatch; any rejudging must be a separately named all-candidate policy variant.",
+  "protocol": "a81e1f1535eee1b1e353cc653c52a359532da582e504a19c64626ab70b757559",
+  "source_commit": "019aa447b4f6da1d2a92eea01d99a919c45dee3e",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "completed_pairs": 1,
+  "scheduled_pairs": 2,
+  "rows": [
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "B",
+      "status": "valid",
+      "credits": 43.6683,
+      "input_tokens": 371081,
+      "output_tokens": 2878,
+      "cache_read_tokens": 320925,
+      "cache_write_tokens": 50129,
+      "reasoning_tokens": 1943,
+      "model_requests": 9,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 19,
+        "executed_call_attempts": 19,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "history_patches_delivered": 0
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "H",
+      "status": "valid",
+      "credits": 33.85668,
+      "input_tokens": 189290,
+      "output_tokens": 3018,
+      "cache_read_tokens": 145267,
+      "cache_write_tokens": 44008,
+      "reasoning_tokens": 1912,
+      "model_requests": 5,
+      "findings": 3,
+      "tool_audit": {
+        "evidence_calls": 19,
+        "executed_call_attempts": 19,
+        "denied_over_budget": 0,
+        "indexed_calls": 5,
+        "errors": 0
+      },
+      "indexed_operations": {
+        "source": 5
+      },
+      "history_patches_delivered": 0
+    }
+  ],
+  "judge_credits": 55.2119,
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": null,
+        "grounded_recall": 0,
+        "augmented_precision": 1,
+        "augmented_recall": 0.16666666666666666,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 1,
+        "candidate_count": 2,
+        "golden_tp_count": 10,
+        "matched_count": 0,
+        "matched_tp_count": 0,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 0
+      },
+      "micro": {
+        "grounded_precision": null,
+        "grounded_recall": 0,
+        "augmented_precision": 1,
+        "augmented_recall": 0.16666666666666666,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 1,
+        "candidate_count": 2,
+        "golden_tp_count": 10,
+        "matched_count": 0,
+        "matched_tp_count": 0,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 0
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 0,
+        "grounded_recall": 0,
+        "augmented_precision": 0.6666666666666666,
+        "augmented_recall": 0.16666666666666666,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.6666666666666666,
+        "candidate_count": 3,
+        "golden_tp_count": 10,
+        "matched_count": 1,
+        "matched_tp_count": 0,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 0
+      },
+      "micro": {
+        "grounded_precision": 0,
+        "grounded_recall": 0,
+        "augmented_precision": 0.6666666666666666,
+        "augmented_recall": 0.16666666666666666,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.6666666666666666,
+        "candidate_count": 3,
+        "golden_tp_count": 10,
+        "matched_count": 1,
+        "matched_tp_count": 0,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 0
+      }
+    }
+  },
+  "gate": {
+    "checks": {
+      "lower_review_credits": true,
+      "grounded_recall": true,
+      "augmented_precision": false,
+      "augmented_recall": true,
+      "nontrivial_augmented_baseline": true
+    },
+    "passed": false,
+    "interpretation": "Small development point gate, not confidence-bound noninferiority or25 authorization"
+  },
+  "interpretation": "H saves22.47% review credits and48.99% input tokens with equal augmented recall, but precision drops100% to66.67%; full joint goal not met. No second case or25-run authorized.",
+  "limitations": [
+    "One repeatedly used development task, not held-out or inferential evidence.",
+    "No grounded reference TP found in either arm; two novel TP per arm under the custom source-grounded Copilot judge.",
+    "Original outputs/matches/classifications unchanged; no reviewer or matcher reruns."
+  ]
+}

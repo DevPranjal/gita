@@ -1,0 +1,180 @@
+{
+  "kind": "E19 core qualified-name/directory correction; two-case qualification",
+  "protocol": "672a5fd28162202509004deb378301e2d46c3067bc15109984771e05e148bdc4",
+  "source_commit": "b3a1ae82bb9834dce2bacf0eb222fe3b7ef017ac",
+  "product_policy": "89cc78b074964d3b636b4c04f372b53b46f923e73e002209ea331ee919125f36",
+  "model": "gpt-5.6-sol",
+  "reasoning": "medium",
+  "review_totals": {
+    "B": {
+      "credits": 64.80672,
+      "input_tokens": 385285,
+      "output_tokens": 7838
+    },
+    "H": {
+      "credits": 78.53276,
+      "input_tokens": 592749,
+      "output_tokens": 7618
+    }
+  },
+  "judge_credits": 70.55279999999999,
+  "scores": {
+    "B": {
+      "macro": {
+        "grounded_precision": 0.5,
+        "grounded_recall": 0.08333333333333333,
+        "augmented_precision": 0.875,
+        "augmented_recall": 0.2582417582417582,
+        "novel_tp_count": 4,
+        "novel_tp_yield": 0.625,
+        "candidate_count": 6,
+        "golden_tp_count": 16,
+        "matched_count": 2,
+        "matched_tp_count": 1,
+        "unmatched_count": 4,
+        "unmatched_tp_count": 4,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      },
+      "micro": {
+        "grounded_precision": 0.5,
+        "grounded_recall": 0.0625,
+        "augmented_precision": 0.8333333333333334,
+        "augmented_recall": 0.25,
+        "novel_tp_count": 4,
+        "novel_tp_yield": 0.6666666666666666,
+        "candidate_count": 6,
+        "golden_tp_count": 16,
+        "matched_count": 2,
+        "matched_tp_count": 1,
+        "unmatched_count": 4,
+        "unmatched_tp_count": 4,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      }
+    },
+    "H": {
+      "macro": {
+        "grounded_precision": 0.5,
+        "grounded_recall": 0.08333333333333333,
+        "augmented_precision": 0.75,
+        "augmented_recall": 0.18831168831168832,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.5,
+        "candidate_count": 4,
+        "golden_tp_count": 16,
+        "matched_count": 2,
+        "matched_tp_count": 1,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      },
+      "micro": {
+        "grounded_precision": 0.5,
+        "grounded_recall": 0.0625,
+        "augmented_precision": 0.75,
+        "augmented_recall": 0.16666666666666666,
+        "novel_tp_count": 2,
+        "novel_tp_yield": 0.5,
+        "candidate_count": 4,
+        "golden_tp_count": 16,
+        "matched_count": 2,
+        "matched_tp_count": 1,
+        "unmatched_count": 2,
+        "unmatched_tp_count": 2,
+        "unmatched_fp_count": 0,
+        "golden_covered_count": 1
+      }
+    }
+  },
+  "rows": [
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "B",
+      "status": "valid",
+      "credits": 40.42356,
+      "input_tokens": 242268,
+      "output_tokens": 4377,
+      "reasoning_tokens": 3048,
+      "findings": 4,
+      "tool_audit": {
+        "evidence_calls": 21,
+        "executed_call_attempts": 21,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "tool_errors": []
+    },
+    {
+      "task": "26e77afc16782af03366ddfbcfcf6e65a7331e4a92dca2ab2cd2f71671ab2817",
+      "arm": "H",
+      "status": "valid",
+      "credits": 50.76486,
+      "input_tokens": 422100,
+      "output_tokens": 3605,
+      "reasoning_tokens": 2280,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 27,
+        "executed_call_attempts": 27,
+        "denied_over_budget": 0,
+        "indexed_calls": 4,
+        "errors": 0
+      },
+      "indexed_operations": {
+        "history": 4
+      },
+      "tool_errors": []
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "arm": "H",
+      "status": "valid",
+      "credits": 27.7679,
+      "input_tokens": 170649,
+      "output_tokens": 4013,
+      "reasoning_tokens": 2666,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 22,
+        "executed_call_attempts": 22,
+        "denied_over_budget": 0,
+        "indexed_calls": 3,
+        "errors": 0
+      },
+      "indexed_operations": {
+        "source": 2,
+        "history": 1
+      },
+      "tool_errors": []
+    },
+    {
+      "task": "a3c2d2b9d85f20e42b0f7ee44b72813e7ff2ae1ee6e7f9f372a3da2f29121736",
+      "arm": "B",
+      "status": "valid",
+      "credits": 24.38316,
+      "input_tokens": 143017,
+      "output_tokens": 3461,
+      "reasoning_tokens": 2042,
+      "findings": 2,
+      "tool_audit": {
+        "evidence_calls": 19,
+        "executed_call_attempts": 19,
+        "denied_over_budget": 0,
+        "indexed_calls": 0,
+        "errors": 0
+      },
+      "indexed_operations": {},
+      "tool_errors": []
+    }
+  ],
+  "interpretation": "Core lookup correctness is improved, but the aggregate quality gate failed. No full25 authorization.",
+  "limitations": [
+    "Earlier-used development tasks with stochastic reviewer/judge outputs.",
+    "Custom Copilot semantic judge and pinned official scorer arithmetic, not an official upstream or held-out result.",
+    "All attempts and costs retained; no reviewer or matcher retries."
+  ]
+}
